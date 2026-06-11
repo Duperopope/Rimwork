@@ -172,12 +172,17 @@ public class GameMap
     public IReadOnlyList<Furniture> Furniture => _furniture;
     /// <summary>Tiles where a tree seed has taken root and is growing back into a Tree.</summary>
 
-    public void GenerateBasicRoomLayout()
-    {
-        // Example: Generate a simple room layout with a sleeping quarters and a canteen
-        AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
-        AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
-    }
+public void GenerateBasicRoomLayout()
+{
+    // Example: Generate a simple room layout with a sleeping quarters and a canteen
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
+    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+}
+
+public void ConsumeFood(int amount)
+{
+    _foodConsumption += amount;
+}
 
 public bool IsZoneFunctional(Zone zone)
 {

@@ -79,3 +79,6 @@
 - Check for existing method names before adding new ones to avoid conflicts.
 - Check for existing method names before adding new ones to avoid conflicts.
 - Ensure all referenced methods and properties exist in the current context before adding new code.
+- Avoid duplicate constructors with identical parameters in the same class.
+- Avoid duplicate method signatures in the same class.
+- Check for existing method signatures before adding new ones to avoid conflicts.

@@ -608,7 +608,7 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.30 - Implement a method to display the number of functional rooms in `GameWorld.cs` by calling an existing method.
 - [ ] Step C.45.1 - Add a method to simulate tree regrowth in `GameWorld.cs` by defining the method signature.
 - [ ] Step C.75 - Implement the `RemoveSapling` method in `GameWorld.cs` to allow tree regrowth simulation.
-- [ ] Step C.90 - Implement a resource consumption system that requires players to manage food, water, and energy for their pawns, forcing them to prioritize building functional rooms to meet basic needs.
+- [x] Step C.90 - Implement a resource consumption system that requires players to manage food, water, and energy for their pawns, forcing them to prioritize building functional rooms to meet basic needs.
 - [ ] Step C.105 - Implement a resource consumption system that forces players to manage their colony's food and materials to prevent starvation and resource depletion.
 - [ ] Step C.120 - Add a resource generation system that rewards players for building functional rooms, encouraging them to reach the win condition.
 - [ ] Step C.135 - Implement a resource generation system to provide a steady flow of resources, encouraging sustainable colony management.

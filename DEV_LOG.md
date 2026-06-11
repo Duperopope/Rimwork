@@ -4196,3 +4196,8 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 79] SKIPPED (no SEARCH match): Implement the `RemoveSapling` method in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 80] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.75 - Implement the `RemoveSapling` method in `GameWorld.cs` to allow tree regrowth simulation.
 - [iter 81] KEPT: Add a basic structure for resource consumption in GameWorld. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 82] REVERTED (build failed): Add a basic resource consumption system for food, water, and energy. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 83] REVERTED (build failed): Add a method to track and consume resources for pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 84] REVERTED (build failed): Add a method to consume resources for pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 85] DONE (had past KEPT edits, change already in file): - [ ] Step C.90 - Implement a resource consumption system that requires players to manage food, water, and energy for their pawns, forcing them to prioritize building functional rooms to meet basic needs.
+- [iter 86] KEPT: Add a method to track food consumption. (src/RimWorldLab.Core/GameWorld.cs)

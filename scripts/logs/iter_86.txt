@@ -1,0 +1,23 @@
+CHANGE: Add a method to track food consumption.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public void GenerateBasicRoomLayout()
+{
+    // Example: Generate a simple room layout with a sleeping quarters and a canteen
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
+    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+}
+=======
+public void GenerateBasicRoomLayout()
+{
+    // Example: Generate a simple room layout with a sleeping quarters and a canteen
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
+    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+}
+
+public void ConsumeFood(int amount)
+{
+    _foodConsumption += amount;
+}
+>>>>>>> REPLACE
+NEXT: Implement a method to track water consumption.

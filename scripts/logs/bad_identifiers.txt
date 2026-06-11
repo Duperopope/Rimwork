@@ -256,3 +256,15 @@ RemoveSapling
 AddResource
 RemoveSapling
 AddResource
+GameMap
+GameMap
+GameMap
+GameMap
+GameMap
+GameMap
+GameMap
+GameMap
+GameMap
+ConsumeResource
+GameMap
+ConsumeResource
