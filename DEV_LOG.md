@@ -3901,3 +3901,4 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 195] CRITIC TASK: - [ ] Step C.195 - Implement a system to generate resources over time to encourage sustainable resource management. (GameWorld.cs)
 - [iter 195] PREDICTED-FAIL (skipped before build): Add a method to generate resources over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 196] KEPT: Add a method to generate resources over time. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 197] KEPT: Add a method to simulate resource growth over time. (src/RimWorldLab.Core/GameWorld.cs)

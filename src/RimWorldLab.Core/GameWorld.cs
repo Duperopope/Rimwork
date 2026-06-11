@@ -193,6 +193,9 @@ public void GenerateResourcesOverTime()
             }
         }
     }
+
+    // Simulate resource growth over time
+    TickSaplings();
 }
 
     public IReadOnlyList<(int X, int Y, int TicksRemaining)> Saplings => _saplings;

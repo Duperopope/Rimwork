@@ -1,10 +1,37 @@
-
-
-CHANGE: Adjust crate icon color for better contrast in resource visualization
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a method to simulate resource growth over time.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public void GenerateResourcesOverTime()
+{
+    // Example: Generate resources based on some logic
+    for (int x = 0; x < Width; x++)
+    {
+        for (int y = 0; y < Height; y++)
+        {
+            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
+            {
+                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
+            }
+        }
+    }
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public void GenerateResourcesOverTime()
+{
+    // Example: Generate resources based on some logic
+    for (int x = 0; x < Width; x++)
+    {
+        for (int y = 0; y < Height; y++)
+        {
+            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
+            {
+                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
+            }
+        }
+    }
+
+    // Simulate resource growth over time
+    TickSaplings();
+}
 >>>>>>> REPLACE
-NEXT: Adjust crate icon size for consistent visual scale across resources and furniture
+NEXT: Implement the `TickSaplings` method to handle sapling growth.
