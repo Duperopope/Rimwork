@@ -74,3 +74,4 @@
 - [ ] Step D.3 - Animals must wander. In src/RimWorldLab.Core/GameWorld.cs,
 - [ ] Step D.4 - Low colony morale slows work. In
 - [ ] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.
+- [ ] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.

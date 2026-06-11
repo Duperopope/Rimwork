@@ -154,3 +154,4 @@
 - Ensure methods are declared within class braces and not outside.
 - Define necessary properties and methods in `GameWorld` before using them.
 - Ensure all used variables and methods are defined in the current context or properly imported namespaces.
+- "Ensure fields are not already defined before adding them."

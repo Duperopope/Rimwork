@@ -15,14 +15,10 @@ public GameWorld()
     // Initialize resource regeneration rates
     _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
     _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
-
-    // Initialize Tools and Food
-    Tools = 0;
-    Food = 0;
 }
 
-private int Tools;
-private int Food;
+private int Tools = 0;
+private int Food = 0;
 
 public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
 {
