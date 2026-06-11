@@ -1,0 +1,10 @@
+
+
+CHANGE: Adjust crate icon color for better contrast in resource visualization
+FILE: src/RimWorldGodot/Main.cs
+<<<<<<< SEARCH
+private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+=======
+private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+>>>>>>> REPLACE
+NEXT: Consider adjusting crate overlay color for consistent visual style with other UI elements

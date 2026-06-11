@@ -1,0 +1,14 @@
+# Build artifacts
+builds/
+**/bin/
+**/obj/
+**/.godot/
+*.pid
+
+# Logs (kept locally, too noisy for git; training_data.jsonl IS tracked - it's the dataset)
+scripts/logs/*.log
+scripts/logs/failed_*.log
+scripts/loop_stdout.log
+scripts/loop_stderr.log
+loop_stdout.log
+*.tmp

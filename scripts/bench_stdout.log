@@ -1,0 +1,6 @@
+
+=== Testing google/gemma-4-12b-qat ===
+Load time: 10,7s
+Tokens: 800 | 6,5 tok/s | Format OK: False
+
+=== Testing qwen3.6-35b-a3b-uncensored-hauhaucs-aggressive ===

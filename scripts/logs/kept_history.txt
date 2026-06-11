@@ -1,0 +1,12 @@
+- [ ] Step G.0 - When every pawn is dead the game sits frozen forever; it
+- [ ] Step G.1 - The win condition is frozen at "3 functional rooms" forever;
+- [ ] Step G.3 - Show the CURRENT goal instead of the frozen one. In
+- [ ] Step G.4a - In src/RimWorldGodot/Main.cs, replace `if (num9 >= 3)` with `if (_world.GoalIndex > 0)`.
+- [ ] Step P.0a - Bridges are built without purpose (nearest water tile,
+- [ ] Step P.0b - Set the flag where the need is discovered. In
+- [ ] Step P.0b - Set the flag where the need is discovered. In
+- [ ] Step P.0c - Only bridge when there is a reason. In
+- [ ] Step P.0c - Only bridge when there is a reason. In
+- [ ] Step P.1 - Pawns must pick the BEST task for them, not the first one.
+- [ ] Step P.2 - In src/RimWorldLab.Core/GameWorld.cs, add the method `TryClaimBest(Pawn pawn)` if it doesn't exist.
+- [ ] Step P.3 - Pawns need an inner life: a Mood. In

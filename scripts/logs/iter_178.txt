@@ -1,0 +1,15 @@
+
+
+CHANGE: Add code to check if an item is a crate and draw its icon
+FILE: src/RimWorldGodot/Main.cs
+<<<<<<< SEARCH
+				DrawRect(rect2, Colors.White, filled: false, 1f);
+=======
+				DrawRect(rect2, Colors.White, filled: false, 1f);
+				if (item.Kind == FurnitureKind.Crate)
+				{
+					DrawLine(rect2.Position, rect2.Position + rect2.Size, Colors.White, 1f);
+					DrawLine(new Vector2(rect2.Position.X + rect2.Size.X, rect2.Position.Y), new Vector2(rect2.Position.X, rect2.Position.Y + rect2.Size.Y), Colors.White, 1f);
+				}
+>>>>>>> REPLACE
+NEXT: Implement the DrawCrateIcon method as described in the comments

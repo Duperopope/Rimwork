@@ -1,0 +1,11 @@
+json
+{
+  "Rock": "models/Rock.glb",
+  "Bed": "models/Bed.glb",
+  "Stove": "models/Stove.glb",
+  "Workbench": "models/Workbench.glb",
+  "DiningTable": "models/DiningTable.glb",
+  "Chair": "models/Chair.glb",
+  "Door": "models/Door.glb",
+  "Crate": "models/Crate.glb"
+}

@@ -1,0 +1,1 @@
+- Ensure variables are declared and in scope before using them in conditional blocks.

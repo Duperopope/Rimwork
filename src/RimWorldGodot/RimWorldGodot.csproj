@@ -1,0 +1,12 @@
+<Project Sdk="Godot.NET.Sdk/4.6.3">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RimWorldLab.Core\RimWorldLab.Core.csproj" />
+  </ItemGroup>
+
+</Project>
