@@ -1,37 +1,18 @@
-CHANGE: Implement a method to check if a zone is functional.
+CHANGE: Lower the initial resource spawn rate for Trees and Rocks in GameWorld constructor.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+public GameWorld()
 {
-    if (!_pawnResourceConsumption.ContainsKey(pawnId))
-    {
-        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
-    }
-
-    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
-=======
-public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
-{
-    if (!_pawnResourceConsumption.ContainsKey(pawnId))
-    {
-        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
-    }
-
-    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
-    {
-        _pawnResourceConsumption[pawnId][kind] += amount;
-    }
-    else
-    {
-        _pawnResourceConsumption[pawnId][kind] = amount;
-    }
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
 }
-
-public bool IsZoneFunctional(Zone zone)
+=======
+public GameWorld()
 {
-    // Example: Check if a zone contains functional furniture
-    var functionalFurniture = _furniture.Where(f => f.IsFunctionalFurniture() && zone.Contains(f.X, f.Y)).ToList();
-    return functionalFurniture.Count > 0;
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 0.5; // Reduced rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 1; // Reduced rate
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to count functional rooms in the game world.
+NEXT: Ensure the regeneration rates are correctly applied in the resource generation logic.

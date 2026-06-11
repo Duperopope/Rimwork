@@ -42,14 +42,22 @@ function Get-DownHereSiteHtml {
         if ($msg -match 'DOWN HERE! - visit flow|DOWN HERE ! - visit flow') { $phase = 3 }
     }
     function RelCol($title, $tag, $cls, $items, $collapsedNote) {
-        $list = $items -join "`n"
-        $count = ([regex]::Matches($list, "class='deliv'")).Count
-        if ($count -gt 14) {
-            $shown = ($items | Select-Object -Last 14) -join "`n"
-            $list = "<details><summary class='more'>$($count - 14) livraisons plus anciennes&hellip;</summary>" +
-                (($items | Select-Object -SkipLast 14) -join "`n") + "</details>" + $shown
+        # Group deliveries by day -> <details> per day for a clean overview.
+        $byDay = [ordered]@{}
+        foreach ($it in $items) {
+            $day = if ($it -match '&#128197; (\d\d/\d\d/\d\d\d\d)') { $Matches[1] } else { "divers" }
+            if (-not $byDay.Contains($day)) { $byDay[$day] = New-Object System.Collections.Generic.List[string] }
+            $byDay[$day].Add($it)
         }
-        "<div class='rel-col'><div class='rel-head $cls'>$title<br><span class='rel-tag'>$tag &middot; $count livraisons dat&eacute;es</span></div><div class='rel-body'>$list</div></div>"
+        $list = ""
+        $dayKeys = @($byDay.Keys)
+        for ($di = 0; $di -lt $dayKeys.Count; $di++) {
+            $day = $dayKeys[$di]
+            $open = if ($di -eq $dayKeys.Count - 1) { " open" } else { "" }
+            $list += "<details class='day'$open><summary>&#128197; $day <span class='pill'>$($byDay[$day].Count) patchs</span></summary>" + ($byDay[$day] -join "`n") + "</details>"
+        }
+        $count = $items.Count
+        "<div class='rel-col'><div class='rel-head $cls'>$title<br><span class='rel-tag'>$tag &middot; $count livraisons</span></div><div class='rel-body'>$list</div></div>"
     }
     $relHtml = "<div class='rel-grid'>" +
         (RelCol "0.1 — FONDATIONS (JAM)" "LIVR&Eacute; 11/06/2026" "done" $r01 "") +
@@ -131,6 +139,39 @@ function Get-DownHereSiteHtml {
 "@
     }
 
+    # ---------- FEEDBACK: stored locally, mirrored as GitHub issues ----------
+    $fbFile = "g:\Rimwork\scripts\logseedback.jsonl"
+    $fbRows = ""
+    if (Test-Path $fbFile) {
+        $entries = Get-Content $fbFile | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} } | Where-Object { $_ }
+        [array]::Reverse($entries)
+        foreach ($f in $entries | Select-Object -First 30) {
+            $stCls = switch ($f.status) { "valide" { "ok" } "traite" { "done" } "rejete" { "bad" } default { "warn" } }
+            $typeIco = if ($f.type -eq "bug") { "&#128027;" } else { "&#10024;" }
+            $fbRows += "<div class='ev $stCls'><span class='tag'>$($f.date)</span><span class='tag2'>$typeIco $($f.type) &middot; $($f.status)</span><span class='txt'>$(E($f.text))</span></div>"
+        }
+    }
+    if (-not $fbRows) { $fbRows = "<div class='muted'>Aucune demande pour l'instant.</div>" }
+    $feedbackBody = if ($Live) {
+        @"
+<form method='GET' action='/feedback' style='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px'>
+<select name='type' style='background:#0d1420;color:#e6edf3;border:1px solid #1f2a3a;border-radius:8px;padding:8px'>
+<option value='feature'>&#10024; Feature</option><option value='bug'>&#128027; Bug</option></select>
+<input name='text' placeholder='Décris ta demande ou le bug...' style='flex:1;min-width:280px;background:#0d1420;color:#e6edf3;border:1px solid #1f2a3a;border-radius:8px;padding:8px'>
+<button style='background:#1f6f35;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-weight:700;cursor:pointer'>Envoyer</button>
+</form>
+<p class='muted'>Statuts: propos&eacute; &rarr; valid&eacute; (sera trait&eacute; par le dev IA) &rarr; trait&eacute;. Les demandes valid&eacute;es deviennent des t&acirc;ches du roadmap.</p>
+$fbRows
+"@
+    } else {
+        @"
+<p>Proposez des features ou signalez des bugs directement sur GitHub &mdash; les demandes valid&eacute;es deviennent des t&acirc;ches du d&eacute;veloppeur IA:</p>
+<p><a class='btnr' href='https://github.com/Duperopope/Rimwork/issues/new?labels=feature&title=%5BFeature%5D%20'>&#10024; Proposer une feature</a>
+&nbsp;<a class='btnp' href='https://github.com/Duperopope/Rimwork/issues/new?labels=bug&title=%5BBug%5D%20'>&#128027; Signaler un bug</a></p>
+$fbRows
+"@
+    }
+
     $refresh = if ($Live) { "<meta http-equiv='refresh' content='10'>" } else { "" }
     $genAt = Get-Date -Format "dd/MM/yyyy HH:mm"
     $publicNote = if ($Live) { "" } else { "<p class='sub'>Site g&eacute;n&eacute;r&eacute; automatiquement depuis les donn&eacute;es r&eacute;elles du d&eacute;p&ocirc;t &mdash; <a href='https://github.com/Duperopope/Rimwork'>code source</a>.</p>" }
@@ -150,9 +191,7 @@ nav { display:flex; gap:4px; }
 nav a { padding:10px 18px; color:#9fb0c3; text-decoration:none; font-weight:600; border-radius:8px 8px 0 0; }
 nav a.on { background:#141d2b; color:#fff; border:1px solid #1f2a3a; border-bottom:none; }
 main { padding:22px 28px; max-width:1500px; margin:0 auto; }
-section { display:none; } section:target { display:block; }
-section.default { display:block; } section:target ~ section.default { display:none; }
-body:has(section:target) section.default { display:none; } section:target { display:block !important; }
+section { display:none; } section.on { display:block; }
 .kpis { display:flex; gap:26px; flex-wrap:wrap; margin-bottom:18px; }
 .kpi { background:#121a26; border:1px solid #1f2a3a; border-radius:12px; padding:14px 22px; }
 .kpi b { font-size:26px; display:block; } .g { color:#3fb950; } .r { color:#f85149; } .y { color:#d29922; }
@@ -172,6 +211,8 @@ h2 { font-size:14px; color:#9fb0c3; text-transform:uppercase; letter-spacing:1px
 .who { font-size:10px; padding:1px 7px; border-radius:10px; font-weight:700; }
 .who.ai { background:#143a23; color:#3fb950; } .who.claude { background:#1a2c4a; color:#58a6ff; }
 .more { cursor:pointer; color:#58a6ff; font-size:12px; padding:4px; }
+details.day > summary { cursor:pointer; padding:6px 8px; font-size:12.5px; font-weight:700; color:#9fb0c3; list-style:none; }
+details.day { border-bottom:1px solid #1f2a3a; margin-bottom:4px; }
 .trk-team { margin-bottom:14px; }
 .trk-name { font-weight:800; color:#5cc26e; margin-bottom:6px; letter-spacing:.5px; }
 .pill { background:#1c2533; border-radius:10px; padding:1px 9px; font-size:12px; color:#9fb0c3; }
@@ -194,17 +235,29 @@ footer { text-align:center; color:#566374; padding:18px; font-size:12px; }
 <p class='sub'>Colonie &middot; 4X &middot; exploration spatiale &mdash; d&eacute;velopp&eacute; 24/7 par une IA locale autonome supervis&eacute;e. Mise &agrave; jour: $genAt.</p>
 $publicNote
 <nav>
-<a href='#overview' class='on'>Vue d'ensemble</a>
-<a href='#releases'>Release View</a>
-<a href='#tracker'>Progress Tracker</a>
-<a href='#activity'>Activit&eacute;</a>
+<a onclick="show('overview',this)" class='on'>Vue d'ensemble</a>
+<a onclick="show('releases',this)">Release View</a>
+<a onclick="show('tracker',this)">Progress Tracker</a>
+<a onclick="show('activity',this)">Activit&eacute;</a>
+<a onclick="show('feedback',this)">&#128172; Feedback</a>
 </nav>
+<script>
+function show(id, el) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('on'));
+  el.classList.add('on');
+}
+window.addEventListener('DOMContentLoaded', () => document.getElementById('overview').classList.add('on'));
+</script>
 </header>
 <main>
 <section id='releases'><div class='card'><h2>&#128640; Release View &mdash; livraisons dat&eacute;es (donn&eacute;es git r&eacute;elles)</h2>$relHtml</div></section>
 <section id='tracker'><div class='card'><h2>&#128202; Progress Tracker &mdash; en d&eacute;veloppement par &eacute;quipe</h2>$trkHtml</div></section>
+<section id='feedback'><div class='card'><h2>&#128172; Feedback &mdash; demandes de features &amp; bugs</h2>
+$feedbackBody</div></section>
 <section id='activity'><div class='card'><h2>&#9889; Activit&eacute; dat&eacute;e (25 derniers commits)</h2>$actRows</div></section>
-<section id='overview' class='default'>
+<section id='overview'>
 <div class='kpis'>
 <div class='kpi'><b>$pct%</b>avancement<div class='bar'><i></i></div><span class='muted'>$done / $total t&acirc;ches</span></div>
 <div class='kpi'><b class='g'>$kept</b>patches accept&eacute;s</div>

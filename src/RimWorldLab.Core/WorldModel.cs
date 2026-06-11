@@ -102,6 +102,14 @@ public class SolarSystem
                 (float)rng.NextDouble() * 0.8f,
                 i == 0 ? Math.Clamp(temp * 0.4f, -0.25f, 0.25f) : temp));
         }
+        // A system without a moon is a sad system: guarantee one (it also
+        // drives tides/night raids in the design charter).
+        if (!Bodies.Any(b => b.Kind == "moon") && Bodies.Count >= 2)
+        {
+            var converted = Bodies[Bodies.Count - 1];
+            Bodies[Bodies.Count - 1] = new WorldBody(converted.Name, "moon",
+                converted.Habitability, converted.ResourceRichness, converted.DangerLevel, converted.ClimateTemp);
+        }
     }
 
     /// <summary>Index into Bodies of the world the colony lives on.</summary>

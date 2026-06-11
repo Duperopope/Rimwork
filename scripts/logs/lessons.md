@@ -160,3 +160,9 @@
 - Always check for existing field names in the target class before adding new ones.
 - Check for existing field names before adding new ones to avoid CS0102 errors.
 - Ensure all referenced fields exist and are correctly scoped in the class.
+- Ensure all referenced fields and collections exist in the class before adding methods that depend on them.
+- Always declare private fields before using them in constructors.
+- Ensure 'Pawn' class has 'Tasks' property before adding methods dependent on it.
+- Ensure resource regeneration rates match the defined type (int) to avoid implicit conversion errors.
+- Ensure unique constructor signatures in GameWorld.cs to avoid CS0111 errors.
+- Always check the data types of dictionary keys and values to avoid implicit conversion errors.

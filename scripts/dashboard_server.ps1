@@ -42,6 +42,22 @@ while ($true) {
         $ctx.Response.Close()
         continue
     }
+    if ($ctx.Request.Url.AbsolutePath -eq "/feedback") {
+        $q = [System.Web.HttpUtility]::ParseQueryString($ctx.Request.Url.Query)
+        $text = $q["text"]
+        if ($text -and $text.Trim().Length -gt 3) {
+            $entry = @{
+                date = (Get-Date -Format "dd/MM HH:mm")
+                type = if ($q["type"] -eq "bug") { "bug" } else { "feature" }
+                text = $text.Trim()
+                status = "propose"
+            } | ConvertTo-Json -Compress
+            Add-Content -Path "g:\Rimwork\scripts\logseedback.jsonl" -Value $entry
+        }
+        $ctx.Response.Redirect("/")
+        $ctx.Response.Close()
+        continue
+    }
     if ($ctx.Request.Url.AbsolutePath -eq "/resume") {
         Start-Stack
         $ctx.Response.Redirect("/")

@@ -498,6 +498,24 @@ for ($i = 1; $i -le $MaxIterations; $i++) {
         Invoke-CriticPass -Iter $i
     }
 
+    # Community pipeline: GitHub issues labeled 'approved' become roadmap
+    # items (the player files requests without the supervisor in the loop).
+    if ($i -gt 0 -and $i % 25 -eq 0) {
+        try {
+            $issues = gh issue list -R Duperopope/Rimwork --label approved --state open --json number,title,body --limit 5 2>$null | ConvertFrom-Json
+            foreach ($iss in $issues) {
+                $desc = ($iss.title -replace '^\[(Feature|Bug)\]\s*', '').Trim()
+                $line = "- [ ] Step U$($iss.number) - (communaute) $desc"
+                if (-not ((Get-Content "g:\Rimwork\ROADMAP.md" -Raw) -match [regex]::Escape($desc))) {
+                    Add-Content -Path "g:\Rimwork\ROADMAP.md" -Value $line
+                    Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] COMMUNITY: issue #$($iss.number) acceptee dans le roadmap: $desc"
+                    gh issue comment $iss.number -R Duperopope/Rimwork -b "Acceptee dans le roadmap du developpeur IA (Step U$($iss.number)). Suivi: https://duperopope.github.io/Rimwork/" 2>$null | Out-Null
+                    gh issue close $iss.number -R Duperopope/Rimwork 2>$null | Out-Null
+                }
+            }
+        } catch {}
+    }
+
     $roadmapLines = Get-Content "g:\Rimwork\ROADMAP.md"
     $firstMatch = $roadmapLines | Select-String -Pattern '^\s*-\s*\[ \]' |
         Where-Object { $blockedItems -notcontains $_.Line.Trim() } |

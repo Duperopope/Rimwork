@@ -157,4 +157,8 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [x] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
 - [x] Step C.60 - Add a private field `functionalRoomsCount` to the `GameWorld` class.
 - [x] Step C.75 - Implement a basic room detection system by adding a private field to track the number of functional rooms in `GameWorld.cs`.
-- [ ] Step C.105 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to ensure players have a steady supply of materials.
+- [x] Step C.105 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to ensure players have a steady supply of materials.
+- [ ] Step C.120 - Add the private field `_resources` to the `GameWorld` class.
+- [ ] Step C.135 - Add a private field to track the number of rooms being built in GameWorld.cs. Define the field in the GameWorld class.
+- [ ] Step C.150 - Add a private field to track resources in GameWorld.cs.
+- [ ] Step C.165 - Reduce the initial resource spawn rate by lowering the regeneration rates for Trees and Rocks to 0.5 and 1 respectively in src/RimWorldLab.Core/GameWorld.cs.
