@@ -25,3 +25,4 @@
 - [ ] Step V.3 - Main.cs._Draw: when GridShape==Hex, draw each tile as a
 - [ ] Step V.4 - Planet/region map: add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions` in `src/RimWorldLab.Core/RegionMap.cs`.
 - [ ] Step Q1 - Add a method to check if a pawn is at the edge of the current region's hex map in GameWorld.cs.
+- [ ] Step S - Ambient sound hooks: add an `AudioStreamPlayer` node that

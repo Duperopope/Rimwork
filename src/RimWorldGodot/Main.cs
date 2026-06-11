@@ -14,6 +14,7 @@ using Godot.NativeInterop;
 
 public partial class Main : Node2D
 {
+    private AudioStreamPlayer _ambientSoundPlayer;
 		private enum BuildMode
 {
 	Select,

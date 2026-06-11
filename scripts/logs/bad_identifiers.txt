@@ -50,3 +50,7 @@ Pawn
 Pawn
 Pawn
 Pawn
+Main
+_Ready
+Main
+_Ready

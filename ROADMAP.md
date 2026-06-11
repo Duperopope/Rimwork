@@ -397,7 +397,7 @@ renderer from Node2D to a 3D/iso pipeline) - but we CAN make the current
       warm radial glow around Lighting-category furniture that appears at
       night (drawn over the darkness overlay).
 - [ ] Step P1 - Add a `Mood` float (0-100) to Pawn class in `src/RimWorldLab.Core/Pawn.cs`.
-- [ ] Step Q1 - Add a method to check if a pawn is at the edge of the current region's hex map in GameWorld.cs.
+- [x] Step Q1 - Add a method to check if a pawn is at the edge of the current region's hex map in GameWorld.cs.
 - [x] Step R - Weather: every few in-game days, toggle a "Rain" state that
       tints the map blue-grey and slightly slows pawn movement; show
       "Raining" in the header.

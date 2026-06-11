@@ -10,3 +10,4 @@
 - Methods must be defined at the class level, not nested within other methods.
 - Methods cannot be defined inside other methods; ensure all methods are at the class level.
 - "Check for missing properties or methods on types before using them."
+- Avoid duplicating method signatures in the same class.
