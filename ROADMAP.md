@@ -545,10 +545,10 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step E.21 - Add a constructor to the `Pawn` class that accepts four parameters: name, x, y, and sex. (src/RimWorldLab.Core/Pawn.cs)
 - [ ] Step E.27a - Add a method to randomly generate a single small animal in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) by creating a new Pawn and adding it to the list of pawns without using the registry.
 - [ ] Step E.33 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) - Ensure the Pawn constructor is called with the correct number of arguments. (Verify the correct number of arguments for the Pawn constructor.)
-- [ ] Step E.39 - Implement a simple weather system that affects resource availability in src/RimWorldLab.Core/GameWorld.cs
-- [ ] Step C.15 - Implement a basic room detection system to identify functional rooms in the colony.
-- [ ] Step C.30 - Implement room detection logic in GameWorld.cs to identify functional rooms based on furniture placement.
-- [ ] Step C.45 - Add a basic room detection system to identify functional rooms in GameWorld.cs
+- [x] Step E.39 - Implement a simple weather system that affects resource availability in src/RimWorldLab.Core/GameWorld.cs
+- [ ] Step C.15.1 - Implement a method to check if a tile is part of a room in the colony. (src/RimWorldLab.Core/GameWorld.cs) - Add a new method signature for checking if a tile is part of a room.
+- [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs by adding a method to check if a cell is adjacent to another cell. Start by adding a method signature for IsAdjacent.
+- [ ] Step C.45 - Add a basic room detection system to identify functional rooms in GameWorld.cs by defining a method to check if a given tile is part of a room.
 - [ ] Step C.60 - Implement a basic room detection system to identify functional rooms in the colony. (GameWorld.cs)
 - [ ] Step C.75 - Implement a basic room detection system in GameWorld.cs to identify functional rooms based on connected furniture and walls.
 - [ ] Step C.15 - Implement a basic room detection system to identify functional rooms in GameWorld.cs

@@ -184,6 +184,18 @@ public void ToggleRain()
 
 public void AddZone(Zone zone) => _zones.Add(zone);
 
+public bool IsTilePartOfRoom(int x, int y)
+{
+    foreach (var zone in _zones)
+    {
+        if (zone.Contains(x, y))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 
     /// <summary>
     /// Returns the passable tile closest to (fromX, fromY) inside the nearest
