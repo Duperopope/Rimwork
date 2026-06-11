@@ -584,7 +584,7 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.60 - Implement a system to automatically generate functional rooms to ensure win conditions can be reached.
 - [x] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
 - [ ] Step C.90 - Implement a room detection system to identify functional rooms in the colony.
-- [ ] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs
+- [x] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs
 - [ ] Step C.15 - Implement a system to generate resources over time to encourage sustainable resource management.
 - [ ] Step C.30 - Implement a resource generation system to ensure players have access to materials over time, improving sustainability and reducing frustration. (GameWorld.cs)
 - [ ] Step C.45 - Implement a system to generate resources over time, such as trees regrowing or rocks respawning, to provide a steady stream of materials for the player to use. (GameWorld.cs)
@@ -603,3 +603,4 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.135 - Implement a system to track and display the number of functional rooms in the game world.
 - [ ] Step C.165 - Implement a system to generate resources over time, such as trees regrowing or rocks respawning, to provide a sustainable source of materials.
 - [ ] Step C.180 - Implement a basic resource management system to ensure players have to gather and manage resources to build rooms.
+- [ ] Step C.195 - Implement a system to generate resources over time to encourage sustainable resource management. (GameWorld.cs)

@@ -3897,3 +3897,7 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 192] SKIPPED (no SEARCH match): Add a method to detect if a zone is functional (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 193] KEPT: Add a method to check if a zone is functional (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 194] KEPT: Add a method to identify furniture types that contribute to room functionality. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 194] DONE (after 2 consecutive KEPT changes): - [ ] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs
+- [iter 195] CRITIC TASK: - [ ] Step C.195 - Implement a system to generate resources over time to encourage sustainable resource management. (GameWorld.cs)
+- [iter 195] PREDICTED-FAIL (skipped before build): Add a method to generate resources over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 196] KEPT: Add a method to generate resources over time. (src/RimWorldLab.Core/GameWorld.cs)

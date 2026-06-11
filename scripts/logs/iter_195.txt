@@ -1,55 +1,31 @@
-CHANGE: Add a method to detect rooms in the GameWorld.
+CHANGE: Add a method to generate resources over time.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsPlantable(int x, int y)
+public void GenerateBasicRoomLayout()
 {
-    if (!IsPassable(x, y)) return false;
-    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
-// ... (lines omitted) ...
+    // Example: Generate a simple room layout with a sleeping quarters and a canteen
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
+    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
 }
 =======
-public bool IsPlantable(int x, int y)
+public void GenerateBasicRoomLayout()
 {
-    if (!IsPassable(x, y)) return false;
-    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
-    if (_furniture.Any(f => f.X == x && f.Y == y)) return false;
-    if (_saplings.Any(s => s.X == x && s.Y == y)) return false;
-    return true;
+    // Example: Generate a simple room layout with a sleeping quarters and a canteen
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
+    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
 }
 
-private List<Room> DetectRooms()
+public void GenerateResourcesOverTime()
 {
-    List<Room> rooms = new List<Room>();
-    bool[,] visited = new bool[Height, Width];
-
-    for (int y = 0; y < Height; y++)
+    // Placeholder for resource generation logic
+    // Example: Generate trees at random locations
+    Random random = new Random();
+    for (int i = 0; i < 10; i++)
     {
-        for (int x = 0; x < Width; x++)
-        {
-            if (!visited[y, x] && IsPassable(x, y))
-            {
-                Room room = new Room();
-                ExploreRoom(x, y, visited, room);
-                rooms.Add(room);
-            }
-        }
+        int x = random.Next(Width);
+        int y = random.Next(Height);
+        AddResource(new ResourceNode(ResourceKind.Tree, x, y));
     }
-
-    return rooms;
-}
-
-private void ExploreRoom(int x, int y, bool[,] visited, Room room)
-{
-    if (x < 0 || x >= Width || y < 0 || y >= Height || visited[y, x] || !IsPassable(x, y))
-        return;
-
-    visited[y, x] = true;
-    room.Tiles.Add((x, y));
-
-    ExploreRoom(x + 1, y, visited, room);
-    ExploreRoom(x - 1, y, visited, room);
-    ExploreRoom(x, y + 1, visited, room);
-    ExploreRoom(x, y - 1, visited, room);
 }
 >>>>>>> REPLACE
-NEXT: Implement the Room class to store room information.
+NEXT: Implement the logic to generate resources at specific intervals.

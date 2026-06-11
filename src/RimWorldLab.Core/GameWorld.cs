@@ -173,12 +173,27 @@ public class GameMap
         AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
     }
 
-    public bool IsZoneFunctional(Zone zone)
+public bool IsZoneFunctional(Zone zone)
+{
+    // Basic check: zone must have at least one furniture item
+    return _furniture.Any(f => f.X >= zone.X && f.X < zone.X + zone.Width &&
+                              f.Y >= zone.Y && f.Y < zone.Y + zone.Height);
+}
+
+public void GenerateResourcesOverTime()
+{
+    // Example: Generate resources based on some logic
+    for (int x = 0; x < Width; x++)
     {
-        // Basic check: zone must have at least one furniture item
-        return _furniture.Any(f => f.X >= zone.X && f.X < zone.X + zone.Width &&
-                                  f.Y >= zone.Y && f.Y < zone.Y + zone.Height);
+        for (int y = 0; y < Height; y++)
+        {
+            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
+            {
+                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
+            }
+        }
     }
+}
 
     public IReadOnlyList<(int X, int Y, int TicksRemaining)> Saplings => _saplings;
     public bool IsRaining => _isRaining;
