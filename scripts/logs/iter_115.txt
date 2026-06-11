@@ -4,11 +4,11 @@ FILE: src/RimWorldLab.Core/GameWorld.cs
 private int Tools = 0;
 private int Food = 0;
 private float[,] _microbialBiomass = new float[100, 100]; // Example size
-private int functionalRoomsCount;
+private int _functionalRoomsCount = 0;
 =======
 private int Tools = 0;
 private int Food = 0;
 private float[,] _microbialBiomass = new float[100, 100]; // Example size
-private int _functionalRoomsCount = 0;
+// private int _functionalRoomsCount = 0; // Uncomment this line
 >>>>>>> REPLACE
 NEXT: Implement a method to update the functional room count.

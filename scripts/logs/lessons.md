@@ -158,3 +158,4 @@
 - Check for existing field names before adding new ones in the same class.
 - Check for existing field definitions before adding a new one.
 - Always check for existing field names in the target class before adding new ones.
+- Check for existing field names before adding new ones to avoid CS0102 errors.

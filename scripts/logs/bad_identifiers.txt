@@ -481,3 +481,7 @@ GameWorld
 functionalRoomsCount
 GameWorld
 functionalRoomsCount
+GameWorld
+_functionalRoomsCount
+GameWorld
+_functionalRoomsCount

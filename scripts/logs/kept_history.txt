@@ -85,3 +85,4 @@
 - [ ] Step C.60 - Add a private field `functionalRoomsCount` to the `GameWorld` class.
 - [ ] Step C.60 - Add a private field `functionalRoomsCount` to the `GameWorld` class.
 - [ ] Step C.75 - Implement a basic room detection system by adding a private field to track the number of functional rooms in `GameWorld.cs`.
+- [ ] Step C.75 - Implement a basic room detection system by adding a private field to track the number of functional rooms in `GameWorld.cs`.
