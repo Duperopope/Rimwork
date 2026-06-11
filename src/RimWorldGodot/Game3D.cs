@@ -76,6 +76,8 @@ public partial class Game3D : Node3D
     private readonly Dictionary<(int, int), Node3D> _staticNodes = new(); // walls/resources/furniture/saplings keyed by tile
     private readonly Dictionary<(int, int), string> _staticKind = new();
     private MeshInstance3D _selectionRing;
+    private DirectionalLight3D _sun;
+    private Godot.Environment _envRes;
 
     // --- Threat slice (skeleton war bands, macro-driven) ---
     public class Threat
@@ -87,6 +89,8 @@ public partial class Game3D : Node3D
     private double _threatTimer = 45.0;
     private double _threatMoveTimer;
     private readonly Random _rng = new(4242);
+
+    [Signal] public delegate void ThreatSpawnedEventHandler();
 
     public override void _Ready()
     {
@@ -119,9 +123,9 @@ public partial class Game3D : Node3D
         _cam.LookAt(new Vector3(0, 0, 0), Vector3.Up);
         _cam.Current = true;
 
-        var sun = new DirectionalLight3D { ShadowEnabled = true, LightEnergy = 1.2f };
-        sun.RotationDegrees = new Vector3(-55, -35, 0);
-        AddChild(sun);
+        _sun = new DirectionalLight3D { ShadowEnabled = true, LightEnergy = 1.2f };
+        _sun.RotationDegrees = new Vector3(-55, -35, 0);
+        AddChild(_sun);
 
         var env = new Godot.Environment
         {
@@ -131,6 +135,7 @@ public partial class Game3D : Node3D
             AmbientLightColor = new Color(0.55f, 0.6f, 0.7f),
             AmbientLightEnergy = 0.7f
         };
+        _envRes = env;
         AddChild(new WorldEnvironment { Environment = env });
     }
 
@@ -204,6 +209,20 @@ public partial class Game3D : Node3D
                 World.RefreshRooms();
                 World.TickGoals();
                 SyncStatics(force: false);
+            }
+        }
+
+        // Day/night cycle: HourOfDay 0-23 -> sun energy and ambient tint.
+        if (_sun != null && World != null)
+        {
+            int h = World.HourOfDay;
+            float dayness = Mathf.Clamp(1f - Math.Abs(h - 13f) / 9f, 0.12f, 1f);
+            _sun.LightEnergy = 0.25f + dayness * 1.1f;
+            _sun.LightColor = new Color(1f, 0.75f + dayness * 0.25f, 0.55f + dayness * 0.45f);
+            if (_envRes != null)
+            {
+                _envRes.AmbientLightEnergy = 0.25f + dayness * 0.5f;
+                _envRes.BackgroundColor = new Color(0.04f + dayness * 0.05f, 0.05f + dayness * 0.06f, 0.10f + dayness * 0.06f);
             }
         }
 
@@ -548,6 +567,7 @@ public partial class Game3D : Node3D
             float tx = edge switch { 0 => 1, 1 => 48, _ => 1 + _rng.Next(47) };
             float ty = edge switch { 2 => 1, 3 => 48, _ => 1 + _rng.Next(47) };
             Threats.Add(new Threat { X = tx, Y = ty });
+            EmitSignal(SignalName.ThreatSpawned);
             AlertText = $"Raid ! Un maraudeur squelette approche (pression {World.Macro.RaidPressure:0.0}x)";
         }
 

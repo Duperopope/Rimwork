@@ -29,6 +29,7 @@ public partial class UiShell : CanvasLayer
     public override void _Ready()
     {
         _game = GetParent().GetNode<Game3D>("Game3D");
+        _game.ThreatSpawned += () => { if (PauseOnThreat && _hud.Visible) _game.Paused = true; };
         BuildMenu();
         BuildHud();
         BuildOptions();

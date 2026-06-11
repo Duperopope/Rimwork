@@ -3363,3 +3363,5 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [startup] Stack relaunched after boot (2026-06-11 15:44).
 - [iter 39] PREDICTED-FAIL (skipped before build): Add a method signature for `IsAtEdge` in `GameWorld.cs`. - REJECTED anti-stub: method 'IsAtEdge' has an empty/trivial body (returns nothing useful). Implement the real behavior.
 - [iter 40] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step V.5.1 - Add the `IsAtEdge` method signature in `GameWorld.cs`.
+- [iter 45] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step V.5.1 - Add the `IsAtEdge` method signature in `GameWorld.cs`.
+- [iter 47] SKIPPED (no SEARCH match): Add the `IsAtEdge` method signature in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
