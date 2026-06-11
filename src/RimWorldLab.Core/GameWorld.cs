@@ -16,16 +16,24 @@ public class GameWorld
         _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
     }
 
-    public void RegenerateResource(ResourceKind kind, int amount)
+public void RegenerateResource(ResourceKind kind, int amount)
+{
+    if (_resourceRegenerationRates.TryGetValue(kind, out int rate))
     {
-        if (_resourceRegenerationRates.TryGetValue(kind, out int rate))
-        {
-            int newAmount = amount + rate;
-            // Ensure the new amount does not exceed a maximum limit
-            int maxAmount = 100; // Example maximum limit
-            _recycledResources[kind] = Math.Min(newAmount, maxAmount);
-        }
+        int newAmount = amount + rate;
+        // Ensure the new amount does not exceed a maximum limit
+        int maxAmount = 100; // Example maximum limit
+        _recycledResources[kind] = Math.Min(newAmount, maxAmount);
     }
+}
+
+public void SimulateResourceRegeneration()
+{
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
 }
 
 /// <summary>
