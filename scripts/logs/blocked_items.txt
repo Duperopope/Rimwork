@@ -19,3 +19,10 @@
 - [ ] Step C.75 - Add a constructor to the Room class to initialize the Tiles list. (src/RimWorldLab.Core/Room.cs)
 - [ ] Step C.90 - Define the Room class with a Tiles property in GameWorld.cs.
 - [ ] Step C.135 - Add the Room class definition to GameWorld.cs, ensuring it is not in the global namespace. Define only the Tiles property.
+- [ ] Step C.15 - Define the Room class with the Tiles property in src/RimWorldLab.Core/GameWorld.cs.
+- [ ] Step C.30 - Add a private List<Room> to GameWorld.cs to store detected rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.45 - Add a private List<Room> _rooms field to GameWorld.cs.
+- [ ] Step C.60 - Implement a basic room detection system to count functional rooms and update the win condition logic.
+- [ ] Step C.75 - Implement basic room detection logic to identify functional rooms in the colony.
+- [ ] Step C.90 - Implement a basic room detection system in GameWorld.cs to identify functional rooms.
+- [ ] Step Z.1 - In src/RimWorldLab.Core/GameWorld.cs, add a field `public int TotalTicks;` and initialize it to 0.

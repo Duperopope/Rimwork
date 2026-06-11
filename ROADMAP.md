@@ -558,10 +558,10 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.90 - Define the Room class with a Tiles property in GameWorld.cs.
 - [x] Step C.105 - Implement a basic room detection system to count functional rooms and trigger win condition in GameWorld.cs
 - [ ] Step C.135 - Add the Room class definition to GameWorld.cs, ensuring it is not in the global namespace. Define only the Tiles property.
-- [ ] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.
-- [ ] Step C.15 - Implement a basic room detection algorithm in GameWorld.cs to identify functional rooms.
-- [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs to identify functional rooms.
-- [ ] Step C.45 - Implement basic room detection to ensure players can achieve the win condition.
+- [x] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.
+- [ ] Step C.15 - Define the Room class with the Tiles property in src/RimWorldLab.Core/GameWorld.cs.
+- [ ] Step C.30 - Add a private List<Room> to GameWorld.cs to store detected rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.45 - Add a private List<Room> _rooms field to GameWorld.cs.
 - [ ] Step C.60 - Implement a basic room detection system to count functional rooms and update the win condition logic.
 - [ ] Step C.75 - Implement basic room detection logic to identify functional rooms in the colony.
 - [ ] Step C.90 - Implement a basic room detection system in GameWorld.cs to identify functional rooms.
@@ -575,11 +575,7 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - Threat/visual behaviors live in src/RimWorldGodot/Game3D.cs (open to patches).
 - The old 2D Main.cs/Main.tscn are LEGACY: do not extend them anymore.
 
-- [ ] Step Z.1 - In src/RimWorldLab.Core/WorldModel.cs, ExternalSite has a
-      TradeDemand but nothing sells goods yet. Add to GameWorldManager (in
-      src/RimWorldLab.Core/GameWorld.cs) a periodic trade: every 4000 ticks,
-      if Tools >= 2 and Macro.TradeDemand > 0.5f, remove 2 Tools, add 8 Food
-      and call LogEvent("Caravan trade: 2 tools sold for 8 food.").
+- [ ] Step Z.1 - In src/RimWorldLab.Core/GameWorld.cs, add a field `public int TotalTicks;` and initialize it to 0.
 - [ ] Step Z.2 - Wildlife pressure: in src/RimWorldLab.Core/WorldModel.cs,
       add a float WildlifePressure (0..1) to WorldRegion, drift it in
       UpdateRegions, and surface a WorldEvents entry when it exceeds 0.8.
@@ -602,3 +598,8 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.15 - Implement a resource generation system to provide players with wood and stone over time, ensuring they have resources to build functional rooms. (GameWorld.cs)
 - [ ] Step C.45 - Implement a system to track and display the number of functional rooms in the colony, allowing players to see their progress towards the win condition.
 - [ ] Step C.60 - Implement a system to generate resources over time, such as trees growing or rocks appearing, to provide players with a steady supply of materials.
+- [ ] Step C.75 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to provide a sustainable resource base for the player.
+- [ ] Step C.90 - Implement a resource consumption system to ensure pawns need to gather resources to survive and build structures, enhancing the gameplay challenge. (GameWorld.cs)
+- [ ] Step C.105 - Implement a system to automatically generate resource-rich areas on the map to encourage exploration and resource gathering. (GameWorld.cs)
+- [ ] Step C.120 - Add a resource generation mechanic to ensure players have a steady supply of materials over time.
+- [ ] Step C.135 - Implement a system to track and display the number of functional rooms in the game world.

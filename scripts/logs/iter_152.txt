@@ -1,0 +1,9 @@
+CHANGE: Add WildlifePressure field to WorldRegion
+FILE: src/RimWorldLab.Core/WorldModel.cs
+<<<<<<< SEARCH
+    public float Danger { get; set; }      // 0..1, drives raid pressure
+=======
+    public float Danger { get; set; }      // 0..1, drives raid pressure
+    public float WildlifePressure { get; set; } // 0..1, drives wildlife pressure
+>>>>>>> REPLACE
+NEXT: Implement drift logic for WildlifePressure in UpdateRegions

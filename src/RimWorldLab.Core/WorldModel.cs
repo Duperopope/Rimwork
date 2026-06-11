@@ -76,6 +76,7 @@ public class WorldRegion
     public string Biome { get; }
     public float Fertility { get; set; }   // 0..1, drives regrowth
     public float Danger { get; set; }      // 0..1, drives raid pressure
+    public float WildlifePressure { get; set; } // 0..1, drives wildlife pressure
     public bool IsColonyRegion { get; set; }
 
     public WorldRegion(int x, int y, string biome, float fertility, float danger)

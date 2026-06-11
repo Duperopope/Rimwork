@@ -43,3 +43,9 @@
 - Check for existing class names before defining new ones to avoid namespace conflicts.
 - Ensure new types are defined before any existing type's methods or properties.
 - Ensure proper nesting and closing of classes and members.
+- Check for existing class definitions before defining new ones.
+- Check for existing class definitions before adding new ones.
+- Ensure proper syntax and structure when adding new properties or fields.
+- Ensure proper class nesting and member declarations within classes.
+- Check for existing class definitions before adding new ones to avoid namespace conflicts.
+- Ensure all variables and methods used in new methods are defined or passed in.
