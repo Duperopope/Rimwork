@@ -203,6 +203,13 @@ public void TrackRecycledResource(ResourceKind kind, int amount)
     }
 }
 
+private int _functionalRoomCount = 0;
+
+public void UpdateFunctionalRoomCount()
+{
+    _functionalRoomCount = CountFunctionalRooms();
+}
+
     public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
     {
         if (!_pawnResourceConsumption.ContainsKey(pawnId))

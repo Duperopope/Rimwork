@@ -127,3 +127,7 @@
 - Ensure method signatures match existing definitions in the class.
 - Ensure method signatures match existing definitions in the file.
 - Ensure method signatures match and types are correctly defined in GameWorld.cs.
+- Ensure all referenced fields and methods exist in the current context before adding new code.
+- Check for existing method signatures before adding new ones to avoid conflicts.
+- Always check for existing method signatures before adding new ones.
+- Always check for existing method signatures before adding new ones to prevent CS0111 errors.

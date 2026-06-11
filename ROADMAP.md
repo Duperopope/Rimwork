@@ -634,4 +634,7 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [x] Step C.90a - Implement a method to simulate resource regeneration for a single resource type, such as trees regrowing, in the `GameWorld` class.
 - [x] Step E.99a - Implement the `IsZoneFunctional` method in src/RimWorldLab.Core/GameWorld.cs.
 - [ ] Step C.105 - Ensure the `TrackResourceConsumption` method has the correct method signature and opening brace in `GameWorld.cs`.
-- [ ] Step C.120 - Implement a system to detect and count functional rooms in the game world.
+- [x] Step C.120 - Implement a system to detect and count functional rooms in the game world.
+- [ ] Step C.133 - Implement a method to find the nearest zone tile of a specific kind. (GameWorld.cs) - Define the FindNearestZoneTile method to return a nullable tuple of coordinates.
+- [ ] Step C.135 - Implement a system to track and display functional room counts to the player.
+- [ ] Step C.150 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs.

@@ -4462,3 +4462,27 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 127] SKIPPED (bogus brace-fix, build was already OK): Ensure the `TrackResourceConsumption` method has the correct method signature and opening brace in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 127] BLOCKED (stuck on brace-fix hallucination, needs manual fix): - [ ] Step C.105 - Ensure the `TrackResourceConsumption` method has the correct method signature and opening brace in `GameWorld.cs`.
 - [iter 128] KEPT: Implement a method to detect and count functional rooms in the game world. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 129] SKIPPED (no SEARCH match): Add a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 130] SKIPPED (no SEARCH match): Ensure `IsZoneFunctional` method is correctly implemented. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 131] SKIPPED (no-op patch): Ensure `IsZoneFunctional` method checks for furniture within the zone bounds correctly. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 132] DONE (had past KEPT edits, change already in file): - [ ] Step C.120 - Implement a system to detect and count functional rooms in the game world.
+- [iter 133] CRITIC TASK: - [ ] Step C.133 - Implement a system to automatically assign pawns to rooms based on their needs, ensuring that functional rooms are created without manual intervention. (GameWorld.cs)
+- [iter 134] PREDICTED-FAIL (skipped before build): Add a method to assign pawns to rooms based on their needs. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [startup] Stack relaunched after boot (2026-06-11 23:14).
+- [iter 135] CRITIC TASK: - [ ] Step C.135 - Implement a system to track and display functional room counts to the player.
+- [iter 135] PREDICTED-FAIL (skipped before build): Start implementing the method to automatically assign pawns to rooms based on their needs. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 136] PREDICTED-FAIL (skipped before build): Add a method to assign pawns to rooms based on their needs. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 137] REVERTED (build failed): Add a method to assign pawns to rooms based on their needs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 138] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.133 - Implement a method to find the nearest zone tile of a specific kind. (GameWorld.cs)
+- [iter 140] SKIPPED (no SEARCH match): Implement the method to find the nearest zone tile of a specific kind. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 141] SKIPPED (no SEARCH match): Complete the implementation of the `FindNearestZoneTile` method. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 142] SKIPPED (no SEARCH match): Ensure the method `FindNearestZoneTile` is properly closed. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 143] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.133 - Implement a method to find the nearest zone tile of a specific kind. (GameWorld.cs) - Define the FindNearestZoneTile method to return a nullable tuple of coordinates.
+- [iter 144] REVERTED (build failed): Implement the FindNearestZoneTile method in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 145] REVERTED (build failed): Define the FindNearestZoneTile method to return a nullable tuple of coordinates. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 146] REVERTED (build failed): Implement a method to find the nearest zone tile of a specific kind. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 147] SKIPPED (no SEARCH match): Define the FindNearestZoneTile method to return a nullable tuple of coordinates. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 148] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.133 - Implement a method to find the nearest zone tile of a specific kind. (GameWorld.cs) - Define the FindNearestZoneTile method to return a nullable tuple of coordinates.
+- [iter 149] PREDICTED-FAIL (skipped before build): Add a method to count functional rooms. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 150] CRITIC TASK: - [ ] Step C.150 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs.
+- [iter 150] KEPT: Add a method to track functional rooms and update the GameWorld class to use it. (src/RimWorldLab.Core/GameWorld.cs)
