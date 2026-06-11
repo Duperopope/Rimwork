@@ -3336,3 +3336,13 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 8] KEPT: Add HexToPixel method for converting hex coordinates to pixel coordinates. (src/RimWorldGodot/Main.cs)
 - [iter 9] PREDICTED-FAIL (skipped before build): Implement hexagonal tile rendering in `_Draw` method. - Identifier 'Deg2Rad' does not exist in the target file or the game API - it would not compile.
 - [iter 10] KEPT: Implement HexToPixel method for converting hex coordinates to pixel coordinates. (src/RimWorldGodot/Main.cs)
+- [iter 10] DONE (after 2 consecutive KEPT changes): - [ ] Step V.3 - Main.cs._Draw: when GridShape==Hex, draw each tile as a
+- [iter 11] SKIPPED (no SEARCH match): Add a basic RegionMap class to manage regions. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 14] SKIPPED (no SEARCH match): Add a new class `RegionMap` to manage the coarse hex grid of regions. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 15] CRITIC TASK: - [ ] Step C.15 - Implement a system to automatically generate functional rooms to meet the win condition.
+- [iter 15] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step V.4 - Planet/region map: add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions`.
+- [iter 16] SKIPPED (no SEARCH match): Add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 17] SKIPPED (no SEARCH match): Add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions`. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 15:34).
+- [iter 20] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step V.4 - Planet/region map: add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions` in `src/RimWorldLab.Core/RegionMap.cs`.
+- [iter 21] KEPT: Add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions`. (src/RimWorldLab.Core/GameWorld.cs)

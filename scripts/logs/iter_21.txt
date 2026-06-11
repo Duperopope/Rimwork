@@ -1,0 +1,38 @@
+CHANGE: Add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions`.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+// =====================================================================
+// 1. Core Data Structures (Map & Collision)
+// =====================================================================
+=======
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+// =====================================================================
+// 1. Core Data Structures (Map & Collision)
+// =====================================================================
+
+/// <summary>
+/// Represents a map of regions on the planet.
+/// </summary>
+public class RegionMap
+{
+    private readonly List<(int X, int Y, string Biome)> _regions = new();
+
+    public RegionMap()
+    {
+        // Initialize with some example regions
+        _regions.Add((0, 0, "Forest"));
+        _regions.Add((10, 10, "Desert"));
+        _regions.Add((20, 20, "Mountain"));
+    }
+
+    public List<(int X, int Y, string Biome)> Regions => _regions;
+}
+>>>>>>> REPLACE
+NEXT: Implement methods to add and remove regions from the `RegionMap`.

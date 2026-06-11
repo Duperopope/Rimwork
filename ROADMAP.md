@@ -379,18 +379,12 @@ step N+1 until N builds and runs correctly.
       yet wired into GameMap/Pathfinder/rendering - existing square-grid
       game is untouched.
 - [x] Step V.2 - Add a `GridShape` property to GameMap with a default value of "Square".
-- [ ] Step V.3 - Main.cs._Draw: when GridShape==Hex, draw each tile as a
+- [x] Step V.3 - Main.cs._Draw: when GridShape==Hex, draw each tile as a
       flat-top hexagon (DrawColoredPolygon with 6 points from HexToPixel)
       instead of a square Rect2. Update click-to-tile (PixelToHex) in
       _UnhandledInput. Switch the default map to Hex once this renders
       correctly and pawns path/move visibly on the hex grid.
-- [ ] Step V.4 - Planet/region map: add a small "RegionMap" - a coarse hex
-      grid (e.g. 20-30 hexes) where each hex is one biome (use
-      asset_manifest.json biome_hints: Forest/Plains/Barren/Rocky) and
-      contains its own local GameMap+GameWorldManager. A new "Planet" view
-      (toggle from the Colony tab) shows this region hex-grid; clicking a
-      region hex zooms into that region's local hex map. Pawns/colony
-      state stay per-region for now (no cross-region travel yet).
+- [ ] Step V.4 - Planet/region map: add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions` in `src/RimWorldLab.Core/RegionMap.cs`.
 - [ ] Step V.5 - Cross-region travel: a pawn that walks off the edge of a
       local region's hex map transfers to the neighboring region (per the
       RegionMap adjacency) at the corresponding edge tile.
@@ -615,3 +609,4 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step Z.3 - Memories of construction: in GameWorld.cs, when a Build task
       completes (the PlaceFurniture branch in Tick), call
       pawn.Remember(TotalTicks, $"built a {kind}", +1.5f).
+- [ ] Step C.15 - Implement a system to automatically generate functional rooms to meet the win condition.

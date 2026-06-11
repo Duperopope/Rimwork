@@ -7,6 +7,24 @@ using System.Linq;
 // =====================================================================
 
 /// <summary>
+/// Represents a map of regions on the planet.
+/// </summary>
+public class RegionMap
+{
+    private readonly List<(int X, int Y, string Biome)> _regions = new();
+
+    public RegionMap()
+    {
+        // Initialize with some example regions
+        _regions.Add((0, 0, "Forest"));
+        _regions.Add((10, 10, "Desert"));
+        _regions.Add((20, 20, "Mountain"));
+    }
+
+    public List<(int X, int Y, string Biome)> Regions => _regions;
+}
+
+/// <summary>
 /// Represents a single cell in the 2D map.
 /// </summary>
 public class Cell
@@ -643,16 +661,16 @@ private void UpdateHeaderText()
     public NeedsSystem Needs { get; }
 
     /// <summary>Wood stockpile. Structural builds consume 1, digging walls/removing structural furniture refunds 1.</summary>
-    public int Wood { get; set; } = 5;
+    public int Wood { get; set; } = 15;
 
     /// <summary>Stone stockpile, harvested from Rock resources (Mining skill).</summary>
-    public int Stone { get; set; } = 0;
+    public int Stone { get; set; } = 5;
 
     /// <summary>Water stockpile, hauled from river tiles.</summary>
-    public int Water { get; set; } = 0;
+    public int Water { get; set; } = 10;
 
     /// <summary>Food stockpile - cooked at Stoves, eaten periodically by pawns.</summary>
-    public int Food { get; set; } = 6;
+    public int Food { get; set; } = 24;
 
     /// <summary>Metal stockpile - byproduct of sustained mining.</summary>
     public int Metal { get; set; } = 0;
@@ -1363,6 +1381,8 @@ private void UpdateHeaderText()
                         if (resource.Kind == ResourceKind.Tree)
                         {
                             Wood++;
+                            if (TotalTicks % 3 == 0) Food++; // foraged berries
+
                             pawn.GainSkill(SkillKind.Woodcutting, 10f);
                             DropTreeSeeds(order.TargetX, order.TargetY);
                         }

@@ -178,3 +178,26 @@ public class MacroSim
         LastUpdate[SimLOD.Region] = tick;
     }
 }
+
+/// <summary>
+/// Deterministic mapping from tile neighborhood to 3D model yaw (degrees).
+/// Pure function so the test suite can verify it without the engine:
+/// a wall segment aligns with its solid neighbors; doors face across
+/// their wall axis. 0 deg = model long axis along X (east-west).
+/// </summary>
+public static class RenderOrientation
+{
+    public static int WallYaw(bool solidN, bool solidS, bool solidE, bool solidW)
+    {
+        bool horizontal = solidE || solidW;
+        bool vertical = solidN || solidS;
+        if (horizontal && !vertical) return 0;
+        if (vertical && !horizontal) return 90;
+        if (horizontal && vertical) return 0;   // corner/junction: default east-west
+        return 0;                                // isolated post
+    }
+
+    /// <summary>A door rotates perpendicular to the wall run it sits in.</summary>
+    public static int DoorYaw(bool solidN, bool solidS, bool solidE, bool solidW)
+        => WallYaw(solidN, solidS, solidE, solidW);
+}
