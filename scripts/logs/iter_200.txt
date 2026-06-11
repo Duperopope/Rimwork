@@ -1,36 +1,49 @@
-CHANGE: Ensure the Cell class has properties X and Y defined only once.
+CHANGE: Add a method to generate resources over time in GameWorld.cs
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public void GenerateResourcesOverTime()
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    // Example: Generate resources based on some logic
+    for (int x = 0; x < Width; x++)
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        for (int y = 0; y < Height; y++)
+        {
+            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
+            {
+                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
+            }
+        }
     }
 }
 =======
-public class Cell
+public void GenerateResourcesOverTime()
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    // Example: Generate resources based on some logic
+    for (int x = 0; x < Width; x++)
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        for (int y = 0; y < Height; y++)
+        {
+            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
+            {
+                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
+            }
+        }
+    }
+
+    // Generate stone resources in desert regions
+    foreach (var region in _regions.Where(r => r.Biome == "Desert"))
+    {
+        for (int x = region.X; x < region.X + region.Width; x++)
+        {
+            for (int y = region.Y; y < region.Y + region.Height; y++)
+            {
+                if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
+                {
+                    AddResource(ResourceKind.Rock, x, y);
+                }
+            }
+        }
     }
 }
 >>>>>>> REPLACE
-NEXT: Remove any duplicate property declarations in the same class.
+NEXT: Implement a method to generate wood resources in forest regions.

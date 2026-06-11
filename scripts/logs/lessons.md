@@ -49,3 +49,7 @@
 - Ensure proper class nesting and member declarations within classes.
 - Check for existing class definitions before adding new ones to avoid namespace conflicts.
 - Ensure all variables and methods used in new methods are defined or passed in.
+- Ensure all methods and types used in code exist before adding logic.
+- Ensure all referenced fields (like `_regions`) are declared and initialized before use in methods.
+- Ensure all used fields and classes are declared and initialized in the same file or referenced correctly.
+- Ensure referenced types like 'Needs' are defined or referenced correctly in the project.

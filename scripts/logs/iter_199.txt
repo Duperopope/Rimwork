@@ -1,36 +1,16 @@
-CHANGE: Ensure the Cell class has properties X and Y defined only once.
+CHANGE: Add a method to check if a tile is already occupied by a resource node.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public bool IsPlantable(int x, int y)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
-    {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
-    }
+    // Example: Check if the tile is not solid and not already occupied by a resource node
+    return !_grid[x, y].IsSolid && !_resources.Any(r => r.X == x && r.Y == y);
 }
 =======
-public class Cell
+public bool IsPlantable(int x, int y)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
-    {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
-    }
+    // Example: Check if the tile is not solid and not already occupied by a resource node
+    return !_grid[x, y].IsSolid && !_resources.Any(r => r.X == x && r.Y == y) && !_saplings.Any(s => s.X == x && s.Y == y);
 }
 >>>>>>> REPLACE
-NEXT: Verify that the Cell class does not have any duplicate properties.
+NEXT: Implement a method to generate resources based on the tile type and biome.

@@ -1,0 +1,32 @@
+CHANGE: Add a method to count functional rooms in the colony.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public bool IsZoneFunctional(Zone zone)
+{
+    // Basic check: zone must have at least one furniture item
+    return _furniture.Any(f => f.X >= zone.X && f.X < zone.X + zone.Width &&
+                              f.Y >= zone.Y && f.Y < zone.Y + zone.Height);
+}
+=======
+public bool IsZoneFunctional(Zone zone)
+{
+    // Basic check: zone must have at least one functional furniture item
+    return _furniture.Any(f => f.X >= zone.X && f.X < zone.X + zone.Width &&
+                              f.Y >= zone.Y && f.Y < zone.Y + zone.Height &&
+                              f.IsFunctionalFurniture());
+}
+
+public int CountFunctionalRooms()
+{
+    int functionalRoomCount = 0;
+    foreach (var zone in _zones)
+    {
+        if (IsZoneFunctional(zone))
+        {
+            functionalRoomCount++;
+        }
+    }
+    return functionalRoomCount;
+}
+>>>>>>> REPLACE
+NEXT: Implement a method to update the game state with the number of functional rooms.

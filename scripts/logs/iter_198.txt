@@ -1,36 +1,51 @@
-CHANGE: Remove duplicate X and Y property declarations in the Cell class.
+CHANGE: Add a method to generate resources over time based on the biome.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public void GenerateResourcesOverTime()
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    // Example: Generate resources based on some logic
+    for (int x = 0; x < Width; x++)
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        for (int y = 0; y < Height; y++)
+        {
+            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
+            {
+                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
+            }
+        }
     }
 }
 =======
-public class Cell
+public void GenerateResourcesOverTime()
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    // Generate resources based on biome
+    foreach (var region in _regions)
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        for (int x = region.X; x < region.X + 10; x++)
+        {
+            for (int y = region.Y; y < region.Y + 10; y++)
+            {
+                if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
+                {
+                    switch (region.Biome)
+                    {
+                        case "Forest":
+                            AddResource(ResourceKind.Tree, x, y);
+                            break;
+                        case "Desert":
+                            AddResource(ResourceKind.Rock, x, y);
+                            break;
+                        // Add more biomes as needed
+                    }
+                }
+            }
+        }
     }
 }
+
+private void AddResource(ResourceKind kind, int x, int y)
+{
+    _resources.Add(new ResourceNode(kind, x, y));
+}
 >>>>>>> REPLACE
-NEXT: Ensure the Cell class has properties X and Y defined only once in GameWorld.cs
+NEXT: Implement a method to remove resources when harvested.

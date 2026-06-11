@@ -42,3 +42,4 @@
 - [ ] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs
 - [ ] Step C.15 - Implement a system to generate resources over time to encourage sustainable resource management.
 - [ ] Step C.15 - Implement a system to generate resources over time to encourage sustainable resource management.
+- [ ] Step C.45 - Implement a system to track and display the number of functional rooms in the colony, allowing players to see their progress towards the win condition.
