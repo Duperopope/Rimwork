@@ -4669,3 +4669,5 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 113] KEPT: Add a private field to track the number of functional rooms in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 114] REVERTED (build failed): Add a private field to track the number of functional rooms in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 115] KEPT: Add a private field to track the number of functional rooms in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 115] DONE (after 2 consecutive KEPT changes): - [ ] Step C.75 - Implement a basic room detection system by adding a private field to track the number of functional rooms in `GameWorld.cs`.
+- [iter 116] KEPT: Add a method to simulate resource regeneration over time. (src/RimWorldLab.Core/GameWorld.cs)

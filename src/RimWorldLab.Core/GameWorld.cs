@@ -63,6 +63,7 @@ public void GenerateResourcesOverTime()
     RegenerateResource(ResourceKind.Tree, 5);
     RegenerateResource(ResourceKind.Rock, 3);
     SimulateMicrobialBiomassRegeneration();
+    SimulateResourceRegeneration();
 }
 
 private void SimulateMicrobialBiomassRegeneration()
@@ -387,10 +388,18 @@ public void GenerateResourcesOverTime()
     public IReadOnlyList<(int X, int Y, int TicksRemaining)> Saplings => _saplings;
     public bool IsRaining => _isRaining;
 
-    public GameMap(int width, int height)
+    /// <summary>Biome this map was generated as (drives terrain/resources).</summary>
+    public string Biome { get; } = "forest";
+    private readonly int _genSeed = 12345;
+
+    public GameMap(int width, int height) : this(width, height, "forest", 12345) { }
+
+    public GameMap(int width, int height, string biome, int seed)
     {
         Width = width;
         Height = height;
+        Biome = biome ?? "forest";
+        _genSeed = seed;
         _grid = new Cell[height, width];
         InitializeMap();
     }
@@ -465,98 +474,94 @@ public bool IsTilePartOfRoom(int x, int y)
 
     private void InitializeMap()
     {
-        // Open terrain bounded by an outer wall. No pre-built rooms - the
-        // player builds their own base using the Build/Dig tools.
+        var rng = new Random(_genSeed);
+        bool dry = Biome is "dunes" or "scorched" or "ash" or "lava rock" or "crater";
+        bool frozen = Biome is "ice" or "snowfield" or "tundra" or "frost rock" or "crevasse";
+        bool wet = Biome is "marsh";
+        string ground = frozen ? "Snow" : (dry ? "Sand" : "Grass");
+
         for (int y = 0; y < Height; y++)
-        {
             for (int x = 0; x < Width; x++)
             {
-                bool isSolid = x == 0 || y == 0 || x == Width - 1 || y == Height - 1;
-                _grid[y, x] = new Cell(isSolid, isSolid ? "Wall" : "Grass");
+                bool border = x == 0 || y == 0 || x == Width - 1 || y == Height - 1;
+                _grid[y, x] = new Cell(border, border ? "Wall" : ground);
             }
+
+        // --- Water logic: ONE meandering river flowing edge to edge (it
+        // exists to be crossed and drunk from), except in dry biomes.
+        void Splash(int cx, int cy, int radius, string type, bool solid)
+        {
+            for (int dy = -radius; dy <= radius; dy++)
+                for (int dx = -radius; dx <= radius; dx++)
+                {
+                    int nx = cx + dx, ny = cy + dy;
+                    if (nx <= 0 || ny <= 0 || nx >= Width - 1 || ny >= Height - 1) continue;
+                    if (dx * dx + dy * dy <= radius * radius)
+                    { _grid[ny, nx].IsSolid = solid; _grid[ny, nx].TileType = type; }
+                }
         }
 
-        // Carve a diagonal river across the map - impassable Water tiles
-        // pawns must walk along the bank of to haul Water from.
-        for (int y = 1; y < Height - 1; y++)
+        if (!dry)
         {
+            // Frozen rivers are ICE: visible water course, but walkable.
+            string wtype = frozen ? "Ice" : "Water";
+            bool wsolid = !frozen;
+            bool vertical = rng.Next(2) == 0;
+            float pos = (vertical ? Width : Height) * (0.3f + (float)rng.NextDouble() * 0.4f);
+            for (int t = 1; t < (vertical ? Height : Width) - 1; t++)
+            {
+                pos += ((float)rng.NextDouble() - 0.5f) * 2.2f;
+                pos = Math.Clamp(pos, 3, (vertical ? Width : Height) - 4);
+                int w = 1 + (t % 7 == 0 ? rng.Next(2) : 0);
+                for (int k = -w; k <= w; k++)
+                {
+                    int x = vertical ? (int)pos + k : t;
+                    int y = vertical ? t : (int)pos + k;
+                    if (x > 0 && y > 0 && x < Width - 1 && y < Height - 1)
+                    { _grid[y, x].IsSolid = wsolid; _grid[y, x].TileType = wtype; }
+                }
+            }
+            // Lakes pool along the river course (depressions).
+            int lakes = wet ? 4 + rng.Next(3) : 1 + rng.Next(2);
+            for (int l = 0; l < lakes; l++)
+                Splash(rng.Next(6, Width - 6), rng.Next(6, Height - 6), wet ? 2 + rng.Next(2) : 3 + rng.Next(2), wtype, wsolid);
+        }
+        else if (rng.Next(2) == 0)
+        {
+            // Desert: at most one small oasis.
+            Splash(rng.Next(8, Width - 8), rng.Next(8, Height - 8), 2, "Water", true);
+        }
+
+        // --- Keep the starter-colony plot dry and clear (home maps build
+        // their 3 starter rooms in the top-left corner).
+        for (int y = 1; y < Math.Min(9, Height - 1); y++)
+            for (int x = 1; x < Math.Min(23, Width - 1); x++)
+            { _grid[y, x].IsSolid = false; _grid[y, x].TileType = ground; }
+
+        // --- Resources dosed by biome (deterministic per-tile hash).
+        (int tree, int rock) = Biome switch
+        {
+            "forest" => (8, 2),
+            "marsh" => (5, 1),
+            "plains" => (3, 2),
+            "hills" or "rocky" or "frost rock" or "crater" => (2, 8),
+            "dunes" or "scorched" or "ash" or "lava rock" => (1, 5),
+            "tundra" or "snowfield" => (2, 3),
+            "ice" or "crevasse" => (0, 4),
+            _ => (4, 2)
+        };
+        for (int y = 1; y < Height - 1; y++)
             for (int x = 1; x < Width - 1; x++)
             {
-                int diag = x - y;
-                // Add a river along the center of the map
-                if (y == Height / 2)
-                {
-                    _grid[y, x] = new Cell(true, "Water");
-                }
-
-                // Add lakes at specific coordinates
-                if ((x >= Width / 4 && x <= Width / 3 && y >= Height / 4 && y <= Height / 3) ||
-                    (x >= 2 * Width / 3 && x < 3 * Width / 4 && y >= 2 * Height / 3 && y < 3 * Height / 4))
-                {
-                    _grid[y, x] = new Cell(true, "Water");
-                }
-                
-
-                // Add a lake in the center of the map
-                for (int ly = Height / 2 - 3; ly < Height / 2 + 3; ly++)
-                {
-                    for (int lx = Width / 2 - 3; lx < Width / 2 + 3; lx++)
-                    {
-                        _grid[ly, lx].IsSolid = true;
-                        _grid[ly, lx].TileType = "Water";
-                    }
-                }
-
-                // Add a river near the bottom of the map
-                for (int ry = Height - 5; ry < Height - 3; ry++)
-                {
-                    for (int rx = 2; rx < Width - 2; rx++)
-                    {
-                        _grid[ry, rx].IsSolid = true;
-                        _grid[ry, rx].TileType = "Water";
-                    }
-                }
-
-                // Add a few lakes/rivers
-                for (int i = 0; i < Width; i++)
-                {
-                    if ((y == Height / 4 && Math.Abs(x - Width / 2) <= 3) ||
-                        (y == Height * 3 / 4 && Math.Abs(x - Width / 2) <= 3))
-                    {
-                        _grid[y, x].IsSolid = true;
-                        _grid[y, x].TileType = "Water";
-                    }
-                }
-
-                for (int i = 0; i < Height; i++)
-                {
-                    if ((x == Width / 4 && Math.Abs(y - Height / 2) <= 3) ||
-                        (x == Width * 3 / 4 && Math.Abs(y - Height / 2) <= 3))
-                    {
-                        _grid[y, x].IsSolid = true;
-                        _grid[y, x].TileType = "Water";
-                    }
-                }
-            }
-        }
-
-        // Scatter resource nodes on passable tiles, avoiding the top-left
-        // rooms reserved for the Canteen/Sleeping Quarters zones.
-        for (int y = 0; y < Height; y++)
-        {
-            for (int x = 0; x < Width; x++)
-            {
-                if (_grid[y, x].IsSolid) continue;
-                if (x < 11 && y < 5) continue;
-
-                int hash = (x * 73856093) ^ (y * 19349663);
+                if (_grid[y, x].IsSolid || _grid[y, x].TileType == "Ice") continue;
+                if (x < 24 && y < 9) continue; // starter plot stays clear
+                int hash = ((x * 73856093) ^ (y * 19349663) ^ _genSeed);
                 int bucket = ((hash % 100) + 100) % 100;
-                if (bucket < 4)
+                if (bucket < tree)
                     _resources.Add(new ResourceNode(ResourceKind.Tree, x, y));
-                else if (bucket < 6)
+                else if (bucket < tree + rock)
                     _resources.Add(new ResourceNode(ResourceKind.Rock, x, y));
             }
-        }
     }
 
     /// <summary>
@@ -1151,9 +1156,11 @@ private void UpdateHeaderText()
         return true;
     }
 
-    public GameWorldManager(int mapWidth, int mapHeight)
+    public GameWorldManager(int mapWidth, int mapHeight) : this(mapWidth, mapHeight, "forest", 12345) { }
+
+    public GameWorldManager(int mapWidth, int mapHeight, string biome, int seed)
     {
-        _map = new GameMap(mapWidth, mapHeight);
+        _map = new GameMap(mapWidth, mapHeight, biome, seed);
 
         // No pre-placed zones - the player designates Canteen/Sleeping
         // Quarters areas themselves using the zone-placement tool.

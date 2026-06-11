@@ -156,5 +156,5 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [x] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
 - [x] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
 - [x] Step C.60 - Add a private field `functionalRoomsCount` to the `GameWorld` class.
-- [ ] Step C.75 - Implement a basic room detection system by adding a private field to track the number of functional rooms in `GameWorld.cs`.
+- [x] Step C.75 - Implement a basic room detection system by adding a private field to track the number of functional rooms in `GameWorld.cs`.
 - [ ] Step C.105 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to ensure players have a steady supply of materials.

@@ -1,0 +1,21 @@
+CHANGE: Add a method to simulate resource regeneration over time.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public void GenerateResourcesOverTime()
+{
+    // Example: Generate resources based on some logic
+    RegenerateResource(ResourceKind.Tree, 5);
+    RegenerateResource(ResourceKind.Rock, 3);
+    SimulateMicrobialBiomassRegeneration();
+}
+=======
+public void GenerateResourcesOverTime()
+{
+    // Example: Generate resources based on some logic
+    RegenerateResource(ResourceKind.Tree, 5);
+    RegenerateResource(ResourceKind.Rock, 3);
+    SimulateMicrobialBiomassRegeneration();
+    SimulateResourceRegeneration();
+}
+>>>>>>> REPLACE
+NEXT: Implement a method to handle specific resource regeneration logic.
