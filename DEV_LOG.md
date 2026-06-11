@@ -3251,3 +3251,7 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 24] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
 - [iter 25] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step P.2b - Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
 - [iter 26] KEPT: Add Mood property to Pawn class (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 27] DONE (repeated identical patch): - [ ] Step P.3b - The Pawn class lives in src/RimWorldLab.Core/GameWorld.cs
+- [iter 28] PREDICTED-FAIL (skipped before build): Add Mood dynamics to PawnTaskDriver - Identifier 'Clamp' does not exist in the target file or the game API - it would not compile.
+- [startup] Stack relaunched after boot (2026-06-11 14:34).
+- [iter 29] KEPT: Implement Mood dynamics by adding the necessary logic to adjust the pawn's mood based on hunger and HP. (src/RimWorldLab.Core/GameWorld.cs)

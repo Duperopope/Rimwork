@@ -1166,6 +1166,7 @@ private void UpdateHeaderText()
             var driver = _drivers[pawn.Id];
 
             Needs.Tick(this, driver, pawn, _rng);
+            pawn.Mood = Math.Max(Math.Min(pawn.Mood + (pawn.Hunger > 70f ? -0.01f : 0.002f) + (pawn.HP < 50f ? -0.01f : 0f), 100f), 0f);
 
             if (driver.IsIdle)
             {

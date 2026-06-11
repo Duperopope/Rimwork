@@ -204,7 +204,7 @@ task queue - and stop doing absurd things like building bridges nobody needs.
       `    public float Mood { get; set; } = 70f;`
 - [ ] Step P.1b - Implement the `TryClaimBest` method in the `TaskBoard` class by adding the following lines after the existing `TryClaimNext` method:
 - [ ] Step P.2b - Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
-- [ ] Step P.3b - The Pawn class lives in src/RimWorldLab.Core/GameWorld.cs
+- [x] Step P.3b - The Pawn class lives in src/RimWorldLab.Core/GameWorld.cs
       (there is NO Pawn.cs file). SEARCH for exactly this one line:
       `    public float Hunger { get; set; } = 0f;`
       and REPLACE it with exactly these 4 lines:
