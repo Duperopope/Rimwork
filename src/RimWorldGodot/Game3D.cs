@@ -281,6 +281,24 @@ public partial class Game3D : Node3D
         }
         SelectedPawn = best;
 
+        // Threat under the cursor? Order a defense: idle colonists converge.
+        if (best == null && ViewLayer == "Local")
+        {
+            foreach (var th in Threats)
+            {
+                if (th.Node == null) continue;
+                var tsp = _cam.UnprojectPosition(th.Node.GlobalPosition + new Vector3(0, 0.8f, 0));
+                if (tsp.DistanceTo(screenPos) < 40f)
+                {
+                    int tx = (int)th.X, ty = (int)th.Y;
+                    for (int i = 0; i < 3; i++)
+                        World.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, tx, ty, priority: 90));
+                    AlertText = "Ordre: défendre la colonie ! Les colons convergent.";
+                    return;
+                }
+            }
+        }
+
         // No pawn under the cursor: this is a TILE ORDER (RimWorld-like).
         if (best == null && ViewLayer == "Local")
             OrderAtTile(screenPos);
