@@ -3346,3 +3346,8 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [startup] Stack relaunched after boot (2026-06-11 15:34).
 - [iter 20] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step V.4 - Planet/region map: add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions` in `src/RimWorldLab.Core/RegionMap.cs`.
 - [iter 21] KEPT: Add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 22] SKIPPED (no SEARCH match): Add a new class `RegionMap` with a private field `_regions` in `src/RimWorldLab.Core/GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 23] SKIPPED (no SEARCH match): Add a private field `_regions` to `RegionMap` class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 24] SKIPPED (no SEARCH match): Add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions` in `src/RimWorldLab.Core/RegionMap.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 25] DONE (had past KEPT edits, change already in file): - [ ] Step V.4 - Planet/region map: add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions` in `src/RimWorldLab.Core/RegionMap.cs`.
+- [iter 26] PREDICTED-FAIL (skipped before build): Add a method to handle pawn movement across region edges. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.

@@ -97,7 +97,18 @@ public partial class UiShell : CanvasLayer
         box.AddChild(sub);
         box.AddChild(new Control { CustomMinimumSize = new Vector2(0, 16) });
 
-        box.AddChild(Btn("Nouvelle partie", () => ShowOnly(_hud)));
+        box.AddChild(Btn("Nouvelle partie", () =>
+        {
+            if (_game.World != null && _game.World.TotalTicks > 0)
+            {
+                GD.Print("[FLOW] New Game: resetting colony (scene reload).");
+                GetTree().ReloadCurrentScene();
+                return;
+            }
+            GD.Print("[FLOW] New Game: started.");
+            _game.AlertText = "Colonie fondée — bonne chance !";
+            ShowOnly(_hud);
+        }));
         box.AddChild(Btn("Continuer", () => { }, disabled: true, tooltip: "Aucune sauvegarde - la persistance de partie arrive dans une itération future."));
         box.AddChild(Btn("Options", () => ShowOnly(_options)));
         box.AddChild(Btn("Dev / Diagnostics", () => ShowOnly(_devTab)));
@@ -187,12 +198,22 @@ public partial class UiShell : CanvasLayer
         // ---- Bottom hint ----
         var hint = new Label
         {
-            Text = "ZQSD/flèches: caméra  |  molette: zoom  |  clic: sélection  |  clic milieu: déplacer la vue",
+            Text = "ZQSD/flèches: caméra  |  molette: zoom  |  clic: sélection  |  Tab/M: vue planète  |  Échap: menu",
             HorizontalAlignment = HorizontalAlignment.Center
         };
         hint.SetAnchorsPreset(Control.LayoutPreset.BottomWide);
         hint.AddThemeColorOverride("font_color", new Color(0.5f, 0.55f, 0.6f));
         _hud.AddChild(hint);
+    }
+
+    public override void _UnhandledKeyInput(InputEvent ev)
+    {
+        if (ev is InputEventKey k && k.Pressed && !k.Echo && k.Keycode == Key.Escape)
+        {
+            if (_hud.Visible) ShowOnly(_menu);
+            else if (_options.Visible || _devTab.Visible || _credits.Visible)
+                ShowOnly(_game.World != null && _game.World.TotalTicks > 0 ? _hud : _menu);
+        }
     }
 
     public override void _Process(double delta)
@@ -201,7 +222,7 @@ public partial class UiShell : CanvasLayer
         var w = _game.World;
 
         _resources.Text = $"Bois {w.Wood}   Pierre {w.Stone}   Eau {w.Water}   Nourriture {w.Food}   Métal {w.Metal}   Outils {w.Tools}   Pop {w.Pawns.Count(p => p.HP > 0)}";
-        _clock.Text = $"Jour {w.DayNumber}, {w.HourOfDay:00}:00" + (_game.Paused ? "  [PAUSE]" : $"  [{_game.SpeedMultiplier:0}x]");
+        _clock.Text = $"[{_game.ViewLayer}] Jour {w.DayNumber}, {w.HourOfDay:00}:00" + (_game.Paused ? "  [PAUSE]" : $"  [{_game.SpeedMultiplier:0}x]");
         _pauseBtn.Text = _game.Paused ? "▶" : "II";
 
         int rooms = w.GetRooms().Count(r => r.Function != RoomFunction.Empty);
@@ -366,6 +387,8 @@ Pawns vivants: {w.Pawns.Count(p => p.HP > 0)}   oisifs: {idle}   tâches en atte
 Bois {w.Wood}  Pierre {w.Stone}  Eau {w.Water}  Nourriture {w.Food}  Métal {w.Metal}  Outils {w.Tools}
 Pièces fonctionnelles: {w.GetRooms().Count(r => r.Function != RoomFunction.Empty)}   Objectif: {w.CurrentGoalText}
 Menaces actives: {_game.Threats.Count}
+État du jeu: {(_hud.Visible ? "En jeu" : "Menu")} — couche active: {_game.ViewLayer} (Tab/M pour basculer)
+Pawns: blessés {w.Pawns.Count(p => p.HP > 0 && p.HP < 60)}  affamés {w.Pawns.Count(p => p.HP > 0 && p.Hunger > 70)}  assoiffés {w.Pawns.Count(p => p.HP > 0 && p.Thirst > 70)}
 
 {B("4. ESPRITS DES PAWNS (LOD Detail)")}
 {string.Join("\n", w.Pawns.Where(p => p.HP > 0).Take(8).Select(p =>

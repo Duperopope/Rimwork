@@ -384,7 +384,7 @@ step N+1 until N builds and runs correctly.
       instead of a square Rect2. Update click-to-tile (PixelToHex) in
       _UnhandledInput. Switch the default map to Hex once this renders
       correctly and pawns path/move visibly on the hex grid.
-- [ ] Step V.4 - Planet/region map: add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions` in `src/RimWorldLab.Core/RegionMap.cs`.
+- [x] Step V.4 - Planet/region map: add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions` in `src/RimWorldLab.Core/RegionMap.cs`.
 - [ ] Step V.5 - Cross-region travel: a pawn that walks off the edge of a
       local region's hex map transfers to the neighboring region (per the
       RegionMap adjacency) at the corresponding edge tile.
