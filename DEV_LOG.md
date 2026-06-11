@@ -4563,3 +4563,20 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 18] SKIPPED (no SEARCH match): Add a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 19] SKIPPED (no SEARCH match): Add a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 20] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.195a - Implement a method to check if a zone has enough functional furniture by counting functional furniture in the zone's local map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 21] REVERTED (build failed): Add a method to count functional furniture in a zone's local map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 22] SKIPPED (no SEARCH match): Add a method to check if a zone has enough functional furniture by counting functional furniture in the zone's local map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 23] SKIPPED (no SEARCH match): Add a method to count functional furniture in a zone's local map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 24] SKIPPED (no SEARCH match): Implement a method to check if a zone has enough functional furniture by counting functional furniture in the zone's local map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 25] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.195a - Add a property to get the local map of a zone. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 26] SKIPPED (no SEARCH match): Add a property to get the local map of a zone. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 27] SKIPPED (no SEARCH match): Add a property to get the local map of a zone. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 28] SKIPPED (no SEARCH match): Add a property to get the local map of a zone. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 29] SKIPPED (no SEARCH match): Add a property to get the local map of a zone. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 30] CRITIC TASK: - [ ] Step C.30 - Implement a unified method for checking passable neighbors in GameWorld.cs to reduce code duplication.
+- [iter 30] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.195a - Add a property to get the local map of a zone. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 31] SKIPPED (no SEARCH match): Implement a unified method for checking passable neighbors in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 32] SKIPPED (no SEARCH match): Implement a unified method for checking passable neighbors in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 33] SKIPPED (no SEARCH match): Implement a unified method for checking passable neighbors in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 34] SKIPPED (no SEARCH match): Implement a unified method for checking passable neighbors in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 23:54).
+- [iter 35] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.30 - Add a method to count functional furniture in a zone's local map in GameWorld.cs.

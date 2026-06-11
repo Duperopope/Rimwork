@@ -124,6 +124,17 @@ public partial class Game3D : Node3D
         AlertText = $"Expédition sur la tuile #{tileIdx} ({biome}) — molette arrière à fond: retour planète";
     }
 
+    /// <summary>Swap in a loaded world (save system) and rebuild visuals.</summary>
+    public void LoadWorld(GameWorldManager w)
+    {
+        World = w;
+        _colonyWorld = w;
+        VisitedTileIdx = -1;
+        RebuildLocalVisuals();
+        SetViewLayer("Local");
+        _camRig.Position = new Vector3(14, 0, 12);
+    }
+
     public void ReturnToColony()
     {
         if (_colonyWorld != null) World = _colonyWorld;

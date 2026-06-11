@@ -1324,7 +1324,7 @@ private void UpdateHeaderText()
     /// Steps each pawn's current task and assigns new tasks from the board when idle.
     /// </summary>
     /// <summary>Total ticks elapsed since world start.</summary>
-    public long TotalTicks { get; private set; }
+    public long TotalTicks { get; set; }
 
     /// <summary>One in-game day = 1000 ticks. Hour = 0-23.</summary>
     public int DayNumber => (int)(TotalTicks / 1000) + 1;
@@ -1686,6 +1686,46 @@ private void UpdateHeaderText()
     /// </summary>
     public List<Room> GetRooms() => _rooms;
 
+    /// <summary>Apply a SaveData diff onto this freshly generated world
+    /// (same deterministic map seed): time, stocks, tech, pawns, walls,
+    /// furniture and consumed resource nodes.</summary>
+    public void RestoreFrom(SaveData d)
+    {
+        TotalTicks = d.TotalTicks;
+        Wood = d.Wood; Stone = d.Stone; Water = d.Water;
+        Food = d.Food; Metal = d.Metal; Tools = d.Tools;
+        ResearchPoints = d.ResearchPoints;
+        UnlockedTech.Clear(); UnlockedTech.AddRange(d.UnlockedTech);
+        GoalIndex = d.GoalIndex;
+        ColonyEvents.Clear(); ColonyEvents.AddRange(d.ColonyEvents);
+
+        foreach (var pd in d.Pawns)
+        {
+            var p = new Pawn(pd.Name, pd.X, pd.Y)
+            {
+                HP = pd.HP, Hunger = pd.Hunger, Thirst = pd.Thirst,
+                Fatigue = pd.Fatigue, Mood = pd.Mood, Stress = pd.Stress
+            };
+            p.Traits.Clear(); p.Traits.AddRange(pd.Traits);
+            foreach (var kv in pd.Skills)
+                if (Enum.TryParse<SkillKind>(kv.Key, out var sk)) p.SkillXP[sk] = kv.Value;
+            RegisterThing(p);
+        }
+        foreach (var wxy in d.Walls)
+            _map.SetSolid(wxy[0], wxy[1], true);
+        // Remove resource nodes that were consumed before the save.
+        var keep = new HashSet<(int, int)>(d.Resources.Select(r => (r[1], r[2])));
+        foreach (var r in _map.Resources.ToList())
+            if (!keep.Contains((r.X, r.Y))) _map.RemoveResourceAt(r.X, r.Y);
+        foreach (var fd in d.Furniture)
+            if (Enum.TryParse<FurnitureKind>(fd.Kind, out var fk))
+            {
+                _map.RemoveResourceAt(fd.X, fd.Y);
+                _map.PlaceFurniture(fk, fd.X, fd.Y);
+            }
+        RefreshRooms();
+    }
+
     public void RefreshRooms() => _rooms = RoomDetector.DetectRooms(_map);
 
     public int GoalIndex { get; private set; } = 0;
@@ -2000,6 +2040,28 @@ public static class GameWorldTests
         catch (Exception ex)
         {
             Console.WriteLine($"✗ [FAIL] ThirstRisesWithoutWaterTest - {ex.Message}");
+            failed++;
+        }
+
+        // Test 9: save/load round-trip (Down Here! multi-slot system).
+        try
+        {
+            var w9 = new GameWorldManager(50, 50);
+            var p9 = new Pawn("Saver", 7, 7) { Mood = 42f };
+            w9.RegisterThing(p9);
+            for (int t9 = 0; t9 < 500; t9++) w9.Tick();
+            w9.Wood = 77; w9.Food = 33;
+            string tmp = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dh_test_save.json");
+            SaveLoad.Save(w9, tmp);
+            var w9b = SaveLoad.Load(tmp);
+            bool ok9 = w9b.Wood == 77 && w9b.Food == 33 && w9b.TotalTicks == w9.TotalTicks
+                && w9b.Pawns.Any(pp => pp.Name == "Saver" && Math.Abs(pp.Mood - p9.Mood) < 0.01f);
+            if (ok9) { Console.WriteLine("✓ [PASS] SaveLoadRoundTripTest"); passed++; }
+            else { Console.WriteLine($"✗ [FAIL] SaveLoadRoundTripTest - wood={w9b.Wood} food={w9b.Food}"); failed++; }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ [FAIL] SaveLoadRoundTripTest - {ex.Message}");
             failed++;
         }
 

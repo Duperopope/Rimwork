@@ -29,6 +29,9 @@ public partial class UiShell : CanvasLayer
     private const string CfgPath = "user://options.cfg";
 
     private const string Version = "down-here-0.2";
+    private Control _saveScreen;
+    private bool _saveMode; // true = saving, false = loading
+    private static string SlotPath(int n) => System.IO.Path.Combine(OS.GetUserDataDir(), "saves", $"slot{n}.json");
 
     public override void _Ready()
     {
@@ -84,7 +87,7 @@ public partial class UiShell : CanvasLayer
 
     private void ShowOnly(Control screen)
     {
-        foreach (var c in new[] { _menu, _hud, _options, _devTab, _credits })
+        foreach (var c in new[] { _menu, _hud, _options, _devTab, _credits, _saveScreen })
             if (c != null) c.Visible = c == screen;
         _game.Paused = screen != _hud;
     }
@@ -123,7 +126,7 @@ public partial class UiShell : CanvasLayer
             _game.AlertText = "Colonie fondée — bonne chance !";
             ShowOnly(_hud);
         }));
-        box.AddChild(Btn("Continuer", () => { }, disabled: true, tooltip: "Aucune sauvegarde - la persistance de partie arrive dans une itération future."));
+        box.AddChild(Btn("Continuer", () => OpenSaveScreen(saveMode: false)));
         box.AddChild(Btn("Options", () => ShowOnly(_options)));
         box.AddChild(Btn("Dev / Diagnostics", () => ShowOnly(_devTab)));
         box.AddChild(Btn("Crédits", () => ShowOnly(_credits)));
@@ -160,6 +163,7 @@ public partial class UiShell : CanvasLayer
         topRow.AddChild(_pauseBtn);
         var s1 = new Button { Text = "1x" }; s1.Pressed += () => _game.SpeedMultiplier = 1f; topRow.AddChild(s1);
         var s3 = new Button { Text = "3x" }; s3.Pressed += () => _game.SpeedMultiplier = 3f; topRow.AddChild(s3);
+        var saveBtn = new Button { Text = "Sauver" }; saveBtn.Pressed += () => OpenSaveScreen(saveMode: true); topRow.AddChild(saveBtn);
         var menuBtn = new Button { Text = "Menu" }; menuBtn.Pressed += () => ShowOnly(_menu); topRow.AddChild(menuBtn);
 
         // ---- Left column: objective + macro/LOD + events ----
@@ -286,6 +290,48 @@ public partial class UiShell : CanvasLayer
                 $"Relations: {p.Relationships.Count} connaissances\n" +
                 $"Souvenirs récents:\n{(mem.Length > 0 ? mem : "  (aucun)")}";
         }
+    }
+
+    // ==================================================================
+    // SAVE SLOTS (3 slots, save or load depending on entry point)
+    // ==================================================================
+    private void OpenSaveScreen(bool saveMode)
+    {
+        _saveMode = saveMode;
+        if (_saveScreen != null) { _saveScreen.QueueFree(); }
+        _saveScreen = new Control { AnchorRight = 1, AnchorBottom = 1 };
+        AddChild(_saveScreen);
+        var center = new CenterContainer { AnchorRight = 1, AnchorBottom = 1 };
+        _saveScreen.AddChild(center);
+        var panel = Panel(); center.AddChild(panel);
+        var box = new VBoxContainer(); panel.AddChild(box);
+        box.AddThemeConstantOverride("separation", 8);
+        box.AddChild(Title(saveMode ? "SAUVEGARDER" : "CHARGER UNE PARTIE"));
+        for (int i = 1; i <= 3; i++)
+        {
+            int slot = i;
+            string desc = System.IO.File.Exists(SlotPath(slot)) ? SaveLoad.Describe(SlotPath(slot)) : null;
+            string label = $"Slot {slot} — " + (desc ?? "(vide)");
+            bool disabled = !saveMode && desc == null;
+            box.AddChild(Btn(label, () =>
+            {
+                if (_saveMode)
+                {
+                    SaveLoad.Save(_game.World, SlotPath(slot));
+                    _game.AlertText = $"Partie sauvegardée (slot {slot}).";
+                    ShowOnly(_hud);
+                }
+                else
+                {
+                    var w = SaveLoad.Load(SlotPath(slot));
+                    _game.LoadWorld(w);
+                    _game.AlertText = $"Partie chargée (slot {slot}) — jour {w.DayNumber}.";
+                    ShowOnly(_hud);
+                }
+            }, disabled: disabled));
+        }
+        box.AddChild(Btn("Retour", () => ShowOnly(_game.World != null && _game.World.TotalTicks > 0 ? _hud : _menu)));
+        ShowOnly(_saveScreen);
     }
 
     // ==================================================================
