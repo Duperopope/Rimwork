@@ -10,3 +10,7 @@
 - [ ] Step P.1 - Pawns must pick the BEST task for them, not the first one.
 - [ ] Step P.2 - In src/RimWorldLab.Core/GameWorld.cs, add the method `TryClaimBest(Pawn pawn)` if it doesn't exist.
 - [ ] Step P.3 - Pawns need an inner life: a Mood. In
+- [ ] Step G.2b - In src/RimWorldGodot/Main.cs, SEARCH for the line `			_world.RefreshRooms();` and REPLACE it with these 4 lines:
+- [ ] Step G.2b - In src/RimWorldGodot/Main.cs, SEARCH for the line `			_world.RefreshRooms();` and REPLACE it with these 4 lines:
+- [ ] Step P.4a.1 - In src/RimWorldLab.Core/Pawn.cs, add the `Mood` property to the `Pawn` class as a float.
+- [ ] Step U.3.4 - In src/RimWorldGodot/Main.cs, find this exact line:

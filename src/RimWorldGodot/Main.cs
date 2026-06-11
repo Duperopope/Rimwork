@@ -161,6 +161,12 @@ private static readonly Color PanelBg = new Color(0.13f, 0.13f, 0.16f);
 	private const float SwatchGap = 4f;
 
 
+		private bool IsRoomFunctional(Room room)
+		{
+			// Placeholder logic for checking if a room is functional
+			return true;
+		}
+
 		public override void _Ready()
 	{
 		_world = new GameWorldManager(50, 50);
@@ -234,7 +240,17 @@ private static readonly Color PanelBg = new Color(0.13f, 0.13f, 0.16f);
 		_roomRefreshTimer -= delta;
 		if (_roomRefreshTimer <= 0.0)
 		{
-			_world.RefreshRooms();
+List<Room> rooms = _world.GetRooms();
+int functionalRoomsCount = rooms.Count(room => IsRoomFunctional(room));
+GD.Print($"Functional Rooms: {functionalRoomsCount}");
+if (functionalRoomsCount >= 3)
+{
+    GD.Print("Win condition reached!");
+}
+else
+{
+    GD.Print("Win condition NOT reached.");
+}
 			_roomRefreshTimer = 1.0;
 			QueueRedraw();
 		}
@@ -787,11 +803,6 @@ private static readonly Color PanelBg = new Color(0.13f, 0.13f, 0.16f);
 			// For example:
 			// var subViewport = new Viewport();
 			// AddChild(subViewport);
-			
-			// Add ambient sound hooks
-			var audioStreamPlayer = new AudioStreamPlayer();
-			audioStreamPlayer.Play();
-			AddChild(audioStreamPlayer);
 		}
 		
 		// TODO: Implement volume dip during raids

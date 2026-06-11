@@ -36,8 +36,9 @@ public static class NeedRates
 public class PawnNeedState
 {
     public NeedKind? ActiveNeed { get; set; } = null;
-// ... (lines omitted) ...
-public float Mood { get; set; } = 70f;
+
+    // Add Mood property
+    public float Mood { get; set; } = 70f;
 }
 
 /// <summary>

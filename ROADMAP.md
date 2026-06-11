@@ -117,7 +117,7 @@ the running game (color, text, new tile, new bar, etc).
       `        };`
       `        if (met) GoalIndex++;`
       `    }`
-- [ ] Step G.2a - In src/RimWorldGodot/Main.cs, find this exact line: `			_world.RefreshRooms();` Immediately AFTER that line, insert this new line: `			_world.TickGoals();`. Ensure `_world` is accessible in the current scope. Verify that `_world` is an instance of a class with a `TickGoals` method.
+- [x] Step G.2b - In src/RimWorldGodot/Main.cs, SEARCH for the line `			_world.RefreshRooms();` and REPLACE it with these 4 lines:
 - [x] Step G.3 - Show the CURRENT goal instead of the frozen one. In
       src/RimWorldGodot/Main.cs, SEARCH for exactly this ONE full line:
       `		DrawString(ThemeDB.FallbackFont, new Vector2(8f, 18f), $"Day {_world.DayNumber}, {_world.HourOfDay:00}:00   Wood: {_world.Wood}   Stone: {_world.Stone}   Water: {_world.Water}   Goal: 3 functional rooms ({num9}/3)", HorizontalAlignment.Left, -1f, 16, Colors.White, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);`
@@ -195,22 +195,77 @@ task queue - and stop doing absurd things like building bridges nobody needs.
       `    }`
       `}`
 - [x] Step P.2 - In src/RimWorldLab.Core/GameWorld.cs, add the method `TryClaimBest(Pawn pawn)` if it doesn't exist.
-- [ ] Step P.3 - Pawns need an inner life: a Mood. In
+- [x] Step P.3 - Pawns need an inner life: a Mood. In
       src/RimWorldLab.Core/GameWorld.cs, find this exact line:
       `    public float Hunger { get; set; } = 0f;`
       Immediately AFTER that line, insert these new lines:
       ``
       `    /// <summary>0 (miserable) to 100 (happy). Driven by needs and events.</summary>`
       `    public float Mood { get; set; } = 70f;`
-- [ ] Step P.4 - Mood dynamics: hunger and wounds erode it, comfort heals
-      it. In src/RimWorldLab.Core/GameWorld.cs, find this exact line:
+- [ ] Step P.1b - The previous TryClaimBest was an empty placeholder in the
+      wrong class (GameWorldManager) - the REAL one belongs on TaskBoard in
+      src/RimWorldLab.Core/Jobs.cs. SEARCH for exactly these 3 contiguous
+      lines (the end of TryClaimNext inside class TaskBoard):
+      `            return task;`
+      `        }`
+      ``
+      `        return null;`
+      `    }`
+      `}`
+      and REPLACE them with:
+      `            return task;`
+      `        }`
+      ``
+      `        return null;`
+      `    }`
+      ``
+      `    /// <summary>Claims the best task for THIS pawn: priority first, then skill affinity, then distance.</summary>`
+      `    public TaskOrder TryClaimBest(Pawn pawn)`
+      `    {`
+      `        TaskOrder best = null;`
+      `        double bestScore = double.MinValue;`
+      `        foreach (var task in _pending)`
+      `        {`
+      `            if (task.Kind.IsMovementTask() && IsTileReserved(task.TargetX, task.TargetY))`
+      `                continue;`
+      `            double score = task.Priority * 10.0;`
+      `            score -= Math.Abs(task.TargetX - pawn.X) + Math.Abs(task.TargetY - pawn.Y);`
+      `            if ((task.Kind == TaskKind.Build || task.Kind == TaskKind.BuildWall || task.Kind == TaskKind.BuildBridge) && pawn.SkillXP.TryGetValue(SkillKind.Construction, out float cxp))`
+      `                score += cxp / 100.0;`
+      `            if (task.Kind == TaskKind.Harvest && pawn.SkillXP.TryGetValue(SkillKind.Woodcutting, out float wxp))`
+      `                score += wxp / 100.0;`
+      `            if (score > bestScore) { bestScore = score; best = task; }`
+      `        }`
+      `        if (best == null) return null;`
+      `        _pending.Remove(best);`
+      `        if (best.Kind.IsMovementTask())`
+      `            ReserveTile(best.TargetX, best.TargetY);`
+      `        return best;`
+      `    }`
+      `}`
+- [ ] Step P.2b - Use the real brain at the claim site. In
+      src/RimWorldLab.Core/GameWorld.cs, SEARCH for exactly this one line:
+      `                var next = Tasks.TryClaimNext();`
+      and REPLACE it with exactly this one line:
+      `                var next = Tasks.TryClaimBest(pawn);`
+- [ ] Step P.3b - The Pawn class lives in src/RimWorldLab.Core/GameWorld.cs
+      (there is NO Pawn.cs file). SEARCH for exactly this one line:
+      `    public float Hunger { get; set; } = 0f;`
+      and REPLACE it with exactly these 4 lines:
+      `    public float Hunger { get; set; } = 0f;`
+      ``
+      `    /// <summary>0 (miserable) to 100 (happy). Driven by needs and events.</summary>`
+      `    public float Mood { get; set; } = 70f;`
+- [ ] Step P.4b - Mood dynamics. In src/RimWorldLab.Core/GameWorld.cs,
+      SEARCH for exactly this one line:
       `            Needs.Tick(this, driver, pawn, _rng);`
-      Immediately AFTER that line, insert this new line:
+      and REPLACE it with exactly these 2 lines:
+      `            Needs.Tick(this, driver, pawn, _rng);`
       `            pawn.Mood = Math.Clamp(pawn.Mood + (pawn.Hunger > 70f ? -0.01f : 0.002f) + (pawn.HP < 50f ? -0.01f : 0f), 0f, 100f);`
-- [ ] Step P.5 - Make mood VISIBLE (a player must read the colony's morale
-      at a glance). In src/RimWorldGodot/Main.cs, find this exact line:
+- [ ] Step P.5b - Show mood in the Colony tab pawn list. In
+      src/RimWorldGodot/Main.cs, SEARCH for exactly this one line:
       `			DrawString(ThemeDB.FallbackFont, new Vector2(x + 16f, y), $"{pawn.Name} ({sexLabel})", HorizontalAlignment.Left, -1f, 14, Colors.White, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);`
-      and REPLACE it with:
+      and REPLACE it with exactly this one line:
       `			DrawString(ThemeDB.FallbackFont, new Vector2(x + 16f, y), $"{pawn.Name} ({sexLabel})  mood {(int)pawn.Mood}", HorizontalAlignment.Left, -1f, 14, pawn.Mood < 30f ? new Color(1f, 0.4f, 0.4f) : Colors.White, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);`
 
 ## CURRENT FOCUS: UI cleanup (small, safe steps)
@@ -310,15 +365,6 @@ task queue - and stop doing absurd things like building bridges nobody needs.
       `					DrawLine(new Vector2(rect2.Position.X + rect2.Size.X / 2f, rect2.Position.Y), new Vector2(rect2.Position.X + rect2.Size.X / 2f, rect2.Position.Y - 4f), new Color(0.6f, 0.6f, 0.6f), 1f);`
       `				}`
 - [ ] Step U.3.4 - In src/RimWorldGodot/Main.cs, find this exact line:
-      `					DrawLine(new Vector2(rect2.Position.X + rect2.Size.X / 2f, rect2.Position.Y), new Vector2(rect2.Position.X + rect2.Size.X / 2f, rect2.Position.Y - 4f), new Color(0.6f, 0.6f, 0.6f), 1f);`
-      (it is inside the new `if (item.Kind == FurnitureKind.Stove)` block).
-      Immediately AFTER the closing `}` of that `if (item.Kind == FurnitureKind.Stove)`
-      block, insert these new lines:
-      `				if (item.Kind == FurnitureKind.Workbench)`
-      `				{`
-      `					DrawLine(new Vector2(rect2.Position.X, rect2.Position.Y + 2f), new Vector2(rect2.Position.X + rect2.Size.X, rect2.Position.Y + 2f), new Color(0.5f, 0.35f, 0.2f), 1f);`
-      `					DrawRect(new Rect2(rect2.Position.X + rect2.Size.X - 4f, rect2.Position.Y + rect2.Size.Y - 4f, 3f, 3f), new Color(0.7f, 0.7f, 0.7f));`
-      `				}`
 - [x] Step U.3.5 - In src/RimWorldGodot/Main.cs, find this exact line:
       `					DrawRect(new Rect2(rect2.Position.X + rect2.Size.X - 4f, rect2.Position.Y + rect2.Size.Y - 4f, 3f, 3f), new Color(0.7f, 0.7f, 0.7f));`
       (it is inside the new `if (item.Kind == FurnitureKind.Workbench)` block).
@@ -586,3 +632,9 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.60 - Implement a basic room detection system to identify functional rooms in the colony. (GameWorld.cs)
 - [ ] Step C.75 - Implement a basic room detection system in GameWorld.cs to identify functional rooms based on connected furniture and walls.
 - [ ] Step C.15 - Implement a basic room detection system to identify functional rooms in GameWorld.cs
+- [ ] Step C.45 - Implement basic room detection to track functional rooms in GameWorld.cs
+- [ ] Step C.60 - Implement room detection and validation logic in GameWorld.cs to ensure functional rooms are counted towards win conditions.
+- [ ] Step C.75 - Implement a basic room detection system in GameWorld.cs to count functional rooms.
+- [ ] Step C.90 - Implement a basic room detection system in GameWorld.cs to identify functional rooms based on connected walkable tiles.
+- [ ] Step C.105 - Implement a basic room detection system to count functional rooms and trigger win condition in GameWorld.cs
+- [ ] Step C.135 - Implement a basic room detection system to count functional rooms and track progress towards win conditions in GameWorld.cs

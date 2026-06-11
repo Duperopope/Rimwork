@@ -1,1 +1,1 @@
-- [ ] Step G.2a - In src/RimWorldGodot/Main.cs, find this exact line: `			_world.RefreshRooms();` Immediately AFTER that line, insert this new line: `			_world.TickGoals();`. Ensure `_world` is accessible in the current scope. Verify that `_world` is an instance of a class with a `TickGoals` method.
+

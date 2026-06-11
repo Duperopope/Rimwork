@@ -650,7 +650,22 @@ Reply with ONLY the rewritten item text, a single line starting exactly with:
     # animals, rooms, ...) lives in GameWorld.cs, NOT Jobs.cs (which is
     # just the TaskKind/TaskBoard/pathing plumbing) - routing everything
     # non-UI to Jobs.cs caused the model to fixate on its enums.
-    if ($firstUnchecked -match 'Step U\.|Main\.cs|SubViewport|DrawColonyTab|DrawSidePanel|DrawBuildTab|AudioStreamPlayer|hexagon|DrawColoredPolygon') {
+    # Highest priority: when the item NAMES its target file explicitly
+    # (all precise items do), believe it - keyword guessing below once sent
+    # a "Mood in GameWorld.cs" item to Needs.cs and it failed forever.
+    if ($firstUnchecked -match 'src/RimWorldLab\.Core/GameWorld\.cs') {
+        $targetRelPath = "src/RimWorldLab.Core/GameWorld.cs"
+        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\GameWorld.cs"
+    } elseif ($firstUnchecked -match 'src/RimWorldLab\.Core/Needs\.cs') {
+        $targetRelPath = "src/RimWorldLab.Core/Needs.cs"
+        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\Needs.cs"
+    } elseif ($firstUnchecked -match 'src/RimWorldLab\.Core/Jobs\.cs') {
+        $targetRelPath = "src/RimWorldLab.Core/Jobs.cs"
+        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\Jobs.cs"
+    } elseif ($firstUnchecked -match 'src/RimWorldGodot/Main\.cs') {
+        $targetRelPath = "src/RimWorldGodot/Main.cs"
+        $targetAbsPath = "g:\Rimwork\src\RimWorldGodot\Main.cs"
+    } elseif ($firstUnchecked -match 'Step U\.|Main\.cs|SubViewport|DrawColonyTab|DrawSidePanel|DrawBuildTab|AudioStreamPlayer|hexagon|DrawColoredPolygon') {
         $targetRelPath = "src/RimWorldGodot/Main.cs"
         $targetAbsPath = "g:\Rimwork\src\RimWorldGodot\Main.cs"
     } elseif ($firstUnchecked -match 'Mood|PawnNeedState|Needs\.cs|Recreation|Hunger|Fatigue') {
@@ -871,6 +886,12 @@ for the exact format). Do NOT output the full file.
                 meta = @{ item = $itemKey; file = $targetRelPath; iter = $i }
             } | ConvertTo-Json -Depth 6 -Compress
             Add-Content -Path "g:\Rimwork\scripts\logs\training_data.jsonl" -Value $trainingExample
+
+            # Version every verified patch: full history + instant rollback,
+            # mirrored to GitHub so progress is visible from anywhere.
+            git -C g:\Rimwork add -A 2>$null | Out-Null
+            git -C g:\Rimwork commit -q -m "[ai-loop iter $i] $changeDesc ($targetRelPath)" 2>$null | Out-Null
+            git -C g:\Rimwork push -q origin master 2>$null | Out-Null
 
             if ($keptStreak -ge $KeptDoneThreshold) {
                 Write-Host "$keptStreak consecutive KEPT changes on this item - marking it done." -ForegroundColor Green

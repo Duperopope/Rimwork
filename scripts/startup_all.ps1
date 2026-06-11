@@ -1,15 +1,23 @@
 # Boots the whole autonomous dev stack after a PC restart (idempotent -
 # safe to run when things are already up). Registered as a logon task.
 
-# 1. LM Studio local server
-lms server start 2>$null
-
-# 2. The coding model (skip if something is already loaded)
-$loaded = (lms ps 2>$null | Out-String)
-if ($loaded -notmatch "qwen2.5-coder-14b-instruct") {
-    # --parallel 1: a single slot keeps the whole KV cache in VRAM
-    # (4 slots x 16k context overflowed into RAM = 10x slower generation).
-    lms load "qwen2.5-coder-14b-instruct" --gpu max --context-length 16384 --parallel 1 -y 2>$null
+# 1. LLM server: llama-server with ROCm inside WSL (18x faster prefill than
+# the Windows Vulkan path - benchmarked 1040 vs 57 tok/s pp2048). Falls back
+# to LM Studio only if the WSL server cannot come up.
+$llmAlive = $false
+try { $llmAlive = (Invoke-WebRequest http://localhost:1234/health -UseBasicParsing -TimeoutSec 5).StatusCode -eq 200 } catch {}
+if (-not $llmAlive) {
+    wsl -d Ubuntu -u root -- bash -c "pgrep -f llama-server >/dev/null || nohup /root/llama.cpp/build/bin/llama-server -m /root/models/Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf -ngl 99 -c 16384 --host 0.0.0.0 --port 1234 > /var/log/llama-server.log 2>&1 &"
+    Start-Sleep -Seconds 30
+    try { $llmAlive = (Invoke-WebRequest http://localhost:1234/health -UseBasicParsing -TimeoutSec 10).StatusCode -eq 200 } catch {}
+    if (-not $llmAlive) {
+        # Fallback: LM Studio (Vulkan, slower but battle-tested)
+        lms server start 2>$null
+        $loaded = (lms ps 2>$null | Out-String)
+        if ($loaded -notmatch "qwen2.5-coder-14b-instruct") {
+            lms load "qwen2.5-coder-14b-instruct" --gpu max --context-length 16384 --parallel 1 -y 2>$null
+        }
+    }
 }
 
 # 3. Dev-loop watchdog (exactly one instance)
