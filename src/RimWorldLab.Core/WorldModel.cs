@@ -166,6 +166,11 @@ public class MacroSim
     /// <summary>0..1 external demand for colony goods (drives objectives/trade).</summary>
     public float TradeDemand { get; private set; } = 0.3f;
 
+    /// <summary>Deterministic weather over the colony tile right now.</summary>
+    public WeatherKind ColonyWeather { get; private set; } = WeatherKind.Clear;
+    public const float ColonyLat = 25f;
+    public const float ColonyLon = 0f;
+
     /// <summary>Last tick each LOD layer was updated (for the dev tab).</summary>
     public Dictionary<SimLOD, long> LastUpdate { get; } = new()
     {
@@ -191,6 +196,13 @@ public class MacroSim
         if (worldTick % 5000 == 0) UpdateSolar(worldTick);
         if (worldTick % 2000 == 0) UpdatePlanet(worldTick);
         if (worldTick % 500 == 0) UpdateRegions(worldTick);
+        if (worldTick % 250 == 0)
+        {
+            var before = ColonyWeather;
+            ColonyWeather = WeatherSystem.At(Gen.Seed, ColonyLat, ColonyLon, worldTick);
+            if (ColonyWeather != before && ColonyWeather == WeatherKind.Storm)
+                WorldEvents.Add($"[t{worldTick}] Storm front over the colony - everyone on edge.");
+        }
         LastUpdate[SimLOD.Local] = worldTick;
     }
 
@@ -258,4 +270,33 @@ public static class RenderOrientation
     /// <summary>A door rotates perpendicular to the wall run it sits in.</summary>
     public static int DoorYaw(bool solidN, bool solidS, bool solidE, bool solidW)
         => WallYaw(solidN, solidS, solidE, solidW);
+}
+
+/// <summary>Deterministic weather: same seed + same tile + same day =
+/// same sky, everywhere, forever (Dwarf Fortress principle).</summary>
+public enum WeatherKind { Clear, Rain, Fog, Storm }
+
+public static class WeatherSystem
+{
+    public static WeatherKind At(int seed, float latDeg, float lonDeg, long tick)
+    {
+        long day = tick / 1000;
+        int h = HashCode.Combine(seed, (int)(latDeg / 8f), (int)(lonDeg / 8f), day);
+        int roll = Math.Abs(h) % 100;
+        // Latitude shapes climate: equator wetter, poles foggier.
+        float wet = 25f + 15f * MathF.Cos(MathF.Abs(latDeg) * MathF.PI / 180f);
+        if (roll < wet * 0.15f) return WeatherKind.Storm;
+        if (roll < wet) return WeatherKind.Rain;
+        if (roll < wet + (MathF.Abs(latDeg) > 50f ? 18f : 8f)) return WeatherKind.Fog;
+        return WeatherKind.Clear;
+    }
+
+    /// <summary>Local solar hour for a tile: planet rotation (1 day = 1000
+    /// ticks) offset by longitude - two tiles 180 deg apart live in
+    /// opposite day phases.</summary>
+    public static float LocalHour(long tick, float lonDeg)
+    {
+        float baseHour = (tick % 1000) / 1000f * 24f;
+        return ((baseHour + lonDeg / 15f) % 24f + 24f) % 24f;
+    }
 }

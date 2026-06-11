@@ -4596,3 +4596,8 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 50] SKIPPED (no SEARCH match): Insert lines immediately after `Macro.Tick(TotalTicks);` (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 51] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step D.1 - In src/RimWorldLab.Core/GameWorld.cs, immediately after the line `Macro.Tick(TotalTicks);`, insert the following line:
 - [iter 52] SKIPPED (no SEARCH match): Insert the specified line after `Macro.Tick(TotalTicks);` (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 53] SKIPPED (no SEARCH match): Insert the specified line after `Macro.Tick(TotalTicks);` (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 54] SKIPPED (no SEARCH match): Insert the required line after `Macro.Tick(TotalTicks);` (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 55] SKIPPED (no SEARCH match): Insert the specified line after `Macro.Tick(TotalTicks);` (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 56] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step D.1 - In src/RimWorldLab.Core/GameWorld.cs, immediately after the line `Macro.Tick(TotalTicks);`, insert the following line:
+- [iter 57] KEPT: Add hunting logic before the existing resource regeneration check. (src/RimWorldLab.Core/GameWorld.cs)

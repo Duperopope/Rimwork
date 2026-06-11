@@ -1369,8 +1369,18 @@ private void UpdateHeaderText()
         // Macro layers tick at their own LOD cadence; the colony then FEELS
         // them: ClimatePulse throttles vegetation regrowth (macro -> local).
         Macro.Tick(TotalTicks);
-        if (_rng.NextDouble() < Macro.ClimatePulse)
+        float weatherGrow = Macro.ColonyWeather switch
+        {
+            WeatherKind.Rain => 1.35f,
+            WeatherKind.Storm => 0.8f,
+            WeatherKind.Fog => 1.05f,
+            _ => 1f
+        };
+        if (_rng.NextDouble() < Macro.ClimatePulse * weatherGrow)
             _map.TickSaplings();
+        if (Macro.ColonyWeather == WeatherKind.Storm && TotalTicks % 400 == 0)
+            foreach (var sp in _pawns.Where(pp => pp.HP > 0))
+                sp.Stress = Math.Clamp(sp.Stress + 2f, 0f, 100f);
 
         if (TotalTicks % 50 == 0)
             AssignPersonalFurniture();
@@ -1386,6 +1396,21 @@ private void UpdateHeaderText()
             }
             if (Food == 0) LogEvent("Food stores are empty!");
         }
+        if (TotalTicks % 200 == 0)
+        {
+            foreach (var hunter in _pawns.Where(p => p.HP > 0 && p.Name != "SmallAnimal"))
+            {
+                var prey = _pawns.FirstOrDefault(a => a.Name == "SmallAnimal" && a.HP > 0 && Math.Abs(a.X - hunter.X) <= 1 && Math.Abs(a.Y - hunter.Y) <= 1);
+                if (prey != null)
+                {
+                    prey.HP = 0f;
+                    Food += 3;
+                    hunter.Remember(TotalTicks, "hunted small game", +1f);
+                    break;
+                }
+            }
+        }
+
         if (TotalTicks % 1500 == 0)
         {
             foreach (var p in _pawns.Where(p => p.HP > 0))
