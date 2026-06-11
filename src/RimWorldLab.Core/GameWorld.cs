@@ -25,6 +25,7 @@ private float[,] _microbialBiomass = new float[100, 100]; // Example size
 public static class Macro
 {
     public static float[,] Regions { get; } = new float[100, 100];
+    public static float[,] MicrobialBiomass { get; } = new float[100, 100];
 }
 
 public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
