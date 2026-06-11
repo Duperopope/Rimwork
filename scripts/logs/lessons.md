@@ -152,3 +152,5 @@
 - Ensure all referenced properties and methods exist in the current context.
 - Ensure method definitions are within class braces and not outside.
 - Ensure methods are declared within class braces and not outside.
+- Define necessary properties and methods in `GameWorld` before using them.
+- Ensure all used variables and methods are defined in the current context or properly imported namespaces.

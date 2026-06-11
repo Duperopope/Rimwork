@@ -50,9 +50,7 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
       and REPLACE it with:
       `            double score = task.Priority * 10.0;`
       `            score += (pawn.Mood - 50.0) / 25.0;`
-- [ ] Step Z.1 - Trade caravan: every 4000 ticks, if Tools >= 2 and
-      Macro.TradeDemand > 0.5f, remove 2 Tools, add 8 Food and LogEvent
-      "Caravan trade: 2 tools sold for 8 food." in GameWorld.cs Tick.
+- [ ] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.
 - [ ] Step Z.3 - When a Build task completes (the PlaceFurniture branch in
       GameWorld.cs Tick), call pawn.Remember(TotalTicks, "built a structure", +1.5f).
 
