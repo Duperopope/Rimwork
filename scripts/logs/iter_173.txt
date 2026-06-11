@@ -1,140 +1,30 @@
-CHANGE: Add a method to the `GameWorld` class to display the number of functional rooms.
+CHANGE: Implement method to track pawn resource consumption in `GameWorld.cs`.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void GenerateBasicRoomLayout()
-public bool IsZoneFunctional(Zone zone)
-public int CountFunctionalRooms()
-public void DisplayFunctionalRooms()
-public void GenerateResourcesOverTime()
-public IReadOnlyList<(int X, int Y, int TicksRemaining)> Saplings
-public bool IsRaining
-public void ToggleRain()
-public void AddZone(Zone zone)
-public bool IsTilePartOfRoom(int x, int y)
-public (int X, int Y)? FindNearestZoneTile(ZoneKind kind, int fromX, int fromY)
-public bool IsPassable(int x, int y)
-public bool HasBridge(int x, int y)
-public bool AddBridge(int x, int y)
-public Cell GetCell(int x, int y)
-public bool SetSolid(int x, int y, bool solid)
-public bool RemoveResourceAt(int x, int y)
-public bool IsPlantable(int x, int y)
-public List<Pawn> FindNearbyThreatenedPawns(Pawn pawn, int threatRange)
-public void MarkNoGrow(int x, int y)
-public void AddSapling(int x, int y, int ticksToGrow)
-public void TickSaplings()
-public bool PlaceFurniture(FurnitureKind kind, int x, int y)
-public bool RemoveFurnitureAt(int x, int y)
-public bool IsWater(int x, int y)
-public (int X, int Y)? FindNearestWaterAdjacentTile(int fromX, int fromY)
-public Guid Id
-public string Name
-public int X
-public int Y
-public int Speed
-public PawnSex Sex
-public Dictionary<SkillKind, float> SkillXP
-public float Hunger
-public float Mood
-public float Fatigue
-public float HP
-public float Thirst
-public float Stress
-public List<string> Traits
-public List<(long Tick, string What, float MoodDelta)> Memories
-public Dictionary<Guid, float> Relationships
-public void Remember(long tick, string what, float moodDelta)
-public int GainSkill(SkillKind kind, float amount)
-public int GetSkillLevel(SkillKind kind)
-public bool IsPawnAtEdge(Pawn pawn, Region region)
-public SkillKind TopSkill
-public bool TryMove(int dx, int dy, GameMap map)
-public override string ToString()
-public void GenerateSmallAnimalPopulation()
-public bool IsRaining
-public void ToggleRain()
-public GameMap Map
-public Dictionary<Guid, Thing> Registry
-public List<Pawn> Pawns
-public TaskBoard Tasks
-public NeedsSystem Needs
-public int Wood
-public int Stone
-public int Water
-public int Food
-public int Metal
-public int Tools
-public int ResearchPoints
-public List<string> UnlockedTech
-public List<string> ColonyEvents
-public MacroSim Macro
-public bool QueueHaulWater(int x, int y)
-public const int WallWoodCost
-public const int WallStoneCost
-public bool CanAffordWall()
-public void SpendWallCost()
-public void RefundWallCost()
-public const int MineWoodCost
-public const int MineTicksPerStone
-public bool QueueBuild(FurnitureKind kind, int x, int y)
-public bool QueueBuildWall(int x, int y)
-public const int BridgeWoodCost
-public bool QueueBuildBridge(int x, int y)
-public bool QueueHarvest(int x, int y)
-public void RegisterThing(Thing thing)
-public long TotalTicks
-public int DayNumber
-public int HourOfDay
-public bool IsNight
-public void Tick()
-public PawnTaskDri
-(...truncated)
-=======
-public void GenerateBasicRoomLayout()
-public bool IsZoneFunctional(Zone zone)
-public int CountFunctionalRooms()
-public void DisplayFunctionalRooms()
-{
-    int functionalRoomCount = CountFunctionalRooms();
-    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
+        {
+            totalConsumption += pawnConsumption[kind];
+        }
+    }
+    return totalConsumption;
 }
-public void GenerateResourcesOverTime()
-public IReadOnlyList<(int X, int Y, int TicksRemaining)> Saplings
-public bool IsRaining
-public void ToggleRain()
-public void AddZone(Zone zone)
-public bool IsTilePartOfRoom(int x, int y)
-public (int X, int Y)? FindNearestZoneTile(ZoneKind kind, int fromX, int fromY)
-public bool IsPassable(int x, int y)
-public bool HasBridge(int x, int y)
-public bool AddBridge(int x, int y)
-public Cell GetCell(int x, int y)
-public bool SetSolid(int x, int y, bool solid)
-public bool RemoveResourceAt(int x, int y)
-public bool IsPlantable(int x, int y)
-public List<Pawn> FindNearbyThreatenedPawns(Pawn pawn, int threatRange)
-public void MarkNoGrow(int x, int y)
-public void AddSapling(int x, int y, int ticksToGrow)
-public void TickSaplings()
-public bool PlaceFurniture(FurnitureKind kind, int x, int y)
-public bool RemoveFurnitureAt(int x, int y)
-public bool IsWater(int x, int y)
-public (int X, int Y)? FindNearestWaterAdjacentTile(int fromX, int fromY)
-public Guid Id
-public string Name
-public int X
-public int Y
-public int Speed
-public PawnSex Sex
-public Dictionary<SkillKind, float> SkillXP
-public float Hunger
-public float Mood
-public float Fatigue
-public float HP
-public float Thirst
-public float Stress
-public List<string> Traits
-public List<(long Tick, string What, float MoodDelta)> Memories
-public Dictionary<Guid, float> Relationships
-public void Remember(long tick, string what, float moodDelta)
-public int GainSkill(SkillKind kind
+=======
+        {
+            totalConsumption += pawnConsumption[kind];
+        }
+    }
+    return totalConsumption;
+}
+
+public int GetResourceConsumption(Guid pawnId, ResourceKind kind)
+{
+    if (_pawnResourceConsumption.TryGetValue(pawnId, out var resources))
+    {
+        if (resources.TryGetValue(kind, out var amount))
+        {
+            return amount;
+        }
+    }
+    return 0;
+}
+>>>>>>> REPLACE
+NEXT: Implement a method to display total resource consumption for all pawns.

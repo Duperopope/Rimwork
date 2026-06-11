@@ -107,7 +107,9 @@ public class Zone
 public enum ResourceKind
 {
     Tree,
-    Rock
+    Rock,
+    Water,
+    Energy
 }
 
 /// <summary>A single resource node at a fixed map tile.</summary>

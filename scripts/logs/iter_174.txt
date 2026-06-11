@@ -1,15 +1,23 @@
-CHANGE: Add a method to the `GameWorld` class to display the number of functional rooms.
+CHANGE: Implement method to track pawn resource consumption in `GameWorld.cs`.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void DisplayFunctionalRooms()
-{
-    // Placeholder for displaying functional rooms
+        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+        {
+            totalConsumption += pawnConsumption[kind];
+        }
+    }
+    return totalConsumption;
 }
 =======
-public void DisplayFunctionalRooms()
-{
-    int functionalRoomCount = CountFunctionalRooms();
-    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
+        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+        {
+            if (pawnConsumption.TryGetValue(kind, out int consumption))
+            {
+                totalConsumption += consumption;
+            }
+        }
+    }
+    return totalConsumption;
 }
 >>>>>>> REPLACE
-NEXT: Implement the `CountFunctionalRooms` method to count functional rooms.
+NEXT: Ensure `ResourceKind` enum includes 'Water' before using it in methods.

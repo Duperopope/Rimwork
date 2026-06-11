@@ -55,3 +55,4 @@
 - [ ] Step C.15 - Implement a resource consumption system to ensure players manage their colony's needs effectively.
 - [ ] Step C.30 - Improve resource management by adding a recycling system for unused materials in GameWorld.cs
 - [ ] Step C.30 - Improve resource management by adding a recycling system for unused materials in GameWorld.cs
+- [ ] Step C.105 - Implement a mechanic that requires players to manage resources more efficiently to unlock new building types.

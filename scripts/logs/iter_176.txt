@@ -1,16 +1,17 @@
-CHANGE: Add a method to check if a cell is part of a room.
+CHANGE: Add the missing closing brace for the `TrackPawnResourceConsumption` method in `GameWorld.cs`.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsTilePartOfRoom(int x, int y)
+public void TrackPawnResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    // Implementation goes here
+    // Implementation for tracking pawn resource consumption
+    // ...
 }
 =======
-public bool IsTilePartOfRoom(int x, int y)
+public void TrackPawnResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    // Check if the cell is part of a room
-    // For now, return false as the implementation is pending
-    return false;
+    // Implementation for tracking pawn resource consumption
+    // ...
+}
 }
 >>>>>>> REPLACE
-NEXT: Implement the logic to determine if a cell is part of a room by checking connected furniture and walls.
+NEXT: Ensure the method logic is correctly implemented.

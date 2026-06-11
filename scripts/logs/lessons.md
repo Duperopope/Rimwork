@@ -92,3 +92,7 @@
 - Ensure `ResourceKind` enum includes `Water` before using it in `GameWorld.cs`.
 - Ensure `ResourceKind` enum includes `Water` before using it in `GameWorld.cs`.
 - Ensure 'ResourceKind' enum includes 'Energy' before using it.
+- Avoid duplicating method names in the same class; check existing methods first.
+- Ensure method parameters match expected types and avoid syntax errors.
+- Ensure method signatures match expected parameters and types.
+- Ensure method signatures and types match existing declarations in GameWorld.cs.

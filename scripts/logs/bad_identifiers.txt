@@ -290,3 +290,11 @@ ResourceKind
 Energy
 ResourceKind
 Energy
+GameMap
+CountFunctionalRooms
+GameMap
+IsZoneFunctional
+GameMap
+CountFunctionalRooms
+GameMap
+IsZoneFunctional
