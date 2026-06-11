@@ -1,27 +1,38 @@
-CHANGE: Add a method to the `GameWorld` class to simulate tree regrowth over time.
+CHANGE: Add a method to assign pawns to tasks based on their needs and skills.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class GameWorld
+public void DisplayFunctionalRooms()
 {
-    // ... (lines omitted) ...
-    public void GenerateBasicRoomLayout()
-    {
-        // ... (lines omitted) ...
-    }
-}
+    int functionalRoomCount = CountFunctionalRooms();
 =======
-public class GameWorld
+public void DisplayFunctionalRooms()
 {
-    // ... (lines omitted) ...
-    public void GenerateBasicRoomLayout()
-    {
-        // ... (lines omitted) ...
-    }
+    int functionalRoomCount = CountFunctionalRooms();
+    AssignPawnsToTasks();
+}
 
-    public void SimulateTreeRegrowth()
+private void AssignPawnsToTasks()
+{
+    foreach (var pawn in Pawns)
     {
-        // Placeholder for tree regrowth logic
+        if (pawn.Hunger > 50)
+        {
+            var foodZone = FindNearestZoneTile(ZoneKind.Canteen, pawn.X, pawn.Y);
+            if (foodZone != null)
+            {
+                // Assign task to go to the canteen
+            }
+        }
+        else if (pawn.Thirst > 50)
+        {
+            var waterTile = FindNearestWaterAdjacentTile(pawn.X, pawn.Y);
+            if (waterTile != null)
+            {
+                // Assign task to get water
+            }
+        }
+        // Add more conditions for other needs and skills
     }
 }
 >>>>>>> REPLACE
-NEXT: Implement the logic for tree regrowth in the `SimulateTreeRegrowth` method.
+NEXT: Implement task assignment logic for other needs and skills.

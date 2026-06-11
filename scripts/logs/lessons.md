@@ -96,3 +96,13 @@
 - Ensure method parameters match expected types and avoid syntax errors.
 - Ensure method signatures match expected parameters and types.
 - Ensure method signatures and types match existing declarations in GameWorld.cs.
+- Ensure method signatures and types match existing definitions in the file.
+- Ensure method parameters and return types match defined classes and properties.
+- Ensure method signatures and types match existing code structure.
+- Ensure all added methods and properties are correctly typed and placed within valid class structures.
+- Ensure all code changes fit within the existing method structure and do not introduce syntax errors.
+- Ensure method parameters match existing types in GameWorld.cs.
+- Ensure method parameters and logic align with existing types and syntax.
+- Ensure method parameters and logic match existing types and syntax in GameWorld.cs.
+- Ensure method parameters match existing types in the file.
+- Always check for existing member names before adding new fields.

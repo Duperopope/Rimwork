@@ -298,3 +298,7 @@ GameMap
 CountFunctionalRooms
 GameMap
 IsZoneFunctional
+GameMap
+_recycledResources
+GameMap
+_recycledResources

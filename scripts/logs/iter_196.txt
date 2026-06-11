@@ -1,33 +1,30 @@
-CHANGE: Add a method to generate resources over time.
+CHANGE: Add a method to assign pawns to tasks based on their needs and skills.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+public void DisplayFunctionalRooms()
 {
-    // Basic check: zone must have at least one furniture item
-    return _furniture.Any(f => f.X >= zone.X && f.X < zone.X + zone.Width &&
-                              f.Y >= zone.Y && f.Y < zone.Y + zone.Height);
-}
+    int functionalRoomCount = CountFunctionalRooms();
 =======
-public bool IsZoneFunctional(Zone zone)
+public void DisplayFunctionalRooms()
 {
-    // Basic check: zone must have at least one furniture item
-    return _furniture.Any(f => f.X >= zone.X && f.X < zone.X + zone.Width &&
-                              f.Y >= zone.Y && f.Y < zone.Y + zone.Height);
+    int functionalRoomCount = CountFunctionalRooms();
+    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
 }
 
-public void GenerateResourcesOverTime()
+public void AssignPawnsToTasks()
 {
-    // Example: Generate resources based on some logic
-    for (int x = 0; x < Width; x++)
+    foreach (var pawn in Pawns)
     {
-        for (int y = 0; y < Height; y++)
+        // Example: Assign a pawn to a task based on their hunger need
+        if (pawn.Hunger > 50)
         {
-            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
+            var nearestFoodTile = FindNearestWaterAdjacentTile(pawn.X, pawn.Y);
+            if (nearestFoodTile.HasValue)
             {
-                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
+                QueueHaulWater(nearestFoodTile.Value.X, nearestFoodTile.Value.Y);
             }
         }
     }
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to update resources based on growth and harvesting.
+NEXT: Implement more detailed task assignment logic based on pawn skills and other needs.

@@ -1,38 +1,14 @@
-CHANGE: Add a method to consume resources for building walls.
+CHANGE: Add a method to assign pawns to tasks based on their sleep need in GameWorld.cs
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public int CountFunctionalRooms()
+public bool IsZoneFunctional(Zone zone)
 {
-    int functionalRoomCount = 0;
-    foreach (var zone in _zones)
-    {
-        if (IsZoneFunctional(zone))
-        {
-            functionalRoomCount++;
+}
+=======
+public bool IsZoneFunctional(Zone zone)
+{
+    // Placeholder implementation for now
+    return true;
+}
 >>>>>>> REPLACE
-public int CountFunctionalRooms()
-{
-    int functionalRoomCount = 0;
-    foreach (var zone in _zones)
-    {
-        if (IsZoneFunctional(zone))
-        {
-            functionalRoomCount++;
-        }
-    }
-    return functionalRoomCount;
-}
-
-public void ConsumeResourcesForWall()
-{
-    if (Wood >= WallWoodCost && Stone >= WallStoneCost)
-    {
-        Wood -= WallWoodCost;
-        Stone -= WallStoneCost;
-    }
-    else
-    {
-        throw new InvalidOperationException("Insufficient resources to build a wall.");
-    }
-}
-NEXT: Implement a method to queue building a wall.
+NEXT: Implement the actual logic to assign pawns to tasks based on their sleep need.

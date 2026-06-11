@@ -57,3 +57,4 @@
 - [ ] Step C.30 - Improve resource management by adding a recycling system for unused materials in GameWorld.cs
 - [ ] Step C.105 - Implement a mechanic that requires players to manage resources more efficiently to unlock new building types.
 - [ ] Step C.150 - Implement a system to automatically assign pawns to build tasks based on their skills and the current needs of the colony.
+- [ ] Step C.15.1.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` to track recycled resources.

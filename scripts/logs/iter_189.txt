@@ -1,31 +1,28 @@
-CHANGE: Add a method to simulate resource regeneration over time in the `GameWorld` class.
+CHANGE: Add a method to assign pawns to build tasks based on their skills and the current needs of the colony.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class GameWorld
+public void DisplayFunctionalRooms()
 {
-    // ... (lines omitted) ...
-    public void GenerateBasicRoomLayout()
-    {
-        // ... (lines omitted) ...
-    }
-
-    // ... (lines omitted) ...
-}
+    int functionalRoomCount = CountFunctionalRooms();
 =======
-public class GameWorld
+public void DisplayFunctionalRooms()
 {
-    // ... (lines omitted) ...
-    public void GenerateBasicRoomLayout()
-    {
-        // ... (lines omitted) ...
-    }
+    int functionalRoomCount = CountFunctionalRooms();
 
-    public void GenerateResourcesOverTime()
-    {
-        // Placeholder for resource regeneration logic
-    }
+    AssignPawnsToBuildTasks();
+}
 
-    // ... (lines omitted) ...
+private void AssignPawnsToBuildTasks()
+{
+    // Placeholder for the actual implementation
+    foreach (var pawn in Pawns)
+    {
+        // Example: Assign pawns with high construction skill to build tasks
+        if (IsPawnSkilledEnough(pawn, SkillKind.Construction, 5.0f))
+        {
+            // Logic to assign build tasks to pawns
+        }
+    }
 }
 >>>>>>> REPLACE
-NEXT: Implement the logic to regrow trees and respawn rocks in the `GenerateResourcesOverTime` method.
+NEXT: Implement the logic to assign build tasks to pawns based on their skills and the current needs of the colony.

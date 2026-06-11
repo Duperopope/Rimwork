@@ -1,49 +1,35 @@
-CHANGE: Add a method to track and manage resource consumption for building rooms.
+CHANGE: Add a method to assign pawns to tasks based on their sleep need in GameWorld.cs
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public int CountFunctionalRooms()
+public bool IsZoneFunctional(Zone zone)
 {
-    int functionalRoomCount = 0;
-    foreach (var zone in _zones)
-    {
-        if (IsZoneFunctional(zone))
-        {
-            functionalRoomCount++;
-        }
-    }
-    return functionalRoomCount;
+    // Implementation not shown
 }
 =======
-public int CountFunctionalRooms()
+public bool IsZoneFunctional(Zone zone)
 {
-    int functionalRoomCount = 0;
-    foreach (var zone in _zones)
+    // Implementation not shown
+}
+
+public void AssignPawnsToTasksBasedOnSleepNeed()
+{
+    foreach (var pawn in Pawns)
     {
-        if (IsZoneFunctional(zone))
+        if (pawn.Needs.Mood < 50) // Example threshold for sleep need
         {
-            functionalRoomCount++;
+            var sleepZone = Zones.FirstOrDefault(z => z.Kind == ZoneKind.SleepingQuarters);
+            if (sleepZone != null)
+            {
+                var task = new TaskBoard.Task
+                {
+                    PawnId = pawn.Id,
+                    Kind = TaskBoard.TaskKind.GoToSleep,
+                    Target = sleepZone.CenterTile
+                };
+                Tasks.Add(task);
+            }
         }
     }
-    return functionalRoomCount;
-}
-
-private Dictionary<ResourceKind, int> _resourceConsumption = new();
-
-public void ConsumeResource(ResourceKind kind, int amount)
-{
-    if (_resourceConsumption.ContainsKey(kind))
-    {
-        _resourceConsumption[kind] += amount;
-    }
-    else
-    {
-        _resourceConsumption[kind] = amount;
-    }
-}
-
-public int GetResourceConsumption(ResourceKind kind)
-{
-    return _resourceConsumption.ContainsKey(kind) ? _resourceConsumption[kind] : 0;
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to check if the player has enough resources to build a room.
+NEXT: Implement the logic to check if a pawn is sleepy and assign them to a sleeping quarters.

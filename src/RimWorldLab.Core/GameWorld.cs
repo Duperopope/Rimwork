@@ -11,7 +11,8 @@ using System.Linq;
 /// </summary>
 public class RegionMap
 {
-    private readonly List<(int X, int Y, string Biome)> _regions = new();
+private readonly List<(int X, int Y, string Biome)> _regions = new();
+private Dictionary<ResourceKind, int> _recycledResources = new();
 
     public RegionMap()
     {
