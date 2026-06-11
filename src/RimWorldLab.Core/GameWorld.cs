@@ -158,6 +158,18 @@ private int _energyConsumption = 0;
 private Dictionary<Guid, Dictionary<ResourceKind, int>> _pawnResourceConsumption = new();
 private Dictionary<ResourceKind, int> _recycledResources = new();
 
+public void TrackRecycledResource(ResourceKind kind, int amount)
+{
+    if (_recycledResources.ContainsKey(kind))
+    {
+        _recycledResources[kind] += amount;
+    }
+    else
+    {
+        _recycledResources[kind] = amount;
+    }
+}
+
     public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
     {
         if (!_pawnResourceConsumption.ContainsKey(pawnId))
