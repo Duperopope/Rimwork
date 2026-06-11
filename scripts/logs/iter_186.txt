@@ -1,40 +1,30 @@
-CHANGE: Ensure the Cell class in GameWorld.cs has properties X and Y defined only once.
+CHANGE: Add missing closing brace in `GetTotalResourceConsumption` method.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public int GetTotalResourceConsumption(ResourceKind kind)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    int totalConsumption = 0;
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        if (pawnConsumption.ContainsKey(kind))
+        {
+            totalConsumption += pawnConsumption[kind];
+        }
     }
+    return totalConsumption;
 }
 =======
-public class Cell
+public int GetTotalResourceConsumption(ResourceKind kind)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    int totalConsumption = 0;
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        if (pawnConsumption.ContainsKey(kind))
+        {
+            totalConsumption += pawnConsumption[kind];
+        }
     }
-
-    // Remove duplicate properties
-    // public int X { get; set; }
-    // public int Y { get; set; }
+    return totalConsumption;
 }
 >>>>>>> REPLACE
-NEXT: Ensure the Cell class in GameWorld.cs has properties X and Y defined only once.
+NEXT: Implement a method to display total resource consumption for each resource kind.

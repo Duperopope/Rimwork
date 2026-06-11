@@ -1,36 +1,78 @@
-CHANGE: Add properties X and Y to the Cell class in GameWorld.cs.
+CHANGE: Add a method to track resource consumption for a specific pawn.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
     }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
+    }
+    else
+    {
+        _pawnResourceConsumption[pawnId][kind] = amount;
+    }
+}
+// ... (lines omitted) ...
+public int GetTotalResourceConsumption(ResourceKind kind)
+{
+    int totalConsumption = 0;
+
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    {
+        if (pawnConsumption.TryGetValue(kind, out int amount))
+        {
+            totalConsumption += amount;
+        }
+    }
+
+    return totalConsumption;
 }
 =======
-public class Cell
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
+    }
+    else
+    {
+        _pawnResourceConsumption[pawnId][kind] = amount;
     }
 }
+
+public int GetResourceConsumption(Guid pawnId, ResourceKind kind)
+{
+    if (_pawnResourceConsumption.TryGetValue(pawnId, out var pawnConsumption))
+    {
+        pawnConsumption.TryGetValue(kind, out int amount);
+        return amount;
+    }
+    return 0;
+}
+
+public int GetTotalResourceConsumption(ResourceKind kind)
+{
+    int totalConsumption = 0;
+
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    {
+        if (pawnConsumption.TryGetValue(kind, out int amount))
+        {
+            totalConsumption += amount;
+        }
+    }
+
+    return totalConsumption;
+}
 >>>>>>> REPLACE
-NEXT: Ensure the Cell class properties X and Y are used consistently in the GameWorld.cs file.
+NEXT: Implement a method to unlock new building types based on resource management.

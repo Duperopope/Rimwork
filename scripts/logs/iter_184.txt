@@ -1,37 +1,39 @@
-CHANGE: Add a method to generate resources over time.
+CHANGE: Add a method to display total resource consumption for each resource kind.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public int CountFunctionalRooms()
-{
-    int functionalRoomCount = 0;
-    foreach (var zone in Zones)
+    public int GetTotalResourceConsumption(ResourceKind kind)
     {
-        if (IsZoneFunctional(zone))
+        int totalConsumption = 0;
+        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
         {
-            functionalRoomCount++;
+            if (pawnConsumption.ContainsKey(kind))
+            {
+                totalConsumption += pawnConsumption[kind];
+            }
         }
+        return totalConsumption;
     }
-    return functionalRoomCount;
-}
-// ... (lines omitted) ...
 =======
-public int CountFunctionalRooms()
-{
-    int functionalRoomCount = 0;
-    foreach (var zone in Zones)
+    public int GetTotalResourceConsumption(ResourceKind kind)
     {
-        if (IsZoneFunctional(zone))
+        int totalConsumption = 0;
+        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
         {
-            functionalRoomCount++;
+            if (pawnConsumption.ContainsKey(kind))
+            {
+                totalConsumption += pawnConsumption[kind];
+            }
+        }
+        return totalConsumption;
+    }
+
+    public void DisplayResourceConsumption()
+    {
+        foreach (var kind in Enum.GetValues<ResourceKind>())
+        {
+            int totalConsumption = GetTotalResourceConsumption(kind);
+            Console.WriteLine($"{kind}: Total Consumption = {totalConsumption}");
         }
     }
-    return functionalRoomCount;
-}
-
-public void GenerateResourcesOverTime()
-{
-    // Placeholder for resource generation logic
-}
-// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Implement the logic inside GenerateResourcesOverTime to regrow trees and respawn rocks.
+NEXT: Add a method to display recycled resources for each resource kind.

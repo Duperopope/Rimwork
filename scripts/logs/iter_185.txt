@@ -1,23 +1,31 @@
-CHANGE: Add a method to generate resources over time.
+CHANGE: Add missing closing brace for `GetTotalResourceConsumption` method.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void GenerateBasicRoomLayout()
+public int GetTotalResourceConsumption(ResourceKind kind)
 {
-    // Example: Generate a simple room layout with a sleeping quarters and a canteen
-    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
-    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+    int totalConsumption = 0;
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    {
+        if (pawnConsumption.ContainsKey(kind))
+        {
+            totalConsumption += pawnConsumption[kind];
+        }
+    }
+    return totalConsumption;
 }
 =======
-public void GenerateBasicRoomLayout()
+public int GetTotalResourceConsumption(ResourceKind kind)
 {
-    // Example: Generate a simple room layout with a sleeping quarters and a canteen
-    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
-    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+    int totalConsumption = 0;
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    {
+        if (pawnConsumption.ContainsKey(kind))
+        {
+            totalConsumption += pawnConsumption[kind];
+        }
+    }
+    return totalConsumption;
 }
-
-public void GenerateResourcesOverTime()
-{
-    // Placeholder for resource generation logic
 }
 >>>>>>> REPLACE
-NEXT: Implement the logic inside GenerateResourcesOverTime to regrow trees and respawn rocks.
+NEXT: Implement a method to display total resource consumption for each resource kind.

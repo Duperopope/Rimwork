@@ -271,6 +271,15 @@ public int GetResourceConsumption(ResourceKind kind)
     return _resourceConsumption.ContainsKey(kind) ? _resourceConsumption[kind] : 0;
 }
 
+public bool IsPawnSkilledEnough(Pawn pawn, SkillKind requiredSkill, float requiredLevel)
+{
+    if (pawn.SkillXP.TryGetValue(requiredSkill, out float skillLevel))
+    {
+        return skillLevel >= requiredLevel;
+    }
+    return false;
+}
+
 public void DisplayFunctionalRooms()
 {
     int functionalRoomCount = CountFunctionalRooms();

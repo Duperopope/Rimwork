@@ -1,24 +1,77 @@
-CHANGE: Implement a method to generate resources over time.
+CHANGE: Add a method to check if the player has enough resources to unlock new building types.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void GenerateBasicRoomLayout()
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    // Example: Generate a simple room layout with a sleeping quarters and a canteen
-    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
-    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
+    }
+    else
+    {
+        _pawnResourceConsumption[pawnId][kind] = amount;
+    }
+}
+// ... (lines omitted) ...
+public int GetTotalResourceConsumption(ResourceKind kind)
+{
+    int totalConsumption = 0;
+
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    {
+        if (pawnConsumption.TryGetValue(kind, out int amount))
+        {
+            totalConsumption += amount;
+        }
+    }
+
+    return totalConsumption;
 }
 =======
-public void GenerateBasicRoomLayout()
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    // Example: Generate a simple room layout with a sleeping quarters and a canteen
-    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
-    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
+    }
+    else
+    {
+        _pawnResourceConsumption[pawnId][kind] = amount;
+    }
 }
 
-public void GenerateResourcesOverTime()
+public bool CanUnlockBuildingType(ResourceKind kind, int requiredAmount)
 {
-    // Placeholder for resource generation logic
-    // This method will be expanded in future steps
+    int totalConsumption = GetTotalResourceConsumption(kind);
+    int totalRecycled = _recycledResources.ContainsKey(kind) ? _recycledResources[kind] : 0;
+    int totalAvailable = totalConsumption + totalRecycled;
+
+    return totalAvailable >= requiredAmount;
+}
+// ... (lines omitted) ...
+public int GetTotalResourceConsumption(ResourceKind kind)
+{
+    int totalConsumption = 0;
+
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    {
+        if (pawnConsumption.TryGetValue(kind, out int amount))
+        {
+            totalConsumption += amount;
+        }
+    }
+
+    return totalConsumption;
 }
 >>>>>>> REPLACE
-NEXT: Implement the logic to regrow trees and respawn rocks.
+NEXT: Implement a mechanic to consume resources when unlocking new building types.

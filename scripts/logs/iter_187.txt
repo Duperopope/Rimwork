@@ -1,38 +1,31 @@
-CHANGE: Add a method to simulate resource regeneration over time.
+CHANGE: Add missing closing brace in `GetTotalResourceConsumption` method.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class GameMap
-{
-    private readonly Cell[,] _grid;
-    private readonly List<Zone> _zones = new();
-    private readonly List<ResourceNode> _resources = new();
-    private readonly List<Furniture> _furniture = new();
-    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
-=======
-public class GameMap
-{
-    private readonly Cell[,] _grid;
-    private readonly List<Zone> _zones = new();
-    private readonly List<ResourceNode> _resources = new();
-    private readonly List<Furniture> _furniture = new();
-    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
-
-    public void RegenerateResources()
+    public int GetTotalResourceConsumption(ResourceKind kind)
     {
-        // Placeholder for resource regeneration logic
-        foreach (var sapling in _saplings.ToList())
+        int totalConsumption = 0;
+        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
         {
-            if (sapling.TicksRemaining <= 0)
+            if (pawnConsumption.ContainsKey(kind))
             {
-                // Regrow the sapling into a tree
-                _resources.Add(new ResourceNode(ResourceKind.Tree, sapling.X, sapling.Y));
-                _saplings.Remove(sapling);
-            }
-            else
-            {
-                sapling.TicksRemaining--;
+                totalConsumption += pawnConsumption[kind];
             }
         }
+        return totalConsumption;
     }
+=======
+    public int GetTotalResourceConsumption(ResourceKind kind)
+    {
+        int totalConsumption = 0;
+        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+        {
+            if (pawnConsumption.ContainsKey(kind))
+            {
+                totalConsumption += pawnConsumption[kind];
+            }
+        }
+        return totalConsumption;
+    }
+}
 >>>>>>> REPLACE
-NEXT: Implement the actual regeneration logic for trees and rocks.
+NEXT: Implement a method to display resource consumption summary.

@@ -622,7 +622,8 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.60 - Implement a resource consumption system for pawns to ensure they deplete resources over time, forcing players to manage resource allocation. (GameWorld.cs) - Add the missing closing brace for the `TrackRecycledResource` method.
 - [ ] Step C.75 - Implement a system to generate resources over time, such as wood from trees or stone from rocks, to encourage sustainable resource management. (GameWorld.cs)
 - [ ] Step C.90.1 - Add the missing closing brace for the `TrackPawnResourceConsumption` method in `GameWorld.cs`.
-- [ ] Step C.105 - Implement a mechanic that requires players to manage resources more efficiently to unlock new building types.
+- [x] Step C.105 - Implement a mechanic that requires players to manage resources more efficiently to unlock new building types.
 - [ ] Step C.120 - Improve resource management and visibility to reduce frustration during early game.
 - [ ] Step C.150 - Implement a system to automatically assign pawns to build tasks based on their skills and the current needs of the colony.
 - [ ] Step C.165 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs
+- [ ] Step C.180 - Implement a system to generate functional rooms automatically as pawns complete tasks, ensuring the win condition is reachable through gameplay.
