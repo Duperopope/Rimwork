@@ -106,3 +106,5 @@
 - Ensure method parameters and logic match existing types and syntax in GameWorld.cs.
 - Ensure method parameters match existing types in the file.
 - Always check for existing member names before adding new fields.
+- Ensure new fields are declared within the correct class block.
+- Ensure new fields are placed within the correct class definition.

@@ -1,9 +1,0 @@
-CHANGE: Add a private dictionary `_recycledResources` to `GameWorld.cs` to track recycled resources.
-FILE: src/RimWorldLab.Core/GameWorld.cs
-<<<<<<< SEARCH
-private readonly List<(int X, int Y, string Biome)> _regions = new();
-=======
-private readonly List<(int X, int Y, string Biome)> _regions = new();
-private Dictionary<ResourceKind, int> _recycledResources = new();
->>>>>>> REPLACE
-NEXT: Implement methods to track and retrieve recycled resources.

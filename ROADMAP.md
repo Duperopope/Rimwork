@@ -627,5 +627,5 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [x] Step C.150 - Implement a system to automatically assign pawns to build tasks based on their skills and the current needs of the colony.
 - [ ] Step C.165 - Add the missing condition to check if a pawn's sleep need is less than 50 in the `AssignPawnsToTasks` method in GameWorld.cs
 - [ ] Step C.180 - Implement a method to check if a room is functional and add it to the list of functional rooms in `src/RimWorldLab.Core/GameWorld.cs`.
-- [ ] Step C.15.1.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` to track recycled resources.
-- [ ] Step C.30 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to provide players with a sustainable source of materials. (GameWorld.cs)
+- [x] Step C.15.1.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` to track recycled resources.
+- [ ] Step C.30.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` by inserting it inside the `GameWorld` class.

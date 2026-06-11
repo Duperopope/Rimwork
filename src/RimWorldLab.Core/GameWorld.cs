@@ -5,6 +5,10 @@ using System.Linq;
 // =====================================================================
 // 1. Core Data Structures (Map & Collision)
 // =====================================================================
+public class GameWorld
+{
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+}
 
 /// <summary>
 /// Represents a map of regions on the planet.

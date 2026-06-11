@@ -302,3 +302,9 @@ GameMap
 _recycledResources
 GameMap
 _recycledResources
+public
+public
+private
+public
+public
+private
