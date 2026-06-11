@@ -4602,3 +4602,4 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 56] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step D.1 - In src/RimWorldLab.Core/GameWorld.cs, immediately after the line `Macro.Tick(TotalTicks);`, insert the following line:
 - [iter 57] KEPT: Add hunting logic before the existing resource regeneration check. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 58] DONE (repeated identical patch): - [ ] Step D.2 - Hunting: a pawn standing next to a SmallAnimal harvests it
+- [iter 59] KEPT: Add animal wandering logic after resource regeneration update. (src/RimWorldLab.Core/GameWorld.cs)

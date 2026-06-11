@@ -71,3 +71,4 @@
 - [ ] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
 - [ ] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step D.2 - Hunting: a pawn standing next to a SmallAnimal harvests it
+- [ ] Step D.3 - Animals must wander. In src/RimWorldLab.Core/GameWorld.cs,

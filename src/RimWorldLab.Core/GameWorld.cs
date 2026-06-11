@@ -1385,6 +1385,13 @@ private void UpdateHeaderText()
         if (TotalTicks % 50 == 0)
             AssignPersonalFurniture();
 
+        if (TotalTicks % 40 == 0)
+            foreach (var an in _pawns.Where(p => p.Name == "SmallAnimal" && p.HP > 0))
+            {
+                int nx = an.X + _rng.Next(-1, 2), ny = an.Y + _rng.Next(-1, 2);
+                if (_map.IsPassable(nx, ny)) { an.X = nx; an.Y = ny; }
+            }
+
         // --- Survival economy: food & water are consumed by living pawns ---
         int mealInterval = UnlockedTech.Contains("Granary") ? 2600 : 2000;
         if (TotalTicks % mealInterval == 0)
