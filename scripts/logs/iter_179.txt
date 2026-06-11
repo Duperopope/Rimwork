@@ -1,29 +1,12 @@
-CHANGE: Add a method to check if a zone is functional based on placed furniture.
+CHANGE: Change the type of `_resourceRegenerationRates` values from `int` to `double`.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class GameWorld
-{
-    private Dictionary<ResourceKind, int> _recycledResources = new();
-    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-// ... (lines omitted) ...
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
+public void RegenerateResource(ResourceKind kind, int amount)
 =======
-public class GameWorld
-{
-    private Dictionary<ResourceKind, int> _recycledResources = new();
-    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-
-    public bool IsZoneFunctional(Zone zone)
-    {
-        // Check if the zone contains at least one functional furniture
-        foreach (var furniture in Furniture)
-        {
-            if (furniture.IsFunctionalFurniture() && zone.Contains(furniture.X, furniture.Y))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-// ... (lines omitted) ...
+private Dictionary<ResourceKind, double> _resourceRegenerationRates = new();
+public void UpdateResourceRegenerationRate(ResourceKind kind, double rate)
+public void RegenerateResource(ResourceKind kind, int amount)
 >>>>>>> REPLACE
-NEXT: Implement a method to count the number of functional rooms in the game world.
+NEXT: Update the initialization of `_resourceRegenerationRates` to use `double` values.

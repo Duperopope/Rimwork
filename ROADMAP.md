@@ -161,4 +161,5 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [ ] Step C.120 - Add the private field `_resources` to the `GameWorld` class.
 - [ ] Step C.135 - Add a private field to track the number of rooms being built in GameWorld.cs. Define the field in the GameWorld class.
 - [ ] Step C.150 - Add a private field to track resources in GameWorld.cs.
-- [ ] Step C.165 - Reduce the initial resource spawn rate by lowering the regeneration rates for Trees and Rocks to 0.5 and 1 respectively in src/RimWorldLab.Core/GameWorld.cs.
+- [ ] Step C.165 - Change the type of `_resourceRegenerationRates` values from `int` to `double` in `src/RimWorldLab.Core/GameWorld.cs`.
+- [ ] Step C.180 - Simplify and deduplicate code in Main.cs and GameWorld.cs to improve maintainability and reduce bugs.

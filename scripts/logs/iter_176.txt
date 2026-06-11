@@ -1,22 +1,12 @@
-CHANGE: Implement a method to check if a zone is functional.
+CHANGE: Change the type of `_resourceRegenerationRates` values from `int` to `double`.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
-{
-    if (!_pawnResourceConsumption.ContainsKey(pawnId))
-    {
-        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
-    }
-
-    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
+public void RegenerateResource(ResourceKind kind, int amount)
 =======
-public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
-{
-    if (!_pawnResourceConsumption.ContainsKey(pawnId))
-    {
-        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
-    }
-
-    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+private Dictionary<ResourceKind, double> _resourceRegenerationRates = new();
+public void UpdateResourceRegenerationRate(ResourceKind kind, double rate)
+public void RegenerateResource(ResourceKind kind, double amount)
 >>>>>>> REPLACE
-NEXT: Add logic to determine if a zone is functional based on its contents.
+NEXT: Update the initialization of `_resourceRegenerationRates` to use `double` values.

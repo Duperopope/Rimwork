@@ -1,77 +1,39 @@
-CHANGE: Add a method to check if the player has enough resources to unlock new building types.
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Simplify the repeated pawn registration logic by extracting it to a method.
+FILE: src/RimWorldGodot/Main.cs
 <<<<<<< SEARCH
-public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+foreach (string name in array)
 {
-    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    int num;
+    int num2;
+    do
     {
-        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+        num = _rng.Next(0, _world.Map.Width);
+        num2 = _rng.Next(0, _world.Map.Height);
     }
-
-    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
-    {
-        _pawnResourceConsumption[pawnId][kind] += amount;
-    }
-    else
-    {
-        _pawnResourceConsumption[pawnId][kind] = amount;
-    }
+    while (!_world.Map.IsPassable(num, num2));
+    _world.RegisterThing(new Pawn(name, num, num2));
 }
-// ... (lines omitted) ...
-public int GetTotalResourceConsumption(ResourceKind kind)
-{
-    int totalConsumption = 0;
-
-    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-    {
-        if (pawnConsumption.TryGetValue(kind, out int amount))
-        {
-            totalConsumption += amount;
-        }
-    }
-
-    return totalConsumption;
+_dialogue = new DialogueService();
 }
 =======
-public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+foreach (string name in array)
 {
-    if (!_pawnResourceConsumption.ContainsKey(pawnId))
-    {
-        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
-    }
-
-    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
-    {
-        _pawnResourceConsumption[pawnId][kind] += amount;
-    }
-    else
-    {
-        _pawnResourceConsumption[pawnId][kind] = amount;
-    }
+    RegisterPawn(name);
+}
+_dialogue = new DialogueService();
 }
 
-public bool CanUnlockBuildingType(ResourceKind kind, int requiredAmount)
+private void RegisterPawn(string name)
 {
-    int totalConsumption = GetTotalResourceConsumption(kind);
-    int totalRecycled = _recycledResources.ContainsKey(kind) ? _recycledResources[kind] : 0;
-    int totalAvailable = totalConsumption + totalRecycled;
-
-    return totalAvailable >= requiredAmount;
-}
-// ... (lines omitted) ...
-public int GetTotalResourceConsumption(ResourceKind kind)
-{
-    int totalConsumption = 0;
-
-    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    int px;
+    int py;
+    do
     {
-        if (pawnConsumption.TryGetValue(kind, out int amount))
-        {
-            totalConsumption += amount;
-        }
+        px = _rng.Next(0, _world.Map.Width);
+        py = _rng.Next(0, _world.Map.Height);
     }
-
-    return totalConsumption;
+    while (!_world.Map.IsPassable(px, py));
+    _world.RegisterThing(new Pawn(name, px, py));
 }
 >>>>>>> REPLACE
-NEXT: Implement a mechanic to consume resources when unlocking new building types.
+NEXT: Simplify the repeated task enqueueing logic by extracting it to a method.

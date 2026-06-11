@@ -1,15 +1,12 @@
-CHANGE: Add the missing closing brace for the `TrackPawnResourceConsumption` method in `GameWorld.cs`.
+CHANGE: Change the type of `_resourceRegenerationRates` values from `int` to `double`.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void TrackPawnResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
-{
-    // Implementation goes here
-}
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
+public void RegenerateResource(ResourceKind kind, int amount)
 =======
-public void TrackPawnResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
-{
-    // Implementation goes here
-}
-}
+private Dictionary<ResourceKind, double> _resourceRegenerationRates = new();
+public void UpdateResourceRegenerationRate(ResourceKind kind, double rate)
+public void RegenerateResource(ResourceKind kind, int amount)
 >>>>>>> REPLACE
-NEXT: Implement the logic inside the `TrackPawnResourceConsumption` method.
+NEXT: Update the initialization of `_resourceRegenerationRates` to use `double` values.

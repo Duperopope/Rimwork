@@ -166,3 +166,5 @@
 - Ensure resource regeneration rates match the defined type (int) to avoid implicit conversion errors.
 - Ensure unique constructor signatures in GameWorld.cs to avoid CS0111 errors.
 - Always check the data types of dictionary keys and values to avoid implicit conversion errors.
+- Always ensure type consistency when updating resource spawn rates.
+- Ensure all method definitions and declarations are properly closed and placed before any instructions.

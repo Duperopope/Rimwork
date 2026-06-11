@@ -12,6 +12,7 @@ try {
 }
 Write-Host "Dashboard: http://localhost:8765"
 . "g:\Rimwork\scripts\site_gen.ps1"
+Add-Type -AssemblyName System.Web -ErrorAction SilentlyContinue
 
 function Esc([string]$s) { [System.Web.HttpUtility]::HtmlEncode($s) }
 Add-Type -AssemblyName System.Web
@@ -43,7 +44,7 @@ while ($true) {
         continue
     }
     if ($ctx.Request.Url.AbsolutePath -eq "/feedback") {
-        $q = [System.Web.HttpUtility]::ParseQueryString($ctx.Request.Url.Query)
+        $q = $ctx.Request.QueryString
         $text = $q["text"]
         if ($text -and $text.Trim().Length -gt 3) {
             $entry = @{
@@ -52,7 +53,7 @@ while ($true) {
                 text = $text.Trim()
                 status = "propose"
             } | ConvertTo-Json -Compress
-            Add-Content -Path "g:\Rimwork\scripts\logseedback.jsonl" -Value $entry
+            Add-Content -Path "g:/Rimwork/scripts/logs/feedback.jsonl" -Value $entry
         }
         $ctx.Response.Redirect("/")
         $ctx.Response.Close()

@@ -1,23 +1,70 @@
-CHANGE: Add a method to check if a zone contains functional furniture.
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Simplify the repeated pawn registration logic in `_Ready` and `_Process` methods.
+FILE: src/RimWorldGodot/Main.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+foreach (string name in array)
 {
-    // Placeholder for future implementation
-    return true;
+    int num;
+    int num2;
+    do
+    {
+        num = _rng.Next(0, _world.Map.Width);
+        num2 = _rng.Next(0, _world.Map.Height);
+    }
+    while (!_world.Map.IsPassable(num, num2));
+    _world.RegisterThing(new Pawn(name, num, num2));
 }
 =======
-public bool IsZoneFunctional(Zone zone)
+private void RegisterPawns(string[] names)
 {
-    // Check if the zone contains any functional furniture
-    foreach (var furniture in Furniture)
+    foreach (string name in names)
     {
-        if (furniture.IsFunctionalFurniture() && zone.Contains(furniture.X, furniture.Y))
+        int num;
+        int num2;
+        do
         {
-            return true;
+            num = _rng.Next(0, _world.Map.Width);
+            num2 = _rng.Next(0, _world.Map.Height);
         }
+        while (!_world.Map.IsPassable(num, num2));
+        _world.RegisterThing(new Pawn(name, num, num2));
     }
-    return false;
+}
+
+public override void _Ready()
+{
+    _world = new GameWorldManager(50, 50);
+    _rng = new Random(12345);
+    string[] array = new string[8] { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt" };
+
+    // Load dining table icon texture
+    var iconPath = "res://icons/dining_table_icon.png"; // Adjust path as necessary
+    _diningTableIcon = ResourceLoader.Load<Texture2D>(iconPath);
+    RegisterPawns(array);
+    _dialogue = new DialogueService();
+}
+
+public override void _Process(double delta)
+{
+    if (_world.Pawns.Count == 0)
+    {
+        _world = new GameWorldManager(50, 50);
+        string[] rebirth = new string[8] { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt" };
+        RegisterPawns(rebirth);
+    }
+    _accumulator += delta;
+// ... (lines omitted) ...
+    if (_world.Tasks.Pending.Count == 0)
+    {
+        int num;
+        int num2;
+        do
+        {
+            num = _rng.Next(0, _world.Map.Width);
+            num2 = _rng.Next(0, _world.Map.Height);
+        }
+        while (!_world.Map.IsPassable(num, num2));
+        _world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
+    }
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to count functional rooms based on placed furniture.
+NEXT: Simplify and deduplicate code in Main.cs and GameWorld.cs to improve maintainability and reduce bugs.

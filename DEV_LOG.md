@@ -4733,3 +4733,14 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 170] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.165 - Reduce the initial resource spawn rate by lowering the regeneration rates for Trees and Rocks to 0.5 and 1 respectively in src/RimWorldLab.Core/GameWorld.cs.
 - [iter 171] REVERTED (build failed): Lower the initial resource spawn rate for Trees and Rocks in GameWorld constructor. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 172] REVERTED (build failed): Update the initial resource spawn rates for Trees and Rocks in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 173] SKIPPED (no SEARCH match): Update the initial resource regeneration rates for Trees and Rocks in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 174] SKIPPED (no SEARCH match): Reduce initial resource spawn rate by lowering the regeneration rates for Trees and Rocks. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 175] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.165 - Change the type of `_resourceRegenerationRates` values from `int` to `double` in `src/RimWorldLab.Core/GameWorld.cs`.
+- [iter 176] SKIPPED (no SEARCH match): Change the type of `_resourceRegenerationRates` values from `int` to `double`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 177] SKIPPED (no SEARCH match): Change the type of `_resourceRegenerationRates` values from `int` to `double`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 178] SKIPPED (no SEARCH match): Change the type of `_resourceRegenerationRates` values from `int` to `double`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 179] SKIPPED (no SEARCH match): Change the type of `_resourceRegenerationRates` values from `int` to `double`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 180] CRITIC TASK: - [ ] Step C.180 - Simplify and deduplicate code in Main.cs and GameWorld.cs to improve maintainability and reduce bugs.
+- [iter 180] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.165 - Change the type of `_resourceRegenerationRates` values from `int` to `double` in `src/RimWorldLab.Core/GameWorld.cs`.
+- [iter 181] REVERTED (build failed): Simplify the repeated pawn registration logic in `_Ready` and `_Process` methods. (src/RimWorldGodot/Main.cs)
+- [iter 182] REVERTED (tests failed): Simplify the repeated pawn registration logic by extracting it to a method. (src/RimWorldGodot/Main.cs)

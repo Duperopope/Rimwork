@@ -140,11 +140,11 @@ function Get-DownHereSiteHtml {
     }
 
     # ---------- FEEDBACK: stored locally, mirrored as GitHub issues ----------
-    $fbFile = "g:\Rimwork\scripts\logseedback.jsonl"
+    $fbFile = "g:/Rimwork/scripts/logs/feedback.jsonl"
     $fbRows = ""
     if (Test-Path $fbFile) {
         $entries = Get-Content $fbFile | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} } | Where-Object { $_ }
-        [array]::Reverse($entries)
+        $entries = @($entries); [array]::Reverse($entries)
         foreach ($f in $entries | Select-Object -First 30) {
             $stCls = switch ($f.status) { "valide" { "ok" } "traite" { "done" } "rejete" { "bad" } default { "warn" } }
             $typeIco = if ($f.type -eq "bug") { "&#128027;" } else { "&#10024;" }
