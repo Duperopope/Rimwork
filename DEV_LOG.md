@@ -4230,3 +4230,6 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 111] DONE (had past KEPT edits, change already in file): - [ ] Step C.135.1 - Implement a method to check if a room is functional in GameWorld.cs.
 - [iter 112] KEPT: Add a method to track resource consumption for pawns. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 113] KEPT: Add a method to track resource consumption for pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 113] DONE (after 2 consecutive KEPT changes): - [ ] Step C.150 - Implement a resource consumption system for pawns to ensure they use resources like wood and stone to build furniture and walls, preventing infinite building without resource management. (GameWorld.cs)
+- [iter 114] SKIPPED (no SEARCH match): Add a new `NeedKind` for Thirst. (src/RimWorldLab.Core/Needs.cs)
+- [iter 115] KEPT: Add a new method to handle water consumption for pawns. (src/RimWorldLab.Core/Needs.cs)

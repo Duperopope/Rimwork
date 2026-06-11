@@ -140,4 +140,13 @@ public void HandleMealConsumption(Pawn pawn, int mealCount)
         pawn.Hunger = Math.Max(0f, pawn.Hunger);
     }
 }
+
+public void ConsumeWater(Pawn pawn, int waterAmount)
+{
+    if (waterAmount > 0 && pawn.Thirst > 0)
+    {
+        pawn.Thirst -= waterAmount;
+        pawn.Thirst = Math.Max(0f, pawn.Thirst);
+    }
+}
 }
