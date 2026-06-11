@@ -212,7 +212,7 @@ task queue - and stop doing absurd things like building bridges nobody needs.
       ``
       `    /// <summary>0 (miserable) to 100 (happy). Driven by needs and events.</summary>`
       `    public float Mood { get; set; } = 70f;`
-- [ ] Step P.4b - Mood dynamics. In src/RimWorldLab.Core/GameWorld.cs,
+- [x] Step P.4b - Mood dynamics. In src/RimWorldLab.Core/GameWorld.cs,
       SEARCH for exactly this one line:
       `            Needs.Tick(this, driver, pawn, _rng);`
       and REPLACE it with exactly these 2 lines:

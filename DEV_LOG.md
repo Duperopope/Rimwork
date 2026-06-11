@@ -3258,3 +3258,5 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 30] CRITIC TASK: - [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs to identify functional rooms.
 - [iter 30] PREDICTED-FAIL (skipped before build): Add Mood dynamics to Pawn class - Identifier 'Clamp' does not exist in the target file or the game API - it would not compile.
 - [iter 31] KEPT: Ensure `Math.Clamp` is available by adding the necessary `using` directive. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 31] DONE (after 2 consecutive KEPT changes): - [ ] Step P.4b - Mood dynamics. In src/RimWorldLab.Core/GameWorld.cs,
+- [iter 32] KEPT: Add mood display to pawn list in Colony tab. (src/RimWorldGodot/Main.cs)

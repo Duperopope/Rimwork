@@ -1363,7 +1363,7 @@ if (_world.GoalIndex > 0)
 			}
 			DrawRect(new Rect2(x, y - 9f, 10f, 10f), color);
 			string sexLabel = pawn.Sex == PawnSex.Male ? "M" : "F";
-			DrawString(ThemeDB.FallbackFont, new Vector2(x + 16f, y), $"{pawn.Name} ({sexLabel})", HorizontalAlignment.Left, -1f, 14, Colors.White, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);
+			DrawString(ThemeDB.FallbackFont, new Vector2(x + 16f, y), $"{pawn.Name} ({sexLabel})  mood {(int)pawn.Mood}", HorizontalAlignment.Left, -1f, 14, pawn.Mood < 30f ? new Color(1f, 0.4f, 0.4f) : Colors.White, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);
 			y += 18f;
 			DrawString(ThemeDB.FallbackFont, new Vector2(x + 16f, y), "task: " + text, HorizontalAlignment.Left, -1f, 11, Colors.LightGray, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);
 			y += 15.3f;
