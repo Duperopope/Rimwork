@@ -87,7 +87,7 @@ public partial class MicroStage : Node2D
         float playerS = _player?.Size ?? 14f;
         var o = new Organism
         {
-            Pos = RandPos(0.9f),
+            Pos = (_player?.Pos ?? Vector2.Zero) + RandPos(0.9f),
             Size = prey ? playerS * (0.45f + (float)_rng.NextDouble() * 0.4f)
                         : playerS * (1.25f + (float)_rng.NextDouble() * 0.9f),
             Speed = 55f + (float)_rng.NextDouble() * 50f,
@@ -115,7 +115,7 @@ public partial class MicroStage : Node2D
     public override void _Process(double dt)
     {
         float d = (float)dt;
-        if (_choosing) { QueueRedraw(); return; }
+        if (_choosing || _paused) { QueueRedraw(); return; }
 
         // ---- Player control: swim toward the mouse ----
         var target = GetGlobalMousePosition();
@@ -133,13 +133,24 @@ public partial class MicroStage : Node2D
         _player.Energy = Mathf.Clamp(_player.Energy, 0f, _player.EnergyMax);
         if (_player.Energy <= 0f) Die("Tu t'es éteint, à court d'énergie... Un descendant prend le relais.");
 
+        // ---- Infinite pool streaming: keep life around the player ----
+        for (int i = _algae.Count - 1; i >= 0; i--)
+            if (_algae[i].DistanceTo(_player.Pos) > WorldR * 1.4f)
+                _algae[i] = _player.Pos + RandPos(1f);
+        for (int i = _motes.Count - 1; i >= 0; i--)
+            if (_motes[i].DistanceTo(_player.Pos) > WorldR)
+                _motes[i] = _player.Pos + RandPos(0.9f);
+        foreach (var cs in _critters)
+            if (!cs.Dead && cs.Pos.DistanceTo(_player.Pos) > WorldR * 1.6f)
+            { cs.Pos = _player.Pos + RandPos(1.2f); }
+
         // ---- Eat algae ----
         for (int i = _algae.Count - 1; i >= 0; i--)
             if (_algae[i].DistanceTo(_player.Pos) < _player.Size + 7f)
             {
                 _algae.RemoveAt(i);
                 _player.Energy = Mathf.Min(_player.EnergyMax, _player.Energy + 9f);
-                _algae.Add(RandPos(0.97f)); // the pool regrows elsewhere
+                _algae.Add(_player.Pos + RandPos(0.97f)); // the pool regrows around you
             }
 
         // ---- Critters AI + predation ----
@@ -187,7 +198,6 @@ public partial class MicroStage : Node2D
     private void Integrate(Organism o, float d)
     {
         o.Pos += o.Vel * d;
-        if (o.Pos.Length() > WorldR) o.Pos = o.Pos.Normalized() * WorldR; // pool edge
         o.Phase += d * (2f + o.Vel.Length() * 0.01f);
     }
 
@@ -205,19 +215,20 @@ public partial class MicroStage : Node2D
 
     public override void _Draw()
     {
-        // Water: layered radial gradient circles (cheap fake volumetrics)
-        DrawCircle(_cam.Position, 2400f, Abyss);
-        DrawCircle(Vector2.Zero, WorldR * 1.05f, new Color(0.02f, 0.09f, 0.16f));
-        DrawCircle(Vector2.Zero, WorldR * 0.7f, new Color(0.03f, 0.12f, 0.20f));
-        DrawCircle(Vector2.Zero, WorldR * 0.4f, new Color(0.035f, 0.15f, 0.24f));
-        // light shafts from above
-        for (int i = 0; i < 5; i++)
+        // Endless water: gradient layers centered on the camera
+        DrawCircle(_cam.Position, 2600f, Abyss);
+        DrawCircle(_cam.Position, 1500f, new Color(0.02f, 0.09f, 0.16f));
+        DrawCircle(_cam.Position, 900f, new Color(0.03f, 0.12f, 0.20f));
+        DrawCircle(_cam.Position, 500f, new Color(0.035f, 0.15f, 0.24f));
+        // drifting light shafts, anchored to world space modulo (infinite tiling)
+        float baseX = Mathf.Floor(_cam.Position.X / 450f) * 450f - 900f;
+        for (int i = 0; i < 7; i++)
         {
-            float x = -900f + i * 450f;
+            float x = baseX + i * 450f;
             DrawColoredPolygon(new[]
             {
-                new Vector2(x - 60, -WorldR), new Vector2(x + 60, -WorldR),
-                new Vector2(x + 220, WorldR), new Vector2(x - 220, WorldR)
+                new Vector2(x - 60, _cam.Position.Y - 1400), new Vector2(x + 60, _cam.Position.Y - 1400),
+                new Vector2(x + 220, _cam.Position.Y + 1400), new Vector2(x - 220, _cam.Position.Y + 1400)
             }, new Color(0.4f, 0.7f, 0.8f, 0.025f));
         }
         // ambient motes
@@ -250,8 +261,9 @@ public partial class MicroStage : Node2D
         {
             float a = i * Mathf.Tau / n;
             float wobble = 1f
+                + 0.18f * Mathf.Sin(a * 2f + o.Phase * 1.6f)
                 + 0.10f * Mathf.Sin(a * 3f + o.Phase * 2.1f)
-                + 0.06f * Mathf.Sin(a * 5f - o.Phase * 1.4f)
+                + 0.05f * Mathf.Sin(a * 5f - o.Phase * 1.4f)
                 + swim * Mathf.Sin(a * 2f + o.Phase * 4f);
             pts[i] = o.Pos + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * o.Size * wobble;
         }
@@ -357,9 +369,14 @@ public partial class MicroStage : Node2D
         _ui.AddChild(_evolveBox);
     }
 
+    private bool _paused;
+
     public override void _UnhandledKeyInput(InputEvent ev)
     {
         if (ev is InputEventKey k && k.Pressed && k.Keycode == Key.Escape)
-            ExitRequested?.Invoke();
+        {
+            _paused = !_paused;
+            _hud.Text = _paused ? "⏸ PAUSE — Échap pour reprendre, ou Quitter la flaque en bas" : "";
+        }
     }
 }

@@ -12,3 +12,7 @@ scripts/loop_stdout.log
 scripts/loop_stderr.log
 loop_stdout.log
 *.tmp
+
+# Embedded third-party releases (Thrive) - fetched by script, not committed
+thirdparty/
+reference/thrive/

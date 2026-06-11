@@ -509,3 +509,13 @@ double
 double
 double
 double
+_traitPool
+_traitPool
+_traitPool
+_traitPool
+public
+public
+Pawns
+Pawns
+Pawns
+Pawns

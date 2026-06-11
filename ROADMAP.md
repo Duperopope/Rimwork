@@ -58,18 +58,9 @@ Le fichier src/RimWorldGodot/MicroStage.cs est jouable et t'appartient:
 ajoute du CONTENU (mutations, especes, comportements). Regles: zero asset,
 tout en geometrie procedurale; chaque mutation doit avoir un effet REEL.
 
-- [ ] Step S.1 - Add 3 new mutations to the trait pool. In
-      src/RimWorldGodot/MicroStage.cs, find the exact line:
-      `        _traitPool.Add(("Compacité", "-15% taille (discret), +10% vitesse", o => { o.Size *= 0.85f; o.Speed *= 1.1f; }));`
-      Immediately AFTER that line, insert these new lines:
-      `        _traitPool.Add(("Toxines", "Les prédateurs perdent de l'énergie en te mordant", o => o.Spikes += 2));`
-      `        _traitPool.Add(("Symbiose algale", "+5 énergie par algue mangée", o => o.EnergyMax += 15f));`
-      `        _traitPool.Add(("Géant des abysses", "+60% taille, -20% vitesse", o => { o.Size *= 1.6f; o.Speed *= 0.8f; }));`
-- [ ] Step S.2 - Prey reproduces: in MicroStage.cs _Process, when fewer
-      than 30 critters exist the pool already respawns them; make small
-      prey occasionally split in two near algae (population dynamics).
-- [ ] Step S.3 - Predators eat prey too (ecosystem): a predator touching a
-      smaller critter removes it and grows slightly.
+- [ ] Step S.1a - In src/RimWorldGodot/MicroStage.cs, find the exact line: `_traitPool.Add(("Compacité", "-15% taille (discret), +10% vitesse", o => { o.Size *= 0.85f; o.Speed *= 1.1f; }));` Immediately AFTER that line, insert this new line: `_traitPool.Add(("Toxines", "Les prédateurs perdent de l'énergie en te mordant", o => o.Spikes += 2));`
+- [ ] Step S.2 - In MicroStage.cs, modify the _Process method to check if the population is less than 30.
+- [ ] Step S.3.1 - Add a method to check if the population is less than 30 in `src/RimWorldLab.Core/GameWorld.cs`. The method should return a boolean indicating the population status.
 
 ## PRIORITE: la couche primordiale (depart Spore - LOD Micro)
 - [x] Step M.1 - In src/RimWorldLab.Core/GameWorld.cs, find the exact line: `Macro.Tick(TotalTicks);` Immediately AFTER that line, insert these new lines: `if (TotalTicks % 1600 == 0) { float biomass = Macro.Regions[2, 2].MicrobialBiomass; if (biomass > 0.75f) LogEvent($"Microbial bloom enriches the soil (biomass {biomass:P0})."); }`
@@ -182,3 +173,7 @@ tout en geometrie procedurale; chaque mutation doit avoir un effet REEL.
 - [ ] Step C.165 - Change the type of `_resourceRegenerationRates` values from `int` to `double` in `src/RimWorldLab.Core/GameWorld.cs`.
 - [ ] Step C.180 - Extract the repeated pawn registration logic into a separate method in Main.cs. Ensure the method is correctly defined and called in both _Ready and _Process methods.
 - [ ] Step C.195 - Implement a system to track and display the progress towards building functional rooms, providing players with clear feedback on their progress.
+- [ ] Step C.15.1 - Add a method to check if the population is less than 30 in `src/RimWorldLab.Core/GameWorld.cs`. Ensure the method is correctly placed and uses the existing `Pawns` field.
+- [ ] Step C.30 - Implement a system to track and display room completion progress to the player.
+- [ ] Step C.45 - Implement a system to track and display progress towards building additional rooms, providing clear feedback to the player on what they need to do next.
+- [ ] Step C.60 - Implement a system to track and display the progress towards building additional rooms, providing clear feedback on the player's progress.

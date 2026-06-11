@@ -5,3 +5,7 @@
 - [ ] Step C.165 - Change the type of `_resourceRegenerationRates` values from `int` to `double` in `src/RimWorldLab.Core/GameWorld.cs`.
 - [ ] Step C.180 - Extract the repeated pawn registration logic into a separate method in Main.cs. Ensure the method is correctly defined and called in both _Ready and _Process methods.
 - [ ] Step C.195 - Implement a system to track and display the progress towards building functional rooms, providing players with clear feedback on their progress.
+- [ ] Step S.1a - In src/RimWorldGodot/MicroStage.cs, find the exact line: `_traitPool.Add(("Compacité", "-15% taille (discret), +10% vitesse", o => { o.Size *= 0.85f; o.Speed *= 1.1f; }));` Immediately AFTER that line, insert this new line: `_traitPool.Add(("Toxines", "Les prédateurs perdent de l'énergie en te mordant", o => o.Spikes += 2));`
+- [ ] Step S.2 - In MicroStage.cs, modify the _Process method to check if the population is less than 30.
+- [ ] Step S.3.1 - Add a method to check if the population is less than 30 in `src/RimWorldLab.Core/GameWorld.cs`. The method should return a boolean indicating the population status.
+- [ ] Step C.15.1 - Add a method to check if the population is less than 30 in `src/RimWorldLab.Core/GameWorld.cs`. Ensure the method is correctly placed and uses the existing `Pawns` field.

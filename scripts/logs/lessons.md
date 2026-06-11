@@ -174,3 +174,9 @@
 - Ensure method signatures and calls match defined types and parameters.
 - Ensure method parameters and types match existing definitions in GameWorld.cs.
 - Ensure method signatures match existing code and avoid syntax errors in new methods.
+- Ensure all used fields and methods are declared before use in the constructor.
+- Ensure method code is within class braces and not outside.
+- Ensure method bodies are properly closed and do not contain invalid tokens.
+- "Ensure all referenced fields exist in the context before adding methods."
+- Ensure method definitions are correctly placed and formatted within the class structure.
+- Ensure all referenced fields (like `Pawns`) exist in `GameWorld` before adding methods that depend on them.

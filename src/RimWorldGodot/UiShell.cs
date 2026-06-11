@@ -295,7 +295,19 @@ public partial class UiShell : CanvasLayer
 
     private void StartMicroStage()
     {
-        GD.Print("[FLOW] New Game: Origines (micro stage).");
+        // DOWN HERE! design decision (12/06/2026): the microbe stage IS
+        // Thrive (Revolutionary Games, GPL-3.0, same engine Godot 4.6.3),
+        // taken as-is. Our procedural MicroStage stays as the built-in
+        // fallback when the Thrive release isn't installed.
+        const string thriveExe = @"g:/Rimwork/thirdparty/thrive/Thrive.exe";
+        if (System.IO.File.Exists(thriveExe))
+        {
+            GD.Print("[FLOW] New Game: Origines -> launching Thrive.");
+            _game.AlertText = "ORIGINES — Thrive se lance... (notre hub reste ouvert)";
+            OS.CreateProcess(thriveExe, new string[] { });
+            return;
+        }
+        GD.Print("[FLOW] New Game: Origines (built-in fallback micro stage).");
         _micro = new MicroStage();
         _micro.Configure(new Random().Next(1, 999999));
         _micro.ExitRequested += () =>
