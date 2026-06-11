@@ -1,94 +1,19 @@
-CHANGE: Start implementing a basic room detection system by adding a method to identify contiguous regions of passable tiles.
+CHANGE: Add a method to simulate resource regeneration over time in `GameWorld`.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class GameMap
+public class GameWorld
 {
-    private readonly Cell[,] _grid;
-    private readonly List<ResourceNode> _resources = new();
-    private readonly List<Furniture> _furniture = new();
-    private readonly List<Zone> _zones = new();
-    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
-    private readonly List<Pawn> _pawns = new();
-    private readonly Dictionary<Guid, Thing> _registry = new();
-    private readonly TaskBoard _tasks = new();
-    private readonly NeedsSystem _needs = new();
-    private readonly MacroSim _macro = new();
-
-    public GameMap(int width, int height)
-    {
-        _grid = new Cell[height, width];
-        InitializeMap();
-    }
-
     // ... (lines omitted) ...
-    public bool RemoveResourceAt(int x, int y)
-    {
-        return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
-    }
+}
 =======
-public class GameMap
+public class GameWorld
 {
-    private readonly Cell[,] _grid;
-    private readonly List<ResourceNode> _resources = new();
-    private readonly List<Furniture> _furniture = new();
-    private readonly List<Zone> _zones = new();
-    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
-    private readonly List<Pawn> _pawns = new();
-    private readonly Dictionary<Guid, Thing> _registry = new();
-    private readonly TaskBoard _tasks = new();
-    private readonly NeedsSystem _needs = new();
-    private readonly MacroSim _macro = new();
-
-    public GameMap(int width, int height)
-    {
-        _grid = new Cell[height, width];
-        InitializeMap();
-    }
-
     // ... (lines omitted) ...
 
-    public bool RemoveResourceAt(int x, int y)
+    public void GenerateResourcesOverTime()
     {
-        return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
-    }
-
-    /// <summary>
-    /// Detects contiguous regions of passable tiles and returns a list of rooms.
-    /// </summary>
-    public List<Room> DetectRooms()
-    {
-        var rooms = new List<Room>();
-        bool[,] visited = new bool[_grid.GetLength(0), _grid.GetLength(1)];
-
-        for (int y = 0; y < _grid.GetLength(0); y++)
-        {
-            for (int x = 0; x < _grid.GetLength(1); x++)
-            {
-                if (_grid[y, x].IsSolid || visited[y, x])
-                    continue;
-
-                var room = new Room();
-                ExploreRoom(x, y, visited, room);
-                rooms.Add(room);
-            }
-        }
-
-        return rooms;
-    }
-
-    private void ExploreRoom(int x, int y, bool[,] visited, Room room)
-    {
-        if (x < 0 || x >= _grid.GetLength(1) || y < 0 || y >= _grid.GetLength(0) || _grid[y, x].IsSolid || visited[y, x])
-            return;
-
-        visited[y, x] = true;
-        room.Tiles.Add((x, y));
-
-        ExploreRoom(x + 1, y, visited, room);
-        ExploreRoom(x - 1, y, visited, room);
-        ExploreRoom(x, y + 1, visited, room);
-        ExploreRoom(x, y - 1, visited, room);
+        // Placeholder for resource regeneration logic
     }
 }
 >>>>>>> REPLACE
-NEXT: Define the Room class to store information about detected rooms.
+NEXT: Implement the logic inside `GenerateResourcesOverTime` to regrow trees or respawn rocks.

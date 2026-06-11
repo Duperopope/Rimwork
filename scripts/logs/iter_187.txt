@@ -1,26 +1,38 @@
-CHANGE: Add a method to detect functional rooms in the colony.
+CHANGE: Add a method to simulate resource regeneration over time.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool RemoveResourceAt(int x, int y)
+public class GameMap
 {
-    return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
-}
-// ... (lines omitted) ...
+    private readonly Cell[,] _grid;
+    private readonly List<Zone> _zones = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
 =======
-public bool RemoveResourceAt(int x, int y)
+public class GameMap
 {
-    return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
-}
+    private readonly Cell[,] _grid;
+    private readonly List<Zone> _zones = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
 
-/// <summary>
-/// Detects functional rooms in the colony.
-/// </summary>
-/// <returns>A list of functional rooms.</returns>
-public List<Room> GetFunctionalRooms()
-{
-    // Placeholder implementation
-    return new List<Room>();
-}
-// ... (lines omitted) ...
+    public void RegenerateResources()
+    {
+        // Placeholder for resource regeneration logic
+        foreach (var sapling in _saplings.ToList())
+        {
+            if (sapling.TicksRemaining <= 0)
+            {
+                // Regrow the sapling into a tree
+                _resources.Add(new ResourceNode(ResourceKind.Tree, sapling.X, sapling.Y));
+                _saplings.Remove(sapling);
+            }
+            else
+            {
+                sapling.TicksRemaining--;
+            }
+        }
+    }
 >>>>>>> REPLACE
-NEXT: Implement the logic to identify functional rooms based on zones and connectivity.
+NEXT: Implement the actual regeneration logic for trees and rocks.

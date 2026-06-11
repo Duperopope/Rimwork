@@ -1,78 +1,25 @@
-CHANGE: Add a method to detect functional rooms in the colony.
+CHANGE: Add a method to simulate resource regeneration over time.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool RemoveResourceAt(int x, int y)
+public class GameMap
 {
-    return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
-}
-// ... (lines omitted) ...
+    private readonly Cell[,] _grid;
+    private readonly List<Zone> _zones = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
 =======
-public bool RemoveResourceAt(int x, int y)
+public class GameMap
 {
-    return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
-}
+    private readonly Cell[,] _grid;
+    private readonly List<Zone> _zones = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
 
-/// <summary>
-/// Detects functional rooms in the colony.
-/// </summary>
-/// <returns>A list of functional rooms.</returns>
-public List<Room> GetFunctionalRooms()
-{
-    List<Room> functionalRooms = new List<Room>();
-
-    // Example: Detect rooms with at least 5 passable tiles.
-    for (int y = 0; y < Height; y++)
+    public void GenerateResourcesOverTime()
     {
-        for (int x = 0; x < Width; x++)
-        {
-            if (IsPassable(x, y))
-            {
-                // Check for a room of at least 5 passable tiles.
-                if (CountPassableTiles(x, y) >= 5)
-                {
-                    functionalRooms.Add(new Room(x, y, 5, 5));
-                }
-            }
-        }
+        // Placeholder for resource regeneration logic
     }
-
-    return functionalRooms;
-}
-
-/// <summary>
-/// Counts the number of passable tiles in a room starting from a given tile.
-/// </summary>
-/// <param name="x">The x-coordinate of the starting tile.</param>
-/// <param name="y">The y-coordinate of the starting tile.</param>
-/// <returns>The number of passable tiles in the room.</returns>
-private int CountPassableTiles(int x, int y)
-{
-    int count = 0;
-    Queue<(int, int)> queue = new Queue<(int, int)>();
-    queue.Enqueue((x, y));
-    bool[,] visited = new bool[Height, Width];
-    visited[y, x] = true;
-
-    while (queue.Count > 0)
-    {
-        var (cx, cy) = queue.Dequeue();
-        count++;
-
-        foreach (var (dx, dy) in new[] { (-1, 0), (1, 0), (0, -1), (0, 1) })
-        {
-            int nx = cx + dx;
-            int ny = cy + dy;
-
-            if (nx >= 0 && nx < Width && ny >= 0 && ny < Height && IsPassable(nx, ny) && !visited[ny, nx])
-            {
-                queue.Enqueue((nx, ny));
-                visited[ny, nx] = true;
-            }
-        }
-    }
-
-    return count;
-}
-// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Implement a method to identify the type of each functional room (e.g., Canteen, Sleeping Quarters).
+NEXT: Implement the logic to regrow trees and respawn rocks in the `GenerateResourcesOverTime` method.

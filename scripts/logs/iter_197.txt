@@ -1,37 +1,23 @@
-CHANGE: Add a method to simulate resource growth over time.
+CHANGE: Add a method to generate resources over time.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void GenerateResourcesOverTime()
+public void GenerateBasicRoomLayout()
 {
-    // Example: Generate resources based on some logic
-    for (int x = 0; x < Width; x++)
-    {
-        for (int y = 0; y < Height; y++)
-        {
-            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
-            {
-                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
-            }
-        }
-    }
+    // Example: Generate a simple room layout with a sleeping quarters and a canteen
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
+    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
 }
 =======
+public void GenerateBasicRoomLayout()
+{
+    // Example: Generate a simple room layout with a sleeping quarters and a canteen
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
+    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+}
+
 public void GenerateResourcesOverTime()
 {
-    // Example: Generate resources based on some logic
-    for (int x = 0; x < Width; x++)
-    {
-        for (int y = 0; y < Height; y++)
-        {
-            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
-            {
-                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
-            }
-        }
-    }
-
-    // Simulate resource growth over time
-    TickSaplings();
+    // Placeholder for resource generation logic
 }
 >>>>>>> REPLACE
-NEXT: Implement the `TickSaplings` method to handle sapling growth.
+NEXT: Implement the logic inside `GenerateResourcesOverTime` to periodically add resources to the map.

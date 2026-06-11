@@ -1,40 +1,27 @@
-CHANGE: Add a method to identify furniture types that contribute to room functionality.
+CHANGE: Add a method to simulate tree regrowth over time in the `GameWorld` class.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Furniture
+public class GameWorld
 {
-    public FurnitureKind Kind { get; }
-    public int X { get; }
-    public int Y { get; }
-    public Guid? OwnerId { get; set; }
-
-    public Furniture(FurnitureKind kind, int x, int y)
+    // ... (lines omitted) ...
+    public void GenerateBasicRoomLayout()
     {
-        Kind = kind;
-        X = x;
-        Y = y;
+        // ... (lines omitted) ...
     }
 }
 =======
-public class Furniture
+public class GameWorld
 {
-    public FurnitureKind Kind { get; }
-    public int X { get; }
-    public int Y { get; }
-    public Guid? OwnerId { get; set; }
-
-    public Furniture(FurnitureKind kind, int x, int y)
+    // ... (lines omitted) ...
+    public void GenerateBasicRoomLayout()
     {
-        Kind = kind;
-        X = x;
-        Y = y;
+        // ... (lines omitted) ...
     }
 
-    public bool IsFunctionalFurniture()
+    public void SimulateTreeRegrowth()
     {
-        // Example: Define which furniture types contribute to room functionality
-        return Kind == FurnitureKind.Bed || Kind == FurnitureKind.Table;
+        // Placeholder for tree regrowth logic
     }
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to check if a zone is functional based on the furniture inside it.
+NEXT: Implement the logic for tree regrowth in the `SimulateTreeRegrowth` method.

@@ -1,51 +1,49 @@
-CHANGE: Add a method to generate resources over time based on the biome.
+CHANGE: Add a method to track and manage resource consumption for building rooms.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void GenerateResourcesOverTime()
+public int CountFunctionalRooms()
 {
-    // Example: Generate resources based on some logic
-    for (int x = 0; x < Width; x++)
+    int functionalRoomCount = 0;
+    foreach (var zone in _zones)
     {
-        for (int y = 0; y < Height; y++)
+        if (IsZoneFunctional(zone))
         {
-            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
-            {
-                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
-            }
+            functionalRoomCount++;
         }
     }
+    return functionalRoomCount;
 }
 =======
-public void GenerateResourcesOverTime()
+public int CountFunctionalRooms()
 {
-    // Generate resources based on biome
-    foreach (var region in _regions)
+    int functionalRoomCount = 0;
+    foreach (var zone in _zones)
     {
-        for (int x = region.X; x < region.X + 10; x++)
+        if (IsZoneFunctional(zone))
         {
-            for (int y = region.Y; y < region.Y + 10; y++)
-            {
-                if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
-                {
-                    switch (region.Biome)
-                    {
-                        case "Forest":
-                            AddResource(ResourceKind.Tree, x, y);
-                            break;
-                        case "Desert":
-                            AddResource(ResourceKind.Rock, x, y);
-                            break;
-                        // Add more biomes as needed
-                    }
-                }
-            }
+            functionalRoomCount++;
         }
+    }
+    return functionalRoomCount;
+}
+
+private Dictionary<ResourceKind, int> _resourceConsumption = new();
+
+public void ConsumeResource(ResourceKind kind, int amount)
+{
+    if (_resourceConsumption.ContainsKey(kind))
+    {
+        _resourceConsumption[kind] += amount;
+    }
+    else
+    {
+        _resourceConsumption[kind] = amount;
     }
 }
 
-private void AddResource(ResourceKind kind, int x, int y)
+public int GetResourceConsumption(ResourceKind kind)
 {
-    _resources.Add(new ResourceNode(kind, x, y));
+    return _resourceConsumption.ContainsKey(kind) ? _resourceConsumption[kind] : 0;
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to remove resources when harvested.
+NEXT: Implement a method to check if the player has enough resources to build a room.

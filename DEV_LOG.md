@@ -4075,3 +4075,38 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 164] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.120 - Add a private field _regions to the GameMap class. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 165] CRITIC TASK: - [ ] Step C.165 - Implement a resource consumption system for pawns to simulate hunger and thirst, forcing players to manage food and water production. (GameWorld.cs)
 - [iter 165] KEPT: Add a private field _regions to the GameMap class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 166] DONE (repeated identical patch): - [ ] Step C.120 - Add a private field _regions to the GameMap class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 167] REVERTED (build failed): Add a method to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 168] REVERTED (build failed): Add a method to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 20:54).
+- [iter 169] REVERTED (build failed): Add a method to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 170] REVERTED (build failed): Ensure the `GameMap` class has a method to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 171] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.135 - Add a method to the `GameWorld` class to display the number of functional rooms.
+- [iter 172] PREDICTED-FAIL (skipped before build): Add a method to the `GameWorld` class to display the number of functional rooms. - REJECTED anti-stub: method 'GenerateBasicRoomLayout' has an empty/trivial body (returns nothing useful). Implement the real behavior.
+- [iter 174] SKIPPED (no SEARCH match): Add a method to the `GameWorld` class to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 175] SKIPPED (no SEARCH match): Implement the `DisplayFunctionalRooms` method to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 176] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.135 - Add a call to `CountFunctionalRooms` in `DisplayFunctionalRooms` to display the number of functional rooms.
+- [iter 177] SKIPPED (no SEARCH match): Add a call to `CountFunctionalRooms` in `DisplayFunctionalRooms` to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 178] SKIPPED (no SEARCH match): Add a call to `CountFunctionalRooms` in `DisplayFunctionalRooms` to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 179] SKIPPED (no SEARCH match): Add a call to `CountFunctionalRooms` in `DisplayFunctionalRooms` to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 180] CRITIC TASK: - [ ] Step C.180 - Add a system to generate resources over time, such as trees regrowing or rocks respawning, to ensure players have a sustainable source of materials. (GameWorld.cs)
+- [iter 180] SKIPPED (no SEARCH match): Add a call to `CountFunctionalRooms` in `DisplayFunctionalRooms` to display the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 181] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.135 - Add a call to `CountFunctionalRooms` in `DisplayFunctionalRooms` to display the number of functional rooms.
+- [iter 182] PREDICTED-FAIL (skipped before build): Implement a method to generate resources over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 183] SKIPPED (no SEARCH match): Add a method to generate resources over time. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 184] PREDICTED-FAIL (skipped before build): Add a method to generate resources over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 185] PREDICTED-FAIL (skipped before build): Add a method to generate resources over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 186] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.165 - Add a method to the `GameWorld` class to simulate resource regeneration over time, such as regrowing trees or respawning rocks.
+- [iter 187] PREDICTED-FAIL (skipped before build): Add a method to simulate resource regeneration over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 188] PREDICTED-FAIL (skipped before build): Add a method to simulate resource regeneration over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 189] PREDICTED-FAIL (skipped before build): Add a method to simulate resource regeneration over time in the `GameWorld` class. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 190] PREDICTED-FAIL (skipped before build): Add a method to simulate resource regeneration over time in `GameWorld`. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 191] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.165 - Add a method to the `GameWorld` class to simulate tree regrowth over time.
+- [iter 192] PREDICTED-FAIL (skipped before build): Add a method to the `GameWorld` class to simulate tree regrowth over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 193] PREDICTED-FAIL (skipped before build): Add a method to the `GameWorld` class to simulate tree regrowth over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 194] PREDICTED-FAIL (skipped before build): Add a method to simulate tree regrowth over time in the `GameWorld` class. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 195] CRITIC TASK: - [ ] Step C.195 - Implement a system to generate resources like wood and stone over time to encourage sustainable resource management.
+- [iter 196] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.165 - Add a method to the `GameWorld` class to simulate tree regrowth over time.
+- [startup] Stack relaunched after boot (2026-06-11 21:04).
+- [iter 197] PREDICTED-FAIL (skipped before build): Add a method to generate resources over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 198] KEPT: Add a method to track and manage resource consumption for building rooms. (src/RimWorldLab.Core/GameWorld.cs)

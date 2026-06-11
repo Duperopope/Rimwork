@@ -1,129 +1,23 @@
-CHANGE: Add a method to generate functional rooms in the GameWorld.
+CHANGE: Add a call to `CountFunctionalRooms` in `DisplayFunctionalRooms` to display the number of functional rooms.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void InitializeMap()
+public void DisplayFunctionalRooms()
 {
-    // Open terrain bounded by an outer wall. No pre-built rooms - the
-    // player builds their own base using the Build/Dig tools.
-    for (int y = 0; y < Height; y++)
+    foreach (var zone in _zones)
     {
-        for (int x = 0; x < Width; x++)
-        {
-            bool isSolid = x == 0 || y == 0 || x == Width - 1 || y == Height - 1;
-            _grid[y, x] = new Cell(isSolid, isSolid ? "Wall" : "Grass");
-        }
+        Console.WriteLine($"Zone: {zone.Kind} at ({zone.X}, {zone.Y}) - Size: {zone.Width}x{zone.Height}");
     }
-
-    // Carve a diagonal river across the map - impassable Water tiles
-    // pawns must walk along the bank of to haul Water from.
-    for (int y = 1; y < Height - 1; y++)
-    {
-        for (int x = 1; x < Width - 1; x++)
-// ... (lines omitted) ...
-                }
-
-                for (int i = 0; i < Height; i++)
-                {
-                    if ((x == Width / 4 && Math.Abs(y - Height / 2) <= 3) ||
-                        (x == Width * 3 / 4 && Math.Abs(y - Height / 2) <= 3))
-                    {
-                        _grid[y, x].IsSolid = true;
-                        _grid[y, x].TileType = "Water";
-                    }
-                }
-            }
-        }
-
-        // Scatter resource nodes on passable tiles, avoiding the top-left
-        // rooms reserved for the Canteen/Sleeping Quarters zones.
-        for (int y = 0; y < Height; y++)
-        {
-            for (int x = 0; x < Width; x++)
-            {
-                if (_grid[y, x].IsSolid) continue;
-                if (x < 11 && y < 5) continue;
-
-                int hash = (x * 73856093) ^ (y * 19349663);
-                int bucket = ((hash % 100) + 100) % 100;
-                if (bucket < 4)
-                    _resources.Add(new ResourceNode(ResourceKind.Tree, x, y));
-                else if (bucket < 6)
-                    _resources.Add(new ResourceNode(ResourceKind.Rock, x, y));
-            }
-        }
-// ... (lines omitted) ...
-        if (zone.Contains(x, y))
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
 =======
-public void InitializeMap()
+public void DisplayFunctionalRooms()
 {
-    // Open terrain bounded by an outer wall. No pre-built rooms - the
-    // player builds their own base using the Build/Dig tools.
-    for (int y = 0; y < Height; y++)
+    foreach (var zone in _zones)
     {
-        for (int x = 0; x < Width; x++)
-        {
-            bool isSolid = x == 0 || y == 0 || x == Width - 1 || y == Height - 1;
-            _grid[y, x] = new Cell(isSolid, isSolid ? "Wall" : "Grass");
-        }
+        Console.WriteLine($"Zone: {zone.Kind} at ({zone.X}, {zone.Y}) - Size: {zone.Width}x{zone.Height}");
     }
 
-    // Carve a diagonal river across the map - impassable Water tiles
-    // pawns must walk along the bank of to haul Water from.
-    for (int y = 1; y < Height - 1; y++)
-    {
-        for (int x = 1; x < Width - 1; x++)
-// ... (lines omitted) ...
-                }
-
-                for (int i = 0; i < Height; i++)
-                {
-                    if ((x == Width / 4 && Math.Abs(y - Height / 2) <= 3) ||
-                        (x == Width * 3 / 4 && Math.Abs(y - Height / 2) <= 3))
-                    {
-                        _grid[y, x].IsSolid = true;
-                        _grid[y, x].TileType = "Water";
-                    }
-                }
-            }
-        }
-
-        // Scatter resource nodes on passable tiles, avoiding the top-left
-        // rooms reserved for the Canteen/Sleeping Quarters zones.
-        for (int y = 0; y < Height; y++)
-        {
-            for (int x = 0; x < Width; x++)
-            {
-                if (_grid[y, x].IsSolid) continue;
-                if (x < 11 && y < 5) continue;
-
-                int hash = (x * 73856093) ^ (y * 19349663);
-                int bucket = ((hash % 100) + 100) % 100;
-                if (bucket < 4)
-                    _resources.Add(new ResourceNode(ResourceKind.Tree, x, y));
-                else if (bucket < 6)
-                    _resources.Add(new ResourceNode(ResourceKind.Rock, x, y));
-            }
-        }
-
-        // Generate functional rooms
-        GenerateFunctionalRooms();
-    }
-}
-
-private void GenerateFunctionalRooms()
-{
-    // Placeholder for generating functional rooms
-    // This method will be expanded in future steps
-    // For now, it simply reserves a small area for a Canteen
-    AddZone(new Zone(ZoneKind.Canteen, 1, 1, 10, 10));
-    AddZone(new Zone(ZoneKind.SleepingQuarters, 12, 1, 10, 10));
+    int functionalRoomCount = CountFunctionalRooms();
+    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
 }
 >>>>>>> REPLACE
-NEXT: Implement logic to ensure generated rooms
+NEXT: Ensure the `CountFunctionalRooms` method is correctly implemented and tested.

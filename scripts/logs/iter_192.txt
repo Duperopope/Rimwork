@@ -1,44 +1,22 @@
-CHANGE: Add a method to detect if a zone is functional
+CHANGE: Add a method to the `GameWorld` class to simulate tree regrowth over time.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Zone
+public class GameWorld
 {
-    public ZoneKind Kind { get; }
-    public int X { get; }
-    public int Y { get; }
-    public int Width { get; }
-    public int Height { get; }
-    public bool Contains(int x, int y) => x >= X && x < X + Width && y >= Y && y < Y + Height;
-    public (int X, int Y) CenterTile => (X + Width / 2, Y + Height / 2);
+    // ... (lines omitted) ...
 }
 =======
-public class Zone
+public class GameWorld
 {
-    public ZoneKind Kind { get; }
-    public int X { get; }
-    public int Y { get; }
-    public int Width { get; }
-    public int Height { get; }
-    public bool Contains(int x, int y) => x >= X && x < X + Width && y >= Y + Height;
-    public (int X, int Y) CenterTile => (X + Width / 2, Y + Height / 2);
+    // ... (lines omitted) ...
 
-    public bool IsFunctional(GameMap map)
+    /// <summary>
+    /// Simulates tree regrowth over time.
+    /// </summary>
+    public void SimulateTreeRegrowth()
     {
-        // Example: A zone is functional if it has at least one adjacent passable tile
-        for (int dx = -1; dx <= 1; dx++)
-        {
-            for (int dy = -1; dy <= 1; dy++)
-            {
-                int adjX = X + dx;
-                int adjY = Y + dy;
-                if (map.IsPassable(adjX, adjY))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
+        // Placeholder for tree regrowth logic
     }
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to generate functional rooms based on furniture placement
+NEXT: Implement the logic for tree regrowth within the `SimulateTreeRegrowth` method.

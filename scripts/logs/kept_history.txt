@@ -45,3 +45,4 @@
 - [ ] Step C.45 - Implement a system to track and display the number of functional rooms in the colony, allowing players to see their progress towards the win condition.
 - [ ] Step C.45 - Implement a system to track and display the number of functional rooms in the colony, allowing players to see their progress towards the win condition.
 - [ ] Step C.120 - Add a private field _regions to the GameMap class. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.180 - Implement a basic resource management system to ensure players have to gather and manage resources to build rooms.

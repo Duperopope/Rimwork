@@ -1,46 +1,15 @@
-CHANGE: Add a method to check if a zone is functional.
+CHANGE: Implement the `DisplayFunctionalRooms` method to display the number of functional rooms.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsTilePartOfRoom(int x, int y)
+public void DisplayFunctionalRooms()
 {
-    // Check if the tile is part of any room
-    foreach (var zone in Zones)
-    {
-        if (zone.Contains(x, y))
-        {
-            return true;
-        }
-    }
-    return false;
+    // Placeholder for displaying functional rooms
 }
 =======
-public bool IsTilePartOfRoom(int x, int y)
+public void DisplayFunctionalRooms()
 {
-    // Check if the tile is part of any room
-    foreach (var zone in Zones)
-    {
-        if (zone.Contains(x, y))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-public bool IsZoneFunctional(Zone zone)
-{
-    // A zone is considered functional if it has at least one passable tile
-    for (int y = zone.Y; y < zone.Y + zone.Height; y++)
-    {
-        for (int x = zone.X; x < zone.X + zone.Width; x++)
-        {
-            if (IsPassable(x, y))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
+    int functionalRoomCount = CountFunctionalRooms();
+    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to generate functional rooms.
+NEXT: Implement the `CountFunctionalRooms` method to count the number of functional rooms.

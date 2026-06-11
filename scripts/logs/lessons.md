@@ -64,3 +64,7 @@
 - Ensure all referenced fields and methods exist before adding new code.
 - Check for missing fields or properties before adding methods that depend on them.
 - Ensure all referenced fields exist in the current class or are properly passed in.
+- Check for existing method signatures before adding new methods.
+- Check for existing method signatures before adding new methods.
+- Check for existing method signatures before adding new methods.
+- Ensure the method name is unique in the class before adding it.

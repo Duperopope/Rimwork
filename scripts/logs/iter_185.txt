@@ -1,28 +1,23 @@
-CHANGE: Add a basic implementation for `GenerateBasicRoomLayout` to start generating rooms.
+CHANGE: Add a method to generate resources over time.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
 public void GenerateBasicRoomLayout()
 {
-    // TODO: Implement room layout generation
+    // Example: Generate a simple room layout with a sleeping quarters and a canteen
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
+    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
 }
 =======
 public void GenerateBasicRoomLayout()
 {
-    // Generate a simple sleeping quarters
-    int startX = 5;
-    int startY = 5;
-    int width = 4;
-    int height = 4;
-    Zone sleepingQuarters = new Zone(ZoneKind.SleepingQuarters, startX, startY, width, height);
-    AddZone(sleepingQuarters);
+    // Example: Generate a simple room layout with a sleeping quarters and a canteen
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
+    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+}
 
-    // Generate a simple canteen
-    startX = 15;
-    startY = 5;
-    width = 4;
-    height = 4;
-    Zone canteen = new Zone(ZoneKind.Canteen, startX, startY, width, height);
-    AddZone(canteen);
+public void GenerateResourcesOverTime()
+{
+    // Placeholder for resource generation logic
 }
 >>>>>>> REPLACE
-NEXT: Implement more detailed room generation logic, including resource placement and furniture.
+NEXT: Implement the logic inside GenerateResourcesOverTime to regrow trees and respawn rocks.

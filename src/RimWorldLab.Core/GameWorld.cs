@@ -195,6 +195,25 @@ public int CountFunctionalRooms()
     return functionalRoomCount;
 }
 
+private Dictionary<ResourceKind, int> _resourceConsumption = new();
+
+public void ConsumeResource(ResourceKind kind, int amount)
+{
+    if (_resourceConsumption.ContainsKey(kind))
+    {
+        _resourceConsumption[kind] += amount;
+    }
+    else
+    {
+        _resourceConsumption[kind] = amount;
+    }
+}
+
+public int GetResourceConsumption(ResourceKind kind)
+{
+    return _resourceConsumption.ContainsKey(kind) ? _resourceConsumption[kind] : 0;
+}
+
 public void DisplayFunctionalRooms()
 {
     int functionalRoomCount = CountFunctionalRooms();

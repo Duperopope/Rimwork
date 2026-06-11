@@ -1,21 +1,15 @@
-CHANGE: Start implementing a method to automatically generate functional rooms.
+CHANGE: Add a method to the `GameWorld` class to display the number of functional rooms.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void RefreshRooms()
+public void DisplayFunctionalRooms()
 {
-    // Placeholder for refreshing rooms
+    // Placeholder for displaying functional rooms
 }
 =======
-public void RefreshRooms()
+public void DisplayFunctionalRooms()
 {
-    // Placeholder for refreshing rooms
-    GenerateFunctionalRooms();
-}
-
-private void GenerateFunctionalRooms()
-{
-    // Start implementing the logic to generate functional rooms
-    // This is a placeholder for the actual implementation
+    int functionalRoomCount = CountFunctionalRooms();
+    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
 }
 >>>>>>> REPLACE
-NEXT: Implement the logic to identify and create functional rooms in the map.
+NEXT: Implement the `CountFunctionalRooms` method to count functional rooms.

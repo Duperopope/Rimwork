@@ -42,3 +42,5 @@
 - [ ] Step C.75 - Rename the new `TickSaplings` method to `TickSaplingsNew` in GameWorld.cs to avoid conflict with the existing method.
 - [ ] Step C.90 - Implement a resource consumption system to ensure pawns need to gather resources to survive and build structures, enhancing the gameplay challenge. (GameWorld.cs)
 - [ ] Step C.105 - Implement a system to automatically generate resource-rich areas on the map to encourage exploration and resource gathering. (GameWorld.cs)
+- [ ] Step C.135 - Add a call to `CountFunctionalRooms` in `DisplayFunctionalRooms` to display the number of functional rooms.
+- [ ] Step C.165 - Add a method to the `GameWorld` class to simulate tree regrowth over time.
