@@ -263,7 +263,7 @@ public void ConsumeFood(int amount)
 
 public bool IsZoneFunctional(Zone zone)
 {
-    // Basic check: zone must have at least one functional furniture item
+    // Check if the zone has at least one functional furniture item
     return _furniture.Any(f => f.X >= zone.X && f.X < zone.X + zone.Width &&
                               f.Y >= zone.Y && f.Y < zone.Y + zone.Height &&
                               f.IsFunctionalFurniture());

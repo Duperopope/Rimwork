@@ -63,3 +63,4 @@
 - [ ] Step C.90a - Implement a method to simulate resource regeneration for a single resource type, such as trees regrowing, in the `GameWorld` class.
 - [ ] Step C.90a - Implement a method to simulate resource regeneration for a single resource type, such as trees regrowing, in the `GameWorld` class.
 - [ ] Step E.99a - Implement the `IsZoneFunctional` method in src/RimWorldLab.Core/GameWorld.cs.
+- [ ] Step E.99a - Implement the `IsZoneFunctional` method in src/RimWorldLab.Core/GameWorld.cs.
