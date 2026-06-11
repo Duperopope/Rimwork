@@ -951,7 +951,17 @@ private void UpdateHeaderText()
     public List<string> ColonyEvents { get; } = new();
 
     /// <summary>Multi-scale world simulation (solar/planet/region layers).</summary>
-    public MacroSim Macro { get; } = new();
+    public MacroSim Macro { get; private set; } = new();
+
+    /// <summary>World-creation settings this world was generated with.</summary>
+    public WorldGenSettings GenSettings { get; private set; } = new();
+
+    /// <summary>Apply world-creation settings (call right after construction).</summary>
+    public void ApplyGenSettings(WorldGenSettings gen)
+    {
+        GenSettings = gen ?? new WorldGenSettings();
+        Macro = new MacroSim(GenSettings);
+    }
 
     /// <summary>How many Macro.WorldEvents have been surfaced into ColonyEvents.</summary>
     private int _surfacedWorldEvents = 0;

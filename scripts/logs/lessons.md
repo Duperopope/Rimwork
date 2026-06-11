@@ -150,3 +150,5 @@
 - Ensure Zone class has LocalMap property before using it.
 - Verify that the 'Zone' class has a 'LocalMap' property before using it.
 - Ensure all referenced properties and methods exist in the current context.
+- Ensure method definitions are within class braces and not outside.
+- Ensure methods are declared within class braces and not outside.

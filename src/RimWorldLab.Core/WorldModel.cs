@@ -51,16 +51,57 @@ public class WorldBody
     }
 }
 
+/// <summary>All the knobs of the world-creation screen (Down Here!).
+/// Fully deterministic: same settings = same universe.</summary>
+public class WorldGenSettings
+{
+    public int Seed { get; set; } = 12345;
+    public int PlanetCount { get; set; } = 3;       // 2..6 bodies
+    public float OrbitSpeedMult { get; set; } = 1f; // 0.25..4
+    public float BiomeShift { get; set; } = 0f;     // -1 cold .. +1 hot universe
+    public int PawnCount { get; set; } = 8;         // 4..16 starting colonists
+    public float AnimalDensity { get; set; } = 1f;  // 0..3
+    public int MapSize { get; set; } = 50;          // 50..128 local map side
+}
+
 /// <summary>The star system the whole game lives in (Scale 0).</summary>
 public class SolarSystem
 {
+    private static readonly string[] StarNames = { "Kerel", "Vanya", "Osmund", "Thara", "Belun", "Ciris" };
+    private static readonly string[] BodyNames = { "Rim", "Cinder", "Palemoon", "Verdis", "Holt", "Ashka", "Nivis", "Drossa" };
+
     public string StarName { get; } = "Kerel";
-    public List<WorldBody> Bodies { get; } = new()
+    public List<WorldBody> Bodies { get; } = new();
+
+    /// <summary>Default universe (legacy save/test compatibility).</summary>
+    public SolarSystem()
     {
-        new WorldBody("Rim",      "planet", 0.72f, 0.6f, 0.35f,  0.1f),
-        new WorldBody("Cinder",   "planet", 0.15f, 0.9f, 0.70f,  0.8f),
-        new WorldBody("Palemoon", "moon",   0.30f, 0.4f, 0.50f, -0.6f),
-    };
+        Bodies.Add(new WorldBody("Rim", "planet", 0.72f, 0.6f, 0.35f, 0.1f));
+        Bodies.Add(new WorldBody("Cinder", "planet", 0.15f, 0.9f, 0.70f, 0.8f));
+        Bodies.Add(new WorldBody("Palemoon", "moon", 0.30f, 0.4f, 0.50f, -0.6f));
+    }
+
+    /// <summary>Procedural universe from the world-creation settings.</summary>
+    public SolarSystem(WorldGenSettings gen)
+    {
+        var rng = new Random(gen.Seed);
+        StarName = StarNames[rng.Next(StarNames.Length)];
+        int count = Math.Clamp(gen.PlanetCount, 2, 6);
+        for (int i = 0; i < count; i++)
+        {
+            string name = BodyNames[(rng.Next(BodyNames.Length) + i) % BodyNames.Length] + (i > 0 && rng.Next(3) == 0 ? $"-{i}" : "");
+            bool moon = i > 0 && rng.Next(4) == 0;
+            float temp = Math.Clamp((float)(rng.NextDouble() * 2 - 1) * 0.8f + gen.BiomeShift * 0.5f, -1f, 1f);
+            float hab = i == 0
+                ? 0.6f + (float)rng.NextDouble() * 0.3f   // home stays livable
+                : (float)rng.NextDouble() * 0.7f;
+            Bodies.Add(new WorldBody(name, moon ? "moon" : "planet",
+                hab, 0.3f + (float)rng.NextDouble() * 0.7f,
+                (float)rng.NextDouble() * 0.8f,
+                i == 0 ? Math.Clamp(temp * 0.4f, -0.25f, 0.25f) : temp));
+        }
+    }
+
     /// <summary>Index into Bodies of the world the colony lives on.</summary>
     public int HomeBodyIndex { get; } = 0;
     public WorldBody HomeBody => Bodies[HomeBodyIndex];
@@ -111,7 +152,8 @@ public class MacroSim
 {
     private readonly Random _rng = new(777);
 
-    public SolarSystem System { get; } = new();
+    public SolarSystem System { get; }
+    public WorldGenSettings Gen { get; }
     public WorldRegion[,] Regions => System.HomeBody.Regions;
     public List<ExternalSite> Sites { get; } = new();
     public List<string> WorldEvents { get; } = new();
@@ -130,8 +172,12 @@ public class MacroSim
         [SimLOD.Solar] = 0, [SimLOD.Planet] = 0, [SimLOD.Region] = 0, [SimLOD.Local] = 0
     };
 
-    public MacroSim()
+    public MacroSim() : this(new WorldGenSettings()) { }
+
+    public MacroSim(WorldGenSettings gen)
     {
+        Gen = gen ?? new WorldGenSettings();
+        System = new SolarSystem(Gen);
         Regions[2, 2].IsColonyRegion = true;
 
         Sites.Add(new ExternalSite("Fort Ashvale", "Iron Compact", -0.6f, 120f));

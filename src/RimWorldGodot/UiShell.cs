@@ -87,7 +87,7 @@ public partial class UiShell : CanvasLayer
 
     private void ShowOnly(Control screen)
     {
-        foreach (var c in new[] { _menu, _hud, _options, _devTab, _credits, _saveScreen })
+        foreach (var c in new[] { _menu, _hud, _options, _devTab, _credits, _saveScreen, _genScreen })
             if (c != null) c.Visible = c == screen;
         _game.Paused = screen != _hud;
     }
@@ -114,18 +114,7 @@ public partial class UiShell : CanvasLayer
         box.AddChild(sub);
         box.AddChild(new Control { CustomMinimumSize = new Vector2(0, 16) });
 
-        box.AddChild(Btn("Nouvelle partie", () =>
-        {
-            if (_game.World != null && _game.World.TotalTicks > 0)
-            {
-                GD.Print("[FLOW] New Game: resetting colony (scene reload).");
-                GetTree().ReloadCurrentScene();
-                return;
-            }
-            GD.Print("[FLOW] New Game: started.");
-            _game.AlertText = "Colonie fondée — bonne chance !";
-            ShowOnly(_hud);
-        }));
+        box.AddChild(Btn("Nouvelle partie", () => OpenWorldGenScreen()));
         box.AddChild(Btn("Continuer", () => OpenSaveScreen(saveMode: false)));
         box.AddChild(Btn("Options", () => ShowOnly(_options)));
         box.AddChild(Btn("Dev / Diagnostics", () => ShowOnly(_devTab)));
@@ -290,6 +279,75 @@ public partial class UiShell : CanvasLayer
                 $"Relations: {p.Relationships.Count} connaissances\n" +
                 $"Souvenirs récents:\n{(mem.Length > 0 ? mem : "  (aucun)")}";
         }
+    }
+
+    // ==================================================================
+    // WORLD CREATION SCREEN (Down Here! - seed-driven universe)
+    // ==================================================================
+    private Control _genScreen;
+
+    private (HSlider Slider, Label Val) GenRow(VBoxContainer box, string label, double min, double max, double val, double step = 1)
+    {
+        var row = new HBoxContainer();
+        row.AddChild(new Label { Text = label, CustomMinimumSize = new Vector2(230, 0) });
+        var sl = new HSlider { MinValue = min, MaxValue = max, Step = step, Value = val, CustomMinimumSize = new Vector2(220, 20) };
+        var vl = new Label { Text = val.ToString("0.##"), CustomMinimumSize = new Vector2(60, 0) };
+        sl.ValueChanged += v => vl.Text = v.ToString("0.##");
+        row.AddChild(sl); row.AddChild(vl);
+        box.AddChild(row);
+        return (sl, vl);
+    }
+
+    private void OpenWorldGenScreen()
+    {
+        if (_genScreen != null) _genScreen.QueueFree();
+        _genScreen = new Control { AnchorRight = 1, AnchorBottom = 1 };
+        AddChild(_genScreen);
+        var center = new CenterContainer { AnchorRight = 1, AnchorBottom = 1 };
+        _genScreen.AddChild(center);
+        var panel = Panel(); center.AddChild(panel);
+        var box = new VBoxContainer(); panel.AddChild(box);
+        box.AddThemeConstantOverride("separation", 6);
+        box.AddChild(Title("CRÉATION DU MONDE"));
+        box.AddChild(new Label { Text = "Le même seed produit toujours le même univers (déterministe)." });
+
+        var seedRow = new HBoxContainer();
+        seedRow.AddChild(new Label { Text = "Seed", CustomMinimumSize = new Vector2(230, 0) });
+        var seedEdit = new LineEdit { Text = new Random().Next(1, 999999).ToString(), CustomMinimumSize = new Vector2(150, 0) };
+        var dice = new Button { Text = "🎲" };
+        dice.Pressed += () => seedEdit.Text = new Random().Next(1, 999999).ToString();
+        seedRow.AddChild(seedEdit); seedRow.AddChild(dice);
+        box.AddChild(seedRow);
+
+        var planets = GenRow(box, "Corps du système", 2, 6, 3);
+        var orbit = GenRow(box, "Vitesse d'orbite", 0.25, 4, 1, 0.25);
+        var biome = GenRow(box, "Climat de l'univers (froid↔chaud)", -1, 1, 0, 0.1);
+        var pawns = GenRow(box, "Colons de départ", 4, 16, 8);
+        var animals = GenRow(box, "Densité de faune", 0, 3, 1, 0.25);
+        var mapSize = GenRow(box, "Taille des cartes locales", 50, 128, 64, 2);
+
+        box.AddChild(new Control { CustomMinimumSize = new Vector2(0, 10) });
+        var create = new Button { Text = "Créer le monde", CustomMinimumSize = new Vector2(260, 46) };
+        create.Pressed += () =>
+        {
+            int seed = int.TryParse(seedEdit.Text, out var sv) ? sv : 12345;
+            var gen = new WorldGenSettings
+            {
+                Seed = seed,
+                PlanetCount = (int)planets.Slider.Value,
+                OrbitSpeedMult = (float)orbit.Slider.Value,
+                BiomeShift = (float)biome.Slider.Value,
+                PawnCount = (int)pawns.Slider.Value,
+                AnimalDensity = (float)animals.Slider.Value,
+                MapSize = (int)mapSize.Slider.Value,
+            };
+            GD.Print($"[FLOW] New Game: world created (seed {seed}).");
+            _game.NewGame(gen);
+            ShowOnly(_hud);
+        };
+        box.AddChild(create);
+        box.AddChild(Btn("Retour", () => ShowOnly(_menu)));
+        ShowOnly(_genScreen);
     }
 
     // ==================================================================

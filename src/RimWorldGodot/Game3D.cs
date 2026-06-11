@@ -124,6 +124,38 @@ public partial class Game3D : Node3D
         AlertText = $"Expédition sur la tuile #{tileIdx} ({biome}) — molette arrière à fond: retour planète";
     }
 
+    /// <summary>Down Here! world creation: build a fresh universe from the
+    /// creation-screen settings (seed, size, pawns, planets, orbits).</summary>
+    public void NewGame(WorldGenSettings gen)
+    {
+        var w = new GameWorldManager(gen.MapSize, gen.MapSize);
+        w.ApplyGenSettings(gen);
+        var rng = new Random(gen.Seed);
+        string[] names = { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt", "Iris", "Joren", "Kira", "Lund", "Mara", "Nils", "Opal", "Pell" };
+        for (int i = 0; i < Math.Clamp(gen.PawnCount, 4, 16); i++)
+        {
+            int x, y;
+            do { x = rng.Next(0, gen.MapSize); y = rng.Next(0, gen.MapSize); } while (!w.Map.IsPassable(x, y));
+            w.RegisterThing(new Pawn(names[i % names.Length], x, y));
+        }
+        World = w;
+        _colonyWorld = w;
+        VisitedTileIdx = -1;
+        OrbitSpeedMult = gen.OrbitSpeedMult;
+        RebuildLocalVisuals();
+        // Rebuild macro views for the new universe
+        _worldViewRoot?.QueueFree();
+        _solarRoot?.QueueFree();
+        _orbiters.Clear();
+        _hexCenters.Clear();
+        BuildWorldView();
+        SetViewLayer("Local");
+        _camRig.Position = new Vector3(gen.MapSize * 0.28f, 0, gen.MapSize * 0.24f);
+        AlertText = $"Monde créé (seed {gen.Seed}) — système {World.Macro.System.StarName}, {World.Macro.System.Bodies.Count} corps.";
+    }
+
+    public float OrbitSpeedMult { get; set; } = 1f;
+
     /// <summary>Swap in a loaded world (save system) and rebuild visuals.</summary>
     public void LoadWorld(GameWorldManager w)
     {
@@ -326,7 +358,7 @@ public partial class Game3D : Node3D
             _cloudHolder.RotateY((float)delta * 0.004f);
         if (_solarRoot != null && _solarRoot.Visible)
             foreach (var (nodeO, _, speed, _) in _orbiters)
-                nodeO.RotateY((float)delta * speed);
+                nodeO.RotateY((float)delta * speed * OrbitSpeedMult);
 
         // Remote view control for visual self-verification:
         // scripts/viewcmd.txt containing Local/Planet/Solar switches the layer.
