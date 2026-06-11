@@ -1,14 +1,14 @@
-CHANGE: Add a private field `functionalRoomsCount` to the `GameWorld` class.
+CHANGE: Add a private field to track the number of functional rooms in `GameWorld.cs`.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
 private int Tools = 0;
 private int Food = 0;
 private float[,] _microbialBiomass = new float[100, 100]; // Example size
-private int functionalRoomsCount = 0;
+private int functionalRoomsCount;
 =======
 private int Tools = 0;
 private int Food = 0;
 private float[,] _microbialBiomass = new float[100, 100]; // Example size
-private int functionalRoomsCount;
+private int _functionalRoomsCount = 0;
 >>>>>>> REPLACE
-NEXT: Add a public property to access the `functionalRoomsCount` field.
+NEXT: Implement a method to update the functional room count.

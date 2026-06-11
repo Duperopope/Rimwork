@@ -477,3 +477,7 @@ GameWorld
 cookBonus
 GameWorld
 cookBonus
+GameWorld
+functionalRoomsCount
+GameWorld
+functionalRoomsCount

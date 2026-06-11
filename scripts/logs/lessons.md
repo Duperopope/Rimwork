@@ -157,3 +157,4 @@
 - "Ensure fields are not already defined before adding them."
 - Check for existing field names before adding new ones in the same class.
 - Check for existing field definitions before adding a new one.
+- Always check for existing field names in the target class before adding new ones.
