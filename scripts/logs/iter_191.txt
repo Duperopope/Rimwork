@@ -1,27 +1,39 @@
-CHANGE: Add a method to assign pawns to build tasks based on their skills.
+CHANGE: Add a method to determine if a zone has enough functional furniture.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void DisplayFunctionalRooms()
+public class GameWorld
 {
-    int functionalRoomCount = CountFunctionalRooms();
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+
+public GameWorld()
+{
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
+}
 =======
-public void DisplayFunctionalRooms()
+public class GameWorld
 {
-    int functionalRoomCount = CountFunctionalRooms();
-    AssignPawnsToBuildTasks();
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+
+public GameWorld()
+{
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
 }
 
-private void AssignPawnsToBuildTasks()
+public bool HasEnoughFunctionalFurniture(Zone zone, int requiredCount)
 {
-    foreach (var pawn in Pawns)
+    if (zone == null)
     {
-        if (IsPawnSkilledEnough(pawn, SkillKind.Construction, 5.0f))
-        {
-            // Assign build task to the pawn
-            // This is a placeholder for actual task assignment logic
-            pawn.Tasks.Add(new BuildTask(pawn, "BuildWall"));
-        }
+        return false;
     }
+
+    int functionalFurnitureCount = zone.LocalMap.Furniture.Count(furniture => furniture.IsFunctionalFurniture());
+    return functionalFurnitureCount >= requiredCount;
 }
 >>>>>>> REPLACE
-NEXT: Implement the actual logic to assign tasks based on resource needs.
+NEXT: Ensure the method correctly references existing properties and methods.

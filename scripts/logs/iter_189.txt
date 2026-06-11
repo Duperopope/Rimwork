@@ -1,28 +1,22 @@
-CHANGE: Add a method to assign pawns to build tasks based on their skills and the current needs of the colony.
+CHANGE: Add a method to determine if a zone has enough functional furniture
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void DisplayFunctionalRooms()
+public class GameWorld
 {
-    int functionalRoomCount = CountFunctionalRooms();
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+// ... (lines omitted) ...
 =======
-public void DisplayFunctionalRooms()
+public class GameWorld
 {
-    int functionalRoomCount = CountFunctionalRooms();
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
 
-    AssignPawnsToBuildTasks();
-}
-
-private void AssignPawnsToBuildTasks()
-{
-    // Placeholder for the actual implementation
-    foreach (var pawn in Pawns)
+    public bool HasEnoughFunctionalFurnitureInZone(Zone zone, int requiredCount)
     {
-        // Example: Assign pawns with high construction skill to build tasks
-        if (IsPawnSkilledEnough(pawn, SkillKind.Construction, 5.0f))
-        {
-            // Logic to assign build tasks to pawns
-        }
+        var functionalFurnitureCount = _furniture.Count(f => f.IsFunctionalFurniture() && zone.Contains(f.X, f.Y));
+        return functionalFurnitureCount >= requiredCount;
     }
-}
+// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Implement the logic to assign build tasks to pawns based on their skills and the current needs of the colony.
+NEXT: Implement the logic to check if a zone has enough functional furniture based on the existing properties and methods.

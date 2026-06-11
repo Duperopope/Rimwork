@@ -1,14 +1,29 @@
-CHANGE: Add a method to assign pawns to tasks based on their sleep need in GameWorld.cs
+CHANGE: Implement a method to check if a zone has enough functional furniture by accessing the zone's map and furniture list.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+```csharp
+public class GameWorld
 {
+    // ... (existing content) ...
 }
+```
 =======
-public bool IsZoneFunctional(Zone zone)
+```csharp
+public class GameWorld
 {
-    // Placeholder implementation for now
-    return true;
+    // ... (existing content) ...
+
+    public bool HasEnoughFunctionalFurniture(Zone zone, int requiredCount)
+    {
+        if (zone.LocalMap == null)
+        {
+            return false;
+        }
+
+        int functionalFurnitureCount = zone.LocalMap.Furniture.Count(furniture => furniture.IsFunctionalFurniture());
+        return functionalFurnitureCount >= requiredCount;
+    }
 }
+```
 >>>>>>> REPLACE
-NEXT: Implement the actual logic to assign pawns to tasks based on their sleep need.
+NEXT: Implement a method to check if a zone has enough functional furniture by accessing the zone's map and furniture list.

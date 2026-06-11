@@ -1,58 +1,36 @@
-CHANGE: Add a method to generate resources over time.
+CHANGE: Add a method to determine if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public int CountFunctionalRooms()
+public class GameWorld
 {
-    int functionalRoomCount = 0;
-    foreach (var zone in Zones)
-    {
-        if (IsZoneFunctional(zone))
-        {
-            functionalRoomCount++;
-        }
-    }
-    return functionalRoomCount;
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+
+public GameWorld()
+{
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
 }
-// ... (lines omitted) ...
 =======
-public int CountFunctionalRooms()
+public class GameWorld
 {
-    int functionalRoomCount = 0;
-    foreach (var zone in Zones)
-    {
-        if (IsZoneFunctional(zone))
-        {
-            functionalRoomCount++;
-        }
-    }
-    return functionalRoomCount;
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+
+public GameWorld()
+{
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
 }
 
-public void GenerateResourcesOverTime()
+public bool IsZoneFunctional(Zone zone)
 {
-    // Example: Regenerate trees and rocks over time
-    foreach (var resource in Resources)
-    {
-        if (resource.Kind == ResourceKind.Tree)
-        {
-            // Logic to regenerate trees
-            // Example: Add a sapling if the tree is cut down
-            if (!IsPlantable(resource.X, resource.Y))
-            {
-                AddSapling(resource.X, resource.Y, 100); // 100 ticks to grow
-            }
-        }
-        else if (resource.Kind == ResourceKind.Rock)
-        {
-            // Logic to respawn rocks
-            // Example: Respawn rocks every 500 ticks
-            if (TotalTicks % 500 == 0)
-            {
-                _resources.Add(new ResourceNode(ResourceKind.Rock, resource.X, resource.Y));
-            }
-        }
-    }
+    // Example: Check if the zone has enough functional furniture
+    int requiredFurnitureCount = 5; // Example requirement
+    int functionalFurnitureCount = zone.LocalMap.Furniture.Count(f => f.IsFunctionalFurniture());
+    return functionalFurnitureCount >= requiredFurnitureCount;
 }
-// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Implement logic to regenerate trees and rocks over time.
+NEXT: Implement a method to count the number of functional rooms in the game world.

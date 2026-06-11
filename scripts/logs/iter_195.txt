@@ -1,36 +1,27 @@
-CHANGE: Add a method to assign pawns to tasks based on their needs and skills.
+CHANGE: Add a method to check if a zone is functional based on its kind and furniture.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void DisplayFunctionalRooms()
+public bool IsZoneFunctional(Zone zone)
 {
-    int functionalRoomCount = CountFunctionalRooms();
-=======
-public void DisplayFunctionalRooms()
-{
-    int functionalRoomCount = CountFunctionalRooms();
-    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
+    // Example: Define which zones contribute to room functionality
+    return zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters;
 }
-public void AssignPawnsToTasks()
+=======
+public bool IsZoneFunctional(Zone zone)
 {
-    foreach (var pawn in Pawns)
+    // Check if the zone kind contributes to room functionality
+    if (zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters)
     {
-        if (pawn.Needs.Food < 50)
+        // Check if there is any functional furniture in the zone
+        foreach (var furniture in _furniture)
         {
-            var nearestFoodZone = FindNearestZoneTile(ZoneKind.Canteen, pawn.X, pawn.Y);
-            if (nearestFoodZone.HasValue)
+            if (furniture.IsFunctionalFurniture() && zone.Contains(furniture.X, furniture.Y))
             {
-                pawn.Tasks.AddTask(new Task(TaskKind.Eat, nearestFoodZone.Value));
-            }
-        }
-        else if (pawn.Needs.Sleep < 50)
-        {
-            var nearestSleepZone = FindNearestZoneTile(ZoneKind.SleepingQuarters, pawn.X, pawn.Y);
-            if (nearestSleepZone.HasValue)
-            {
-                pawn.Tasks.AddTask(new Task(TaskKind.Sleep, nearestSleepZone.Value));
+                return true;
             }
         }
     }
+    return false;
 }
 >>>>>>> REPLACE
-NEXT: Implement additional task assignments for other needs and skills.
+NEXT: Implement a method to identify and count functional rooms in the game world.

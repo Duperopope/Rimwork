@@ -378,6 +378,8 @@ public partial class Game3D : Node3D
     {
         if (ev is InputEventKey k && k.Pressed && !k.Echo && (k.Keycode == Key.Tab || k.Keycode == Key.M))
             ToggleWorldView();
+        if (ev is InputEventKey kc && kc.Pressed && !kc.Echo && kc.Keycode == Key.C && _cloudHolder != null)
+            _cloudHolder.Visible = !_cloudHolder.Visible;
         if (ev is InputEventMouseButton mb && mb.Pressed)
         {
             if (mb.ButtonIndex == MouseButton.WheelUp) _zoom = Math.Clamp(_zoom - CamZoomSpeed, 8f, 45f);
@@ -887,23 +889,34 @@ public partial class Game3D : Node3D
                 MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.35f, 0.34f, 0.36f) } });
         }
 
-        // --- Clouds: drifting flattened blobs
+        // --- Clouds: stylized chunky clusters (Before We Leave-inspired:
+        // fat rounded puffs in groups, drifting slowly). Toggle with key C.
         _cloudHolder = new Node3D();
         _planetSpin.AddChild(_cloudHolder);
-        var mmC = new MultiMesh { TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
-            Mesh = new SphereMesh { Radius = 1.1f, Height = 0.8f }, InstanceCount = 38 };
         var crng = new Random(7);
-        for (int ci = 0; ci < 38; ci++)
+        int clusters = 14;
+        var puffXf = new List<Transform3D>();
+        for (int ci = 0; ci < clusters; ci++)
         {
-            var dir = new Vector3((float)crng.NextDouble() - 0.5f, (float)(crng.NextDouble() - 0.5f) * 0.8f, (float)crng.NextDouble() - 0.5f).Normalized();
+            var dir = new Vector3((float)crng.NextDouble() - 0.5f, (float)(crng.NextDouble() - 0.5f) * 0.9f, (float)crng.NextDouble() - 0.5f).Normalized();
             var up2 = dir;
             var e2 = up2.Cross(Math.Abs(up2.Y) < 0.99f ? Vector3.Up : Vector3.Right).Normalized();
             var n3 = e2.Cross(up2);
-            float sc = 0.8f + (float)crng.NextDouble() * 1.6f;
-            mmC.SetInstanceTransform(ci, new Transform3D(new Basis(e2 * sc, up2 * 0.5f, n3 * sc), dir * (GlobeRadius * 1.045f)));
+            int puffs = 3 + crng.Next(4);
+            for (int k = 0; k < puffs; k++)
+            {
+                float ox = ((float)crng.NextDouble() - 0.5f) * 3.2f;
+                float oz = ((float)crng.NextDouble() - 0.5f) * 2.0f;
+                float sc = 0.9f + (float)crng.NextDouble() * 1.3f;
+                var pos = (dir * (GlobeRadius * 1.06f)) + e2 * ox + n3 * oz;
+                puffXf.Add(new Transform3D(new Basis(e2 * sc, up2 * (sc * 0.55f), n3 * sc), pos));
+            }
         }
+        var mmC = new MultiMesh { TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+            Mesh = new SphereMesh { Radius = 1.0f, Height = 2.0f, RadialSegments = 10, Rings = 6 }, InstanceCount = puffXf.Count };
+        for (int i2 = 0; i2 < puffXf.Count; i2++) mmC.SetInstanceTransform(i2, puffXf[i2]);
         _cloudHolder.AddChild(new MultiMeshInstance3D { Multimesh = mmC,
-            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(1f, 1f, 1f, 0.85f), Transparency = BaseMaterial3D.TransparencyEnum.Alpha } });
+            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.97f, 0.96f, 0.99f), Roughness = 1f } });
 
         // --- Atmosphere halo
         _planetSpin.AddChild(new MeshInstance3D
@@ -955,7 +968,7 @@ public partial class Game3D : Node3D
         _tileHighlight = new MeshInstance3D { Visible = false };
         _planetSpin.AddChild(_tileHighlight);
 
-        _planetTitle.Text = body.Name.ToUpper() + " — " + body.Kind + "  (molette: zoom, clic droit: pivoter, clic: tuile, Tab: système)";
+        _planetTitle.Text = body.Name.ToUpper() + " — " + body.Kind + "  (molette: zoom · clic droit: pivoter · clic: tuile · C: nuages · Tab: système)";
         // Face the colony/land toward the camera at first sight.
         _planetSpin.Rotation = Vector3.Zero;
         _planetSpin.RotateY(Mathf.DegToRad(45));

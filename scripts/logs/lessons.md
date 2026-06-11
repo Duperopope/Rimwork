@@ -139,3 +139,13 @@
 - Ensure correct syntax and placement of code within methods and classes.
 - Ensure method implementations are complete and syntactically correct before adding new methods.
 - Ensure method bodies are correctly closed and placed within classes.
+- Ensure new methods are properly placed and formatted within the class structure.
+- Ensure new methods are properly placed within existing classes and do not interfere with method declarations.
+- Ensure Zone class has LocalMap property or add necessary extension method.
+- "Ensure Zone class has LocalMap property or appropriate method before use."
+- Ensure `LocalMap` is defined or passed to the method to avoid CS0103 errors.
+- Ensure Zone class has LocalMap property or appropriate extension method before using it.
+- Ensure Zone class has LocalMap property or provide a method to access it.
+- Ensure Zone class has LocalMap property or appropriate extension method before using it.
+- Ensure Zone class has LocalMap property before using it.
+- Verify that the 'Zone' class has a 'LocalMap' property before using it.

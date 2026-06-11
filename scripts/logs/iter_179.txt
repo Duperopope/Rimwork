@@ -1,18 +1,29 @@
-CHANGE: Add `ResourceKind` enum values for 'Water' and 'Energy'.
+CHANGE: Add a method to check if a zone is functional based on placed furniture.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public enum ResourceKind
+public class GameWorld
 {
-    Tree,
-    Rock
-}
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+// ... (lines omitted) ...
 =======
-public enum ResourceKind
+public class GameWorld
 {
-    Tree,
-    Rock,
-    Water,
-    Energy
-}
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+
+    public bool IsZoneFunctional(Zone zone)
+    {
+        // Check if the zone contains at least one functional furniture
+        foreach (var furniture in Furniture)
+        {
+            if (furniture.IsFunctionalFurniture() && zone.Contains(furniture.X, furniture.Y))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Implement a method to track energy consumption.
+NEXT: Implement a method to count the number of functional rooms in the game world.

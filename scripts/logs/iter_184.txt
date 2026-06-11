@@ -1,39 +1,15 @@
-CHANGE: Add a method to display total resource consumption for each resource kind.
+CHANGE: Add a method to check if a zone is functional based on its furniture.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-    public int GetTotalResourceConsumption(ResourceKind kind)
-    {
-        int totalConsumption = 0;
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-        {
-            if (pawnConsumption.ContainsKey(kind))
-            {
-                totalConsumption += pawnConsumption[kind];
-            }
-        }
-        return totalConsumption;
-    }
+public bool IsZoneFunctional(Zone zone)
+{
+    // ... (lines omitted) ...
+}
 =======
-    public int GetTotalResourceConsumption(ResourceKind kind)
-    {
-        int totalConsumption = 0;
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-        {
-            if (pawnConsumption.ContainsKey(kind))
-            {
-                totalConsumption += pawnConsumption[kind];
-            }
-        }
-        return totalConsumption;
-    }
-
-    public void DisplayResourceConsumption()
-    {
-        foreach (var kind in Enum.GetValues<ResourceKind>())
-        {
-            int totalConsumption = GetTotalResourceConsumption(kind);
-            Console.WriteLine($"{kind}: Total Consumption = {totalConsumption}");
-        }
-    }
+public bool IsZoneFunctional(Zone zone)
+{
+    // Check if the zone has at least one functional furniture
+    return zone.LocalMap.Furniture.Any(f => f.IsFunctionalFurniture());
+}
 >>>>>>> REPLACE
-NEXT: Add a method to display recycled resources for each resource kind.
+NEXT: Implement a method to assign pawns to rooms based on their needs.

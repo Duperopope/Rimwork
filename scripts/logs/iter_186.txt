@@ -1,30 +1,15 @@
-CHANGE: Add missing closing brace in `GetTotalResourceConsumption` method.
+CHANGE: Add a method to check if a zone has sufficient functional furniture.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public int GetTotalResourceConsumption(ResourceKind kind)
+public bool IsZoneFunctional(Zone zone)
 {
-    int totalConsumption = 0;
-    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-    {
-        if (pawnConsumption.ContainsKey(kind))
-        {
-            totalConsumption += pawnConsumption[kind];
-        }
-    }
-    return totalConsumption;
+    // ... (lines omitted) ...
 }
 =======
-public int GetTotalResourceConsumption(ResourceKind kind)
+public bool IsZoneFunctional(Zone zone)
 {
-    int totalConsumption = 0;
-    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-    {
-        if (pawnConsumption.ContainsKey(kind))
-        {
-            totalConsumption += pawnConsumption[kind];
-        }
-    }
-    return totalConsumption;
+    var functionalFurnitureCount = zone.LocalMap.Furniture.Count(f => f.IsFunctionalFurniture());
+    return functionalFurnitureCount > 0;
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to display total resource consumption for each resource kind.
+NEXT: Implement a method to assign pawns to zones based on their needs.

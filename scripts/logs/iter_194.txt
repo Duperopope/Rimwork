@@ -1,37 +1,16 @@
-CHANGE: Add a method to assign pawns to tasks based on their needs and skills.
+CHANGE: Add a method to check if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void DisplayFunctionalRooms()
+public bool IsZoneFunctional(Zone zone)
 {
-    int functionalRoomCount = CountFunctionalRooms();
-=======
-public void DisplayFunctionalRooms()
-{
-    int functionalRoomCount = CountFunctionalRooms();
-    AssignPawnsToTasks();
+    // Example: Define which zones contribute to room functionality
+    return zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters;
 }
-
-private void AssignPawnsToTasks()
+=======
+public bool IsZoneFunctional(Zone zone)
 {
-    foreach (var pawn in Pawns)
-    {
-        if (pawn.Hunger > 50)
-        {
-            var foodZone = FindNearestZoneTile(ZoneKind.Canteen, pawn.X, pawn.Y);
-            if (foodZone.HasValue)
-            {
-                pawn.Tasks.AddTask("Eat", foodZone.Value);
-            }
-        }
-        else if (pawn.Fatigue > 50)
-        {
-            var sleepZone = FindNearestZoneTile(ZoneKind.SleepingQuarters, pawn.X, pawn.Y);
-            if (sleepZone.HasValue)
-            {
-                pawn.Tasks.AddTask("Sleep", sleepZone.Value);
-            }
-        }
-    }
+    // Example: Define which zones contribute to room functionality
+    return zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters;
 }
 >>>>>>> REPLACE
-NEXT: Implement more detailed task assignment logic based on pawn skills and other needs.
+NEXT: Implement a method to count functional rooms in the game world.

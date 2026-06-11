@@ -1,23 +1,39 @@
-CHANGE: Add a method to determine if a pawn is skilled enough for a task.
+CHANGE: Add a method to determine if a zone has enough functional furniture
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public int GetResourceConsumption(ResourceKind kind)
+public void TrackRecycledResource(ResourceKind kind, int amount)
 {
-    return _resourceConsumption.ContainsKey(kind) ? _resourceConsumption[kind] : 0;
+    if (_recycledResources.ContainsKey(kind))
+    {
+        _recycledResources[kind] += amount;
+    }
+    else
+    {
+        _recycledResources[kind] = amount;
+    }
 }
 =======
-public int GetResourceConsumption(ResourceKind kind)
+public void TrackRecycledResource(ResourceKind kind, int amount)
 {
-    return _resourceConsumption.ContainsKey(kind) ? _resourceConsumption[kind] : 0;
+    if (_recycledResources.ContainsKey(kind))
+    {
+        _recycledResources[kind] += amount;
+    }
+    else
+    {
+        _recycledResources[kind] = amount;
+    }
 }
 
-public bool IsPawnSkilledEnough(Pawn pawn, SkillKind requiredSkill, float requiredLevel)
+public bool HasEnoughFunctionalFurniture(Zone zone, int requiredCount)
 {
-    if (pawn.SkillXP.TryGetValue(requiredSkill, out float skillLevel))
+    if (zone == null)
     {
-        return skillLevel >= requiredLevel;
+        return false;
     }
-    return false;
+
+    var functionalFurnitureCount = zone.LocalMap._furniture.Count(furniture => furniture.IsFunctionalFurniture());
+    return functionalFurnitureCount >= requiredCount;
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to find the most suitable pawn for a build task.
+NEXT: Add a method to update the functional room count based on furniture requirements

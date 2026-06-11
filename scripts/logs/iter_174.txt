@@ -1,23 +1,36 @@
-CHANGE: Implement method to track pawn resource consumption in `GameWorld.cs`.
+CHANGE: Implement a method to check if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-        {
-            totalConsumption += pawnConsumption[kind];
-        }
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
     }
-    return totalConsumption;
-}
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
 =======
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-        {
-            if (pawnConsumption.TryGetValue(kind, out int consumption))
-            {
-                totalConsumption += consumption;
-            }
-        }
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
     }
-    return totalConsumption;
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
+    }
+    else
+    {
+        _pawnResourceConsumption[pawnId][kind] = amount;
+    }
+}
+
+public bool IsZoneFunctional(Zone zone)
+{
+    // Example: A zone is functional if it contains at least one functional furniture item
+    return _furniture.Any(f => f.IsFunctionalFurniture() && f.OwnerId == zone.Id);
 }
 >>>>>>> REPLACE
-NEXT: Ensure `ResourceKind` enum includes 'Water' before using it in methods.
+NEXT: Implement a method to count functional rooms in the game world.

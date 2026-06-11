@@ -1,23 +1,21 @@
-CHANGE: Add a method to generate resources over time.
+CHANGE: Add a method to check if a zone is functional based on its kind and furniture.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void GenerateBasicRoomLayout()
+public bool IsZoneFunctional(Zone zone)
 {
-    // Example: Generate a simple room layout with a sleeping quarters and a canteen
-    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
-    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
+    // Example: Define which zones contribute to room functionality
+    return zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters;
 }
 =======
-public void GenerateBasicRoomLayout()
+public bool IsZoneFunctional(Zone zone)
 {
-    // Example: Generate a simple room layout with a sleeping quarters and a canteen
-    AddZone(new Zone(ZoneKind.SleepingQuarters, 5, 5, 4, 4));
-    AddZone(new Zone(ZoneKind.Canteen, 10, 10, 4, 4));
-}
+    // Check if the zone kind is functional
+    bool isFunctionalKind = zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters;
 
-public void GenerateResourcesOverTime()
-{
-    // Placeholder for resource generation logic
+    // Check if the zone contains functional furniture
+    bool hasFunctionalFurniture = zone.LocalMap.Furniture.Any(f => f.IsFunctionalFurniture());
+
+    return isFunctionalKind && hasFunctionalFurniture;
 }
 >>>>>>> REPLACE
-NEXT: Implement the logic inside `GenerateResourcesOverTime` to periodically add resources to the map.
+NEXT: Implement a method to generate basic room layouts based on available resources and pawn needs.

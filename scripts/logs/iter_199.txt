@@ -1,21 +1,39 @@
-CHANGE: Implement the `IsZoneFunctional` method to check if a zone is functional based on its kind and other criteria.
+CHANGE: Implement a method to check if a zone has enough functional furniture by accessing the zone's map and furniture list.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+public void TrackRecycledResource(ResourceKind kind, int amount)
 {
-}
-=======
-public bool IsZoneFunctional(Zone zone)
-{
-    switch (zone.Kind)
+    if (_recycledResources.ContainsKey(kind))
     {
-        case ZoneKind.SleepingQuarters:
-            return Furniture.Any(f => f.Kind == FurnitureKind.Bed && f.OwnerId.HasValue);
-        case ZoneKind.Canteen:
-            return Resources.Any(r => r.Kind == ResourceKind.Food);
-        default:
-            return false;
+        _recycledResources[kind] += amount;
+    }
+    else
+    {
+        _recycledResources[kind] = amount;
     }
 }
+=======
+public void TrackRecycledResource(ResourceKind kind, int amount)
+{
+    if (_recycledResources.ContainsKey(kind))
+    {
+        _recycledResources[kind] += amount;
+    }
+    else
+    {
+        _recycledResources[kind] = amount;
+    }
+}
+
+public bool HasEnoughFunctionalFurniture(Zone zone, int requiredCount)
+{
+    if (zone.LocalMap == null)
+    {
+        return false;
+    }
+
+    int functionalFurnitureCount = zone.LocalMap._furniture.Count(furniture => furniture.IsFunctionalFurniture() && zone.Contains(furniture.X, furniture.Y));
+    return functionalFurnitureCount >= requiredCount;
+}
 >>>>>>> REPLACE
-NEXT: Implement a method to assign pawns to tasks based on their sleep need.
+NEXT: Implement a method to update the functional room count based on the new furniture check.

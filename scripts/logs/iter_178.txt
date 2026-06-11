@@ -1,15 +1,24 @@
-CHANGE: Add the missing closing brace for the `TrackPawnResourceConsumption` method in `GameWorld.cs`.
+CHANGE: Add a method to check if a furniture arrangement forms a functional room.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-    public void TrackPawnResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
-    {
-        // Implementation of tracking pawn resource consumption
-    }
+public class GameWorld
+{
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+// ... (lines omitted) ...
 =======
-    public void TrackPawnResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+public class GameWorld
+{
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+
+    private bool IsFurnitureArrangementFunctional(IEnumerable<Furniture> furniture)
     {
-        // Implementation of tracking pawn resource consumption
+        // Example: Check if there is at least one bed and one table in the arrangement
+        bool hasBed = furniture.Any(f => f.Kind == FurnitureKind.Bed);
+        bool hasTable = furniture.Any(f => f.Kind == FurnitureKind.Table);
+        return hasBed && hasTable;
     }
-}
+// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Ensure method parameters and logic align with existing properties and types.
+NEXT: Implement a method to generate basic room layouts based on placed furniture.

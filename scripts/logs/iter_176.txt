@@ -1,17 +1,22 @@
-CHANGE: Add the missing closing brace for the `TrackPawnResourceConsumption` method in `GameWorld.cs`.
+CHANGE: Implement a method to check if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void TrackPawnResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    // Implementation for tracking pawn resource consumption
-    // ...
-}
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
 =======
-public void TrackPawnResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    // Implementation for tracking pawn resource consumption
-    // ...
-}
-}
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
 >>>>>>> REPLACE
-NEXT: Ensure the method logic is correctly implemented.
+NEXT: Add logic to determine if a zone is functional based on its contents.

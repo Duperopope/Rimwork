@@ -1,15 +1,43 @@
-CHANGE: Implement the `DisplayFunctionalRooms` method to display the number of functional rooms.
+CHANGE: Implement a method to check if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void DisplayFunctionalRooms()
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    // Placeholder for displaying functional rooms
-}
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
 =======
-public void DisplayFunctionalRooms()
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    int functionalRoomCount = CountFunctionalRooms();
-    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
+    }
+    else
+    {
+        _pawnResourceConsumption[pawnId][kind] = amount;
+    }
+}
+
+public bool IsZoneFunctional(Zone zone)
+{
+    // Check if the zone contains at least one functional furniture
+    foreach (var furniture in _furniture)
+    {
+        if (furniture.IsFunctionalFurniture() && zone.Contains(furniture.X, furniture.Y))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 >>>>>>> REPLACE
-NEXT: Implement the `CountFunctionalRooms` method to count the number of functional rooms.
+NEXT: Implement a method to count functional rooms by checking each zone.

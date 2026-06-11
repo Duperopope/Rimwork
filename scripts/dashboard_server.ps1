@@ -15,8 +15,38 @@ Write-Host "Dashboard: http://localhost:8765"
 function Esc([string]$s) { [System.Web.HttpUtility]::HtmlEncode($s) }
 Add-Type -AssemblyName System.Web
 
+function Stop-Stack {
+    # Free the machine: stop dev loop, game, game watchdog, and unload the LLM.
+    Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" |
+        Where-Object { $_.CommandLine -match 'dev_loop|game_watchdog' } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Get-Process | Where-Object { $_.Name -match '^(godot|Rimwork)' } |
+        ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
+    wsl -d Ubuntu -u root -- bash -c "pkill -f llama-server" 2>$null
+    Disable-ScheduledTask -TaskName RimworkAIDev -ErrorAction SilentlyContinue | Out-Null
+    Set-Content -Path "g:\Rimwork\scripts\logs\stack_state.txt" -Value "PAUSED"
+}
+
+function Start-Stack {
+    Enable-ScheduledTask -TaskName RimworkAIDev -ErrorAction SilentlyContinue | Out-Null
+    Start-Process pwsh -ArgumentList '-NoProfile','-File','g:\Rimwork\scripts\startup_all.ps1' -WindowStyle Hidden
+    Set-Content -Path "g:\Rimwork\scripts\logs\stack_state.txt" -Value "RUNNING"
+}
+
 while ($true) {
     try { $ctx = $listener.GetContext() } catch { Start-Sleep -Seconds 1; continue }
+    if ($ctx.Request.Url.AbsolutePath -eq "/pause") {
+        Stop-Stack
+        $ctx.Response.Redirect("/")
+        $ctx.Response.Close()
+        continue
+    }
+    if ($ctx.Request.Url.AbsolutePath -eq "/resume") {
+        Start-Stack
+        $ctx.Response.Redirect("/")
+        $ctx.Response.Close()
+        continue
+    }
     try {
         $roadmap = Get-Content "g:\Rimwork\ROADMAP.md" -ErrorAction SilentlyContinue
         $done = ($roadmap | Select-String '^\s*-\s*\[x\]').Count
@@ -35,6 +65,8 @@ while ($true) {
         if (Test-Path "g:\Rimwork\scripts\logs\health.json") {
             try { $hj = Get-Content "g:\Rimwork\scripts\logs\health.json" -Raw | ConvertFrom-Json } catch {}
         }
+        $stackState = "RUNNING"
+        if (Test-Path "g:\Rimwork\scripts\logs\stack_state.txt") { $stackState = (Get-Content "g:\Rimwork\scripts\logs\stack_state.txt" -Raw).Trim() }
         $revertsLast20 = ($devlog | Select-Object -Last 20 | Select-String 'REVERTED').Count
         $lastCommit = (git -C g:\Rimwork log -1 --format="%h %s (%cr)" 2>$null)
         if ($hj) {
@@ -104,7 +136,13 @@ h1 { font-size:22px; margin-bottom:4px; } h2 { font-size:15px; color:#8b949e; fo
 ul { padding-left:20px; } li { margin-bottom:6px; font-size:13.5px; color:#c9d1d9; }
 .muted { color:#8b949e; } .health { font-family:Consolas,monospace; font-size:12.5px; color:#7ee787; }
 </style></head><body>
-<h1>&#129302; Rimwork &mdash; le developpeur IA en direct</h1>
+<h1>&#129302; Down Here ! &mdash; le developpeur IA en direct</h1>
+<div style='margin:8px 0 14px 0'>
+  <a href='/pause' style='background:#7d2c2c;color:#fff;padding:9px 18px;border-radius:8px;text-decoration:none;font-weight:700'>&#9208; PAUSE MACHINE (libere GPU/CPU pour toi)</a>
+  &nbsp;
+  <a href='/resume' style='background:#1f6f35;color:#fff;padding:9px 18px;border-radius:8px;text-decoration:none;font-weight:700'>&#9654; REPRENDRE l'usine IA</a>
+  &nbsp; <span class='muted'>etat: $stackState</span>
+</div>
 <p class='sub'>Tout ce qui est ici est fait par le modele local, sans intervention humaine. Actualisation auto toutes les 5s.</p>
 <div class='grid'>
   <div class='card'><h2>Avancement du jeu</h2><span class='big'>$pct%</span> <span class='muted'>($done / $total taches)</span><div class='bar'><i></i></div></div>

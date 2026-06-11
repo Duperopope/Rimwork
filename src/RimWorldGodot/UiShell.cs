@@ -28,7 +28,7 @@ public partial class UiShell : CanvasLayer
     private ConfigFile _cfg = new();
     private const string CfgPath = "user://options.cfg";
 
-    private const string Version = "gamejam-superpass-1.0";
+    private const string Version = "down-here-0.2";
 
     public override void _Ready()
     {
@@ -103,7 +103,7 @@ public partial class UiShell : CanvasLayer
         box.AddThemeConstantOverride("separation", 10);
         center.AddChild(box);
 
-        var t = Title("RIMWORK", 54);
+        var t = Title("DOWN HERE !", 54);
         t.HorizontalAlignment = HorizontalAlignment.Center;
         box.AddChild(t);
         var sub = new Label { Text = "Une colonie, une planète, un système.\nChaque ligne de gameplay écrite par une IA locale autonome.", HorizontalAlignment = HorizontalAlignment.Center };

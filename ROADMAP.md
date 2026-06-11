@@ -639,5 +639,8 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [x] Step C.135 - Implement a system to track and display functional room counts to the player.
 - [x] Step C.150 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs.
 - [x] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
-- [ ] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
+- [x] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.165 - Implement a system to generate functional rooms based on placed furniture, ensuring players must arrange furniture logically to meet room requirements. (GameWorld.cs)
+- [ ] Step C.180 - Add a method to determine if a zone has enough functional furniture, ensuring that the method references existing properties and methods. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.193.1 - Implement a method to check if a zone has enough functional furniture by accessing the zone's map and furniture list. (src/RimWorldLab.Core/GameWorld.cs) Add a method to get the local map from a zone. Ensure the method signature and any required using directives are correct.
+- [ ] Step C.195a - Implement a method to check if a zone has enough functional furniture by counting functional furniture in the zone's local map. (src/RimWorldLab.Core/GameWorld.cs)
