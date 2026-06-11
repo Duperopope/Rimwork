@@ -59,3 +59,4 @@
 - [ ] Step C.150 - Implement a system to automatically assign pawns to build tasks based on their skills and the current needs of the colony.
 - [ ] Step C.15.1.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` to track recycled resources.
 - [ ] Step C.30.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` by inserting it inside the `GameWorld` class.
+- [ ] Step C.64.1 - Implement the method `GetTotalResourceConsumption` in `GameWorld.cs` to iterate over `_pawnResourceConsumption.Values` and sum the consumption for the specified `ResourceKind`.

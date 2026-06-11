@@ -108,3 +108,8 @@
 - Always check for existing member names before adding new fields.
 - Ensure new fields are declared within the correct class block.
 - Ensure new fields are placed within the correct class definition.
+- Ensure each class has a unique name to avoid namespace conflicts.
+- Ensure correct syntax and types in foreach loops; verify collection types.
+- Ensure foreach loop syntax is correct and matches collection type.
+- Ensure foreach syntax is correct and matches expected collection types.
+- Ensure foreach syntax is correct and matches collection type.

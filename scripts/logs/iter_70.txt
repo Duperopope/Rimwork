@@ -1,0 +1,30 @@
+CHANGE: Implement the method `GetTotalResourceConsumption` in `GameWorld.cs`.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public int GetTotalResourceConsumption(ResourceKind kind)
+{
+    int totalConsumption = 0;
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    {
+        if (pawnConsumption.TryGetValue(kind, out int consumption))
+        {
+            totalConsumption += consumption;
+        }
+    }
+    return totalConsumption;
+}
+=======
+public int GetTotalResourceConsumption(ResourceKind kind)
+{
+    int totalConsumption = 0;
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    {
+        if (pawnConsumption.TryGetValue(kind, out int consumption))
+        {
+            totalConsumption += consumption;
+        }
+    }
+    return totalConsumption;
+}
+>>>>>>> REPLACE
+NEXT: Ensure the method `GetTotalResourceConsumption` is correctly implemented in `GameWorld.cs`.

@@ -628,4 +628,5 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.165 - Add the missing condition to check if a pawn's sleep need is less than 50 in the `AssignPawnsToTasks` method in GameWorld.cs
 - [ ] Step C.180 - Implement a method to check if a room is functional and add it to the list of functional rooms in `src/RimWorldLab.Core/GameWorld.cs`.
 - [x] Step C.15.1.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` to track recycled resources.
-- [ ] Step C.30.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` by inserting it inside the `GameWorld` class.
+- [x] Step C.30.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` by inserting it inside the `GameWorld` class.
+- [ ] Step C.64.1 - Implement the method `GetTotalResourceConsumption` in `GameWorld.cs` to iterate over `_pawnResourceConsumption.Values` and sum the consumption for the specified `ResourceKind`.

@@ -194,18 +194,18 @@ public void TrackRecycledResource(ResourceKind kind, int amount)
         }
     }
 
-    public int GetTotalResourceConsumption(ResourceKind kind)
+public int GetTotalResourceConsumption(ResourceKind kind)
+{
+    int totalConsumption = 0;
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
     {
-        int totalConsumption = 0;
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+        if (pawnConsumption.TryGetValue(kind, out int consumption))
         {
-            if (pawnConsumption.TryGetValue(kind, out int consumption))
-            {
-                totalConsumption += consumption;
-            }
+            totalConsumption += consumption;
         }
-        return totalConsumption;
     }
+    return totalConsumption;
+}
 
     private GridShape _gridShape = GridShape.Square;
 

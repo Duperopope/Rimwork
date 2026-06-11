@@ -308,3 +308,8 @@ private
 public
 public
 private
+Cell
+Region
+Zone
+ResourceNode
+Furniture
