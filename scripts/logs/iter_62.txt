@@ -1,4 +1,4 @@
-CHANGE: Add mood influence to task scoring in TryClaimBest
+CHANGE: Add the line to adjust the score based on pawn's mood.
 FILE: src/RimWorldLab.Core/Jobs.cs
 <<<<<<< SEARCH
             double score = task.Priority * 10.0;
@@ -6,4 +6,4 @@ FILE: src/RimWorldLab.Core/Jobs.cs
             double score = task.Priority * 10.0;
             score += (pawn.Mood - 50.0) / 25.0;
 >>>>>>> REPLACE
-NEXT: Implement the TryClaimBest method to use the updated scoring logic.
+NEXT: Implement the logic to apply the score adjustment in the task selection process.

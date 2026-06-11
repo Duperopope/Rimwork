@@ -107,13 +107,15 @@ public partial class Game3D : Node3D
         if (_colonyWorld == null) _colonyWorld = World;
         if (tileIdx == _colonyTileIdx) { ReturnToColony(); return; }
 
-        var w = new GameWorldManager(64, 64); // expedition maps are bigger
-        var rng2 = new Random(1000 + tileIdx);
+        int msize = Math.Clamp(World.Macro.Gen.MapSize, 50, 128);
+        var w = new GameWorldManager(msize, msize); // size from world creation
+        w.ApplyGenSettings(World.Macro.Gen);
+        var rng2 = new Random(World.Macro.Gen.Seed * 31 + tileIdx);
         string[] scouts = { "Eclaireur A", "Eclaireur B", "Eclaireur C" };
         foreach (var n in scouts)
         {
             int x, y;
-            do { x = rng2.Next(0, 64); y = rng2.Next(0, 64); } while (!w.Map.IsPassable(x, y));
+            do { x = rng2.Next(0, msize); y = rng2.Next(0, msize); } while (!w.Map.IsPassable(x, y));
             w.RegisterThing(new Pawn(n, x, y));
         }
         World = w;
@@ -122,7 +124,7 @@ public partial class Game3D : Node3D
             LocalLonDeg = Mathf.RadToDeg(Mathf.Atan2(_tiles[tileIdx].Center.X, _tiles[tileIdx].Center.Z));
         RebuildLocalVisuals();
         SetViewLayer("Local");
-        _camRig.Position = new Vector3(32, 0, 32);
+        _camRig.Position = new Vector3(msize / 2f, 0, msize / 2f);
         AlertText = $"Expédition sur la tuile #{tileIdx} ({biome}) — molette arrière à fond: retour planète";
     }
 

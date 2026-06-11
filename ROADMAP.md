@@ -44,7 +44,7 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
       `            }`
 
 ## PRIORITE: humeur qui compte (Bannerlord layer)
-- [ ] Step D.4 - Low colony morale slows work. In
+- [x] Step D.4 - Low colony morale slows work. In
       src/RimWorldLab.Core/Jobs.cs, inside TryClaimBest, find the exact line:
       `            double score = task.Priority * 10.0;`
       and REPLACE it with:

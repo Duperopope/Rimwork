@@ -4606,3 +4606,5 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 60] CRITIC TASK: - [ ] Step C.60 - Implement a system to track and display the number of functional rooms in the game world.
 - [iter 60] DONE (repeated identical patch): - [ ] Step D.3 - Animals must wander. In src/RimWorldLab.Core/GameWorld.cs,
 - [iter 61] KEPT: Add mood influence to task scoring in TryClaimBest (src/RimWorldLab.Core/Jobs.cs)
+- [startup] Stack relaunched after boot (2026-06-12 00:04).
+- [iter 62] DONE (repeated identical patch): - [ ] Step D.4 - Low colony morale slows work. In
