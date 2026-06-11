@@ -62,7 +62,7 @@ private Vector2 HexToPixel(int q, int r)
     float width = size * sqrt3;
     float height = size * 1.5f;
     float x = width * q + width / 2 * r;
-    float y = height * r;
+    float y = height * r + size / 2;
     return new Vector2(x, y);
 }
 

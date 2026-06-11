@@ -3334,3 +3334,5 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 6] SKIPPED (no SEARCH match): Add HexToPixel method to convert hex coordinates to pixel coordinates. (src/RimWorldGodot/Main.cs)
 - [iter 7] PREDICTED-FAIL (skipped before build): Add HexToPixel and PixelToHex methods for hex grid conversion. - Identifier 'Round' does not exist in the target file or the game API - it would not compile.
 - [iter 8] KEPT: Add HexToPixel method for converting hex coordinates to pixel coordinates. (src/RimWorldGodot/Main.cs)
+- [iter 9] PREDICTED-FAIL (skipped before build): Implement hexagonal tile rendering in `_Draw` method. - Identifier 'Deg2Rad' does not exist in the target file or the game API - it would not compile.
+- [iter 10] KEPT: Implement HexToPixel method for converting hex coordinates to pixel coordinates. (src/RimWorldGodot/Main.cs)

@@ -22,3 +22,4 @@
 - [ ] Step U.3.7 - In src/RimWorldGodot/Main.cs, find this exact line:
 - [ ] Step V.2 - Add a `GridShape` property to GameMap with a default value of "Square".
 - [ ] Step V.3 - Main.cs._Draw: when GridShape==Hex, draw each tile as a
+- [ ] Step V.3 - Main.cs._Draw: when GridShape==Hex, draw each tile as a
