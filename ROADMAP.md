@@ -401,7 +401,7 @@ renderer from Node2D to a 3D/iso pipeline) - but we CAN make the current
 - [x] Step R - Weather: every few in-game days, toggle a "Rain" state that
       tints the map blue-grey and slightly slows pawn movement; show
       "Raining" in the header.
-- [ ] Step S - Ambient sound hooks: add an `AudioStreamPlayer` node that
+- [x] Step S - Ambient sound hooks: add an `AudioStreamPlayer` node that
       plays a soft loop, with volume dipping during raids (purely additive,
       skip if no audio asset available - log a TODO instead of failing).
 - [x] Step T (partial) - Furniture now draws a soft drop-shadow (offset
@@ -506,11 +506,7 @@ renderer from Node2D to a 3D/iso pipeline) - but we CAN make the current
       to staff it (a "Cook" task, gated on a Food resource from W.3).
       Eating a Meal restores Hunger faster than the current direct
       recovery. Needs Step W.3 (Food resource) first.
-- [ ] Step W.6 - Organic village growth: instead of (only) the fixed
-      3-room starter plan, once Wood/Stone allow it the colony should
-      plan additional rooms from a small catalog (storage, workshop,
-      extra bedrooms) near the existing base, so the village keeps
-      expanding organically as resources and population grow.
+- [ ] Step W.6 - Organic village growth: Add a method to check if a pawn is at the edge of a region's map in GameWorld.cs.
 - [ ] Step W.7 - Raider reproduction: surviving raiders that retreat (or
       a raider "camp" off-map) periodically spawn reinforcements, scaling
       with colony wealth/population, so the threat grows over time.

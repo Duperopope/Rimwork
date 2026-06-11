@@ -111,7 +111,11 @@ public partial class Game3D : Node3D
         SyncStatics(force: true);
         BuildSelectionRing();
         BuildWorldView();
-        _camRig.Position = new Vector3(12, 0, 8); // start over the starter rooms
+        _camRig.Position = new Vector3(14, 0, 12); // start over the starter rooms
+        // Re-aim AFTER the rig move: LookAt uses global coords, so the
+        // rotation computed in BuildEnvironment pointed at the old spot.
+        _cam.Position = new Vector3(20, 26, 20);
+        _cam.LookAt(_camRig.GlobalPosition, Vector3.Up);
     }
 
     private void BuildEnvironment()
