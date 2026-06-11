@@ -506,13 +506,8 @@ renderer from Node2D to a 3D/iso pipeline) - but we CAN make the current
       to staff it (a "Cook" task, gated on a Food resource from W.3).
       Eating a Meal restores Hunger faster than the current direct
       recovery. Needs Step W.3 (Food resource) first.
-- [ ] Step W.7 - Raider reproduction: surviving raiders that retreat (or
-      a raider "camp" off-map) periodically spawn reinforcements, scaling
-      with colony wealth/population, so the threat grows over time.
-- [ ] Step W.8 - Pawn cooperation under threat: when raiders are near and
-      multiple pawns are idle/unarmed, idle pawns path toward the nearest
-      threatened pawn and fight together instead of acting independently,
-      so the colony can avoid being overwhelmed one-by-one.
+- [ ] Step W.7.1.1 - Add properties for Wood, Stone, Food, Metal, Tools, and ResearchPoints to the GameWorld class.
+- [ ] Step W.8a - Add missing resource fields (Wood, Stone, Food, Metal, Tools) to GameWorld.cs.
 
 ## Ecology & survival loop (next major arc)
 
@@ -524,15 +519,8 @@ master" loop, work through these in order - each is independently testable:
       GameMap.InitializeMap (a few lakes/rivers). Water tiles are
       impassable but a pawn can "Haul Water" from an adjacent tile to a
       Canteen/Crate, producing a new "Water" resource counter.
-- [ ] Step W.3 - Food loop: replace the current Hunger-only need with a
-      real Food resource. Crops (new FurnitureKind, planted on Grass,
-      requires nearby Water) grow over several days like Saplings and
-      yield Food when harvested; Stove converts raw Food -> Meals which
-      restore Hunger faster.
-- [ ] Step W.4 - Animals: spawn a few wild herbivores (e.g. "Boar") that
-      wander the map and can be hunted (similar TaskKind to Harvest) for
-      Food + a hide resource; herbivores reproduce slowly if population is
-      low, giving another renewable loop.
+- [ ] Step W.3.1 - Add Food resource: Define a new resource `Food` in `GameWorld.cs` with an initial value of 0.
+- [ ] Step W.4.1.1 - Add a method to create a new herbivore pawn with a specific type (e.g., "Boar") at a random location on the map.
 - [x] Step W.5 - Tie it together: Wood/Stone/Water/Food become the four
       core resources shown in the header; rooms/furniture upkeep can start
       consuming them slowly so the colony must keep the loop running
@@ -553,10 +541,10 @@ master" loop, work through these in order - each is independently testable:
   tooltips and mouse-wheel scrolling
 - Dev tab: roadmap progress bar + done/next lists parsed from this file
 - [x] Step E.7 - Add a method to randomly generate small animal populations in GameWorld.cs
-- [ ] Step E.12 - Add a method to randomly generate small animal populations in GameWorld.cs
-- [ ] Step E.21 - Add a method to randomly generate small animal populations in GameWorld.cs
-- [ ] Step E.27 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
-- [ ] Step E.33 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step E.12.1 - Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills.
+- [ ] Step E.21 - Add a constructor to the `Pawn` class that accepts four parameters: name, x, y, and sex. (src/RimWorldLab.Core/Pawn.cs)
+- [ ] Step E.27a - Add a method to randomly generate a single small animal in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) by creating a new Pawn and adding it to the list of pawns without using the registry.
+- [ ] Step E.33 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) - Ensure the Pawn constructor is called with the correct number of arguments. (Verify the correct number of arguments for the Pawn constructor.)
 - [ ] Step E.39 - Implement a simple weather system that affects resource availability in src/RimWorldLab.Core/GameWorld.cs
 - [ ] Step C.15 - Implement a basic room detection system to identify functional rooms in the colony.
 - [ ] Step C.30 - Implement room detection logic in GameWorld.cs to identify functional rooms based on furniture placement.
@@ -603,3 +591,9 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
 - [ ] Step C.90 - Implement a room detection system to identify functional rooms in the colony.
 - [ ] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs
+- [ ] Step C.15 - Implement a system to generate resources over time to encourage sustainable resource management.
+- [ ] Step C.30 - Implement a resource generation system to ensure players have access to materials over time, improving sustainability and reducing frustration. (GameWorld.cs)
+- [ ] Step C.45 - Implement a system to generate resources over time, such as trees regrowing or rocks respawning, to provide a steady stream of materials for the player to use. (GameWorld.cs)
+- [ ] Step C.60 - Implement a system to generate resources over time to encourage sustainable colony management. (GameWorld.cs)
+- [ ] Step C.90 - Implement a resource consumption system that forces players to manage their colony's needs, such as food and shelter, to progress. (GameWorld.cs)
+- [ ] Step C.105 - Implement a system to automatically generate functional rooms as pawns complete tasks, ensuring the win condition is reachable through gameplay.

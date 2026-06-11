@@ -4,3 +4,11 @@
 - [ ] Step P.5b - In src/RimWorldGodot/Main.cs, append the mood value to the existing DrawString call by appending it to the string. Use the format "Mood: {pawn.Mood}" where "pawn" is the first pawn in the world's pawns list. Ensure the string interpolation is correctly formatted. Only add the mood part, not the whole string.
 - [ ] Step V.5.1 - Add the `IsAtEdge` method signature in `GameWorld.cs`.
 - [ ] Step P1 - Add a `Mood` float (0-100) to Pawn class in `src/RimWorldLab.Core/Pawn.cs`.
+- [ ] Step W.7.1.1 - Add properties for Wood, Stone, Food, Metal, Tools, and ResearchPoints to the GameWorld class.
+- [ ] Step W.8a - Add missing resource fields (Wood, Stone, Food, Metal, Tools) to GameWorld.cs.
+- [ ] Step W.3.1 - Add Food resource: Define a new resource `Food` in `GameWorld.cs` with an initial value of 0.
+- [ ] Step W.4.1.1 - Add a method to create a new herbivore pawn with a specific type (e.g., "Boar") at a random location on the map.
+- [ ] Step E.12.1 - Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills.
+- [ ] Step E.21 - Add a constructor to the `Pawn` class that accepts four parameters: name, x, y, and sex. (src/RimWorldLab.Core/Pawn.cs)
+- [ ] Step E.27a - Add a method to randomly generate a single small animal in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) by creating a new Pawn and adding it to the list of pawns without using the registry.
+- [ ] Step E.33 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) - Ensure the Pawn constructor is called with the correct number of arguments. (Verify the correct number of arguments for the Pawn constructor.)

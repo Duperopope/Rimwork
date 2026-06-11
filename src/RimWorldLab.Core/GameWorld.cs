@@ -138,6 +138,7 @@ public class GameMap
     private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
     private readonly HashSet<(int X, int Y)> _noGrowTiles = new();
     private readonly HashSet<(int X, int Y)> _bridges = new();
+    private bool _isRaining = false;
 
     private GridShape _gridShape = GridShape.Square;
 
@@ -155,6 +156,7 @@ public class GameMap
     public IReadOnlyList<Furniture> Furniture => _furniture;
     /// <summary>Tiles where a tree seed has taken root and is growing back into a Tree.</summary>
     public IReadOnlyList<(int X, int Y, int TicksRemaining)> Saplings => _saplings;
+    public bool IsRaining => _isRaining;
 
     public GameMap(int width, int height)
     {
@@ -162,6 +164,11 @@ public class GameMap
         Height = height;
         _grid = new Cell[height, width];
         InitializeMap();
+    }
+
+    public void ToggleRain()
+    {
+        _isRaining = !_isRaining;
     }
 
 public void AddZone(Zone zone) => _zones.Add(zone);

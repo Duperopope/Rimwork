@@ -1,0 +1,81 @@
+CHANGE: Add a simple weather system to affect resource availability.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public class GameMap
+{
+    private readonly Cell[,] _grid;
+    private readonly List<Zone> _zones = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly HashSet<(int X, int Y)> _noGrowTiles = new();
+    private readonly HashSet<(int X, int Y)> _bridges = new();
+
+    private GridShape _gridShape = GridShape.Square;
+
+    public GridShape GridShape
+    {
+        get => _gridShape;
+        set => _gridShape = value;
+    }
+
+    public IReadOnlyCollection<(int X, int Y)> Bridges => _bridges;
+    public int Width { get; }
+    public int Height { get; }
+    public IReadOnlyList<Zone> Zones => _zones;
+    public IReadOnlyList<ResourceNode> Resources => _resources;
+    public IReadOnlyList<Furniture> Furniture => _furniture;
+    /// <summary>Tiles where a tree seed has taken root and is growing back into a Tree.</summary>
+    public IReadOnlyList<(int X, int Y, int TicksRemaining)> Saplings => _saplings;
+
+    public GameMap(int width, int height)
+    {
+        Width = width;
+        Height = height;
+        _grid = new Cell[height, width];
+        InitializeMap();
+    }
+=======
+public class GameMap
+{
+    private readonly Cell[,] _grid;
+    private readonly List<Zone> _zones = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly HashSet<(int X, int Y)> _noGrowTiles = new();
+    private readonly HashSet<(int X, int Y)> _bridges = new();
+    private bool _isRaining = false;
+
+    private GridShape _gridShape = GridShape.Square;
+
+    public GridShape GridShape
+    {
+        get => _gridShape;
+        set => _gridShape = value;
+    }
+
+    public IReadOnlyCollection<(int X, int Y)> Bridges => _bridges;
+    public int Width { get; }
+    public int Height { get; }
+    public IReadOnlyList<Zone> Zones => _zones;
+    public IReadOnlyList<ResourceNode> Resources => _resources;
+    public IReadOnlyList<Furniture> Furniture => _furniture;
+    /// <summary>Tiles where a tree seed has taken root and is growing back into a Tree.</summary>
+    public IReadOnlyList<(int X, int Y, int TicksRemaining)> Saplings => _saplings;
+    public bool IsRaining => _isRaining;
+
+    public GameMap(int width, int height)
+    {
+        Width = width;
+        Height = height;
+        _grid = new Cell[height, width];
+        InitializeMap();
+    }
+
+    public void ToggleRain()
+    {
+        _isRaining = !_isRaining;
+    }
+>>>>>>> REPLACE
+NEXT: Implement weather effects on resource availability.

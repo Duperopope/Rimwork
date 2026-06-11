@@ -28,10 +28,26 @@ public class WorldBody
     public float DangerLevel { get; set; }  // 0..1
     public float ClimateTemp { get; set; }  // abstract -1 cold .. +1 hot
 
+    /// <summary>This body's own surface regions (5x5 hex grid, biome
+    /// palette depends on the body's climate).</summary>
+    public WorldRegion[,] Regions { get; } = new WorldRegion[5, 5];
+
     public WorldBody(string name, string kind, float habitability, float richness, float danger, float temp)
     {
         Name = name; Kind = kind; Habitability = habitability;
         ResourceRichness = richness; DangerLevel = danger; ClimateTemp = temp;
+
+        string[] palette = temp > 0.4f
+            ? new[] { "ash", "dunes", "scorched", "lava rock", "crater" }
+            : temp < -0.3f
+                ? new[] { "ice", "tundra", "snowfield", "frost rock", "crevasse" }
+                : new[] { "forest", "plains", "hills", "marsh", "rocky" };
+        var rng = new Random(name.GetHashCode() & 0x7fffffff);
+        for (int y = 0; y < 5; y++)
+            for (int x = 0; x < 5; x++)
+                Regions[x, y] = new WorldRegion(x, y, palette[(x + y * 5 + rng.Next(2)) % palette.Length],
+                    habitability * (0.4f + (float)rng.NextDouble() * 0.6f),
+                    danger * (0.4f + (float)rng.NextDouble() * 0.8f));
     }
 }
 
@@ -95,7 +111,7 @@ public class MacroSim
     private readonly Random _rng = new(777);
 
     public SolarSystem System { get; } = new();
-    public WorldRegion[,] Regions { get; } = new WorldRegion[5, 5];
+    public WorldRegion[,] Regions => System.HomeBody.Regions;
     public List<ExternalSite> Sites { get; } = new();
     public List<string> WorldEvents { get; } = new();
 
@@ -115,11 +131,6 @@ public class MacroSim
 
     public MacroSim()
     {
-        string[] biomes = { "forest", "plains", "hills", "marsh", "rocky" };
-        for (int y = 0; y < 5; y++)
-            for (int x = 0; x < 5; x++)
-                Regions[x, y] = new WorldRegion(x, y, biomes[(x + y * 5) % biomes.Length],
-                    0.3f + (float)_rng.NextDouble() * 0.6f, (float)_rng.NextDouble() * 0.6f);
         Regions[2, 2].IsColonyRegion = true;
 
         Sites.Add(new ExternalSite("Fort Ashvale", "Iron Compact", -0.6f, 120f));

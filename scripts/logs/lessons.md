@@ -12,3 +12,25 @@
 - "Check for missing properties or methods on types before using them."
 - Avoid duplicating method signatures in the same class.
 - Ensure method definitions are within the correct class scope and follow C# syntax rules.
+- GameWorld.cs has no ResourceKind.Stone - Stone is an int property on GameWorldManager.
+- Check constructor parameters before adding new objects.
+- Verify the exact constructor parameters of the class you're instantiating.
+- Ensure the `Pawn` constructor exists with the required parameters before adding new code.
+- Check for existing methods before adding new ones to avoid naming conflicts.
+- Ensure method names are unique within the same class to avoid redefinition errors.
+- Verify constructor parameters match before adding new code.
+- Ensure `Pawn` constructor parameters match before using it.
+- Always check for existing method signatures before adding new methods.
+- Verify constructor parameters match exactly before instantiation.
+- Check for existing method signatures before adding new methods to avoid conflicts.
+- Ensure `Pawn` constructor exists with required parameters before using it.
+- Verify the constructor parameters of the `Pawn` class before adding new arguments.
+- Verify the exact constructor parameters of the class before adding arguments.
+- Verify the exact number and types of parameters the constructor expects.
+- Ensure the number of arguments in the Pawn constructor matches the actual constructor definition.
+- "Verify constructor parameters match exactly before modifying code."
+- Verify constructor parameters match exactly, including types and count.
+- Verify constructor parameters match exactly before adding new ones.
+- Verify constructor arguments match exactly before adding new parameters.
+- Verify constructor parameters match exactly before using.
+- Verify the exact number and types of arguments the constructor expects before modifying code.

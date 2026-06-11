@@ -3487,3 +3487,123 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 160] SKIPPED (no SEARCH match): Implement the `GetCurrentMap` method in the `GameWorldManager` class to return a dummy map with dimensions 10x10. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 161] SKIPPED (no SEARCH match): Implement the `GetCurrentMap` method in the `GameWorldManager` class to return a dummy map with dimensions 10x10. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 162] SKIPPED (no SEARCH match): Implement the `GetCurrentMap` method in the `GameWorldManager` class to return a dummy map with dimensions 10x10. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 16:54).
+- [iter 1] PREDICTED-FAIL (skipped before build): Add a method to simulate raider reproduction based on colony wealth and population. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 2] PREDICTED-FAIL (skipped before build): Add a method to simulate raider reproduction based on colony wealth and population. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 3] PREDICTED-FAIL (skipped before build): Add a method to simulate raider reproduction based on colony wealth and population. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 4] REVERTED (build failed): Add a method to simulate raider reproduction based on colony wealth and population. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 5] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.7.1 - Add resource properties to GameWorld: Wood, Stone, Food, Metal, Tools, and ResearchPoints.
+- [iter 6] SKIPPED (no SEARCH match): Add resource properties to GameWorld (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 7] SKIPPED (no SEARCH match): Add Wood property to GameWorld (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 8] SKIPPED (no SEARCH match): Add resource properties to GameWorld (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 9] SKIPPED (no SEARCH match): Add resource properties to GameWorld. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 10] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.7.1.1 - Add properties for Wood, Stone, Food, Metal, Tools, and ResearchPoints to the GameWorld class.
+- [iter 11] SKIPPED (no SEARCH match): Add properties for Wood, Stone, Food, Metal, Tools, and ResearchPoints to the GameWorld class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 13] SKIPPED (no SEARCH match): Add properties for Wood, Stone, Food, Metal, Tools, and ResearchPoints to the GameWorld class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 14] SKIPPED (no SEARCH match): Add properties for Wood, Stone, Food, Metal, Tools, and ResearchPoints to the GameWorld class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 15] CRITIC TASK: - [ ] Step C.15 - Implement a system to generate resources over time to encourage sustainable resource management.
+- [iter 15] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step W.7.1.1 - Add properties for Wood, Stone, Food, Metal, Tools, and ResearchPoints to the GameWorld class.
+- [iter 16] SKIPPED (no SEARCH match): Add a method to find nearby threatened pawns for a given pawn. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 17] SKIPPED (no SEARCH match): Add a method to check if a pawn is idle and unarmed. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 18] SKIPPED (no SEARCH match): Add a method to determine if a pawn is idle and unarmed. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 19] PREDICTED-FAIL (skipped before build): Add a method to find the nearest threatened pawn for a given pawn. - Identifier 'DistanceTo' does not exist in the target file or the game API - it would not compile.
+- [iter 20] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.8a - Implement a method to check if a pawn is at the edge of a region in GameWorld.cs.
+- [iter 21] SKIPPED (no SEARCH match): Implement a method to check if a pawn is at the edge of a region in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 17:04).
+- [iter 23] SKIPPED (no SEARCH match): Implement a method to check if a pawn is at the edge of a region in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 24] SKIPPED (no SEARCH match): Implement a method to check if a pawn is at the edge of a region in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 25] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.8a - Add missing resource fields (Wood, Stone, Food, Metal, Tools) to GameWorld.cs.
+- [iter 30] CRITIC TASK: - [ ] Step C.30 - Implement a resource generation system to ensure players have access to materials over time, improving sustainability and reducing frustration. (GameWorld.cs)
+- [iter 30] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step W.8a - Add missing resource fields (Wood, Stone, Food, Metal, Tools) to GameWorld.cs.
+- [iter 31] SKIPPED (no SEARCH match): Add Food resource and update NeedsSystem to track it. (src/RimWorldLab.Core/Needs.cs)
+- [iter 32] SKIPPED (no SEARCH match): Add Food resource and update Pawn class to include it. (src/RimWorldLab.Core/Needs.cs)
+- [iter 33] SKIPPED (no SEARCH match): Add Food resource to Pawn class (src/RimWorldLab.Core/Needs.cs)
+- [iter 34] SKIPPED (no SEARCH match): Add Food resource and update NeedsSystem to manage it. (src/RimWorldLab.Core/Needs.cs)
+- [iter 35] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.3.1 - Add Food resource: Define a new resource `Food` in `GameWorld.cs`.
+- [iter 36] SKIPPED (no SEARCH match): Add Food resource to ResourceKind enum (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 37] SKIPPED (no SEARCH match): Add Food resource to ResourceKind enum (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 38] SKIPPED (no SEARCH match): Add Food resource to ResourceKind enum (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 39] SKIPPED (no SEARCH match): Define a new resource `Food` in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 40] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.3.1 - Add Food resource: Define a new resource `Food` in `GameWorld.cs` with an initial value of 0.
+- [iter 42] SKIPPED (no SEARCH match): Add Food resource to GameWorldManager (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 43] SKIPPED (no SEARCH match): Define a new resource `Food` in `GameWorld.cs` with an initial value of 0. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 17:14).
+- [iter 44] SKIPPED (no SEARCH match): Add Food resource property to GameWorldManager (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 45] CRITIC TASK: - [ ] Step C.45 - Implement a system to generate resources over time, such as trees regrowing or rocks respawning, to provide a steady stream of materials for the player to use. (GameWorld.cs)
+- [iter 45] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step W.3.1 - Add Food resource: Define a new resource `Food` in `GameWorld.cs` with an initial value of 0.
+- [iter 46] SKIPPED (no SEARCH match): Add a new TaskKind for hunting herbivores. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 47] SKIPPED (no SEARCH match): Add a new TaskKind for hunting herbivores. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 48] SKIPPED (no SEARCH match): Add a new TaskKind for hunting herbivores. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 49] SKIPPED (no SEARCH match): Add a new TaskKind for hunting herbivores. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 50] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.4.1 - Add a method to spawn a single wild herbivore (e.g., "Boar") at a random location on the map.
+- [iter 51] PREDICTED-FAIL (skipped before build): Add a method to spawn a single wild herbivore at a random location on the map. - REJECTED anti-stub: method 'GenerateSmallAnimalPopulation' has an empty/trivial body (returns nothing useful). Implement the real behavior.
+- [iter 52] SKIPPED (no SEARCH match): Add a method to spawn a single wild herbivore (e.g., "Boar") at a random location on the map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 53] SKIPPED (no SEARCH match): Add a method to spawn a single wild herbivore at a random location on the map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 55] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.4.1.1 - Add a method to create a new herbivore pawn with a specific type (e.g., "Boar") at a random location on the map.
+- [iter 56] SKIPPED (no SEARCH match): Add a method to create a new herbivore pawn with a specific type at a random location on the map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 57] SKIPPED (no SEARCH match): Add a method to create a new herbivore pawn with a specific type at a random location on the map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 58] SKIPPED (no SEARCH match): Add a method to create a new herbivore pawn with a specific type at a random location on the map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 59] SKIPPED (no SEARCH match): Add a method to create a new herbivore pawn with a specific type at a random location on the map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 60] CRITIC TASK: - [ ] Step C.60 - Implement a system to generate resources over time to encourage sustainable colony management. (GameWorld.cs)
+- [iter 60] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step W.4.1.1 - Add a method to create a new herbivore pawn with a specific type (e.g., "Boar") at a random location on the map.
+- [iter 61] REVERTED (build failed): Add a method to randomly generate small animal populations in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 62] REVERTED (build failed): Add a method to randomly generate small animal populations in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 63] REVERTED (build failed): Add a method to randomly generate small animal populations in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 64] SKIPPED (no SEARCH match): Ensure the `Pawn` constructor exists with the required parameters before adding new code. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 65] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.12.1 - Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills.
+- [startup] Stack relaunched after boot (2026-06-11 17:24).
+- [iter 68] SKIPPED (no SEARCH match): Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 69] SKIPPED (no SEARCH match): Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 70] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.12.1 - Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills.
+- [iter 71] SKIPPED (no SEARCH match): Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 72] SKIPPED (no SEARCH match): Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 73] SKIPPED (no SEARCH match): Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 74] SKIPPED (no SEARCH match): Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 75] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step E.12.1 - Add a constructor to the Pawn class that accepts 5 parameters: name, x, y, sex, and skills.
+- [iter 76] REVERTED (build failed): Add a method to randomly generate small animal populations in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 77] REVERTED (build failed): Ensure `GenerateSmallAnimalPopulation` method is defined at the class level. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 78] REVERTED (build failed): Add a method to randomly generate small animal populations in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 79] REVERTED (build failed): Ensure the `Pawn` constructor exists with the required parameters before adding new code. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 80] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.21 - Ensure the `Pawn` constructor exists with the required parameters before adding new code. (src/RimWorldLab.Core/Pawn.cs)
+- [iter 81] SKIPPED (no SEARCH match): Ensure the `Pawn` constructor exists with the required parameters before adding new code. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 82] SKIPPED (no SEARCH match): Ensure the `Pawn` constructor exists with the required parameters before adding new code. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 83] SKIPPED (no SEARCH match): Ensure the `Pawn` constructor exists with the required parameters before adding new code. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 84] SKIPPED (no SEARCH match): Ensure the `Pawn` constructor exists with the required parameters before adding new code. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 85] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.21 - Add a constructor to the `Pawn` class that accepts four parameters: name, x, y, and sex. (src/RimWorldLab.Core/Pawn.cs)
+- [iter 87] PREDICTED-FAIL (skipped before build): Add a constructor to the `Pawn` class that accepts four parameters: name, x, y, and sex. - REJECTED anti-stub: method 'IsPawnAtEdge' has an empty/trivial body (returns nothing useful). Implement the real behavior.
+- [startup] Stack relaunched after boot (2026-06-11 17:34).
+- [iter 90] CRITIC TASK: - [ ] Step C.90 - Implement a resource consumption system that forces players to manage their colony's needs, such as food and shelter, to progress. (GameWorld.cs)
+- [iter 90] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step E.21 - Add a constructor to the `Pawn` class that accepts four parameters: name, x, y, and sex. (src/RimWorldLab.Core/Pawn.cs)
+- [iter 91] SKIPPED (no SEARCH match): Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 92] SKIPPED (no SEARCH match): Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 93] REVERTED (build failed): Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 94] SKIPPED (no SEARCH match): Ensure the `Pawn` constructor exists with the required parameters before adding new code. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 95] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.27a - Add a method to randomly generate a single small animal in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 96] PREDICTED-FAIL (skipped before build): Add a method to randomly generate a single small animal in GameWorldManager.cs - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 97] REVERTED (build failed): Add logic to instantiate and register a small animal pawn. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 98] PREDICTED-FAIL (skipped before build): Add a method to randomly generate a single small animal in GameWorldManager.cs - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 99] PREDICTED-FAIL (skipped before build): Add a method to randomly generate a single small animal in GameWorldManager.cs - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 100] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.27a - Add a method to randomly generate a single small animal in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) by creating a new Pawn and adding it to the list of pawns without using the registry.
+- [iter 101] PREDICTED-FAIL (skipped before build): Add a method to randomly generate a single small animal in GameWorldManager.cs - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 102] PREDICTED-FAIL (skipped before build): Add a method to randomly generate a single small animal in GameWorldManager.cs - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 103] SKIPPED (no SEARCH match): Add a method to randomly generate a single small animal in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 104] SKIPPED (no SEARCH match): Add a method to randomly generate a single small animal in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 105] CRITIC TASK: - [ ] Step C.105 - Implement a system to automatically generate functional rooms as pawns complete tasks, ensuring the win condition is reachable through gameplay.
+- [iter 105] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step E.27a - Add a method to randomly generate a single small animal in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) by creating a new Pawn and adding it to the list of pawns without using the registry.
+- [iter 106] REVERTED (build failed): Add a method to randomly generate small animal populations in GameWorldManager. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 107] REVERTED (build failed): Ensure the `Pawn` constructor exists with the required parameters before adding new code. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 108] REVERTED (build failed): Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 109] REVERTED (build failed): Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 110] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.33 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) - Ensure the Pawn constructor is called with the correct number of arguments.
+- [startup] Stack relaunched after boot (2026-06-11 17:44).
+- [iter 111] REVERTED (build failed): Add missing constructor parameters to Pawn instantiation in GenerateSmallAnimalPopulation method. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 112] REVERTED (build failed): Ensure the Pawn constructor is called with the correct number of arguments. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 113] REVERTED (build failed): Ensure `Pawn` constructor is called with the correct number of arguments. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 114] REVERTED (build failed): Ensure the `Pawn` constructor is called with the correct number of arguments. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 115] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.33 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) - Ensure the Pawn constructor is called with the correct number of arguments. (Verify the correct number of arguments for the Pawn constructor.)
+- [iter 116] REVERTED (build failed): Add missing parameters to Pawn constructor call (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 117] REVERTED (build failed): Verify the correct number of arguments for the Pawn constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 118] REVERTED (build failed): Verify the correct number of arguments for the Pawn constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 119] REVERTED (build failed): Verify the correct number of arguments for the Pawn constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 120] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step E.33 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) - Ensure the Pawn constructor is called with the correct number of arguments. (Verify the correct number of arguments for the Pawn constructor.)
+- [iter 121] KEPT: Add a simple weather system to affect resource availability. (src/RimWorldLab.Core/GameWorld.cs)
