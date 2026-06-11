@@ -50,9 +50,8 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
       and REPLACE it with:
       `            double score = task.Priority * 10.0;`
       `            score += (pawn.Mood - 50.0) / 25.0;`
-- [ ] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.
-- [ ] Step Z.3 - When a Build task completes (the PlaceFurniture branch in
-      GameWorld.cs Tick), call pawn.Remember(TotalTicks, "built a structure", +1.5f).
+- [x] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.
+- [ ] Step Z.3.1 - Add a private field `int TotalTicks` to `GameWorld.cs`.
 
 ## ARCHIVE (accompli - ne pas retoucher)
 - [x] Step W.1 - Mining is already implemented (Mine furniture,
@@ -153,3 +152,4 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [x] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
 - [x] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.60 - Implement a system to track and display the number of functional rooms in the game world.
+- [ ] Step C.75 - Implement a basic room detection system to count functional rooms towards the win condition.

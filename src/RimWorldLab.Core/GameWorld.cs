@@ -7,8 +7,9 @@ using System.Linq;
 // =====================================================================
 public class GameWorld
 {
-    private Dictionary<ResourceKind, int> _recycledResources = new();
-    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+private Dictionary<ResourceKind, int> _recycledResources = new();
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+private int TotalTicks = 0;
 
 public GameWorld()
 {

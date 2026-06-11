@@ -11,11 +11,13 @@ using System.Linq;
 /// <summary>Simulation levels of detail, coarsest to finest.</summary>
 public enum SimLOD
 {
-    Solar,   // long-pulse global modifiers (climate cycle, system events)
-    Planet,  // per-body climate/habitability drift
-    Region,  // external sites: trade/raid/migration pressure
-    Local,   // the playable colony map - full per-pawn simulation
-    Detail   // pawn body/mind (runs inside Local each tick)
+    Solar,    // long-pulse global modifiers (climate cycle, system events)
+    Planet,   // per-body climate/habitability drift
+    Region,   // external sites: trade/raid/migration pressure
+    Local,    // the playable colony map - full per-pawn simulation
+    Detail,   // pawn body/mind (runs inside Local each tick)
+    Organism, // single-creature stage (Spore-like, pre-tribal) - future
+    Micro     // microbial biomass per region: the primordial layer
 }
 
 /// <summary>A star-system body the colony could live on.</summary>
@@ -118,6 +120,9 @@ public class WorldRegion
     public float Fertility { get; set; }   // 0..1, drives regrowth
     public float Danger { get; set; }      // 0..1, drives raid pressure
     public float WildlifePressure { get; set; } // 0..1, drives wildlife pressure
+    /// <summary>Microbial biomass 0..1 (SimLOD.Micro): the primordial soil
+    /// layer - it FEEDS Fertility (bacteria -> soil -> plants -> us).</summary>
+    public float MicrobialBiomass { get; set; } = 0.5f;
     public bool IsColonyRegion { get; set; }
 
     public WorldRegion(int x, int y, string biome, float fertility, float danger)
@@ -174,7 +179,7 @@ public class MacroSim
     /// <summary>Last tick each LOD layer was updated (for the dev tab).</summary>
     public Dictionary<SimLOD, long> LastUpdate { get; } = new()
     {
-        [SimLOD.Solar] = 0, [SimLOD.Planet] = 0, [SimLOD.Region] = 0, [SimLOD.Local] = 0
+        [SimLOD.Solar] = 0, [SimLOD.Planet] = 0, [SimLOD.Region] = 0, [SimLOD.Local] = 0, [SimLOD.Micro] = 0
     };
 
     public MacroSim() : this(new WorldGenSettings()) { }
@@ -196,6 +201,7 @@ public class MacroSim
         if (worldTick % 5000 == 0) UpdateSolar(worldTick);
         if (worldTick % 2000 == 0) UpdatePlanet(worldTick);
         if (worldTick % 500 == 0) UpdateRegions(worldTick);
+        if (worldTick % 800 == 0) UpdateMicro(worldTick);
         if (worldTick % 250 == 0)
         {
             var before = ColonyWeather;
@@ -225,6 +231,21 @@ public class MacroSim
         if (ClimatePulse < 0.6f)
             WorldEvents.Add($"[t{tick}] Drought pulse on {home.Name}: vegetation regrowth slowed.");
         LastUpdate[SimLOD.Planet] = tick;
+    }
+
+    /// <summary>LOD Micro: bacteria bloom with warmth+wet, and slowly pull
+    /// regional Fertility toward their own level (primordial engine).</summary>
+    public void UpdateMicro(long tick)
+    {
+        var home = System.HomeBody;
+        foreach (var reg in Regions)
+        {
+            float warmth = 1f - Math.Abs(home.ClimateTemp - 0.2f);
+            float drift = (warmth * 0.6f + ClimatePulse * 0.4f - 0.5f) * 0.05f;
+            reg.MicrobialBiomass = Math.Clamp(reg.MicrobialBiomass + drift + ((float)_rng.NextDouble() - 0.5f) * 0.02f, 0.05f, 1f);
+            reg.Fertility = Math.Clamp(reg.Fertility * 0.95f + reg.MicrobialBiomass * 0.05f, 0f, 1f);
+        }
+        LastUpdate[SimLOD.Micro] = tick;
     }
 
     /// <summary>LOD 1: external sites trade, grow, and sharpen their appetites.</summary>

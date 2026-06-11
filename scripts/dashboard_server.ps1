@@ -106,6 +106,55 @@ while ($true) {
             Select-Object -Last 8 | ForEach-Object { "<li>$(Esc($_ -replace '^- ',''))</li>" }) -join ""
         if (-not $lessons) { $lessons = "<li class='muted'>Aucune lecon enregistree pour l'instant</li>" }
 
+        # ---- PROGRESS TRACKER (RSI-style): pending items grouped by team ----
+        $pendingItems = $roadmap | Select-String '^\s*-\s*\[ \] (Step [^
+]*)' | ForEach-Object { $_.Matches[0].Groups[1].Value }
+        $teamRows = ""
+        $teams = [ordered]@{
+            "COEUR DE SIMULATION" = @()
+            "PLANETES & ECHELLES" = @()
+            "PRESENTATION 3D" = @()
+            "IDEES DU CRITIQUE IA" = @()
+        }
+        foreach ($it in $pendingItems) {
+            $short = if ($it.Length -gt 90) { $it.Substring(0, 90) + "..." } else { $it }
+            if ($it -match '^Step C\.') { $teams["IDEES DU CRITIQUE IA"] += $short }
+            elseif ($it -match 'Game3D|Planet|planet|orbit') { $teams["PRESENTATION 3D"] += $short }
+            elseif ($it -match 'WorldModel|Micro|Region|tile') { $teams["PLANETES & ECHELLES"] += $short }
+            else { $teams["COEUR DE SIMULATION"] += $short }
+        }
+        foreach ($tm in $teams.Keys) {
+            $items = $teams[$tm]
+            $rows2 = if ($items.Count -eq 0) { "<div class='trk-item muted'>aucune tache en file</div>" }
+                else { ($items | ForEach-Object { "<div class='trk-item'><span class='trk-dot'></span>$(Esc($_))</div>" }) -join "" }
+            $teamRows += "<div class='trk-team'><div class='trk-name'>$tm <span class='muted'>($($items.Count))</span></div>$rows2</div>"
+        }
+
+        # ---- RELEASE VIEW (RSI-style columns) ----
+        $archCount = ($roadmap | Select-String '^- \[x\]').Count
+        $relHtml = @"
+<div class='rel-grid'>
+  <div class='rel-col'><div class='rel-head done'>0.1 &mdash; JAM<br><span class='rel-tag'>ARCHIVE</span></div>
+    <div class='rel-cat'>Fondations <b>$archCount taches accomplies</b></div>
+    <div class='rel-cat'>Colonie 2D&rarr;3D, economie, pieces, raids</div></div>
+  <div class='rel-col'><div class='rel-head done'>0.2 &mdash; DOWN HERE<br><span class='rel-tag'>LIVE</span></div>
+    <div class='rel-cat'>Planetes Goldberg + biomes/tuile</div>
+    <div class='rel-cat'>Systeme solaire + lunes + orbites</div>
+    <div class='rel-cat'>Creation de monde par seed</div>
+    <div class='rel-cat'>Meteo deterministe + jour/nuit orbital</div>
+    <div class='rel-cat'>Sauvegardes 3 slots + expeditions</div></div>
+  <div class='rel-col'><div class='rel-head tent'>0.3<br><span class='rel-tag'>EN DEV</span></div>
+    <div class='rel-cat'>Faune sur cartes + chasse ($($teams["COEUR DE SIMULATION"].Count) en file)</div>
+    <div class='rel-cat'>Cartes x10 par biome + eau logique</div>
+    <div class='rel-cat'>Vue 4X des unites reelles</div></div>
+  <div class='rel-col'><div class='rel-head tent'>0.4+<br><span class='rel-tag'>TENTATIVE</span></div>
+    <div class='rel-cat'>Depart Spore: stade bacterie (LOD Micro actif)</div>
+    <div class='rel-cat'>Stade organisme</div>
+    <div class='rel-cat'>Gravite/atmosphere par planete</div>
+    <div class='rel-cat'>Multi-systemes + endgame KSP</div></div>
+</div>
+"@
+
         $next = ($roadmap | Select-String '^\s*-\s*\[ \]' | Select-Object -First 4 | ForEach-Object {
             "<li>$(Esc(($_.Line.Trim() -replace '^- \[ \] ','')))</li>" }) -join ""
 
@@ -134,7 +183,17 @@ h1 { font-size:22px; margin-bottom:4px; } h2 { font-size:15px; color:#8b949e; fo
 .ev.smart .tag { background:#2d1b46; color:#bc8cff; } .ev.info .tag { background:#21262d; color:#8b949e; }
 .ev .txt { color:#c9d1d9; font-size:13px; }
 ul { padding-left:20px; } li { margin-bottom:6px; font-size:13.5px; color:#c9d1d9; }
-.muted { color:#8b949e; } .health { font-family:Consolas,monospace; font-size:12.5px; color:#7ee787; }
+.muted { color:#8b949e; }
+.rel-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+.rel-col { background:#0d1117; border:1px solid #21262d; border-radius:10px; overflow:hidden; }
+.rel-head { padding:10px; font-weight:700; text-align:center; border-bottom:2px solid #2ea043; }
+.rel-head.tent { border-bottom-color:#d29922; }
+.rel-tag { font-size:10px; color:#8b949e; letter-spacing:1px; }
+.rel-cat { padding:8px 10px; border-bottom:1px solid #21262d; font-size:13px; color:#c9d1d9; }
+.trk-team { margin-bottom:12px; }
+.trk-name { font-weight:700; color:#5cc26e; margin-bottom:6px; letter-spacing:.5px; }
+.trk-item { padding:6px 10px; background:#0d1117; border:1px solid #21262d; border-radius:6px; margin-bottom:4px; font-size:13px; display:flex; gap:8px; align-items:center; }
+.trk-dot { width:8px; height:8px; border-radius:50%; background:#d29922; flex:none; } .health { font-family:Consolas,monospace; font-size:12.5px; color:#7ee787; }
 </style></head><body>
 <h1>&#129302; Down Here ! &mdash; le developpeur IA en direct</h1>
 <div style='margin:8px 0 14px 0'>
@@ -157,6 +216,8 @@ ul { padding-left:20px; } li { margin-bottom:6px; font-size:13.5px; color:#c9d1d
   <div class='card'><h2>&#128300; Ce qu'il a appris (lecons)</h2><ul>$lessons</ul></div>
   <div class='card'><h2>&#128203; Prochaines taches</h2><ul>$next</ul></div>
 </div>
+<div class='card'><h2>&#128640; RELEASE VIEW</h2>$relHtml</div>
+<div class='card'><h2>&#128202; PROGRESS TRACKER &mdash; taches en developpement</h2>$teamRows</div>
 <div class='card'><h2>&#9889; Activite en direct (plus recent en haut)</h2>$($rows -join "`n")</div>
 </body></html>
 "@

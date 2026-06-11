@@ -75,3 +75,4 @@
 - [ ] Step D.4 - Low colony morale slows work. In
 - [ ] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.
 - [ ] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.
+- [ ] Step Z.3.1 - Add a private field `int TotalTicks` to `GameWorld.cs`.

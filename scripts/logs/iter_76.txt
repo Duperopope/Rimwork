@@ -1,0 +1,11 @@
+CHANGE: Add a private field `int TotalTicks` to `GameWorld.cs`.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+private Dictionary<ResourceKind, int> _recycledResources = new();
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+=======
+private Dictionary<ResourceKind, int> _recycledResources = new();
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+private int TotalTicks = 0;
+>>>>>>> REPLACE
+NEXT: Increment `TotalTicks` in a suitable method, such as `UpdateResourceRegenerationRate`.

@@ -7,8 +7,13 @@ Program. Différenciateur face à Before We Leave (référence UX planète) :
 la couche RimWorld/Bannerlord qui vit SOUS la couche 4X.
 
 ## Échelles (toutes naviguables, zoom continu molette)
+(à venir) Micro/bactérien (départ Spore: piscine primordiale, évolution) ↔
+(à venir) Organisme (créature individuelle, stade Spore 2) ↔
 Tuile locale (carte jouable) ↔ Planète hex (Goldberg) ↔ Système solaire ↔
-(à venir) Multi-systèmes connectés (zoom supplémentaire).
+(à venir) Multi-systèmes connectés.
+Le JEU COMMENCE au niveau bactérie: on évolue de la cellule à la
+civilisation interstellaire - Spore-like en début de partie, RimWorld au
+milieu, 4X/KSP en fin.
 
 ## Chantiers actés — état
 | Chantier | État |
@@ -43,7 +48,10 @@ Tuile locale (carte jouable) ↔ Planète hex (Goldberg) ↔ Système solaire �
 7. **Gravité/atmosphère/composition par planète** : modificateurs réels
    (vitesse de déplacement, coût de construction, besoin d'équipement) —
    pont vers l'endgame spatial KSP.
-8. **Multi-systèmes** : graphe d'étoiles connectées, l'échelle au-dessus de
+8. **Échelles micro (départ Spore)** : SimLOD.Micro - biomasse microbienne
+   par tuile (nourrit la fertilité), mini-jeu d'évolution cellulaire comme
+   ouverture de partie; SimLOD.Organism - le stade créature avant la tribu.
+9. **Multi-systèmes** : graphe d'étoiles connectées, l'échelle au-dessus de
    Solar (SimLOD.Galaxy), navigation par le même zoom continu.
 
 ## Règles de fabrication
