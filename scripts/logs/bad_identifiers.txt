@@ -112,3 +112,16 @@ Pawn
 Pawn
 Pawn
 Pawn
+GameMap
+IsTilePartOfRoom
+GameMap
+IsTilePartOfRoom
+Cell
+Cell
+Cell
+Cell
+function
+Cell
+Cell
+Cell
+Cell

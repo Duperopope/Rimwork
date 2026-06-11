@@ -3648,3 +3648,14 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 159] PREDICTED-FAIL (skipped before build): Add a method to check if a given tile is part of a room. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 160] PREDICTED-FAIL (skipped before build): Add a basic method to check if a given tile is part of a room. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 161] KEPT: Add a method to check if a given tile is part of a room in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 162] REVERTED (build failed): Add a method to check if a given tile is part of a room. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 163] REVERTED (build failed): Add a method to detect functional rooms by checking if a given tile is part of a room. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 18:04).
+- [iter 164] SKIPPED (no-op patch): Add a method to check if a given tile is part of a room. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 165] DONE (had past KEPT edits, change already in file): - [ ] Step C.45 - Add a basic room detection system to identify functional rooms in GameWorld.cs by defining a method to check if a given tile is part of a room.
+- [iter 166] SKIPPED (no SEARCH match): Add a method to detect if a set of cells forms a room. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 167] SKIPPED (no SEARCH match): Start implementing a basic room detection system by identifying contiguous passable cells. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 168] SKIPPED (no SEARCH match): Add a method to check if a region is fully enclosed. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 169] SKIPPED (no SEARCH match): Add a method to detect if a region is a functional room. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 170] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.60 - Add properties X and Y to the Cell class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 171] KEPT: Add properties X and Y to the Cell class. (src/RimWorldLab.Core/GameWorld.cs)

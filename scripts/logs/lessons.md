@@ -34,3 +34,5 @@
 - Verify constructor arguments match exactly before adding new parameters.
 - Verify constructor parameters match exactly before using.
 - Verify the exact number and types of arguments the constructor expects before modifying code.
+- Check for existing method signatures before adding new ones.
+- Ensure `Cell` has `X` and `Y` properties before using them.

@@ -548,8 +548,8 @@ master" loop, work through these in order - each is independently testable:
 - [x] Step E.39 - Implement a simple weather system that affects resource availability in src/RimWorldLab.Core/GameWorld.cs
 - [ ] Step C.15.1 - Implement a method to check if a tile is part of a room in the colony. (src/RimWorldLab.Core/GameWorld.cs) - Add a new method signature for checking if a tile is part of a room.
 - [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs by adding a method to check if a cell is adjacent to another cell. Start by adding a method signature for IsAdjacent.
-- [ ] Step C.45 - Add a basic room detection system to identify functional rooms in GameWorld.cs by defining a method to check if a given tile is part of a room.
-- [ ] Step C.60 - Implement a basic room detection system to identify functional rooms in the colony. (GameWorld.cs)
+- [x] Step C.45 - Add a basic room detection system to identify functional rooms in GameWorld.cs by defining a method to check if a given tile is part of a room.
+- [ ] Step C.60 - Add properties X and Y to the Cell class. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.75 - Implement a basic room detection system in GameWorld.cs to identify functional rooms based on connected furniture and walls.
 - [ ] Step C.15 - Implement a basic room detection system to identify functional rooms in GameWorld.cs
 - [ ] Step C.45 - Implement basic room detection to track functional rooms in GameWorld.cs

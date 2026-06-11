@@ -31,11 +31,15 @@ public class Cell
 {
     public bool IsSolid { get; set; }
     public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
+    public int X { get; set; }
+    public int Y { get; set; }
 
-    public Cell(bool isSolid = false, string tileType = "Ground")
+    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
     {
         IsSolid = isSolid;
         TileType = tileType;
+        X = x;
+        Y = y;
     }
 }
 
