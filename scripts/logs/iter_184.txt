@@ -1,36 +1,28 @@
-CHANGE: Add properties X and Y to the Cell class in GameWorld.cs.
+CHANGE: Add a basic room layout generation method implementation.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public void GenerateBasicRoomLayout()
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
-    {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
-    }
+    // TODO: Implement room layout generation
 }
 =======
-public class Cell
+public void GenerateBasicRoomLayout()
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
+    // Generate a simple sleeping quarters zone
+    int startX = 5;
+    int startY = 5;
+    int width = 10;
+    int height = 10;
+    var sleepingQuarters = new Zone(ZoneKind.SleepingQuarters, startX, startY, width, height);
+    AddZone(sleepingQuarters);
 
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
-    {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
-    }
+    // Generate a simple canteen zone
+    startX = 20;
+    startY = 20;
+    width = 8;
+    height = 8;
+    var canteen = new Zone(ZoneKind.Canteen, startX, startY, width, height);
+    AddZone(canteen);
 }
 >>>>>>> REPLACE
-NEXT: Ensure the number of arguments in the Pawn constructor matches the actual constructor definition.
+NEXT: Implement resource placement within generated rooms.

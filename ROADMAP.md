@@ -582,7 +582,7 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step Z.3.1 - In GameWorld.cs, add the `TotalTicks` property to the `GameWorld` class.
 - [ ] Step C.15 - Implement a system to automatically generate functional rooms to meet the win condition.
 - [ ] Step C.60 - Implement a system to automatically generate functional rooms to ensure win conditions can be reached.
-- [ ] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
+- [x] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
 - [ ] Step C.90 - Implement a room detection system to identify functional rooms in the colony.
 - [ ] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs
 - [ ] Step C.15 - Implement a system to generate resources over time to encourage sustainable resource management.

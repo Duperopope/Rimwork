@@ -1,40 +1,26 @@
-CHANGE: Ensure the Cell class in GameWorld.cs has properties X and Y defined only once.
+CHANGE: Add a method to detect functional rooms in the colony.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public bool RemoveResourceAt(int x, int y)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
-    {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
-    }
-
-    // Remove duplicate properties
-    // public int X { get; set; }
-    // public int Y { get; set; }
+    return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
 }
+// ... (lines omitted) ...
 =======
-public class Cell
+public bool RemoveResourceAt(int x, int y)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
-    {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
-    }
+    return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
 }
+
+/// <summary>
+/// Detects functional rooms in the colony.
+/// </summary>
+/// <returns>A list of functional rooms.</returns>
+public List<Room> GetFunctionalRooms()
+{
+    // Placeholder implementation
+    return new List<Room>();
+}
+// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Ensure the Cell class in GameWorld.cs has properties X and Y defined only once.
+NEXT: Implement the logic to identify functional rooms based on zones and connectivity.

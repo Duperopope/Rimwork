@@ -1,39 +1,16 @@
-CHANGE: Add properties X and Y to the Cell class in GameWorld.cs.
+CHANGE: Add a method to generate a basic room layout.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public void GenerateBasicRoomLayout()
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
-    {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
-    }
+    // TODO: Implement room layout generation
 }
 =======
-public class Cell
+public void GenerateBasicRoomLayout()
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
-    {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
-    }
-
-    public int X { get; set; }
-    public int Y { get; set; }
+    // Generate a basic room layout
+    AddZone(new Zone(ZoneKind.Canteen, 5, 5, 10, 10));
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 20, 20, 10, 10));
 }
 >>>>>>> REPLACE
-NEXT: Add properties X and Y to the Cell class in GameWorld.cs.
+NEXT: Implement resource management to ensure rooms can be built.

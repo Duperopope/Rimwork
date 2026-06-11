@@ -1,64 +1,78 @@
-CHANGE: Add a basic method to detect functional rooms in GameWorld.cs
+CHANGE: Add a method to detect functional rooms in the colony.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsPlantable(int x, int y)
+public bool RemoveResourceAt(int x, int y)
 {
-    if (!IsPassable(x, y)) return false;
-    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+    return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
+}
 // ... (lines omitted) ...
-}
 =======
-public bool IsPlantable(int x, int y)
+public bool RemoveResourceAt(int x, int y)
 {
-    if (!IsPassable(x, y)) return false;
-    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
-
-    // Check for furniture or saplings
-    if (_furniture.Any(f => f.X == x && f.Y == y)) return false;
-    if (_saplings.Any(s => s.X == x && s.Y == y)) return false;
-
-    return true;
+    return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
 }
 
-// Method to detect functional rooms
+/// <summary>
+/// Detects functional rooms in the colony.
+/// </summary>
+/// <returns>A list of functional rooms.</returns>
 public List<Room> GetFunctionalRooms()
 {
-    List<Room> rooms = new List<Room>();
-    bool[,] visited = new bool[Height, Width];
+    List<Room> functionalRooms = new List<Room>();
 
+    // Example: Detect rooms with at least 5 passable tiles.
     for (int y = 0; y < Height; y++)
     {
         for (int x = 0; x < Width; x++)
         {
-            if (!visited[y, x] && IsPassable(x, y))
+            if (IsPassable(x, y))
             {
-                Room room = new Room();
-                ExploreRoom(x, y, ref visited, room);
-                if (room.Cells.Count >= 10) // Minimum size for a functional room
+                // Check for a room of at least 5 passable tiles.
+                if (CountPassableTiles(x, y) >= 5)
                 {
-                    rooms.Add(room);
+                    functionalRooms.Add(new Room(x, y, 5, 5));
                 }
             }
         }
     }
 
-    return rooms;
+    return functionalRooms;
 }
 
-private void ExploreRoom(int x, int y, ref bool[,] visited, Room room)
+/// <summary>
+/// Counts the number of passable tiles in a room starting from a given tile.
+/// </summary>
+/// <param name="x">The x-coordinate of the starting tile.</param>
+/// <param name="y">The y-coordinate of the starting tile.</param>
+/// <returns>The number of passable tiles in the room.</returns>
+private int CountPassableTiles(int x, int y)
 {
-    if (x < 0 || x >= Width || y < 0 || y >= Height || visited[y, x] || !IsPassable(x, y))
+    int count = 0;
+    Queue<(int, int)> queue = new Queue<(int, int)>();
+    queue.Enqueue((x, y));
+    bool[,] visited = new bool[Height, Width];
+    visited[y, x] = true;
+
+    while (queue.Count > 0)
     {
-        return;
+        var (cx, cy) = queue.Dequeue();
+        count++;
+
+        foreach (var (dx, dy) in new[] { (-1, 0), (1, 0), (0, -1), (0, 1) })
+        {
+            int nx = cx + dx;
+            int ny = cy + dy;
+
+            if (nx >= 0 && nx < Width && ny >= 0 && ny < Height && IsPassable(nx, ny) && !visited[ny, nx])
+            {
+                queue.Enqueue((nx, ny));
+                visited[ny, nx] = true;
+            }
+        }
     }
 
-    visited[y, x] = true;
-    room.Cells.Add((x, y));
-
-    ExploreRoom(x + 1, y, ref visited, room);
-    ExploreRoom(x - 1, y, ref visited, room);
-    ExploreRoom(x, y + 1, ref visited, room);
-    ExploreRoom(x, y - 1, ref visited, room);
+    return count;
 }
+// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Implement additional checks for room functionality (e.g., presence of zones)
+NEXT: Implement a method to identify the type of each functional room (e.g., Canteen, Sleeping Quarters).

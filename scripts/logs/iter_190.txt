@@ -1,62 +1,94 @@
-CHANGE: Add a method to detect functional rooms in GameWorld.cs
+CHANGE: Start implementing a basic room detection system by adding a method to identify contiguous regions of passable tiles.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsPlantable(int x, int y)
+public class GameMap
 {
-    if (!IsPassable(x, y)) return false;
-    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
-// ... (lines omitted) ...
-}
-=======
-public bool IsPlantable(int x, int y)
-{
-    if (!IsPassable(x, y)) return false;
-    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
-    if (_furniture.Exists(f => f.X == x && f.Y == y)) return false;
-    if (_saplings.Exists(s => s.X == x && s.Y == y)) return false;
-    return true;
-}
+    private readonly Cell[,] _grid;
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<Zone> _zones = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly List<Pawn> _pawns = new();
+    private readonly Dictionary<Guid, Thing> _registry = new();
+    private readonly TaskBoard _tasks = new();
+    private readonly NeedsSystem _needs = new();
+    private readonly MacroSim _macro = new();
 
-private List<Room> DetectRooms()
-{
-    List<Room> rooms = new List<Room>();
-    bool[,] visited = new bool[Height, Width];
-
-    for (int y = 0; y < Height; y++)
+    public GameMap(int width, int height)
     {
-        for (int x = 0; x < Width; x++)
-        {
-            if (!visited[y, x] && IsPassable(x, y))
-            {
-                List<(int, int)> roomTiles = new List<(int, int)>();
-                Queue<(int, int)> queue = new Queue<(int, int)>();
-                queue.Enqueue((x, y));
-
-                while (queue.Count > 0)
-                {
-                    var (currentX, currentY) = queue.Dequeue();
-                    if (visited[currentY, currentX] || !IsPassable(currentX, currentY))
-                        continue;
-
-                    visited[currentY, currentX] = true;
-                    roomTiles.Add((currentX, currentY));
-
-                    for (int dy = -1; dy <= 1; dy++)
-                    {
-                        for (int dx = -1; dx <= 1; dx++)
-                        {
-                            if (dx == 0 && dy == 0) continue;
-                            queue.Enqueue((currentX + dx, currentY + dy));
-                        }
-                    }
-                }
-
-                rooms.Add(new Room(roomTiles));
-            }
-        }
+        _grid = new Cell[height, width];
+        InitializeMap();
     }
 
-    return rooms;
+    // ... (lines omitted) ...
+    public bool RemoveResourceAt(int x, int y)
+    {
+        return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
+    }
+=======
+public class GameMap
+{
+    private readonly Cell[,] _grid;
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<Zone> _zones = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly List<Pawn> _pawns = new();
+    private readonly Dictionary<Guid, Thing> _registry = new();
+    private readonly TaskBoard _tasks = new();
+    private readonly NeedsSystem _needs = new();
+    private readonly MacroSim _macro = new();
+
+    public GameMap(int width, int height)
+    {
+        _grid = new Cell[height, width];
+        InitializeMap();
+    }
+
+    // ... (lines omitted) ...
+
+    public bool RemoveResourceAt(int x, int y)
+    {
+        return _resources.RemoveAll(r => r.X == x && r.Y == y) > 0;
+    }
+
+    /// <summary>
+    /// Detects contiguous regions of passable tiles and returns a list of rooms.
+    /// </summary>
+    public List<Room> DetectRooms()
+    {
+        var rooms = new List<Room>();
+        bool[,] visited = new bool[_grid.GetLength(0), _grid.GetLength(1)];
+
+        for (int y = 0; y < _grid.GetLength(0); y++)
+        {
+            for (int x = 0; x < _grid.GetLength(1); x++)
+            {
+                if (_grid[y, x].IsSolid || visited[y, x])
+                    continue;
+
+                var room = new Room();
+                ExploreRoom(x, y, visited, room);
+                rooms.Add(room);
+            }
+        }
+
+        return rooms;
+    }
+
+    private void ExploreRoom(int x, int y, bool[,] visited, Room room)
+    {
+        if (x < 0 || x >= _grid.GetLength(1) || y < 0 || y >= _grid.GetLength(0) || _grid[y, x].IsSolid || visited[y, x])
+            return;
+
+        visited[y, x] = true;
+        room.Tiles.Add((x, y));
+
+        ExploreRoom(x + 1, y, visited, room);
+        ExploreRoom(x - 1, y, visited, room);
+        ExploreRoom(x, y + 1, visited, room);
+        ExploreRoom(x, y - 1, visited, room);
+    }
 }
 >>>>>>> REPLACE
-NEXT: Add a Room class to represent a room in the game world.
+NEXT: Define the Room class to store information about detected rooms.
