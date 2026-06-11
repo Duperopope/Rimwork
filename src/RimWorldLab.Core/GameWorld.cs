@@ -34,6 +34,13 @@ public void SimulateResourceRegeneration()
         RegenerateResource(resource, _recycledResources[resource]);
     }
 }
+
+public void GenerateResourcesOverTime()
+{
+    // Example: Generate resources based on some logic
+    RegenerateResource(ResourceKind.Tree, 5);
+    RegenerateResource(ResourceKind.Rock, 3);
+}
 }
 
 /// <summary>

@@ -132,3 +132,4 @@
 - Always check for existing method signatures before adding new ones.
 - Always check for existing method signatures before adding new ones to prevent CS0111 errors.
 - Ensure method signatures and types match existing definitions in the file.
+- Ensure method calls and string interpolations are correctly formatted and syntactically valid.
