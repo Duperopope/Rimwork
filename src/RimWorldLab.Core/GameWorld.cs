@@ -397,6 +397,17 @@ public bool IsPlantable(int x, int y)
 
     // Start of room detection logic
     if (IsTilePartOfRoom(x, y)) return false;
+
+    // Check if the tile is part of a room
+    foreach (var zone in Zones)
+    {
+        if (zone.Contains(x, y))
+        {
+            return false;
+        }
+    }
+
+    return true;
     if (_furniture.Exists(f => f.X == x && f.Y == y)) return false;
     if (_saplings.Exists(s => s.X == x && s.Y == y)) return false;
     if (_noGrowTiles.Contains((x, y))) return false;

@@ -557,7 +557,7 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.75 - Add a constructor to the Room class to initialize the Tiles list. (src/RimWorldLab.Core/Room.cs)
 - [ ] Step C.90 - Define the Room class with a Tiles property in GameWorld.cs.
 - [x] Step C.105 - Implement a basic room detection system to count functional rooms and trigger win condition in GameWorld.cs
-- [ ] Step C.135 - Implement a basic room detection system to count functional rooms and track progress towards win conditions in GameWorld.cs
+- [ ] Step C.135 - Add the Room class definition to GameWorld.cs, ensuring it is not in the global namespace. Define only the Tiles property.
 - [ ] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.
 - [ ] Step C.15 - Implement a basic room detection algorithm in GameWorld.cs to identify functional rooms.
 - [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs to identify functional rooms.
@@ -601,3 +601,4 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.195 - Implement a resource consumption system for pawns to ensure they deplete resources over time, forcing players to manage their colony's needs effectively. (GameWorld.cs)
 - [ ] Step C.15 - Implement a resource generation system to provide players with wood and stone over time, ensuring they have resources to build functional rooms. (GameWorld.cs)
 - [ ] Step C.45 - Implement a system to track and display the number of functional rooms in the colony, allowing players to see their progress towards the win condition.
+- [ ] Step C.60 - Implement a system to generate resources over time, such as trees growing or rocks appearing, to provide players with a steady supply of materials.

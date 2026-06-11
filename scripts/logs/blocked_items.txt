@@ -18,3 +18,4 @@
 - [ ] Step C.60 - Fix tuple syntax in the `ExploreRoom` method by ensuring each tuple contains at least two elements.
 - [ ] Step C.75 - Add a constructor to the Room class to initialize the Tiles list. (src/RimWorldLab.Core/Room.cs)
 - [ ] Step C.90 - Define the Room class with a Tiles property in GameWorld.cs.
+- [ ] Step C.135 - Add the Room class definition to GameWorld.cs, ensuring it is not in the global namespace. Define only the Tiles property.

@@ -96,6 +96,57 @@ public partial class Game3D : Node3D
     [Signal] public delegate void ThreatSpawnedEventHandler();
     public event Action<int, string, bool> TileSelected;
 
+    private GameWorldManager _colonyWorld;
+    /// <summary>Tile index currently visited; -1 = home colony.</summary>
+    public int VisitedTileIdx { get; private set; } = -1;
+
+    /// <summary>Load the local map of a planet tile (expedition). The colony
+    /// world is kept intact and restored via ReturnToColony().</summary>
+    public void VisitTile(int tileIdx, string biome)
+    {
+        if (_colonyWorld == null) _colonyWorld = World;
+        if (tileIdx == _colonyTileIdx) { ReturnToColony(); return; }
+
+        var w = new GameWorldManager(64, 64); // expedition maps are bigger
+        var rng2 = new Random(1000 + tileIdx);
+        string[] scouts = { "Eclaireur A", "Eclaireur B", "Eclaireur C" };
+        foreach (var n in scouts)
+        {
+            int x, y;
+            do { x = rng2.Next(0, 64); y = rng2.Next(0, 64); } while (!w.Map.IsPassable(x, y));
+            w.RegisterThing(new Pawn(n, x, y));
+        }
+        World = w;
+        VisitedTileIdx = tileIdx;
+        RebuildLocalVisuals();
+        SetViewLayer("Local");
+        _camRig.Position = new Vector3(32, 0, 32);
+        AlertText = $"Expédition sur la tuile #{tileIdx} ({biome}) — molette arrière à fond: retour planète";
+    }
+
+    public void ReturnToColony()
+    {
+        if (_colonyWorld != null) World = _colonyWorld;
+        VisitedTileIdx = -1;
+        RebuildLocalVisuals();
+        SetViewLayer("Local");
+        _camRig.Position = new Vector3(14, 0, 12);
+        AlertText = "Retour à la colonie.";
+    }
+
+    private void RebuildLocalVisuals()
+    {
+        foreach (var n in _pawnNodes.Values) n.QueueFree();
+        _pawnNodes.Clear(); _pawnAnims.Clear(); _pawnAnimState.Clear();
+        foreach (var n in _staticNodes.Values) n.QueueFree();
+        _staticNodes.Clear(); _staticKind.Clear();
+        foreach (var t in Threats) t.Node?.QueueFree();
+        Threats.Clear();
+        SelectedPawn = null;
+        BuildTerrain();
+        SyncStatics(force: true);
+    }
+
     public override void _Ready()
     {
         World = new GameWorldManager(50, 50);
@@ -147,8 +198,13 @@ public partial class Game3D : Node3D
         AddChild(new WorldEnvironment { Environment = env });
     }
 
+    private Node3D _terrainRoot;
+
     private void BuildTerrain()
     {
+        if (_terrainRoot != null) _terrainRoot.QueueFree();
+        _terrainRoot = new Node3D();
+        AddChild(_terrainRoot);
         // One MultiMesh per tile type: cheap, single draw call each.
         foreach (var (type, color, height) in new[]
         {
@@ -172,7 +228,7 @@ public partial class Game3D : Node3D
             };
             for (int idx = 0; idx < tiles.Count; idx++)
                 mm.SetInstanceTransform(idx, new Transform3D(Basis.Identity, tiles[idx] + new Vector3(0.5f, -height / 2f, 0.5f)));
-            AddChild(new MultiMeshInstance3D
+            _terrainRoot.AddChild(new MultiMeshInstance3D
             {
                 Multimesh = mm,
                 MaterialOverride = new StandardMaterial3D { AlbedoColor = color }
@@ -325,7 +381,17 @@ public partial class Game3D : Node3D
         if (ev is InputEventMouseButton mb && mb.Pressed)
         {
             if (mb.ButtonIndex == MouseButton.WheelUp) _zoom = Math.Clamp(_zoom - CamZoomSpeed, 8f, 45f);
-            if (mb.ButtonIndex == MouseButton.WheelDown) _zoom = Math.Clamp(_zoom + CamZoomSpeed, 8f, 45f);
+            if (mb.ButtonIndex == MouseButton.WheelDown)
+            {
+                if (ViewLayer == "Local" && _zoom >= 44.5f)
+                {
+                    _savedRigPos = _camRig.Position; _savedZoom = 30f;
+                    SetViewLayer("Planet");
+                }
+                else if (ViewLayer == "Planet" && _zoom >= 58f)
+                    SetViewLayer("Solar");
+                else _zoom = Math.Clamp(_zoom + CamZoomSpeed, 8f, ViewLayer == "Solar" ? 90f : 60f);
+            }
             if (mb.ButtonIndex == MouseButton.Left) PickPawn(mb.Position);
         }
         if (ev is InputEventMouseMotion mm)

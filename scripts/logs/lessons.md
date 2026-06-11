@@ -40,3 +40,6 @@
 - Ensure tuple syntax is correct and complete, avoiding missing elements or braces.
 - Check for existing class definitions before adding new ones.
 - Check for existing class definitions before adding new ones to prevent namespace conflicts.
+- Check for existing class names before defining new ones to avoid namespace conflicts.
+- Ensure new types are defined before any existing type's methods or properties.
+- Ensure proper nesting and closing of classes and members.

@@ -19,6 +19,10 @@ public partial class UiShell : CanvasLayer
     private Label _resources, _clock, _objective, _alert, _macro, _events;
     private Label _inspector;
     private Button _pauseBtn;
+    private PanelContainer _visitPanel;
+    private Button _visitBtn;
+    private int _pendingTile = -1;
+    private string _pendingBiome = "";
 
     // Options state
     private ConfigFile _cfg = new();
@@ -204,6 +208,26 @@ public partial class UiShell : CanvasLayer
         _alert.AddThemeFontSizeOverride("font_size", 16);
         alertP.AddChild(_alert);
         _hud.AddChild(alertP);
+
+        // ---- Visit button (appears when a planet tile is selected) ----
+        _visitPanel = Panel();
+        _visitPanel.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
+        _visitPanel.AnchorTop = 0.86f; _visitPanel.AnchorBottom = 0.86f;
+        _visitPanel.Visible = false;
+        _visitBtn = new Button { Text = "Visiter cette tuile", CustomMinimumSize = new Vector2(260, 44) };
+        _visitBtn.Pressed += () =>
+        {
+            _visitPanel.Visible = false;
+            if (_pendingTile >= 0) _game.VisitTile(_pendingTile, _pendingBiome);
+        };
+        _visitPanel.AddChild(_visitBtn);
+        _hud.AddChild(_visitPanel);
+        _game.TileSelected += (idx, biome, isColony) =>
+        {
+            _pendingTile = idx; _pendingBiome = biome;
+            _visitBtn.Text = isColony ? "Retourner à la colonie" : $"Visiter cette tuile ({biome})";
+            _visitPanel.Visible = true;
+        };
 
         // ---- Bottom hint ----
         var hint = new Label
