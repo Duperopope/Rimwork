@@ -4260,3 +4260,8 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 138] PREDICTED-FAIL (skipped before build): Add a method to generate resources like wood and stone over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 139] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.195 - Implement a system to generate resources like wood and stone over time to encourage sustainable resource management.
 - [iter 140] KEPT: Add a method to calculate total resource consumption for a specific resource kind. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 141] REVERTED (build failed): Add a method to track energy consumption for pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 142] SKIPPED (no SEARCH match): Ensure `ResourceKind` enum includes 'Water' before using it in methods. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 143] SKIPPED (no SEARCH match): Add 'Water' to the ResourceKind enum. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 144] DONE (had past KEPT edits, change already in file): - [ ] Step C.15 - Implement a resource consumption system to ensure players manage their colony's needs effectively.
+- [iter 145] KEPT: Add a new method to track recycled resources in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)

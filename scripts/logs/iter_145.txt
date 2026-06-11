@@ -1,0 +1,9 @@
+CHANGE: Add a new method to track recycled resources in GameWorld.cs
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+private Dictionary<Guid, Dictionary<ResourceKind, int>> _pawnResourceConsumption = new();
+=======
+private Dictionary<Guid, Dictionary<ResourceKind, int>> _pawnResourceConsumption = new();
+private Dictionary<ResourceKind, int> _recycledResources = new();
+>>>>>>> REPLACE
+NEXT: Implement logic to update the recycled resources dictionary when resources are recycled.

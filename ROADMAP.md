@@ -616,7 +616,7 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [x] Step C.165 - Implement a resource consumption system for pawns to simulate hunger and thirst, forcing players to manage food and water production. (GameWorld.cs)
 - [ ] Step C.180 - Add a method to simulate water regeneration for trees in GameWorld.cs.
 - [ ] Step C.195 - Implement a system to generate resources like wood and stone over time to encourage sustainable resource management.
-- [ ] Step C.15 - Implement a resource consumption system to ensure players manage their colony's needs effectively.
+- [x] Step C.15 - Implement a resource consumption system to ensure players manage their colony's needs effectively.
 - [ ] Step C.30 - Improve resource management by adding a recycling system for unused materials in GameWorld.cs
 - [ ] Step C.45 - Implement a system to track and display the number of functional rooms in the game world.
 - [ ] Step C.60 - Implement a resource consumption system for pawns to ensure they deplete resources over time, forcing players to manage resource allocation. (GameWorld.cs)

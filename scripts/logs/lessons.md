@@ -91,3 +91,4 @@
 - Ensure `ResourceKind` enum includes 'Water' before using it in methods.
 - Ensure `ResourceKind` enum includes `Water` before using it in `GameWorld.cs`.
 - Ensure `ResourceKind` enum includes `Water` before using it in `GameWorld.cs`.
+- Ensure 'ResourceKind' enum includes 'Energy' before using it.

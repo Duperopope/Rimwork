@@ -53,3 +53,4 @@
 - [ ] Step C.150 - Implement a resource consumption system for pawns to ensure they use resources like wood and stone to build furniture and walls, preventing infinite building without resource management. (GameWorld.cs)
 - [ ] Step C.165 - Implement a resource consumption system for pawns to simulate hunger and thirst, forcing players to manage food and water production. (GameWorld.cs)
 - [ ] Step C.15 - Implement a resource consumption system to ensure players manage their colony's needs effectively.
+- [ ] Step C.30 - Improve resource management by adding a recycling system for unused materials in GameWorld.cs

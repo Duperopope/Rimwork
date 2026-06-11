@@ -156,6 +156,7 @@ private int _foodConsumption = 0;
 private int _waterConsumption = 0;
 private int _energyConsumption = 0;
 private Dictionary<Guid, Dictionary<ResourceKind, int>> _pawnResourceConsumption = new();
+private Dictionary<ResourceKind, int> _recycledResources = new();
 
     public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
     {

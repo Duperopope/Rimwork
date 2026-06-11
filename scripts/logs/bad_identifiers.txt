@@ -280,3 +280,13 @@ ResourceKind
 Water
 ResourceKind
 Water
+ResourceKind
+Energy
+ResourceKind
+Energy
+ResourceKind
+Energy
+ResourceKind
+Energy
+ResourceKind
+Energy
