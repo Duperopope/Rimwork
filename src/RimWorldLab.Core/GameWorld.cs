@@ -22,6 +22,11 @@ private int Tools = 0;
 private int Food = 0;
 private float[,] _microbialBiomass = new float[100, 100]; // Example size
 
+public static class Macro
+{
+    public static float[,] Regions { get; } = new float[100, 100];
+}
+
 public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
 {
     if (_resourceRegenerationRates.ContainsKey(kind))
