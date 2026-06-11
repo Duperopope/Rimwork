@@ -149,6 +149,7 @@ public class GameMap
     private readonly HashSet<(int X, int Y)> _noGrowTiles = new();
     private readonly HashSet<(int X, int Y)> _bridges = new();
     private bool _isRaining = false;
+    private List<(int X, int Y, string Biome)> _regions = new();
 
     private GridShape _gridShape = GridShape.Square;
 

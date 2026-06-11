@@ -38,3 +38,7 @@
 - [ ] Step C.180 - Define the `_regionMap` field in `GameWorld.cs` and initialize it with a new instance of `RegionMap`.
 - [ ] Step C.195 - Define the `Needs` class in `Needs.cs` with a basic structure.
 - [ ] Step C.15.1 - Create an empty `Needs.cs` file in `src/RimWorldLab.Core/` and add a `Needs` class with a basic constructor.
+- [ ] Step C.60 - Implement a system to generate resources over time, such as trees growing or rocks appearing, to provide players with a steady supply of materials.
+- [ ] Step C.75 - Rename the new `TickSaplings` method to `TickSaplingsNew` in GameWorld.cs to avoid conflict with the existing method.
+- [ ] Step C.90 - Implement a resource consumption system to ensure pawns need to gather resources to survive and build structures, enhancing the gameplay challenge. (GameWorld.cs)
+- [ ] Step C.105 - Implement a system to automatically generate resource-rich areas on the map to encourage exploration and resource gathering. (GameWorld.cs)

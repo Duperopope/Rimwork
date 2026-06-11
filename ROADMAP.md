@@ -594,12 +594,12 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.180 - Define the `_regionMap` field in `GameWorld.cs` and initialize it with a new instance of `RegionMap`.
 - [ ] Step C.195 - Define the `Needs` class in `Needs.cs` with a basic structure.
 - [ ] Step C.15.1 - Create an empty `Needs.cs` file in `src/RimWorldLab.Core/` and add a `Needs` class with a basic constructor.
-- [ ] Step C.45 - Implement a system to track and display the number of functional rooms in the colony, allowing players to see their progress towards the win condition.
+- [x] Step C.45 - Implement a system to track and display the number of functional rooms in the colony, allowing players to see their progress towards the win condition.
 - [ ] Step C.60 - Implement a system to generate resources over time, such as trees growing or rocks appearing, to provide players with a steady supply of materials.
-- [ ] Step C.75 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to provide a sustainable resource base for the player.
+- [ ] Step C.75 - Rename the new `TickSaplings` method to `TickSaplingsNew` in GameWorld.cs to avoid conflict with the existing method.
 - [ ] Step C.90 - Implement a resource consumption system to ensure pawns need to gather resources to survive and build structures, enhancing the gameplay challenge. (GameWorld.cs)
 - [ ] Step C.105 - Implement a system to automatically generate resource-rich areas on the map to encourage exploration and resource gathering. (GameWorld.cs)
-- [ ] Step C.120 - Add a resource generation mechanic to ensure players have a steady supply of materials over time.
+- [ ] Step C.120 - Add a private field _regions to the GameMap class. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.135 - Implement a system to track and display the number of functional rooms in the game world.
 - [ ] Step C.165 - Implement a system to generate resources over time, such as trees regrowing or rocks respawning, to provide a sustainable source of materials.
 - [ ] Step C.180 - Implement a basic resource management system to ensure players have to gather and manage resources to build rooms.
@@ -611,3 +611,6 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.90 - Implement a resource consumption system that requires players to manage food, water, and energy for their pawns, forcing them to prioritize building functional rooms to meet basic needs.
 - [ ] Step C.105 - Implement a resource consumption system that forces players to manage their colony's food and materials to prevent starvation and resource depletion.
 - [ ] Step C.120 - Add a resource generation system that rewards players for building functional rooms, encouraging them to reach the win condition.
+- [ ] Step C.135 - Implement a resource generation system to provide a steady flow of resources, encouraging sustainable colony management.
+- [ ] Step C.150 - Implement a resource consumption system for pawns to ensure they use resources like wood and stone to build furniture and walls, preventing infinite building without resource management. (GameWorld.cs)
+- [ ] Step C.165 - Implement a resource consumption system for pawns to simulate hunger and thirst, forcing players to manage food and water production. (GameWorld.cs)

@@ -53,3 +53,14 @@
 - Ensure all referenced fields (like `_regions`) are declared and initialized before use in methods.
 - Ensure all used fields and classes are declared and initialized in the same file or referenced correctly.
 - Ensure referenced types like 'Needs' are defined or referenced correctly in the project.
+- Ensure method declarations use valid C# syntax and avoid tuple misuse.
+- Check for existing method signatures before adding new ones.
+- Check for existing method signatures before adding new ones to avoid conflicts.
+- Ensure unique method names within the same class to avoid CS0111 errors.
+- Check for existing method signatures before adding new methods to avoid conflicts.
+- Ensure all referenced fields and methods exist in the current context before adding new code.
+- Always check for existing method signatures before adding new ones.
+- Ensure all used fields and methods exist in the current context before adding new code.
+- Ensure all referenced fields and methods exist before adding new code.
+- Check for missing fields or properties before adding methods that depend on them.
+- Ensure all referenced fields exist in the current class or are properly passed in.
