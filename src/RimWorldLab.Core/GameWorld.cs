@@ -54,6 +54,19 @@ public void GenerateResourcesOverTime()
     // Example: Generate resources based on some logic
     RegenerateResource(ResourceKind.Tree, 5);
     RegenerateResource(ResourceKind.Rock, 3);
+    SimulateMicrobialBiomassRegeneration();
+}
+
+private void SimulateMicrobialBiomassRegeneration()
+{
+    for (int x = 0; x < 100; x++)
+    {
+        for (int y = 0; y < 100; y++)
+        {
+            // Simple regeneration logic: increase biomass by 0.01 each tick
+            _microbialBiomass[x, y] = Math.Min(_microbialBiomass[x, y] + 0.01f, 1.0f);
+        }
+    }
 }
 }
 
