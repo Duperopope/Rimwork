@@ -1,10 +1,23 @@
-
-
-CHANGE: Adjust crate icon color for better contrast in resource visualization
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a method to check if a tile is part of a room in GameWorld.cs
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // TODO: Implement the real behavior.
+    return false;
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // Check if the tile is part of any zone
+    foreach (var zone in Zones)
+    {
+        if (zone.Contains(x, y))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 >>>>>>> REPLACE
-NEXT: Consider adjusting other icon colors for consistency in visual design
+NEXT: Implement a method to detect connected furniture and walls to form rooms.

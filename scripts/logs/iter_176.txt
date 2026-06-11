@@ -1,10 +1,16 @@
-
-
-CHANGE: Adjust crate icon color for better contrast in resource visualization
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a method to check if a cell is part of a room.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // Implementation goes here
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // Check if the cell is part of a room
+    // For now, return false as the implementation is pending
+    return false;
+}
 >>>>>>> REPLACE
-NEXT: Consider adjusting the crate overlay color to ensure it stands out against different background themes
+NEXT: Implement the logic to determine if a cell is part of a room by checking connected furniture and walls.

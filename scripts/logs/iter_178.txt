@@ -1,15 +1,38 @@
-
-
-CHANGE: Add code to check if an item is a crate and draw its icon
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a simple method to check if a tile is part of a room.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-				DrawRect(rect2, Colors.White, filled: false, 1f);
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // TODO: Implement the real behavior.
+    return false;
+}
 =======
-				DrawRect(rect2, Colors.White, filled: false, 1f);
-				if (item.Kind == FurnitureKind.Crate)
-				{
-					DrawLine(rect2.Position, rect2.Position + rect2.Size, Colors.White, 1f);
-					DrawLine(new Vector2(rect2.Position.X + rect2.Size.X, rect2.Position.Y), new Vector2(rect2.Position.X, rect2.Position.Y + rect2.Size.Y), Colors.White, 1f);
-				}
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // Check if the tile is adjacent to a wall or furniture
+    if (IsPassable(x, y))
+    {
+        return false;
+    }
+
+    // Check adjacent tiles
+    for (int dx = -1; dx <= 1; dx++)
+    {
+        for (int dy = -1; dy <= 1; dy++)
+        {
+            int nx = x + dx;
+            int ny = y + dy;
+            if (nx >= 0 && nx < Width && ny >= 0 && ny < Height)
+            {
+                if (!IsPassable(nx, ny))
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
 >>>>>>> REPLACE
-NEXT: Implement the DrawCrateIcon method as described in the comments
+NEXT: Implement a method to detect connected regions of non-passable tiles.

@@ -36,3 +36,4 @@
 - Verify the exact number and types of arguments the constructor expects before modifying code.
 - Check for existing method signatures before adding new ones.
 - Ensure `Cell` has `X` and `Y` properties before using them.
+- Avoid duplicating property declarations in the same class.

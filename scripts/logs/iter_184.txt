@@ -1,10 +1,36 @@
-
-
-CHANGE: Adjust crate icon color for better contrast with surrounding elements
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add properties X and Y to the Cell class in GameWorld.cs.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public class Cell
+{
+    public bool IsSolid { get; set; }
+    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
+    public int X { get; set; }
+    public int Y { get; set; }
+
+    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    {
+        IsSolid = isSolid;
+        TileType = tileType;
+        X = x;
+        Y = y;
+    }
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public class Cell
+{
+    public bool IsSolid { get; set; }
+    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
+    public int X { get; set; }
+    public int Y { get; set; }
+
+    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    {
+        IsSolid = isSolid;
+        TileType = tileType;
+        X = x;
+        Y = y;
+    }
+}
 >>>>>>> REPLACE
-NEXT: Consider adjusting other icon colors for consistency in visual design
+NEXT: Ensure the number of arguments in the Pawn constructor matches the actual constructor definition.

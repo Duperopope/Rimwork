@@ -1,10 +1,55 @@
-
-
-CHANGE: Adjust crate icon color for better contrast in resource visualization
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a basic room detection system in GameWorld.cs to identify functional rooms based on connected furniture and walls.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // TODO: Implement the real behavior.
+    return false;
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // Check if the tile is solid (part of a wall)
+    if (IsSolid(x, y))
+    {
+        return true;
+    }
+
+    // Check if the tile has adjacent furniture
+    if (HasAdjacentFurniture(x, y))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+private bool IsSolid(int x, int y)
+{
+    return _grid[y, x].IsSolid;
+}
+
+private bool HasAdjacentFurniture(int x, int y)
+{
+    // Check all 4 adjacent tiles for furniture
+    int[] dx = { -1, 1, 0, 0 };
+    int[] dy = { 0, 0, -1, 1 };
+
+    for (int i = 0; i < 4; i++)
+    {
+        int nx = x + dx[i];
+        int ny = y + dy[i];
+
+        if (nx >= 0 && nx < Width && ny >= 0 && ny < Height)
+        {
+            if (_furniture.Any(f => f.X == nx && f.Y == ny))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
 >>>>>>> REPLACE
-NEXT: Consider adjusting the crate overlay color to ensure it stands out against different background themes
+NEXT: Implement a method to find all connected tiles in a room.

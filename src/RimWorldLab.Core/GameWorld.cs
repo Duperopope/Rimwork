@@ -41,6 +41,10 @@ public class Cell
         X = x;
         Y = y;
     }
+
+    // Remove duplicate properties
+    // public int X { get; set; }
+    // public int Y { get; set; }
 }
 
 /// <summary>
