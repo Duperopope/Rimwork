@@ -53,6 +53,24 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [x] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.
 - [ ] Step Z.3.1 - Add a private field `int TotalTicks` to `GameWorld.cs`.
 
+## PRIORITE: la couche primordiale (depart Spore - LOD Micro)
+- [ ] Step M.1 - Microbial blooms feed the colony soil. In
+      src/RimWorldLab.Core/GameWorld.cs, find the exact line:
+      `        Macro.Tick(TotalTicks);`
+      Immediately AFTER that line (and after any D.1 wildlife block already
+      inserted there), insert these new lines:
+      `        if (TotalTicks % 1600 == 0)`
+      `        {`
+      `            float biomass = Macro.Regions[2, 2].MicrobialBiomass;`
+      `            if (biomass > 0.75f) LogEvent($"Microbial bloom enriches the soil (biomass {biomass:P0}).");`
+      `        }`
+- [ ] Step M.2 - Rich soil grows food faster. In
+      src/RimWorldLab.Core/GameWorld.cs, find the exact line:
+      `        if (TotalTicks % 800 == 0 && Wood >= 1 && Food < _pawns.Count * 3 &&`
+      and REPLACE it with:
+      `        int cookBonus = Macro.Regions[2, 2].MicrobialBiomass > 0.7f ? 1 : 0;`
+      `        if (TotalTicks % 800 == 0 && Wood >= 1 && Food < _pawns.Count * 3 + cookBonus * 4 &&`
+
 ## ARCHIVE (accompli - ne pas retoucher)
 - [x] Step W.1 - Mining is already implemented (Mine furniture,
 - [x] Step W.1b - VERIFIED DEADLOCK (headless 30k-tick sim): Stone stays 0
