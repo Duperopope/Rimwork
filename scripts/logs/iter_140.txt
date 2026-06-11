@@ -1,0 +1,51 @@
+CHANGE: Add a method to calculate total resource consumption for a specific resource kind.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+    public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+    {
+        if (!_pawnResourceConsumption.ContainsKey(pawnId))
+        {
+            _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+        }
+
+        if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+        {
+            _pawnResourceConsumption[pawnId][kind] += amount;
+        }
+        else
+        {
+            _pawnResourceConsumption[pawnId][kind] = amount;
+        }
+    }
+=======
+    public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+    {
+        if (!_pawnResourceConsumption.ContainsKey(pawnId))
+        {
+            _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+        }
+
+        if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+        {
+            _pawnResourceConsumption[pawnId][kind] += amount;
+        }
+        else
+        {
+            _pawnResourceConsumption[pawnId][kind] = amount;
+        }
+    }
+
+    public int GetTotalResourceConsumption(ResourceKind kind)
+    {
+        int totalConsumption = 0;
+        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+        {
+            if (pawnConsumption.TryGetValue(kind, out int consumption))
+            {
+                totalConsumption += consumption;
+            }
+        }
+        return totalConsumption;
+    }
+>>>>>>> REPLACE
+NEXT: Implement a method to update resource amounts based on consumption.

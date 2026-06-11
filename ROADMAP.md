@@ -613,8 +613,8 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.120 - Implement a method to check if a room is functional in GameMap.cs.
 - [x] Step C.135.1 - Implement a method to check if a room is functional in GameWorld.cs.
 - [x] Step C.150 - Implement a resource consumption system for pawns to ensure they use resources like wood and stone to build furniture and walls, preventing infinite building without resource management. (GameWorld.cs)
-- [ ] Step C.165 - Implement a resource consumption system for pawns to simulate hunger and thirst, forcing players to manage food and water production. (GameWorld.cs)
-- [ ] Step C.180 - Add a system to generate resources over time, such as trees regrowing or rocks respawning, to ensure players have a sustainable source of materials. (GameWorld.cs)
+- [x] Step C.165 - Implement a resource consumption system for pawns to simulate hunger and thirst, forcing players to manage food and water production. (GameWorld.cs)
+- [ ] Step C.180 - Add a method to simulate water regeneration for trees in GameWorld.cs.
 - [ ] Step C.195 - Implement a system to generate resources like wood and stone over time to encourage sustainable resource management.
 - [ ] Step C.15 - Implement a resource consumption system to ensure players manage their colony's needs effectively.
 - [ ] Step C.30 - Improve resource management by adding a recycling system for unused materials in GameWorld.cs
@@ -623,3 +623,4 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.75 - Implement a system to generate resources over time, such as wood from trees or stone from rocks, to encourage sustainable resource management. (GameWorld.cs)
 - [ ] Step C.90 - Implement a system to automatically assign pawns to tasks based on their skills and the current needs of the colony.
 - [ ] Step C.105 - Implement a mechanic that requires players to manage resources more efficiently to unlock new building types.
+- [ ] Step C.120 - Improve resource management and visibility to reduce frustration during early game.

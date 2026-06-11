@@ -50,3 +50,5 @@
 - [ ] Step C.45.1 - Add a method to simulate tree regrowth in `GameWorld.cs` by defining the method signature.
 - [ ] Step C.75 - Implement the `RemoveSapling` method in `GameWorld.cs` to allow tree regrowth simulation.
 - [ ] Step C.120 - Implement a method to check if a room is functional in GameMap.cs.
+- [ ] Step C.180 - Add a method to simulate water regeneration for trees in GameWorld.cs.
+- [ ] Step C.195 - Implement a system to generate resources like wood and stone over time to encourage sustainable resource management.

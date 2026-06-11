@@ -85,3 +85,9 @@
 - Ensure method bodies are correctly formatted and do not contain syntax errors.
 - Ensure method syntax is correct and matches C# language rules.
 - Ensure method signatures and logic align with existing code structure and types.
+- Ensure method bodies are correctly formatted and do not contain syntax errors.
+- Ensure method parameters and logic align with existing properties and types.
+- Ensure method signatures match existing declarations and use correct syntax.
+- Ensure `ResourceKind` enum includes 'Water' before using it in methods.
+- Ensure `ResourceKind` enum includes `Water` before using it in `GameWorld.cs`.
+- Ensure `ResourceKind` enum includes `Water` before using it in `GameWorld.cs`.

@@ -268,3 +268,15 @@ GameMap
 ConsumeResource
 GameMap
 ConsumeResource
+ResourceKind
+Water
+ResourceKind
+Water
+ResourceKind
+Water
+ResourceKind
+Water
+ResourceKind
+Water
+ResourceKind
+Water

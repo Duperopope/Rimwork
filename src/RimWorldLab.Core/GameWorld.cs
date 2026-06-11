@@ -157,22 +157,35 @@ private int _waterConsumption = 0;
 private int _energyConsumption = 0;
 private Dictionary<Guid, Dictionary<ResourceKind, int>> _pawnResourceConsumption = new();
 
-public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
-{
-    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
     {
-        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+        if (!_pawnResourceConsumption.ContainsKey(pawnId))
+        {
+            _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+        }
+
+        if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+        {
+            _pawnResourceConsumption[pawnId][kind] += amount;
+        }
+        else
+        {
+            _pawnResourceConsumption[pawnId][kind] = amount;
+        }
     }
 
-    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    public int GetTotalResourceConsumption(ResourceKind kind)
     {
-        _pawnResourceConsumption[pawnId][kind] += amount;
+        int totalConsumption = 0;
+        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+        {
+            if (pawnConsumption.TryGetValue(kind, out int consumption))
+            {
+                totalConsumption += consumption;
+            }
+        }
+        return totalConsumption;
     }
-    else
-    {
-        _pawnResourceConsumption[pawnId][kind] = amount;
-    }
-}
 
     private GridShape _gridShape = GridShape.Square;
 
