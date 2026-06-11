@@ -4655,3 +4655,5 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 102] PREDICTED-FAIL (skipped before build): Add a method to count functional rooms in the GameWorld - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 103] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.60 - Add a private field `functionalRoomsCount` to the `GameWorld` class.
 - [iter 104] KEPT: Add a private field `functionalRoomsCount` to the `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 105] CRITIC TASK: - [ ] Step C.105 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to ensure players have a steady supply of materials.
+- [iter 105] KEPT: Add a private field `functionalRoomsCount` to the `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
