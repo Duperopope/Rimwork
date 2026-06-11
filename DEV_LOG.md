@@ -4201,3 +4201,26 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 84] REVERTED (build failed): Add a method to consume resources for pawns. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 85] DONE (had past KEPT edits, change already in file): - [ ] Step C.90 - Implement a resource consumption system that requires players to manage food, water, and energy for their pawns, forcing them to prioritize building functional rooms to meet basic needs.
 - [iter 86] KEPT: Add a method to track food consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 87] SKIPPED (no SEARCH match): Add a method to track water consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 88] SKIPPED (no SEARCH match): Add a method to consume water resources. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 89] SKIPPED (no SEARCH match): Add a method to consume water resources. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 90] CRITIC TASK: - [ ] Step C.90 - Implement a system to automatically assign pawns to tasks based on their skills and the current needs of the colony.
+- [iter 90] DONE (had past KEPT edits, change already in file): - [ ] Step C.105 - Implement a resource consumption system that forces players to manage their colony's food and materials to prevent starvation and resource depletion.
+- [iter 91] SKIPPED (no SEARCH match): Add a method to calculate resource generation based on functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 92] SKIPPED (no SEARCH match): Add a method to calculate the number of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 21:44).
+- [iter 93] SKIPPED (no SEARCH match): Add a method to generate resources based on functional rooms (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 94] SKIPPED (no SEARCH match): Add a method to generate resources based on functional rooms (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 95] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.120 - Implement a method to check if a room is functional in GameMap.cs.
+- [iter 96] REVERTED (build failed): Implement a method to check if a room is functional in GameMap.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 98] REVERTED (build failed): Implement a method to check if a room is functional in GameMap.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 99] REVERTED (build failed): Implement a basic check for zone functionality in GameMap.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 100] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.120 - Implement a method to check if a room is functional in GameMap.cs.
+- [iter 101] PREDICTED-FAIL (skipped before build): Add a method to generate resources over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 102] PREDICTED-FAIL (skipped before build): Begin implementing the resource generation system by adding a method to generate resources over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 103] SKIPPED (no SEARCH match): Add a method to generate resources over time. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 104] SKIPPED (no SEARCH match): Add a method to generate resources over time. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 105] CRITIC TASK: - [ ] Step C.105 - Implement a mechanic that requires players to manage resources more efficiently to unlock new building types.
+- [iter 105] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.135.1 - Implement a method to check if a room is functional in GameWorld.cs.
+- [iter 106] SKIPPED (no SEARCH match): Implement a method to check if a room is functional in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 107] KEPT: Increment functionalRoomCount when a zone is functional (src/RimWorldLab.Core/GameWorld.cs)

@@ -200,6 +200,7 @@ public int CountFunctionalRooms()
         if (IsZoneFunctional(zone))
         {
             functionalRoomCount++;
+            functionalRoomCount++;
         }
     }
     return functionalRoomCount;

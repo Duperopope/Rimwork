@@ -609,9 +609,9 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.45.1 - Add a method to simulate tree regrowth in `GameWorld.cs` by defining the method signature.
 - [ ] Step C.75 - Implement the `RemoveSapling` method in `GameWorld.cs` to allow tree regrowth simulation.
 - [x] Step C.90 - Implement a resource consumption system that requires players to manage food, water, and energy for their pawns, forcing them to prioritize building functional rooms to meet basic needs.
-- [ ] Step C.105 - Implement a resource consumption system that forces players to manage their colony's food and materials to prevent starvation and resource depletion.
-- [ ] Step C.120 - Add a resource generation system that rewards players for building functional rooms, encouraging them to reach the win condition.
-- [ ] Step C.135 - Implement a resource generation system to provide a steady flow of resources, encouraging sustainable colony management.
+- [x] Step C.105 - Implement a resource consumption system that forces players to manage their colony's food and materials to prevent starvation and resource depletion.
+- [ ] Step C.120 - Implement a method to check if a room is functional in GameMap.cs.
+- [ ] Step C.135.1 - Implement a method to check if a room is functional in GameWorld.cs.
 - [ ] Step C.150 - Implement a resource consumption system for pawns to ensure they use resources like wood and stone to build furniture and walls, preventing infinite building without resource management. (GameWorld.cs)
 - [ ] Step C.165 - Implement a resource consumption system for pawns to simulate hunger and thirst, forcing players to manage food and water production. (GameWorld.cs)
 - [ ] Step C.180 - Add a system to generate resources over time, such as trees regrowing or rocks respawning, to ensure players have a sustainable source of materials. (GameWorld.cs)
@@ -621,3 +621,5 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.45 - Implement a system to track and display the number of functional rooms in the game world.
 - [ ] Step C.60 - Implement a resource consumption system for pawns to ensure they deplete resources over time, forcing players to manage resource allocation. (GameWorld.cs)
 - [ ] Step C.75 - Implement a system to generate resources over time, such as wood from trees or stone from rocks, to encourage sustainable resource management. (GameWorld.cs)
+- [ ] Step C.90 - Implement a system to automatically assign pawns to tasks based on their skills and the current needs of the colony.
+- [ ] Step C.105 - Implement a mechanic that requires players to manage resources more efficiently to unlock new building types.

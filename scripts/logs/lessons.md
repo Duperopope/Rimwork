@@ -82,3 +82,6 @@
 - Avoid duplicate constructors with identical parameters in the same class.
 - Avoid duplicate method signatures in the same class.
 - Check for existing method signatures before adding new ones to avoid conflicts.
+- Ensure method bodies are correctly formatted and do not contain syntax errors.
+- Ensure method syntax is correct and matches C# language rules.
+- Ensure method signatures and logic align with existing code structure and types.
