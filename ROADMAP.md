@@ -554,8 +554,8 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.15 - Implement a basic room detection system to identify functional rooms in GameWorld.cs
 - [x] Step C.45.1 - Ensure the Cell class has properties X and Y defined only once in GameWorld.cs
 - [ ] Step C.60 - Fix tuple syntax in the `ExploreRoom` method by ensuring each tuple contains at least two elements.
-- [ ] Step C.75 - Implement a basic room detection system in GameWorld.cs to count functional rooms.
-- [ ] Step C.90 - Implement a basic room detection system in GameWorld.cs to identify functional rooms based on connected walkable tiles.
+- [ ] Step C.75 - Add a constructor to the Room class to initialize the Tiles list. (src/RimWorldLab.Core/Room.cs)
+- [ ] Step C.90 - Implement a basic room detection system in GameWorld.cs to identify functional rooms based on connected walkable tiles. Define the Room class with a Tiles property.
 - [ ] Step C.105 - Implement a basic room detection system to count functional rooms and trigger win condition in GameWorld.cs
 - [ ] Step C.135 - Implement a basic room detection system to count functional rooms and track progress towards win conditions in GameWorld.cs
 - [ ] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.

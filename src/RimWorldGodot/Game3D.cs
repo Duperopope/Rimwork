@@ -252,6 +252,8 @@ public partial class Game3D : Node3D
         // Living macro layers: planet spins, bodies orbit the star.
         if (_planetSpin != null && _worldViewRoot.Visible && !Input.IsMouseButtonPressed(MouseButton.Right))
             _planetSpin.RotateY((float)delta * 0.01f);
+        if (_moonHolder != null && _worldViewRoot.Visible)
+            _moonHolder.RotateY((float)delta * 0.06f);
         if (_solarRoot != null && _solarRoot.Visible)
             foreach (var (nodeO, _, speed, _) in _orbiters)
                 nodeO.RotateY((float)delta * speed);
@@ -267,6 +269,7 @@ public partial class Game3D : Node3D
                 if (System.IO.File.Exists(@"g:/Rimwork/scripts/viewcmd.txt"))
                 {
                     var want = System.IO.File.ReadAllText(@"g:/Rimwork/scripts/viewcmd.txt").Trim();
+                    System.IO.File.Delete(@"g:/Rimwork/scripts/viewcmd.txt"); // one-shot command, never hijack the player
                     if (want.StartsWith("Planet:"))
                     {
                         int bodyN = int.Parse(want.Substring(7));
@@ -632,6 +635,7 @@ public partial class Game3D : Node3D
     private int _colonyTileIdx = -1;
     private Node3D _tileMarker;
     private Label3D _planetTitle;
+    private Node3D _moonHolder;
 
     private static readonly Dictionary<string, Color> BiomeColors = new()
     {
@@ -688,7 +692,7 @@ public partial class Game3D : Node3D
         var body = World.Macro.System.Bodies[bodyIdx];
         foreach (Node child in _planetSpin.GetChildren()) child.QueueFree();
 
-        _tiles = HexPlanet.Generate(6); // 362 tiles per planet
+        _tiles = HexPlanet.Generate(8); // 642 tiles per planet
         bool isHome = bodyIdx == World.Macro.System.HomeBodyIndex;
         var rng = new Random(body.Name.GetHashCode() & 0x7fffffff);
         _colonyTileIdx = -1;
@@ -717,6 +721,81 @@ public partial class Game3D : Node3D
         int idx = 0;
         var globe = HexPlanet.BuildMesh(_tiles, _ => tileColors[idx++], GlobeRadius);
         _planetSpin.AddChild(globe);
+
+        // --- Biome props: tiny trees on green tiles, boulders on rocky ones
+        // (the reference look: tiles dressed with 3D props, not flat color).
+        var treeXf = new List<Transform3D>();
+        var rockXf = new List<Transform3D>();
+        for (int i = 0; i < _tiles.Count; i++)
+        {
+            var col = tileColors[i];
+            bool isOcean = col.B > col.R && col.B > col.G;
+            if (isOcean) continue;
+            bool green = col.G > col.R * 1.15f;
+            bool rockyT = Math.Abs(col.R - col.G) < 0.06f && col.R > 0.3f;
+            var c = _tiles[i].Center;
+            var up = c;
+            var east = up.Cross(Math.Abs(up.Y) < 0.99f ? Vector3.Up : Vector3.Right).Normalized();
+            var north = east.Cross(up);
+            int props = green ? 2 + (i % 2) : (rockyT ? 1 : 0);
+            for (int k = 0; k < props; k++)
+            {
+                float a = (i * 37 + k * 113) % 360 * Mathf.Pi / 180f;
+                float r = 0.35f + ((i * 13 + k * 71) % 50) / 100f;
+                var offset = (east * Mathf.Cos(a) + north * Mathf.Sin(a)) * r;
+                var pos = (c + offset * 0.04f).Normalized() * (GlobeRadius * 1.015f);
+                var basis = new Basis(east, up, north).Scaled(Vector3.One * (green ? 0.55f : 0.4f));
+                if (green) treeXf.Add(new Transform3D(basis, pos));
+                else rockXf.Add(new Transform3D(basis, pos));
+            }
+        }
+        if (treeXf.Count > 0)
+        {
+            var mmT = new MultiMesh { TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+                Mesh = new CylinderMesh { TopRadius = 0f, BottomRadius = 0.32f, Height = 0.9f }, InstanceCount = treeXf.Count };
+            for (int i = 0; i < treeXf.Count; i++) mmT.SetInstanceTransform(i, treeXf[i]);
+            _planetSpin.AddChild(new MultiMeshInstance3D { Multimesh = mmT,
+                MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.10f, 0.34f, 0.13f) } });
+        }
+        if (rockXf.Count > 0)
+        {
+            var mmR = new MultiMesh { TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+                Mesh = new BoxMesh { Size = new Vector3(0.35f, 0.3f, 0.35f) }, InstanceCount = rockXf.Count };
+            for (int i = 0; i < rockXf.Count; i++) mmR.SetInstanceTransform(i, rockXf[i]);
+            _planetSpin.AddChild(new MultiMeshInstance3D { Multimesh = mmR,
+                MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.35f, 0.34f, 0.36f) } });
+        }
+
+        // --- Atmosphere halo
+        _planetSpin.AddChild(new MeshInstance3D
+        {
+            Mesh = new SphereMesh { Radius = GlobeRadius * 1.07f, Height = GlobeRadius * 2.14f },
+            MaterialOverride = new StandardMaterial3D
+            {
+                AlbedoColor = new Color(0.45f, 0.65f, 1f, 0.10f),
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                CullMode = BaseMaterial3D.CullModeEnum.Front
+            }
+        });
+
+        // --- Moons of this body orbit in view
+        _moonHolder = new Node3D();
+        _planetSpin.AddChild(_moonHolder);
+        foreach (var other in World.Macro.System.Bodies)
+        {
+            if (other.Kind != "moon" || body.Kind == "moon") continue;
+            var moon = new MeshInstance3D
+            {
+                Mesh = new SphereMesh { Radius = 2.2f, Height = 4.4f },
+                MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.62f, 0.64f, 0.7f) },
+                Position = new Vector3(GlobeRadius * 1.9f, GlobeRadius * 0.35f, 0)
+            };
+            _moonHolder.AddChild(moon);
+            _moonHolder.AddChild(new Label3D { Text = other.Name, FontSize = 56,
+                Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
+                Position = new Vector3(GlobeRadius * 1.9f, GlobeRadius * 0.35f + 3.2f, 0) });
+        }
 
         if (_colonyTileIdx >= 0)
         {
@@ -771,11 +850,13 @@ public partial class Game3D : Node3D
             Billboard = BaseMaterial3D.BillboardModeEnum.Enabled
         });
 
-        float[] radii = { 14f, 24f, 32f };
-        float[] sizes = { 2.2f, 1.7f, 1.1f };
+        float[] radii = { 14f, 24f, 6f };   // moons use a tight orbit around their planet
+        float[] sizes = { 2.2f, 1.7f, 0.9f };
         int bi = 0;
+        Node3D homeHolder = null;
         foreach (var body in m.System.Bodies)
         {
+            bool isMoon = body.Kind == "moon";
             // Orbit ring (thin torus laid flat).
             _solarRoot.AddChild(new MeshInstance3D
             {
@@ -783,7 +864,14 @@ public partial class Game3D : Node3D
                 MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.5f, 0.55f, 0.65f, 0.5f), Transparency = BaseMaterial3D.TransparencyEnum.Alpha }
             });
             var holder = new Node3D();
-            _solarRoot.AddChild(holder);
+            if (isMoon && homeHolder != null)
+            {
+                // moons orbit their PLANET: parent the holder to it
+                var anchor = new Node3D { Position = new Vector3(radii[0], 0, 0) };
+                homeHolder.AddChild(anchor);
+                anchor.AddChild(holder);
+            }
+            else _solarRoot.AddChild(holder);
             bool home = bi == m.System.HomeBodyIndex;
             var planet = new MeshInstance3D
             {
@@ -803,7 +891,8 @@ public partial class Game3D : Node3D
                 Billboard = BaseMaterial3D.BillboardModeEnum.Enabled
             };
             holder.AddChild(lbl);
-            _orbiters.Add((holder, radii[bi], 0.10f - bi * 0.025f, bi * 2.1f));
+            if (!isMoon && bi == m.System.HomeBodyIndex) homeHolder = holder;
+            _orbiters.Add((holder, radii[bi], isMoon ? 0.5f : 0.10f - bi * 0.025f, bi * 2.1f));
             bi++;
         }
     }

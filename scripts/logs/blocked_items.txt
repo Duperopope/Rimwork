@@ -16,3 +16,4 @@
 - [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs by adding a method to check if a cell is adjacent to another cell. Start by adding a method signature for IsAdjacent.
 - [ ] Step C.15 - Implement a basic room detection system to identify functional rooms in GameWorld.cs
 - [ ] Step C.60 - Fix tuple syntax in the `ExploreRoom` method by ensuring each tuple contains at least two elements.
+- [ ] Step C.75 - Add a constructor to the Room class to initialize the Tiles list. (src/RimWorldLab.Core/Room.cs)
