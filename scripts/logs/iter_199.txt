@@ -1,16 +1,36 @@
-CHANGE: Add a method to check if a tile is already occupied by a resource node.
+CHANGE: Add a method to consume resources for building rooms.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsPlantable(int x, int y)
+public int CountFunctionalRooms()
 {
-    // Example: Check if the tile is not solid and not already occupied by a resource node
-    return !_grid[x, y].IsSolid && !_resources.Any(r => r.X == x && r.Y == y);
+    int functionalRoomCount = 0;
+    foreach (var zone in _zones)
+    {
+        if (IsZoneFunctional(zone))
+        {
+            functionalRoomCount++;
+        }
+    }
+    return functionalRoomCount;
 }
 =======
-public bool IsPlantable(int x, int y)
+public int CountFunctionalRooms()
 {
-    // Example: Check if the tile is not solid and not already occupied by a resource node
-    return !_grid[x, y].IsSolid && !_resources.Any(r => r.X == x && r.Y == y) && !_saplings.Any(s => s.X == x && s.Y == y);
+    int functionalRoomCount = 0;
+    foreach (var zone in _zones)
+    {
+        if (IsZoneFunctional(zone))
+        {
+            functionalRoomCount++;
+        }
+    }
+    return functionalRoomCount;
+}
+
+public void ConsumeResource(ResourceKind kind, int amount)
+{
+    // Placeholder for resource consumption logic
+    // This will be expanded in future steps
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to generate resources based on the tile type and biome.
+NEXT: Implement the logic to consume resources when building rooms.

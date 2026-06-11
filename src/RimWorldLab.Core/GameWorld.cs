@@ -151,6 +151,11 @@ public class GameMap
     private bool _isRaining = false;
     private List<(int X, int Y, string Biome)> _regions = new();
 
+    // Resource consumption tracking
+    private int _foodConsumption = 0;
+    private int _waterConsumption = 0;
+    private int _energyConsumption = 0;
+
     private GridShape _gridShape = GridShape.Square;
 
     public GridShape GridShape

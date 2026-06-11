@@ -68,3 +68,14 @@
 - Check for existing method signatures before adding new methods.
 - Check for existing method signatures before adding new methods.
 - Ensure the method name is unique in the class before adding it.
+- Ensure methods are added within a class and not at the file level.
+- Ensure the method signature is unique and not already defined in the class.
+- Ensure all enum values used in method logic are defined in the enum.
+- Ensure all referenced types and methods exist in the current context.
+- Ensure all referenced types and properties exist before adding new methods.
+- Ensure all referenced enums and methods exist before adding new code.
+- Check for existing method signatures before adding new methods.
+- Check for existing method names before adding new ones to avoid conflicts.
+- Check for existing method names before adding new ones to avoid conflicts.
+- Check for existing method names before adding new ones to avoid conflicts.
+- Ensure all referenced methods and properties exist in the current context before adding new code.

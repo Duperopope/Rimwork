@@ -44,3 +44,8 @@
 - [ ] Step C.105 - Implement a system to automatically generate resource-rich areas on the map to encourage exploration and resource gathering. (GameWorld.cs)
 - [ ] Step C.135 - Add a call to `CountFunctionalRooms` in `DisplayFunctionalRooms` to display the number of functional rooms.
 - [ ] Step C.165 - Add a method to the `GameWorld` class to simulate tree regrowth over time.
+- [ ] Step C.195.1 - Add a method to consume resources for building rooms in GameWorld.cs. Define the method signature and handle the Wood and Stone cases.
+- [ ] Step C.15.1 - Add the missing `ResourceKind` enum values `Wood` and `Stone` to `GameWorld.cs`.
+- [ ] Step C.30 - Implement a method to display the number of functional rooms in `GameWorld.cs` by calling an existing method.
+- [ ] Step C.45.1 - Add a method to simulate tree regrowth in `GameWorld.cs` by defining the method signature.
+- [ ] Step C.75 - Implement the `RemoveSapling` method in `GameWorld.cs` to allow tree regrowth simulation.

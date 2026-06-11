@@ -1,49 +1,38 @@
-CHANGE: Add a method to generate resources over time in GameWorld.cs
+CHANGE: Add a method to consume resources for building walls.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void GenerateResourcesOverTime()
+public int CountFunctionalRooms()
 {
-    // Example: Generate resources based on some logic
-    for (int x = 0; x < Width; x++)
+    int functionalRoomCount = 0;
+    foreach (var zone in _zones)
     {
-        for (int y = 0; y < Height; y++)
+        if (IsZoneFunctional(zone))
         {
-            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
-            {
-                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
-            }
-        }
-    }
-}
-=======
-public void GenerateResourcesOverTime()
-{
-    // Example: Generate resources based on some logic
-    for (int x = 0; x < Width; x++)
-    {
-        for (int y = 0; y < Height; y++)
-        {
-            if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
-            {
-                AddSapling(x, y, 100); // Add a sapling that takes 100 ticks to grow
-            }
-        }
-    }
-
-    // Generate stone resources in desert regions
-    foreach (var region in _regions.Where(r => r.Biome == "Desert"))
-    {
-        for (int x = region.X; x < region.X + region.Width; x++)
-        {
-            for (int y = region.Y; y < region.Y + region.Height; y++)
-            {
-                if (IsPlantable(x, y) && !_noGrowTiles.Contains((x, y)))
-                {
-                    AddResource(ResourceKind.Rock, x, y);
-                }
-            }
-        }
-    }
-}
+            functionalRoomCount++;
 >>>>>>> REPLACE
-NEXT: Implement a method to generate wood resources in forest regions.
+public int CountFunctionalRooms()
+{
+    int functionalRoomCount = 0;
+    foreach (var zone in _zones)
+    {
+        if (IsZoneFunctional(zone))
+        {
+            functionalRoomCount++;
+        }
+    }
+    return functionalRoomCount;
+}
+
+public void ConsumeResourcesForWall()
+{
+    if (Wood >= WallWoodCost && Stone >= WallStoneCost)
+    {
+        Wood -= WallWoodCost;
+        Stone -= WallStoneCost;
+    }
+    else
+    {
+        throw new InvalidOperationException("Insufficient resources to build a wall.");
+    }
+}
+NEXT: Implement a method to queue building a wall.
