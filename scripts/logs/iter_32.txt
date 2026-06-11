@@ -1,8 +1,0 @@
-CHANGE: Add mood display to pawn list in Colony tab.
-FILE: src/RimWorldGodot/Main.cs
-<<<<<<< SEARCH
-			DrawString(ThemeDB.FallbackFont, new Vector2(x + 16f, y), $"{pawn.Name} ({sexLabel})", HorizontalAlignment.Left, -1f, 14, Colors.White, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);
-=======
-			DrawString(ThemeDB.FallbackFont, new Vector2(x + 16f, y), $"{pawn.Name} ({sexLabel})  mood {(int)pawn.Mood}", HorizontalAlignment.Left, -1f, 14, pawn.Mood < 30f ? new Color(1f, 0.4f, 0.4f) : Colors.White, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);
->>>>>>> REPLACE
-NEXT: Ensure the `Pawn` class has a `Mood` property or method before using it in code.

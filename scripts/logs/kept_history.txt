@@ -18,3 +18,4 @@
 - [ ] Step P.4b - Mood dynamics. In src/RimWorldLab.Core/GameWorld.cs,
 - [ ] Step P.4b - Mood dynamics. In src/RimWorldLab.Core/GameWorld.cs,
 - [ ] Step P.5b - Show mood in the Colony tab pawn list. In
+- [ ] Step U.3.7 - In src/RimWorldGodot/Main.cs, find this exact line:

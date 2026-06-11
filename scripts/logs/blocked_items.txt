@@ -1,3 +1,4 @@
 
 - [ ] Step P.1b - Implement the `TryClaimBest` method in the `TaskBoard` class by adding the following lines after the existing `TryClaimNext` method:
 - [ ] Step P.2b - Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
+- [ ] Step P.5b - In src/RimWorldGodot/Main.cs, append the mood value to the existing DrawString call by appending it to the string. Use the format "Mood: {pawn.Mood}" where "pawn" is the first pawn in the world's pawns list. Ensure the string interpolation is correctly formatted. Only add the mood part, not the whole string.

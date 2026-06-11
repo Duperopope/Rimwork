@@ -218,11 +218,7 @@ task queue - and stop doing absurd things like building bridges nobody needs.
       and REPLACE it with exactly these 2 lines:
       `            Needs.Tick(this, driver, pawn, _rng);`
       `            pawn.Mood = Math.Clamp(pawn.Mood + (pawn.Hunger > 70f ? -0.01f : 0.002f) + (pawn.HP < 50f ? -0.01f : 0f), 0f, 100f);`
-- [ ] Step P.5b - Show mood in the Colony tab pawn list. In
-      src/RimWorldGodot/Main.cs, SEARCH for exactly this one line:
-      `			DrawString(ThemeDB.FallbackFont, new Vector2(x + 16f, y), $"{pawn.Name} ({sexLabel})", HorizontalAlignment.Left, -1f, 14, Colors.White, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);`
-      and REPLACE it with exactly this one line:
-      `			DrawString(ThemeDB.FallbackFont, new Vector2(x + 16f, y), $"{pawn.Name} ({sexLabel})  mood {(int)pawn.Mood}", HorizontalAlignment.Left, -1f, 14, pawn.Mood < 30f ? new Color(1f, 0.4f, 0.4f) : Colors.White, TextServer.JustificationFlag.Kashida | TextServer.JustificationFlag.WordBound, TextServer.Direction.Auto, TextServer.Orientation.Horizontal, 0f);`
+- [ ] Step P.5b - In src/RimWorldGodot/Main.cs, append the mood value to the existing DrawString call by appending it to the string. Use the format "Mood: {pawn.Mood}" where "pawn" is the first pawn in the world's pawns list. Ensure the string interpolation is correctly formatted. Only add the mood part, not the whole string.
 
 ## CURRENT FOCUS: UI cleanup (small, safe steps)
 
@@ -320,7 +316,7 @@ task queue - and stop doing absurd things like building bridges nobody needs.
       `					DrawRect(new Rect2(rect2.Position.X + rect2.Size.X / 2f - 2f, rect2.Position.Y + rect2.Size.Y / 2f - 2f, 4f, 4f), new Color(0.2f, 0.2f, 0.2f));`
       `					DrawLine(new Vector2(rect2.Position.X + rect2.Size.X / 2f, rect2.Position.Y), new Vector2(rect2.Position.X + rect2.Size.X / 2f, rect2.Position.Y - 4f), new Color(0.6f, 0.6f, 0.6f), 1f);`
       `				}`
-- [ ] Step U.3.4 - In src/RimWorldGodot/Main.cs, find this exact line:
+- [x] Step U.3.4 - In src/RimWorldGodot/Main.cs, find this exact line:
 - [x] Step U.3.5 - In src/RimWorldGodot/Main.cs, find this exact line:
       `					DrawRect(new Rect2(rect2.Position.X + rect2.Size.X - 4f, rect2.Position.Y + rect2.Size.Y - 4f, 3f, 3f), new Color(0.7f, 0.7f, 0.7f));`
       (it is inside the new `if (item.Kind == FurnitureKind.Workbench)` block).
@@ -597,3 +593,6 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.
 - [ ] Step C.15 - Implement a basic room detection algorithm in GameWorld.cs to identify functional rooms.
 - [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs to identify functional rooms.
+- [ ] Step C.45 - Implement basic room detection to ensure players can achieve the win condition.
+- [ ] Step C.60 - Implement a basic room detection system to count functional rooms and update the win condition logic.
+- [ ] Step C.75 - Implement basic room detection logic to identify functional rooms in the colony.

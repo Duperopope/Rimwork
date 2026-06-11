@@ -1,0 +1,19 @@
+CHANGE: Add the new `if (item.Kind == FurnitureKind.Door)` block after the existing `if (item.Kind == FurnitureKind.Chair)` block.
+FILE: src/RimWorldGodot/Main.cs
+<<<<<<< SEARCH
+if (item.Kind == FurnitureKind.Chair)
+{
+    DrawRect(new Rect2(rect2.Position.X, rect2.Position.Y, rect2.Size.X, 2f), new Color(0.4f, 0.3f, 0.2f));
+}
+=======
+if (item.Kind == FurnitureKind.Chair)
+{
+    DrawRect(new Rect2(rect2.Position.X, rect2.Position.Y, rect2.Size.X, 2f), new Color(0.4f, 0.3f, 0.2f));
+}
+
+if (item.Kind == FurnitureKind.Door)
+{
+    DrawLine(new Vector2(rect2.Position.X, rect2.Position.Y + rect2.Size.Y / 2f), new Vector2(rect2.Position.X + rect2.Size.X, rect2.Position.Y + rect2.Size.Y / 2f), new Color(0.6f, 0.4f, 0.2f), 2f);
+}
+>>>>>>> REPLACE
+NEXT: Continue implementing the drawing logic for other furniture types.

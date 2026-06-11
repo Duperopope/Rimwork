@@ -2,3 +2,4 @@
 - Ensure `Pawn` class has a `Mood` property or method before using it in code.
 - Verify properties and methods exist before using them in code.
 - Always ensure the target method exists in the class before making changes.
+- Verify that the class and its constructor exist before implementing.
