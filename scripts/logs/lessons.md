@@ -11,3 +11,4 @@
 - Methods cannot be defined inside other methods; ensure all methods are at the class level.
 - "Check for missing properties or methods on types before using them."
 - Avoid duplicating method signatures in the same class.
+- Ensure method definitions are within the correct class scope and follow C# syntax rules.

@@ -631,10 +631,13 @@ Reply with EXACTLY one line in this format and nothing else:
         # its compiler errors) and rewrites the item into something smaller
         # and more precise. Only after a rewritten item ALSO fails is the
         # item truly blocked.
-        if (-not $rewriteCounts.ContainsKey($itemKey)) { $rewriteCounts[$itemKey] = 0 }
-        if ($rewriteCounts[$itemKey] -lt 2) {
-            $rewriteCounts[$itemKey]++
-            Write-Host "Item stuck - asking model to diagnose and rewrite it (rewrite $($rewriteCounts[$itemKey])/2)." -ForegroundColor Cyan
+        # Lineage key: rewrites rename items (W.6.1 -> W.6.1.1 -> ...) which
+        # used to reset the counter and spin forever. Count per STEP ROOT.
+        $stepRoot = if ($itemKey -match 'Step ([A-Z]+\.?\d*)') { $Matches[1] } else { $itemKey.Substring(0, [Math]::Min(40, $itemKey.Length)) }
+        if (-not $rewriteCounts.ContainsKey($stepRoot)) { $rewriteCounts[$stepRoot] = 0 }
+        if ($rewriteCounts[$stepRoot] -lt 2) {
+            $rewriteCounts[$stepRoot]++
+            Write-Host "Item stuck - asking model to diagnose and rewrite it (rewrite $($rewriteCounts[$stepRoot])/2)." -ForegroundColor Cyan
             $evidence = ""
             foreach ($lf in @("failed_searches.log", "failed_builds.log")) {
                 $lp = "g:\Rimwork\scripts\logs\$lf"
@@ -663,6 +666,11 @@ Reply with ONLY the rewritten item text, a single line starting exactly with:
 "@
             $rewritten = Invoke-LmStudio -UserMessage $rewritePrompt
             $newItemLine = ($rewritten -split "`n" | Where-Object { $_.Trim() -match '^- \[ \] Step' } | Select-Object -First 1)
+            if ($newItemLine -and $newItemLine -match '(?i)dummy|placeholder|stub') {
+                Write-Host "Rewrite proposes a stub task - discarding lineage." -ForegroundColor Red
+                $newItemLine = $null
+                $rewriteCounts[$stepRoot] = 99
+            }
             if ($newItemLine) {
                 # Replace the old multi-line item in ROADMAP.md with the new one-liner.
                 $rl = Get-Content "g:\Rimwork\ROADMAP.md"

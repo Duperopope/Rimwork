@@ -54,3 +54,6 @@ Main
 _Ready
 Main
 _Ready
+public
+public
+private
