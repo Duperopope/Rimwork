@@ -1,9 +1,0 @@
-CHANGE: Implement Mood dynamics by adding the necessary logic to adjust the pawn's mood based on hunger and HP.
-FILE: src/RimWorldLab.Core/GameWorld.cs
-<<<<<<< SEARCH
-            Needs.Tick(this, driver, pawn, _rng);
-=======
-            Needs.Tick(this, driver, pawn, _rng);
-            pawn.Mood = Math.Max(Math.Min(pawn.Mood + (pawn.Hunger > 70f ? -0.01f : 0.002f) + (pawn.HP < 50f ? -0.01f : 0f), 100f), 0f);
->>>>>>> REPLACE
-NEXT: Ensure the `Needs` class has a `Tick` method that accepts the parameters used in the call.

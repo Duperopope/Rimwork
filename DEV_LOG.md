@@ -3255,3 +3255,6 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 28] PREDICTED-FAIL (skipped before build): Add Mood dynamics to PawnTaskDriver - Identifier 'Clamp' does not exist in the target file or the game API - it would not compile.
 - [startup] Stack relaunched after boot (2026-06-11 14:34).
 - [iter 29] KEPT: Implement Mood dynamics by adding the necessary logic to adjust the pawn's mood based on hunger and HP. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 30] CRITIC TASK: - [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs to identify functional rooms.
+- [iter 30] PREDICTED-FAIL (skipped before build): Add Mood dynamics to Pawn class - Identifier 'Clamp' does not exist in the target file or the game API - it would not compile.
+- [iter 31] KEPT: Ensure `Math.Clamp` is available by adding the necessary `using` directive. (src/RimWorldLab.Core/GameWorld.cs)

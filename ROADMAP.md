@@ -596,3 +596,4 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.135 - Implement a basic room detection system to count functional rooms and track progress towards win conditions in GameWorld.cs
 - [ ] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.
 - [ ] Step C.15 - Implement a basic room detection algorithm in GameWorld.cs to identify functional rooms.
+- [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs to identify functional rooms.

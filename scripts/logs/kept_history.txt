@@ -16,3 +16,4 @@
 - [ ] Step U.3.4 - In src/RimWorldGodot/Main.cs, find this exact line:
 - [ ] Step P.3b - The Pawn class lives in src/RimWorldLab.Core/GameWorld.cs
 - [ ] Step P.4b - Mood dynamics. In src/RimWorldLab.Core/GameWorld.cs,
+- [ ] Step P.4b - Mood dynamics. In src/RimWorldLab.Core/GameWorld.cs,

@@ -1,0 +1,13 @@
+CHANGE: Ensure `Math.Clamp` is available by adding the necessary `using` directive.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+using System;
+using System.Collections.Generic;
+using System.Linq;
+=======
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System;
+>>>>>>> REPLACE
+NEXT: Implement mood dynamics by modifying the `Tick` method in `GameWorld.cs`.
