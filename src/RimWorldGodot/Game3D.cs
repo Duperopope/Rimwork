@@ -21,6 +21,7 @@ public partial class Game3D : Node3D
     /// <summary>Active zoom layer: "Local" or "Planet" (Tab/M to toggle).</summary>
     public string ViewLayer { get; private set; } = "Local";
     private Node3D _worldViewRoot;
+    private readonly Dictionary<(int, int), Vector3> _hexCenters = new();
     private Vector3 _savedRigPos;
     private float _savedZoom;
 
@@ -33,6 +34,45 @@ public partial class Game3D : Node3D
     public float CamZoomSpeed { get; set; } = 2.5f;
 
     private readonly Dictionary<Guid, Node3D> _pawnNodes = new();
+    private readonly Dictionary<Guid, AnimationPlayer> _pawnAnims = new();
+    private readonly Dictionary<Guid, string> _pawnAnimState = new();
+
+    private static AnimationPlayer FindAnim(Node node)
+    {
+        if (node is AnimationPlayer ap) return ap;
+        foreach (var child in node.GetChildren())
+        {
+            var found = FindAnim(child);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    private void PlayAnim(Guid id, Node3D node, bool moving)
+    {
+        if (!_pawnAnims.TryGetValue(id, out var ap))
+        {
+            ap = FindAnim(node);
+            _pawnAnims[id] = ap;
+        }
+        if (ap == null) return;
+        string want = null;
+        foreach (var name in ap.GetAnimationList())
+        {
+            string n = name.ToString();
+            if (moving && (n.Contains("Walk") || n.Contains("Run"))) { want = n; break; }
+            if (!moving && n.Contains("Idle")) { want = n; break; }
+        }
+        if (want == null) return;
+        _pawnAnimState.TryGetValue(id, out var cur);
+        if (cur != want)
+        {
+            ap.Play(want, customBlend: 0.2f);
+            var anim = ap.GetAnimation(want);
+            if (anim != null) anim.LoopMode = Animation.LoopModeEnum.Linear;
+            _pawnAnimState[id] = want;
+        }
+    }
     private readonly Dictionary<(int, int), Node3D> _staticNodes = new(); // walls/resources/furniture/saplings keyed by tile
     private readonly Dictionary<(int, int), string> _staticKind = new();
     private MeshInstance3D _selectionRing;
@@ -221,6 +261,79 @@ public partial class Game3D : Node3D
             if (d < bestDist) { bestDist = d; best = p; }
         }
         SelectedPawn = best;
+
+        // No pawn under the cursor: this is a TILE ORDER (RimWorld-like).
+        if (best == null && ViewLayer == "Local")
+            OrderAtTile(screenPos);
+        else if (best == null && ViewLayer == "Planet")
+            PickRegion(screenPos);
+    }
+
+    /// <summary>Click a planet hex: show its region sheet in the alert/inspector.</summary>
+    private void PickRegion(Vector2 screenPos)
+    {
+        var origin = _cam.ProjectRayOrigin(screenPos);
+        var normal = _cam.ProjectRayNormal(screenPos);
+        if (Math.Abs(normal.Y) < 0.0001f) return;
+        float t = -origin.Y / normal.Y;
+        var hit = origin + normal * t;
+        (int, int)? bestHex = null; float bd = 2.2f;
+        foreach (var (key, center) in _hexCenters)
+        {
+            float d = new Vector2(hit.X - center.X, hit.Z - center.Z).Length();
+            if (d < bd) { bd = d; bestHex = key; }
+        }
+        if (bestHex == null) return;
+        var reg = World.Macro.Regions[bestHex.Value.Item1, bestHex.Value.Item2];
+        AlertText = $"Région ({reg.X},{reg.Y}) — biome {reg.Biome}, fertilité {reg.Fertility:P0}, danger {reg.Danger:P0}" +
+            (reg.IsColonyRegion ? "  ← VOTRE COLONIE" : "");
+    }
+
+    /// <summary>Math ray->ground intersection: screen position to tile coords.</summary>
+    private (int X, int Y)? ScreenToTile(Vector2 screenPos)
+    {
+        var origin = _cam.ProjectRayOrigin(screenPos);
+        var normal = _cam.ProjectRayNormal(screenPos);
+        if (Math.Abs(normal.Y) < 0.0001f) return null;
+        float t = -origin.Y / normal.Y;
+        if (t < 0) return null;
+        var hit = origin + normal * t;
+        int tx = (int)Math.Floor(hit.X), ty = (int)Math.Floor(hit.Z);
+        if (tx < 0 || ty < 0 || tx >= World.Map.Width || ty >= World.Map.Height) return null;
+        return (tx, ty);
+    }
+
+    /// <summary>Player orders: click a tree/rock = harvest; Shift+click open
+    /// ground = build wall; Ctrl+click open ground = build a bed.</summary>
+    private void OrderAtTile(Vector2 screenPos)
+    {
+        var tile = ScreenToTile(screenPos);
+        if (tile == null) return;
+        var (tx, ty) = tile.Value;
+
+        var res = World.Map.Resources.FirstOrDefault(r => r.X == tx && r.Y == ty);
+        if (res != null)
+        {
+            if (World.QueueHarvest(tx, ty))
+                AlertText = $"Ordre: récolter {(res.Kind == ResourceKind.Tree ? "l'arbre" : "le rocher")} en ({tx},{ty})";
+            return;
+        }
+        if (Input.IsKeyPressed(Key.Shift))
+        {
+            if (World.QueueBuildWall(tx, ty))
+                AlertText = $"Ordre: construire un mur en ({tx},{ty})";
+            else
+                AlertText = "Impossible: ressources insuffisantes ou case invalide";
+            return;
+        }
+        if (Input.IsKeyPressed(Key.Ctrl))
+        {
+            if (World.QueueBuild(FurnitureKind.Bed, tx, ty))
+                AlertText = $"Ordre: construire un lit en ({tx},{ty})";
+            else
+                AlertText = "Impossible: case occupée ou bois insuffisant";
+            return;
+        }
     }
 
     // ------------------------------------------------------------------
@@ -247,6 +360,7 @@ public partial class Game3D : Node3D
                 _pawnNodes[p.Id] = node;
             }
             var target = new Vector3(p.X + 0.5f, 0.1f, p.Y + 0.5f);
+            bool moving = node.Position.DistanceTo(target) > 0.15f;
             if (node.Position.DistanceTo(target) > 0.01f)
             {
                 var dir = target - node.Position;
@@ -254,6 +368,7 @@ public partial class Game3D : Node3D
                 if (new Vector2(dir.X, dir.Z).Length() > 0.05f)
                     node.Rotation = new Vector3(0, Mathf.Atan2(dir.X, dir.Z), 0);
             }
+            PlayAnim(p.Id, node, moving);
             modelIdx++;
         }
     }
@@ -269,7 +384,7 @@ public partial class Game3D : Node3D
                 {
                     bool SolidAt(int ax, int ay) => !World.Map.IsPassable(ax, ay) && !World.Map.IsWater(ax, ay);
                     int yaw = RenderOrientation.WallYaw(SolidAt(x, y - 1), SolidAt(x, y + 1), SolidAt(x + 1, y), SolidAt(x - 1, y));
-                    wanted[(x, y)] = ("wall" + yaw, RenderCatalog.WallModel, new Color(0.45f, 0.42f, 0.4f), 0.5f, yaw);
+                    wanted[(x, y)] = ("wall" + yaw, RenderCatalog.WallModel, new Color(0.45f, 0.42f, 0.4f), 0.42f, yaw);
                 }
 
         foreach (var r in World.Map.Resources)
@@ -279,6 +394,14 @@ public partial class Game3D : Node3D
 
         foreach (var (sx, sy, _) in World.Map.Saplings)
             wanted[(sx, sy)] = ("sapling", RenderCatalog.SaplingModel, new Color(0.3f, 0.6f, 0.3f), 0.4f, 0);
+
+        foreach (var room in World.GetRooms())
+        {
+            foreach (var (rxx, ryy) in room.Tiles)
+                if (!wanted.ContainsKey((rxx, ryy)))
+                    wanted[(rxx, ryy)] = ("floor", RenderCatalog.Dungeon + "floor_tile_large.gltf",
+                        new Color(0.35f, 0.3f, 0.28f), 0.5f, 0);
+        }
 
         foreach (var f in World.Map.Furniture)
         {
@@ -339,23 +462,27 @@ public partial class Game3D : Node3D
                     "marsh" => new Color(0.2f, 0.35f, 0.3f),
                     _ => new Color(0.42f, 0.42f, 0.45f)
                 };
+                // Hexagonal prism: a cylinder with 6 radial segments.
+                var hexPos = new Vector3(rx * 3.1f, 0, ry * 3.58f + (rx % 2) * 1.79f);
                 var tile = new MeshInstance3D
                 {
-                    Mesh = new BoxMesh { Size = new Vector3(3.6f, 0.3f, 3.6f) },
+                    Mesh = new CylinderMesh { TopRadius = 1.95f, BottomRadius = 1.95f, Height = 0.35f, RadialSegments = 6 },
                     MaterialOverride = new StandardMaterial3D { AlbedoColor = c },
-                    Position = new Vector3(rx * 4, 0, ry * 4)
+                    Position = hexPos,
+                    RotationDegrees = new Vector3(0, 30, 0)
                 };
                 _worldViewRoot.AddChild(tile);
+                _hexCenters[(rx, ry)] = _worldViewRoot.Position + hexPos;
                 if (reg.IsColonyRegion)
                 {
                     var marker = new MeshInstance3D
                     {
                         Mesh = new CylinderMesh { TopRadius = 0f, BottomRadius = 0.7f, Height = 1.6f },
                         MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.36f, 0.78f, 0.46f), ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded },
-                        Position = new Vector3(rx * 4, 1.2f, ry * 4)
+                        Position = hexPos + new Vector3(0, 1.2f, 0)
                     };
                     _worldViewRoot.AddChild(marker);
-                    _worldViewRoot.AddChild(new Label3D { Text = "COLONIE", Position = new Vector3(rx * 4, 2.4f, ry * 4), FontSize = 64, Billboard = BaseMaterial3D.BillboardModeEnum.Enabled });
+                    _worldViewRoot.AddChild(new Label3D { Text = "COLONIE", Position = hexPos + new Vector3(0, 2.4f, 0), FontSize = 64, Billboard = BaseMaterial3D.BillboardModeEnum.Enabled });
                 }
             }
         int si = 0;
@@ -469,7 +596,20 @@ public partial class Game3D : Node3D
                 AddChild(t.Node);
             }
             var target = new Vector3(t.X + 0.5f, 0.1f, t.Y + 0.5f);
+            bool tmoving = t.Node.Position.DistanceTo(target) > 0.15f;
             t.Node.Position = t.Node.Position.Lerp(target, (float)delta * 6f);
+            var tap = FindAnim(t.Node);
+            if (tap != null)
+            {
+                string twant = null;
+                foreach (var name in tap.GetAnimationList())
+                {
+                    string n = name.ToString();
+                    if (tmoving && (n.Contains("Walk") || n.Contains("Run"))) { twant = n; break; }
+                    if (!tmoving && n.Contains("Idle")) { twant = n; break; }
+                }
+                if (twant != null && tap.CurrentAnimation != twant) tap.Play(twant, customBlend: 0.2f);
+            }
         }
     }
 }

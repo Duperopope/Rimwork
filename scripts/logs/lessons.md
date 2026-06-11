@@ -6,3 +6,6 @@
 - Ensure enums and types are unique across all files to avoid namespace conflicts.
 - Ensure enums are declared only once, preferably in a dedicated file.
 - Avoid defining enums in multiple files; consolidate enum definitions in a single common file.
+- Ensure new methods are syntactically correct and do not interfere with existing code.
+- Methods must be defined at the class level, not nested within other methods.
+- Methods cannot be defined inside other methods; ensure all methods are at the class level.

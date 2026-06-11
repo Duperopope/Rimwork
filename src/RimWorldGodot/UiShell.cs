@@ -198,7 +198,7 @@ public partial class UiShell : CanvasLayer
         // ---- Bottom hint ----
         var hint = new Label
         {
-            Text = "ZQSD/flèches: caméra  |  molette: zoom  |  clic: sélection  |  Tab/M: vue planète  |  Échap: menu",
+            Text = "clic: sélection/ordre récolte  |  Shift+clic: mur  |  Ctrl+clic: lit  |  Tab/M: planète (hex cliquables)  |  molette: zoom  |  Échap: menu",
             HorizontalAlignment = HorizontalAlignment.Center
         };
         hint.SetAnchorsPreset(Control.LayoutPreset.BottomWide);

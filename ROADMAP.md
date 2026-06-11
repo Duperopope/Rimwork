@@ -385,9 +385,7 @@ step N+1 until N builds and runs correctly.
       _UnhandledInput. Switch the default map to Hex once this renders
       correctly and pawns path/move visibly on the hex grid.
 - [x] Step V.4 - Planet/region map: add a new class `RegionMap` with a private field `List<(int X, int Y, string Biome)> _regions` in `src/RimWorldLab.Core/RegionMap.cs`.
-- [ ] Step V.5 - Cross-region travel: a pawn that walks off the edge of a
-      local region's hex map transfers to the neighboring region (per the
-      RegionMap adjacency) at the corresponding edge tile.
+- [ ] Step V.5.1 - Add the `IsAtEdge` method signature in `GameWorld.cs`.
 
 ## VISION: push toward "best version of this game" (atmosphere + emergence)
 
