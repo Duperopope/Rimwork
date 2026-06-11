@@ -3896,3 +3896,4 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 191] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.90 - Implement a room detection system to identify functional rooms in the colony.
 - [iter 192] SKIPPED (no SEARCH match): Add a method to detect if a zone is functional (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 193] KEPT: Add a method to check if a zone is functional (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 194] KEPT: Add a method to identify furniture types that contribute to room functionality. (src/RimWorldLab.Core/GameWorld.cs)

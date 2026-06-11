@@ -39,3 +39,4 @@
 - [ ] Step Z.2 - Wildlife pressure: in src/RimWorldLab.Core/WorldModel.cs,
 - [ ] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
 - [ ] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs
+- [ ] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs

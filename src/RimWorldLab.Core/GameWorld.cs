@@ -128,6 +128,12 @@ public class Furniture
         X = x;
         Y = y;
     }
+
+    public bool IsFunctionalFurniture()
+    {
+        // Example: Define which furniture types contribute to room functionality
+        return Kind == FurnitureKind.Bed || Kind == FurnitureKind.Table;
+    }
 }
 
 /// <summary>
