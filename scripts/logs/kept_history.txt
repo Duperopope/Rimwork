@@ -20,3 +20,4 @@
 - [ ] Step P.5b - Show mood in the Colony tab pawn list. In
 - [ ] Step U.3.7 - In src/RimWorldGodot/Main.cs, find this exact line:
 - [ ] Step U.3.7 - In src/RimWorldGodot/Main.cs, find this exact line:
+- [ ] Step V.2 - Add a `GridShape` property to GameMap with a default value of "Square".

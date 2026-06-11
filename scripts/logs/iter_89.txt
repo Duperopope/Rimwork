@@ -1,0 +1,35 @@
+CHANGE: Add a `GridShape` property to `GameMap` with a default value of "Square".
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public class GameMap
+{
+    private readonly Cell[,] _grid;
+    private readonly List<Zone> _zones = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly HashSet<(int X, int Y)> _noGrowTiles = new();
+    private readonly HashSet<(int X, int Y)> _bridges = new();
+
+private bool _needsBridgeToExpand = false;
+=======
+public class GameMap
+{
+    private readonly Cell[,] _grid;
+    private readonly List<Zone> _zones = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly HashSet<(int X, int Y)> _noGrowTiles = new();
+    private readonly HashSet<(int X, int Y)> _bridges = new();
+
+private bool _needsBridgeToExpand = false;
+    private GridShape _gridShape = GridShape.Square;
+
+public GridShape GridShape
+{
+    get => _gridShape;
+    set => _gridShape = value;
+}
+>>>>>>> REPLACE
+NEXT: Implement the logic for determining if expansion is blocked by water.

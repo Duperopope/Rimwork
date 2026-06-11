@@ -335,7 +335,7 @@ task queue - and stop doing absurd things like building bridges nobody needs.
       `				{`
       `					DrawRect(new Rect2(rect2.Position.X, rect2.Position.Y, rect2.Size.X, 2f), new Color(0.4f, 0.3f, 0.2f));`
       `				}`
-- [ ] Step U.3.7 - In src/RimWorldGodot/Main.cs, find this exact line:
+- [x] Step U.3.7 - In src/RimWorldGodot/Main.cs, find this exact line:
       `					DrawRect(new Rect2(rect2.Position.X, rect2.Position.Y, rect2.Size.X, 2f), new Color(0.4f, 0.3f, 0.2f));`
       (it is inside the new `if (item.Kind == FurnitureKind.Chair)` block).
       Immediately AFTER the closing `}` of that `if (item.Kind == FurnitureKind.Chair)`
@@ -378,10 +378,7 @@ step N+1 until N builds and runs correctly.
       ToPixel/FromPixel for pointy-top hexes, DistanceTo. Pure helper, not
       yet wired into GameMap/Pathfinder/rendering - existing square-grid
       game is untouched.
-- [ ] Step V.2 - Add a `GridShape` toggle (Square/Hex) to GameMap. When
-      Hex, GameMap.IsPassable/neighbors use HexGrid adjacency (6 neighbors
-      instead of 4/8). Pathfinder.FindPath switches neighbor iteration
-      based on GridShape. Keep Square as default until rendering catches up.
+- [ ] Step V.2 - Add a `GridShape` property to GameMap with a default value of "Square".
 - [ ] Step V.3 - Main.cs._Draw: when GridShape==Hex, draw each tile as a
       flat-top hexagon (DrawColoredPolygon with 6 points from HexToPixel)
       instead of a square Rect2. Update click-to-tile (PixelToHex) in

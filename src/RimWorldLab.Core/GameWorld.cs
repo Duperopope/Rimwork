@@ -123,6 +123,13 @@ public class GameMap
     private readonly HashSet<(int X, int Y)> _bridges = new();
 
 private bool _needsBridgeToExpand = false;
+    private GridShape _gridShape = GridShape.Square;
+
+public GridShape GridShape
+{
+    get => _gridShape;
+    set => _gridShape = value;
+}
 
 public bool NeedsBridgeToExpand
 {

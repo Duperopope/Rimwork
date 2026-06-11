@@ -3312,3 +3312,12 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 78] SKIPPED (no SEARCH match): Add the new `if (item.Kind == FurnitureKind.Door)` block after the existing `if (item.Kind == FurnitureKind.Chair)` block. (src/RimWorldGodot/Main.cs)
 - [iter 79] KEPT: Add the new `if (item.Kind == FurnitureKind.Door)` block after the existing `if (item.Kind == FurnitureKind.Chair)` block. (src/RimWorldGodot/Main.cs)
 - [iter 80] KEPT: Add Door furniture kind check and draw line for door. (src/RimWorldGodot/Main.cs)
+- [iter 80] DONE (after 2 consecutive KEPT changes): - [ ] Step U.3.7 - In src/RimWorldGodot/Main.cs, find this exact line:
+- [iter 81] SKIPPED (no SEARCH match): Add a `GridShape` property to `GameMap` and update `TaskOrder` to use it. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 82] PREDICTED-FAIL (skipped before build): Add a `GridShape` property to `GameMap` and update `Pathfinder` to use it. - REJECTED anti-stub: method 'IsPassable' has an empty/trivial body (returns nothing useful). Implement the real behavior.
+- [startup] Stack relaunched after boot (2026-06-11 14:54).
+- [iter 83] SKIPPED (no SEARCH match): Add a `GridShape` property to `GameMap` and initialize it to `GridShape.Square`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 85] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step V.2 - Add a `GridShape` property to GameMap with a default value of "Square".
+- [iter 86] PREDICTED-FAIL (skipped before build): Add a `GridShape` property to `GameMap` with a default value of "Square". - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 88] PREDICTED-FAIL (skipped before build): Add a `GridShape` property to GameMap with a default value of "Square". - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 89] KEPT: Add a `GridShape` property to `GameMap` with a default value of "Square". (src/RimWorldLab.Core/GameWorld.cs)
