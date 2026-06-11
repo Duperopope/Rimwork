@@ -4499,3 +4499,4 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 160] DONE (repeated identical patch): - [ ] Step C.150 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs.
 - [iter 161] CRITIC TASK: - [ ] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
 - [iter 162] KEPT: Add a method to generate resources over time. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 163] KEPT: Add a method to update the resource regeneration rates. (src/RimWorldLab.Core/GameWorld.cs)

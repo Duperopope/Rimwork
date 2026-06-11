@@ -1,0 +1,25 @@
+CHANGE: Add a method to update the resource regeneration rates.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public GameWorld()
+{
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+}
+=======
+public GameWorld()
+{
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
+}
+
+public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
+{
+    if (_resourceRegenerationRates.ContainsKey(kind))
+    {
+        _resourceRegenerationRates[kind] = rate;
+    }
+}
+>>>>>>> REPLACE
+NEXT: Implement a method to simulate resource consumption over time.

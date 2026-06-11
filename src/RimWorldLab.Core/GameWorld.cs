@@ -10,11 +10,20 @@ public class GameWorld
     private Dictionary<ResourceKind, int> _recycledResources = new();
     private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
 
-    public GameWorld()
+public GameWorld()
+{
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
+}
+
+public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
+{
+    if (_resourceRegenerationRates.ContainsKey(kind))
     {
-        // Initialize resource regeneration rates
-        _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+        _resourceRegenerationRates[kind] = rate;
     }
+}
 
 public void RegenerateResource(ResourceKind kind, int amount)
 {
