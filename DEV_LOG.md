@@ -3406,3 +3406,12 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 83] SKIPPED (no SEARCH match): Add `Mood` float to `Pawn` class (src/RimWorldLab.Core/Needs.cs)
 - [iter 84] SKIPPED (no SEARCH match): Add a `Mood` float property to the `Pawn` class. (src/RimWorldLab.Core/Needs.cs)
 - [iter 85] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step P1 - Add a `Mood` float (0-100) to Pawn class in `src/RimWorldLab.Core/Pawn.cs`.
+- [iter 86] SKIPPED (no SEARCH match): Add a method to find the nearest storage furniture tile. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 87] SKIPPED (no SEARCH match): Add a method to check if a furniture tile is of Storage category. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 16:14).
+- [iter 89] SKIPPED (no SEARCH match): Add a method to check if a furniture tile is of Storage kind. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 90] CRITIC TASK: - [ ] Step C.90 - Implement a room detection system to identify functional rooms in the colony.
+- [iter 90] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step Q1 - Add a method to check if a pawn is at the edge of the current region's hex map in GameWorld.cs.
+- [iter 91] REVERTED (build failed): Add a method to check if a pawn is at the edge of the current region's hex map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 92] SKIPPED (no SEARCH match): Add a method to check if a pawn is at the edge of the current region's hex map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 93] KEPT: Add a method to check if a pawn is at the edge of the current region's hex map. (src/RimWorldLab.Core/GameWorld.cs)

@@ -559,7 +559,23 @@ public class Pawn : Thing
         return GetSkillLevel(kind);
     }
 
-    public int GetSkillLevel(SkillKind kind) => (int)(SkillXP[kind] / 100f);
+public int GetSkillLevel(SkillKind kind) => (int)(SkillXP[kind] / 100f);
+
+    /// <summary>Checks if a pawn is at the edge of the current region's hex map.</summary>
+    public bool IsPawnAtEdge(Pawn pawn, Region region)
+    {
+        int pawnX = pawn.X;
+        int pawnY = pawn.Y;
+        int regionX = region.X;
+        int regionY = region.Y;
+
+        // Assuming the region is a square of size 10x10
+        int regionWidth = 10;
+        int regionHeight = 10;
+
+        return pawnX == regionX || pawnX == regionX + regionWidth - 1 ||
+               pawnY == regionY || pawnY == regionY + regionHeight - 1;
+    }
 
     /// <summary>Highest-level skill, for display purposes.</summary>
     public SkillKind TopSkill => SkillXP.OrderByDescending(kv => kv.Value).First().Key;

@@ -37,6 +37,14 @@ public partial class UiShell : CanvasLayer
         BuildCredits();
         LoadOptions();
         ShowOnly(_menu);
+        // Unattended verification mode: the watchdog sets RIMWORK_AUTOSTART
+        // so self-screenshots capture real gameplay, not the menu.
+        if (OS.GetEnvironment("RIMWORK_AUTOSTART") == "1" || System.IO.File.Exists(@"g:/Rimwork/scripts/autostart.flag"))
+        {
+            GD.Print("[FLOW] Autostart: New Game (verification mode).");
+            _game.AlertText = "Colonie fondée — bonne chance !";
+            ShowOnly(_hud);
+        }
     }
 
     // ==================================================================

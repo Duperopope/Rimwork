@@ -397,9 +397,7 @@ renderer from Node2D to a 3D/iso pipeline) - but we CAN make the current
       warm radial glow around Lighting-category furniture that appears at
       night (drawn over the darkness overlay).
 - [ ] Step P1 - Add a `Mood` float (0-100) to Pawn class in `src/RimWorldLab.Core/Pawn.cs`.
-- [ ] Step Q - Emergent need: Hauler pawns automatically carry chopped Wood
-      to a Storage-category furniture tile if one exists (simple "haul"
-      task), making Storage furniture matter.
+- [ ] Step Q1 - Add a method to check if a pawn is at the edge of the current region's hex map in GameWorld.cs.
 - [x] Step R - Weather: every few in-game days, toggle a "Rain" state that
       tints the map blue-grey and slightly slows pawn movement; show
       "Raining" in the header.
@@ -608,3 +606,4 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.15 - Implement a system to automatically generate functional rooms to meet the win condition.
 - [ ] Step C.60 - Implement a system to automatically generate functional rooms to ensure win conditions can be reached.
 - [ ] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
+- [ ] Step C.90 - Implement a room detection system to identify functional rooms in the colony.
