@@ -41,6 +41,7 @@ function Get-ApiMap {
     # each prompt so the model stops inventing APIs that don't exist.
     $files = @(
         "g:\Rimwork\src\RimWorldLab.Core\GameWorld.cs",
+        "g:\Rimwork\src\RimWorldLab.Core\WorldModel.cs",
         "g:\Rimwork\src\RimWorldLab.Core\Jobs.cs",
         "g:\Rimwork\src\RimWorldLab.Core\Needs.cs",
         "g:\Rimwork\src\RimWorldLab.Core\RoomDetection.cs",
@@ -709,7 +710,13 @@ Reply with ONLY the rewritten item text, a single line starting exactly with:
     # Highest priority: when the item NAMES its target file explicitly
     # (all precise items do), believe it - keyword guessing below once sent
     # a "Mood in GameWorld.cs" item to Needs.cs and it failed forever.
-    if ($firstUnchecked -match 'src/RimWorldLab\.Core/GameWorld\.cs') {
+    if ($firstUnchecked -match 'src/RimWorldLab\.Core/WorldModel\.cs') {
+        $targetRelPath = "src/RimWorldLab.Core/WorldModel.cs"
+        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\WorldModel.cs"
+    } elseif ($firstUnchecked -match 'src/RimWorldGodot/Game3D\.cs') {
+        $targetRelPath = "src/RimWorldGodot/Game3D.cs"
+        $targetAbsPath = "g:\Rimwork\src\RimWorldGodot\Game3D.cs"
+    } elseif ($firstUnchecked -match 'src/RimWorldLab\.Core/GameWorld\.cs') {
         $targetRelPath = "src/RimWorldLab.Core/GameWorld.cs"
         $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\GameWorld.cs"
     } elseif ($firstUnchecked -match 'src/RimWorldLab\.Core/Needs\.cs') {
@@ -823,6 +830,17 @@ for the exact format). Do NOT output the full file.
 
     $newContent = $targetContent
     $appliedCount = 0
+    # UI FREEZE CONTRACT (docs/UI_FREEZE_CONTRACT.md): the frozen
+    # presentation files may not be redesigned by the local model.
+    if ($targetRelPath -match 'UiShell\.cs|Boot3D\.tscn|RenderCatalog\.cs') {
+        Write-Host "REJECTED ui-freeze: $targetRelPath is frozen by the UI contract." -ForegroundColor Red
+        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] REJECTED (ui-freeze contract): $changeDesc ($targetRelPath)"
+        $lastFailNote = "File $targetRelPath is FROZEN by docs/UI_FREEZE_CONTRACT.md. Extend content through GameWorld.cs data or RenderCatalog rows via roadmap items instead."
+        $lastFailItem = $itemKey
+        Start-Sleep -Seconds $DelaySeconds
+        continue
+    }
+
     # Predictive gate: refuse patches the world model predicts will fail,
     # without paying a build cycle - and tell the model WHY immediately.
     $prediction = $null

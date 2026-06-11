@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 // =====================================================================
 // 1. Core Data Structures (Map & Collision)
@@ -122,29 +121,15 @@ public class GameMap
     private readonly HashSet<(int X, int Y)> _noGrowTiles = new();
     private readonly HashSet<(int X, int Y)> _bridges = new();
 
-private bool _needsBridgeToExpand = false;
     private GridShape _gridShape = GridShape.Square;
 
-public GridShape GridShape
-{
-    get => _gridShape;
-    set => _gridShape = value;
-}
+    public GridShape GridShape
+    {
+        get => _gridShape;
+        set => _gridShape = value;
+    }
 
-public bool NeedsBridgeToExpand
-{
-    get => _needsBridgeToExpand;
-    set => _needsBridgeToExpand = value;
-}
-
-private bool IsExpansionBlocked()
-{
-    // Placeholder logic to determine if expansion is blocked by water.
-    // This will be expanded in future steps.
-    return false;
-}
-
-public IReadOnlyCollection<(int X, int Y)> Bridges => _bridges;
+    public IReadOnlyCollection<(int X, int Y)> Bridges => _bridges;
     public int Width { get; }
     public int Height { get; }
     public IReadOnlyList<Zone> Zones => _zones;
@@ -163,18 +148,6 @@ public IReadOnlyCollection<(int X, int Y)> Bridges => _bridges;
 
 public void AddZone(Zone zone) => _zones.Add(zone);
 
-    public void ConsumeResourcesForUpkeep()
-    {
-        // Placeholder method to consume resources for room/furniture upkeep.
-        // This will be expanded in future steps.
-
-        // Example: Consume 1 unit of wood per day for each furniture item
-        foreach (var furniture in _furniture)
-        {
-            // ResourceManager.Consume(ResourceKind.Wood, 1);
-            Console.WriteLine("Consuming resources for upkeep...");
-        }
-    }
 
     /// <summary>
     /// Returns the passable tile closest to (fromX, fromY) inside the nearest
@@ -526,11 +499,39 @@ public class Pawn : Thing
     /// <summary>Hit points. 0 means the pawn is dead.</summary>
     public float HP { get; set; } = 100f;
 
+    /// <summary>0 (hydrated) to 100 (parched). Rises over time; drinking resets it.</summary>
+    public float Thirst { get; set; } = 0f;
+
+    /// <summary>0 (calm) to 100 (panicking). Driven by wounds, hunger and danger.</summary>
+    public float Stress { get; set; } = 0f;
+
+    /// <summary>Two fixed personality tags rolled at creation (affect mood dynamics).</summary>
+    public List<string> Traits { get; } = new();
+
+    /// <summary>Recent memorable events: (tick, what happened, mood delta). Capped at 20.</summary>
+    public List<(long Tick, string What, float MoodDelta)> Memories { get; } = new();
+
+    /// <summary>Opinion of other pawns (-1..+1), built from shared time and events.</summary>
+    public Dictionary<Guid, float> Relationships { get; } = new();
+
+    /// <summary>Record a life event and apply its mood effect.</summary>
+    public void Remember(long tick, string what, float moodDelta)
+    {
+        Memories.Add((tick, what, moodDelta));
+        if (Memories.Count > 20) Memories.RemoveAt(0);
+        Mood = Math.Clamp(Mood + moodDelta, 0f, 100f);
+    }
+
+    private static readonly string[] TraitPool = { "hardy", "gloomy", "jovial", "loner", "diligent", "anxious" };
+
     public Pawn(string name, int startX, int startY) : base(name)
     {
         X = startX;
         Y = startY;
         Sex = _sexRng.Next(2) == 0 ? PawnSex.Male : PawnSex.Female;
+        Traits.Add(TraitPool[_sexRng.Next(TraitPool.Length)]);
+        string second = TraitPool[_sexRng.Next(TraitPool.Length)];
+        if (!Traits.Contains(second)) Traits.Add(second);
     }
 
     /// <summary>Adds XP to a skill and returns the resulting level (XP / 100).</summary>
@@ -586,11 +587,6 @@ public class GameWorldManager
     private readonly Dictionary<Guid, PawnTaskDriver> _drivers;
     private readonly Random _rng = new(12345);
 
-    public TaskOrder TryClaimBest(Pawn pawn)
-    {
-        // Placeholder implementation
-        return null;
-    }
     private bool _isRaining = false;
     private int _rainToggleCounter = 0; // Counter to track in-game days
 
@@ -654,6 +650,48 @@ private void UpdateHeaderText()
 
     /// <summary>Water stockpile, hauled from river tiles.</summary>
     public int Water { get; set; } = 0;
+
+    /// <summary>Food stockpile - cooked at Stoves, eaten periodically by pawns.</summary>
+    public int Food { get; set; } = 6;
+
+    /// <summary>Metal stockpile - byproduct of sustained mining.</summary>
+    public int Metal { get; set; } = 0;
+
+    /// <summary>Tool stockpile - crafted at the Workbench, speeds up future crafting.</summary>
+    public int Tools { get; set; } = 0;
+
+    /// <summary>Research insight accrued by crafting and building.</summary>
+    public int ResearchPoints { get; private set; } = 0;
+
+    /// <summary>Unlocked technologies (gates real effects, see Tick).</summary>
+    public List<string> UnlockedTech { get; } = new();
+
+    /// <summary>Colony-level event feed (newest last, capped at 60).</summary>
+    public List<string> ColonyEvents { get; } = new();
+
+    /// <summary>Multi-scale world simulation (solar/planet/region layers).</summary>
+    public MacroSim Macro { get; } = new();
+
+    /// <summary>How many Macro.WorldEvents have been surfaced into ColonyEvents.</summary>
+    private int _surfacedWorldEvents = 0;
+
+    private void LogEvent(string text)
+    {
+        ColonyEvents.Add($"Day {DayNumber}: {text}");
+        if (ColonyEvents.Count > 60) ColonyEvents.RemoveAt(0);
+    }
+
+    private void GainResearch(int points)
+    {
+        ResearchPoints += points;
+        (int Cost, string Tech)[] ladder = { (5, "Metal tools"), (15, "Watch post"), (30, "Granary") };
+        foreach (var (cost, tech) in ladder)
+            if (ResearchPoints >= cost && !UnlockedTech.Contains(tech))
+            {
+                UnlockedTech.Add(tech);
+                LogEvent($"Research breakthrough: {tech} unlocked!");
+            }
+    }
 
     /// <summary>Queues a HaulWater task: a pawn walks to a tile next to the river and brings back +1 Water.</summary>
     public bool QueueHaulWater(int x, int y)
@@ -1036,10 +1074,89 @@ private void UpdateHeaderText()
     public void Tick()
     {
         TotalTicks++;
-        _map.TickSaplings();
+
+        // Macro layers tick at their own LOD cadence; the colony then FEELS
+        // them: ClimatePulse throttles vegetation regrowth (macro -> local).
+        Macro.Tick(TotalTicks);
+        if (_rng.NextDouble() < Macro.ClimatePulse)
+            _map.TickSaplings();
 
         if (TotalTicks % 50 == 0)
             AssignPersonalFurniture();
+
+        // --- Survival economy: food & water are consumed by living pawns ---
+        int mealInterval = UnlockedTech.Contains("Granary") ? 2600 : 2000;
+        if (TotalTicks % mealInterval == 0)
+        {
+            foreach (var p in _pawns.Where(p => p.HP > 0))
+            {
+                if (Food > 0) { Food--; p.Remember(TotalTicks, "ate a warm meal", +2f); p.Hunger = Math.Max(0f, p.Hunger - 30f); }
+                else { p.Remember(TotalTicks, "went hungry - no food in store", -4f); p.Stress = Math.Clamp(p.Stress + 10f, 0f, 100f); }
+            }
+            if (Food == 0) LogEvent("Food stores are empty!");
+        }
+        if (TotalTicks % 1500 == 0)
+        {
+            foreach (var p in _pawns.Where(p => p.HP > 0))
+            {
+                if (Water > 0) { Water--; p.Thirst = 0f; }
+                else p.Thirst = Math.Clamp(p.Thirst + 25f, 0f, 100f);
+            }
+        }
+
+        // --- Cooking: a built Stove slowly turns Wood into Food ---
+        if (TotalTicks % 800 == 0 && Wood >= 1 && Food < _pawns.Count * 3 &&
+            _map.Furniture.Any(f => f.Kind == FurnitureKind.Stove))
+        {
+            Wood--; Food += 2;
+        }
+
+        // --- Crafting: a Workbench turns Wood+Stone into Tools (+research) ---
+        int craftInterval = UnlockedTech.Contains("Metal tools") ? 200 : 300;
+        if (TotalTicks % craftInterval == 0 && Wood >= 2 && Stone >= 1 && Tools < _pawns.Count &&
+            _map.Furniture.Any(f => f.Kind == FurnitureKind.Workbench))
+        {
+            Wood -= 2; Stone -= 1; Tools++;
+            GainResearch(2);
+            if (Tools % 4 == 0) LogEvent($"Workshop output: tool stock at {Tools}.");
+        }
+
+        // --- Metallurgy: sustained mining smelts Metal from Stone ---
+        if (TotalTicks % 1000 == 0 && Stone >= 5 && _map.Furniture.Any(f => f.Kind == FurnitureKind.Mine))
+        {
+            Stone -= 5; Metal++;
+        }
+
+        // --- Pawn minds: stress, relationships, shared time ---
+        if (TotalTicks % 100 == 0)
+        {
+            var alive = _pawns.Where(p => p.HP > 0).ToList();
+            foreach (var p in alive)
+            {
+                float stressDrive = (p.HP < 50f ? 1.5f : 0f) + (p.Hunger > 80f ? 1f : 0f) + (p.Thirst > 80f ? 1f : 0f);
+                float calm = p.Traits.Contains("hardy") ? 1.5f : (p.Traits.Contains("anxious") ? 0.5f : 1f);
+                p.Stress = Math.Clamp(p.Stress + stressDrive - 0.8f * calm, 0f, 100f);
+                if (p.Stress > 80f) p.Mood = Math.Clamp(p.Mood - 0.5f, 0f, 100f);
+
+                foreach (var other in alive)
+                {
+                    if (other.Id == p.Id) continue;
+                    if (Math.Abs(other.X - p.X) <= 1 && Math.Abs(other.Y - p.Y) <= 1)
+                    {
+                        p.Relationships.TryGetValue(other.Id, out float rel);
+                        float social = p.Traits.Contains("loner") ? 0.005f : 0.02f;
+                        p.Relationships[other.Id] = Math.Clamp(rel + social, -1f, 1f);
+                    }
+                }
+            }
+        }
+
+        // Surface fresh macro world events into the colony feed.
+        while (_surfacedWorldEvents < Macro.WorldEvents.Count)
+        {
+            LogEvent(Macro.WorldEvents[_surfacedWorldEvents]);
+            _surfacedWorldEvents++;
+        }
 
         // Drip-feed the starter colony plan into the build queue so pawns
         // walk over and construct it piece by piece. If an item can't be
@@ -1178,7 +1295,7 @@ private void UpdateHeaderText()
 
             if (driver.IsIdle)
             {
-                var next = Tasks.TryClaimNext();
+                var next = Tasks.TryClaimBest(pawn);
                 if (next != null)
                 {
                     driver.Assign(next, pawn, _map);
@@ -1299,6 +1416,26 @@ private void UpdateHeaderText()
         4 => "Survive to day 100",
         _ => "Colony thriving - endless mode"
     };
+
+    /// <summary>Advances the goal ladder when the current objective is met.</summary>
+    public void TickGoals()
+    {
+        bool met = GoalIndex switch
+        {
+            0 => _rooms.Count(r => r.Function != RoomFunction.Empty) >= 3,
+            1 => _pawns.Count(p => p.HP > 0) >= 4,
+            2 => Stone >= 50,
+            3 => _rooms.Count(r => r.Function != RoomFunction.Empty) >= 6,
+            4 => DayNumber >= 100,
+            _ => false
+        };
+        if (met)
+        {
+            GoalIndex++;
+            LogEvent($"Objective complete! Next: {CurrentGoalText}");
+            GainResearch(3);
+        }
+    }
 
     /// <summary>
     /// When a tree is chopped, it has a chance to drop 0-2 seeds onto nearby
@@ -1498,6 +1635,88 @@ public static class GameWorldTests
         catch (Exception ex)
         {
             Console.WriteLine($"✗ [FAIL] FunctionalRoomDetectionTest - {ex.Message}");
+            failed++;
+        }
+
+        // Test 6: TryClaimBest must prefer the nearby task over a distant
+        // equal-priority one (regression of the first-task-only AI and of
+        // the stubbed TryClaimBest incident).
+        try
+        {
+            var board = new TaskBoard();
+            board.Enqueue(new TaskOrder(TaskKind.MoveTo, 40, 40, priority: 50));
+            board.Enqueue(new TaskOrder(TaskKind.MoveTo, 6, 5, priority: 50));
+            var pawn6 = new Pawn("Tester", 5, 5);
+            var picked = board.TryClaimBest(pawn6);
+            if (picked != null && picked.TargetX == 6 && picked.TargetY == 5)
+            {
+                Console.WriteLine("✓ [PASS] TryClaimBestPrefersNearTaskTest");
+                passed++;
+            }
+            else
+            {
+                Console.WriteLine($"✗ [FAIL] TryClaimBestPrefersNearTaskTest - picked {picked?.TargetX},{picked?.TargetY}");
+                failed++;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ [FAIL] TryClaimBestPrefersNearTaskTest - {ex.Message}");
+            failed++;
+        }
+
+        // Test 7: the macro layers must actually tick at their LOD cadences
+        // and keep their pressures in sane bounds (multi-scale spine proof).
+        try
+        {
+            var macro = new MacroSim();
+            for (long t = 1; t <= 5001; t++) macro.Tick(t);
+            bool layersTicked = macro.LastUpdate[SimLOD.Solar] >= 5000
+                && macro.LastUpdate[SimLOD.Planet] >= 4000
+                && macro.LastUpdate[SimLOD.Region] >= 4500;
+            bool sane = macro.RaidPressure >= 0.5f && macro.RaidPressure <= 2.5f
+                && macro.ClimatePulse >= 0.4f && macro.ClimatePulse <= 1.2f;
+            if (layersTicked && sane && macro.Sites.Count >= 3)
+            {
+                Console.WriteLine("✓ [PASS] MacroLodLayersTest");
+                passed++;
+            }
+            else
+            {
+                Console.WriteLine($"✗ [FAIL] MacroLodLayersTest - ticked={layersTicked} sane={sane}");
+                failed++;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ [FAIL] MacroLodLayersTest - {ex.Message}");
+            failed++;
+        }
+
+        // Test 8: with no Water in store, pawns must get thirsty (survival
+        // economy proof - needs are consumed, not cosmetic).
+        try
+        {
+            var world8 = new GameWorldManager(50, 50);
+            var p8 = new Pawn("Dusty", 5, 5);
+            world8.RegisterThing(p8);
+            // Enforced drought: pawns may auto-haul water, so the shortage
+            // is reasserted every tick (we test thirst, not logistics).
+            for (int t = 0; t < 1600; t++) { world8.Water = 0; world8.Tick(); }
+            if (p8.Thirst > 0f)
+            {
+                Console.WriteLine("✓ [PASS] ThirstRisesWithoutWaterTest");
+                passed++;
+            }
+            else
+            {
+                Console.WriteLine($"✗ [FAIL] ThirstRisesWithoutWaterTest - thirst={p8.Thirst}");
+                failed++;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ [FAIL] ThirstRisesWithoutWaterTest - {ex.Message}");
             failed++;
         }
 

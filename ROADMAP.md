@@ -593,3 +593,25 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.45 - Implement basic room detection to ensure players can achieve the win condition.
 - [ ] Step C.60 - Implement a basic room detection system to count functional rooms and update the win condition logic.
 - [ ] Step C.75 - Implement basic room detection logic to identify functional rooms in the colony.
+- [ ] Step C.90 - Implement a basic room detection system in GameWorld.cs to identify functional rooms.
+
+## CONTINUATION RULES AFTER THE 3D SUPERPASS (2026-06-11)
+The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
+- UiShell.cs, Boot3D.tscn and RenderCatalog.cs are FROZEN (docs/UI_FREEZE_CONTRACT.md);
+  the dev loop rejects patches against them.
+- Extend gameplay in src/RimWorldLab.Core/GameWorld.cs, WorldModel.cs, Jobs.cs,
+  Needs.cs - everything those expose appears automatically in HUD/dev tab.
+- Threat/visual behaviors live in src/RimWorldGodot/Game3D.cs (open to patches).
+- The old 2D Main.cs/Main.tscn are LEGACY: do not extend them anymore.
+
+- [ ] Step Z.1 - In src/RimWorldLab.Core/WorldModel.cs, ExternalSite has a
+      TradeDemand but nothing sells goods yet. Add to GameWorldManager (in
+      src/RimWorldLab.Core/GameWorld.cs) a periodic trade: every 4000 ticks,
+      if Tools >= 2 and Macro.TradeDemand > 0.5f, remove 2 Tools, add 8 Food
+      and call LogEvent("Caravan trade: 2 tools sold for 8 food.").
+- [ ] Step Z.2 - Wildlife pressure: in src/RimWorldLab.Core/WorldModel.cs,
+      add a float WildlifePressure (0..1) to WorldRegion, drift it in
+      UpdateRegions, and surface a WorldEvents entry when it exceeds 0.8.
+- [ ] Step Z.3 - Memories of construction: in GameWorld.cs, when a Build task
+      completes (the PlaceFurniture branch in Tick), call
+      pawn.Remember(TotalTicks, $"built a {kind}", +1.5f).

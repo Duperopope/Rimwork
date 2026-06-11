@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://boot3drimwork1"]
+
+[ext_resource type="Script" path="res://Game3D.cs" id="1_game3d"]
+[ext_resource type="Script" path="res://UiShell.cs" id="2_uishell"]
+
+[node name="Boot3D" type="Node"]
+
+[node name="Game3D" type="Node3D" parent="."]
+script = ExtResource("1_game3d")
+
+[node name="UiShell" type="CanvasLayer" parent="."]
+script = ExtResource("2_uishell")

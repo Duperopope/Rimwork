@@ -199,6 +199,36 @@ public class TaskBoard
 
         return null;
     }
+
+    /// <summary>
+    /// Claims the best task for THIS pawn instead of the first available
+    /// one: priority dominates, then skill affinity, then proximity. This
+    /// is what makes the best builder take build jobs near them rather
+    /// than everyone popping a global queue.
+    /// </summary>
+    public TaskOrder TryClaimBest(Pawn pawn)
+    {
+        TaskOrder best = null;
+        double bestScore = double.MinValue;
+        foreach (var task in _pending)
+        {
+            if (task.Kind.IsMovementTask() && IsTileReserved(task.TargetX, task.TargetY))
+                continue;
+            double score = task.Priority * 10.0;
+            score -= Math.Abs(task.TargetX - pawn.X) + Math.Abs(task.TargetY - pawn.Y);
+            if ((task.Kind == TaskKind.Build || task.Kind == TaskKind.BuildWall || task.Kind == TaskKind.BuildBridge)
+                && pawn.SkillXP.TryGetValue(SkillKind.Construction, out float cxp))
+                score += cxp / 100.0;
+            if (task.Kind == TaskKind.Harvest && pawn.SkillXP.TryGetValue(SkillKind.Woodcutting, out float wxp))
+                score += wxp / 100.0;
+            if (score > bestScore) { bestScore = score; best = task; }
+        }
+        if (best == null) return null;
+        _pending.Remove(best);
+        if (best.Kind.IsMovementTask())
+            ReserveTile(best.TargetX, best.TargetY);
+        return best;
+    }
 }
 
 /// <summary>
