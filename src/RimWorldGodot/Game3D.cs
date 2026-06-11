@@ -94,6 +94,7 @@ public partial class Game3D : Node3D
     private readonly Random _rng = new(4242);
 
     [Signal] public delegate void ThreatSpawnedEventHandler();
+    public event Action<int, string, bool> TileSelected;
 
     public override void _Ready()
     {
@@ -254,6 +255,8 @@ public partial class Game3D : Node3D
             _planetSpin.RotateY((float)delta * 0.01f);
         if (_moonHolder != null && _worldViewRoot.Visible)
             _moonHolder.RotateY((float)delta * 0.06f);
+        if (_cloudHolder != null && _worldViewRoot.Visible)
+            _cloudHolder.RotateY((float)delta * 0.004f);
         if (_solarRoot != null && _solarRoot.Visible)
             foreach (var (nodeO, _, speed, _) in _orbiters)
                 nodeO.RotateY((float)delta * speed);
@@ -423,11 +426,42 @@ public partial class Game3D : Node3D
         var (rx, ry) = TileToRegion(_tiles[best].Center);
         var body = World.Macro.System.Bodies[_currentBodyIdx];
         var reg = body.Regions[rx, ry];
-        _tileMarker.Visible = true;
-        _tileMarker.Position = _tiles[best].Center * (GlobeRadius + 0.25f);
-        _tileMarker.LookAt(_planetSpin.ToGlobal(_tiles[best].Center * (GlobeRadius + 5f)), Vector3.Up);
-        AlertText = $"{body.Name} — tuile #{best} ({(_tiles[best].Polygon.Length == 5 ? "pentagone" : "hexagone")})  biome {reg.Biome}, fertilité {reg.Fertility:P0}, danger {reg.Danger:P0}" +
+        string bio = _tileBiomes[best];
+        string res = bio switch
+        {
+            "forest" => "bois, gibier, baies",
+            "plains" => "terres arables, gibier",
+            "hills" => "pierre, minerai",
+            "rocky" => "pierre, métal",
+            "marsh" => "eau, tourbe",
+            "dunes" => "sable, silice",
+            "tundra" => "fourrure, lichen",
+            "ocean" => "poisson, sel",
+            _ => "minéraux rares"
+        };
+        _selectedTileIdx = best;
+        var st = new SurfaceTool();
+        st.Begin(Mesh.PrimitiveType.Triangles);
+        var tile = _tiles[best];
+        float hr = GlobeRadius * 1.022f;
+        for (int k = 0; k < tile.Polygon.Length; k++)
+        {
+            st.SetNormal(tile.Center); st.AddVertex(tile.Center * hr);
+            st.SetNormal(tile.Center); st.AddVertex(tile.Polygon[(k + 1) % tile.Polygon.Length] * hr);
+            st.SetNormal(tile.Center); st.AddVertex(tile.Polygon[k] * hr);
+        }
+        _tileHighlight.Mesh = st.Commit();
+        _tileHighlight.MaterialOverride = new StandardMaterial3D
+        {
+            AlbedoColor = new Color(1f, 0.9f, 0.35f, 0.55f),
+            EmissionEnabled = true, Emission = new Color(1f, 0.85f, 0.3f), EmissionEnergyMultiplier = 1.6f,
+            Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded
+        };
+        _tileHighlight.Visible = true;
+        AlertText = $"{body.Name} — tuile #{best}  biome {bio}  ressources: {res}  (fertilité {reg.Fertility:P0}, danger {reg.Danger:P0})" +
             (best == _colonyTileIdx ? "  ← VOTRE COLONIE" : "");
+        TileSelected?.Invoke(best, bio, best == _colonyTileIdx);
     }
 
     /// <summary>Math ray->ground intersection: screen position to tile coords.</summary>
@@ -633,9 +667,13 @@ public partial class Game3D : Node3D
     private int _currentBodyIdx = 0;
     private List<HexPlanet.Tile> _tiles;
     private int _colonyTileIdx = -1;
+    private string[] _tileBiomes;
+    private int _selectedTileIdx = -1;
+    private MeshInstance3D _tileHighlight;
     private Node3D _tileMarker;
     private Label3D _planetTitle;
     private Node3D _moonHolder;
+    private Node3D _cloudHolder;
 
     private static readonly Dictionary<string, Color> BiomeColors = new()
     {
@@ -692,30 +730,48 @@ public partial class Game3D : Node3D
         var body = World.Macro.System.Bodies[bodyIdx];
         foreach (Node child in _planetSpin.GetChildren()) child.QueueFree();
 
-        _tiles = HexPlanet.Generate(8); // 642 tiles per planet
+        _tiles = HexPlanet.Generate(11); // ~1212 tiles per planet
         bool isHome = bodyIdx == World.Macro.System.HomeBodyIndex;
         var rng = new Random(body.Name.GetHashCode() & 0x7fffffff);
         _colonyTileIdx = -1;
         float bestColonyDist = float.MaxValue;
 
         var tileColors = new Color[_tiles.Count];
+        _tileBiomes = new string[_tiles.Count];
         for (int i = 0; i < _tiles.Count; i++)
         {
-            var (rx, ry) = TileToRegion(_tiles[i].Center);
-            var reg = body.Regions[rx, ry];
-            var baseCol = BiomeColors.TryGetValue(reg.Biome, out var bc) ? bc : new Color(0.4f, 0.4f, 0.4f);
-            // Contiguous seas: smooth low-frequency noise over the sphere
-            // (sum of sines), threshold scaled by habitability.
             var cc = _tiles[i].Center;
+            float lat = Mathf.Abs(Mathf.RadToDeg(Mathf.Asin(Mathf.Clamp(cc.Y, -1f, 1f))));
             float n = Mathf.Sin(cc.X * 3.1f + cc.Y * 1.7f) + Mathf.Sin(cc.Y * 2.3f - cc.Z * 2.9f) + Mathf.Sin(cc.Z * 3.7f + cc.X * 1.3f);
+            float n2 = Mathf.Sin(cc.X * 5.3f - cc.Z * 4.1f) + Mathf.Sin(cc.Y * 6.7f + cc.X * 2.9f);
             bool ocean = n < -0.55f + (1f - body.Habitability) * 1.1f;
-            tileColors[i] = ocean
-                ? new Color(0.09f, 0.27f, 0.52f)
-                : baseCol * (0.95f + (float)rng.NextDouble() * 0.25f);
-            if (isHome && reg.IsColonyRegion && !ocean)
+
+            string biome;
+            if (ocean) biome = "ocean";
+            else if (body.ClimateTemp > 0.4f)
+                biome = n2 > 0.8f ? "lava rock" : (n2 > 0f ? "scorched" : (n2 > -0.9f ? "dunes" : "ash"));
+            else if (body.ClimateTemp < -0.3f)
+                biome = lat > 50f ? "ice" : (n2 > 0.5f ? "frost rock" : (n2 > -0.5f ? "snowfield" : "tundra"));
+            else
+                biome = lat > 62f ? "ice"
+                    : lat > 50f ? "tundra"
+                    : n2 > 1.0f ? "rocky"
+                    : n2 > 0.35f ? "hills"
+                    : n2 > -0.45f ? "forest"
+                    : lat < 18f ? "dunes" : "plains";
+            _tileBiomes[i] = biome;
+            var baseCol = biome == "ocean"
+                ? new Color(0.09f, 0.27f, 0.52f) * (1f + 0.25f * Mathf.Clamp(n + 1f, -1f, 0f))
+                : (BiomeColors.TryGetValue(biome, out var bc) ? bc : new Color(0.4f, 0.4f, 0.4f));
+            tileColors[i] = biome == "ocean" ? baseCol : baseCol * (0.95f + (float)rng.NextDouble() * 0.22f);
+            if (isHome && !ocean && biome != "ice")
             {
-                float d = _tiles[i].Center.DistanceTo(new Vector3(0, 0.42f, 0.91f));
-                if (d < bestColonyDist) { bestColonyDist = d; _colonyTileIdx = i; }
+                var (rx, ry) = TileToRegion(cc);
+                if (body.Regions[rx, ry].IsColonyRegion)
+                {
+                    float d = cc.DistanceTo(new Vector3(0, 0.42f, 0.91f));
+                    if (d < bestColonyDist) { bestColonyDist = d; _colonyTileIdx = i; }
+                }
             }
         }
         int idx = 0;
@@ -728,11 +784,10 @@ public partial class Game3D : Node3D
         var rockXf = new List<Transform3D>();
         for (int i = 0; i < _tiles.Count; i++)
         {
-            var col = tileColors[i];
-            bool isOcean = col.B > col.R && col.B > col.G;
-            if (isOcean) continue;
-            bool green = col.G > col.R * 1.15f;
-            bool rockyT = Math.Abs(col.R - col.G) < 0.06f && col.R > 0.3f;
+            string bio = _tileBiomes[i];
+            if (bio == "ocean" || bio == "ice" || bio == "snowfield") continue;
+            bool green = bio == "forest" || bio == "marsh" || bio == "tundra";
+            bool rockyT = bio == "rocky" || bio == "hills" || bio == "frost rock" || bio == "lava rock" || bio == "crater";
             var c = _tiles[i].Center;
             var up = c;
             var east = up.Cross(Math.Abs(up.Y) < 0.99f ? Vector3.Up : Vector3.Right).Normalized();
@@ -765,6 +820,24 @@ public partial class Game3D : Node3D
             _planetSpin.AddChild(new MultiMeshInstance3D { Multimesh = mmR,
                 MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.35f, 0.34f, 0.36f) } });
         }
+
+        // --- Clouds: drifting flattened blobs
+        _cloudHolder = new Node3D();
+        _planetSpin.AddChild(_cloudHolder);
+        var mmC = new MultiMesh { TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+            Mesh = new SphereMesh { Radius = 1.1f, Height = 0.8f }, InstanceCount = 38 };
+        var crng = new Random(7);
+        for (int ci = 0; ci < 38; ci++)
+        {
+            var dir = new Vector3((float)crng.NextDouble() - 0.5f, (float)(crng.NextDouble() - 0.5f) * 0.8f, (float)crng.NextDouble() - 0.5f).Normalized();
+            var up2 = dir;
+            var e2 = up2.Cross(Math.Abs(up2.Y) < 0.99f ? Vector3.Up : Vector3.Right).Normalized();
+            var n3 = e2.Cross(up2);
+            float sc = 0.8f + (float)crng.NextDouble() * 1.6f;
+            mmC.SetInstanceTransform(ci, new Transform3D(new Basis(e2 * sc, up2 * 0.5f, n3 * sc), dir * (GlobeRadius * 1.045f)));
+        }
+        _cloudHolder.AddChild(new MultiMeshInstance3D { Multimesh = mmC,
+            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(1f, 1f, 1f, 0.85f), Transparency = BaseMaterial3D.TransparencyEnum.Alpha } });
 
         // --- Atmosphere halo
         _planetSpin.AddChild(new MeshInstance3D
@@ -811,14 +884,10 @@ public partial class Game3D : Node3D
             _planetSpin.AddChild(lbl);
         }
 
-        // Selected-tile marker (hidden until a tile is picked)
-        _tileMarker = new MeshInstance3D
-        {
-            Mesh = new TorusMesh { InnerRadius = 0.9f, OuterRadius = 1.15f },
-            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(1f, 0.85f, 0.2f), ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded },
-            Visible = false
-        };
-        _planetSpin.AddChild(_tileMarker);
+        // Selected-tile highlight: the tile ITSELF lights up (emissive copy
+        // of its polygon, slightly above the surface).
+        _tileHighlight = new MeshInstance3D { Visible = false };
+        _planetSpin.AddChild(_tileHighlight);
 
         _planetTitle.Text = body.Name.ToUpper() + " — " + body.Kind + "  (molette: zoom, clic droit: pivoter, clic: tuile, Tab: système)";
         // Face the colony/land toward the camera at first sight.
