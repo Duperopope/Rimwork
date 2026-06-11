@@ -215,6 +215,7 @@ public class TaskBoard
             if (task.Kind.IsMovementTask() && IsTileReserved(task.TargetX, task.TargetY))
                 continue;
             double score = task.Priority * 10.0;
+            score += (pawn.Mood - 50.0) / 25.0;
             score -= Math.Abs(task.TargetX - pawn.X) + Math.Abs(task.TargetY - pawn.Y);
             if ((task.Kind == TaskKind.Build || task.Kind == TaskKind.BuildWall || task.Kind == TaskKind.BuildBridge)
                 && pawn.SkillXP.TryGetValue(SkillKind.Construction, out float cxp))

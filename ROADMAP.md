@@ -32,7 +32,7 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
       `                }`
       `            }`
       `        }`
-- [ ] Step D.3 - Animals must wander. In src/RimWorldLab.Core/GameWorld.cs,
+- [x] Step D.3 - Animals must wander. In src/RimWorldLab.Core/GameWorld.cs,
       find the exact line:
       `        if (TotalTicks % 50 == 0)`
       Immediately AFTER that line and its `            AssignPersonalFurniture();` line, insert:
@@ -154,3 +154,4 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [x] Step C.150 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs.
 - [x] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
 - [x] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.60 - Implement a system to track and display the number of functional rooms in the game world.
