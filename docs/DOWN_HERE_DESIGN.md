@@ -54,6 +54,22 @@ milieu, 4X/KSP en fin.
 9. **Multi-systèmes** : graphe d'étoiles connectées, l'échelle au-dessus de
    Solar (SimLOD.Galaxy), navigation par le même zoom continu.
 
+## PROGRAMME PRIORITAIRE: la période Spore (décision 12/06/2026)
+Le jeu COMMENCE au stade microbien (ORIGINES, jouable depuis e7eee44) et on
+ne passe à l'échelle supérieure qu'après 10 évolutions. Philosophie
+100% PROCÉDURAL/SHADERS, zéro asset (paradigme post-1995: le calcul
+remplace les assets - efficacité matérielle, pertinence Game Awards).
+- Créatures: système de création organique modelable, au moins aussi
+  profond que Spore mais JOLI (membranes multi-sinus, métaballes, pas de
+  formes simples). Les ANIMAUX du jeu suivent le même système.
+- Boucle micro: manger (plantes/espèces plus petites) -> énergie (coût
+  selon la taille) -> reproduction -> menu d'évolution (objectif: ~100
+  mutations) -> grossir = nouveaux prédateurs ET nouvelles proies.
+- Échelles suivantes (organisme, tribu, colonie, 4X) déverrouillées par
+  paliers d'évolution. Assets/bâtiments: bien plus tard.
+- Jouable sur le web: export C# Godot indisponible (4.6) -> teaser JS
+  procédural sur la GitHub Pages en attendant le support moteur.
+
 ## Règles de fabrication
 - Toute affirmation visuelle se vérifie par screenshot auto avant d'être
   annoncée. Toute mécanique par test ou simulation headless.

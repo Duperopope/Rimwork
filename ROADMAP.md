@@ -53,6 +53,24 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [x] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.
 - [x] Step Z.3.1 - Add a private field `int TotalTicks` to `GameWorld.cs`.
 
+## PRIORITE ABSOLUE: contenu du stade ORIGINES (MicroStage.cs est OUVERT)
+Le fichier src/RimWorldGodot/MicroStage.cs est jouable et t'appartient:
+ajoute du CONTENU (mutations, especes, comportements). Regles: zero asset,
+tout en geometrie procedurale; chaque mutation doit avoir un effet REEL.
+
+- [ ] Step S.1 - Add 3 new mutations to the trait pool. In
+      src/RimWorldGodot/MicroStage.cs, find the exact line:
+      `        _traitPool.Add(("Compacité", "-15% taille (discret), +10% vitesse", o => { o.Size *= 0.85f; o.Speed *= 1.1f; }));`
+      Immediately AFTER that line, insert these new lines:
+      `        _traitPool.Add(("Toxines", "Les prédateurs perdent de l'énergie en te mordant", o => o.Spikes += 2));`
+      `        _traitPool.Add(("Symbiose algale", "+5 énergie par algue mangée", o => o.EnergyMax += 15f));`
+      `        _traitPool.Add(("Géant des abysses", "+60% taille, -20% vitesse", o => { o.Size *= 1.6f; o.Speed *= 0.8f; }));`
+- [ ] Step S.2 - Prey reproduces: in MicroStage.cs _Process, when fewer
+      than 30 critters exist the pool already respawns them; make small
+      prey occasionally split in two near algae (population dynamics).
+- [ ] Step S.3 - Predators eat prey too (ecosystem): a predator touching a
+      smaller critter removes it and grows slightly.
+
 ## PRIORITE: la couche primordiale (depart Spore - LOD Micro)
 - [x] Step M.1 - In src/RimWorldLab.Core/GameWorld.cs, find the exact line: `Macro.Tick(TotalTicks);` Immediately AFTER that line, insert these new lines: `if (TotalTicks % 1600 == 0) { float biomass = Macro.Regions[2, 2].MicrobialBiomass; if (biomass > 0.75f) LogEvent($"Microbial bloom enriches the soil (biomass {biomass:P0})."); }`
 - [x] Step M.2.1 - Add private field `cookBonus` in `src/RimWorldLab.Core/GameWorld.cs`.

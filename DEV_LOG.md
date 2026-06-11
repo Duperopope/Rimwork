@@ -4762,3 +4762,5 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 196] SKIPPED (no SEARCH match): Add a method to track and display the progress towards building functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 197] REVERTED (build failed): Add a method to display the progress towards building functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 198] REVERTED (build failed): Add a method to track and display the progress towards building functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 199] REVERTED (build failed): Add a method to display the progress towards building functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 200] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.195 - Implement a system to track and display the progress towards building functional rooms, providing players with clear feedback on their progress.

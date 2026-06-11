@@ -173,3 +173,4 @@
 - Ensure all methods are properly closed with `}` and check for missing identifiers or misplaced tokens.
 - Ensure method signatures and calls match defined types and parameters.
 - Ensure method parameters and types match existing definitions in GameWorld.cs.
+- Ensure method signatures match existing code and avoid syntax errors in new methods.

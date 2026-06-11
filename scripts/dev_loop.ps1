@@ -740,7 +740,10 @@ Reply with ONLY the rewritten item text, a single line starting exactly with:
     # Highest priority: when the item NAMES its target file explicitly
     # (all precise items do), believe it - keyword guessing below once sent
     # a "Mood in GameWorld.cs" item to Needs.cs and it failed forever.
-    if ($firstUnchecked -match 'src/RimWorldLab\.Core/WorldModel\.cs') {
+    if ($firstUnchecked -match 'src/RimWorldGodot/MicroStage\.cs|MicroStage') {
+        $targetRelPath = "src/RimWorldGodot/MicroStage.cs"
+        $targetAbsPath = "g:\Rimwork\src\RimWorldGodot\MicroStage.cs"
+    } elseif ($firstUnchecked -match 'src/RimWorldLab\.Core/WorldModel\.cs') {
         $targetRelPath = "src/RimWorldLab.Core/WorldModel.cs"
         $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\WorldModel.cs"
     } elseif ($firstUnchecked -match 'src/RimWorldGodot/Game3D\.cs') {

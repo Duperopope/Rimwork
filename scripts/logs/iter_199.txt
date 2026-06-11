@@ -1,39 +1,34 @@
-CHANGE: Implement a method to check if a zone has enough functional furniture by accessing the zone's map and furniture list.
+CHANGE: Add a method to display the progress towards building functional rooms.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public void TrackRecycledResource(ResourceKind kind, int amount)
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    if (_recycledResources.ContainsKey(kind))
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        _recycledResources[kind] += amount;
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
     }
-    else
-    {
-        _recycledResources[kind] = amount;
-    }
-}
 =======
-public void TrackRecycledResource(ResourceKind kind, int amount)
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    if (_recycledResources.ContainsKey(kind))
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        _recycledResources[kind] += amount;
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
     }
     else
     {
-        _recycledResources[kind] = amount;
+        _pawnResourceConsumption[pawnId][kind] = amount;
     }
 }
 
-public bool HasEnoughFunctionalFurniture(Zone zone, int requiredCount)
+public void DisplayFunctionalRoomsProgress()
 {
-    if (zone.LocalMap == null)
-    {
-        return false;
-    }
-
-    int functionalFurnitureCount = zone.LocalMap._furniture.Count(furniture => furniture.IsFunctionalFurniture() && zone.Contains(furniture.X, furniture.Y));
-    return functionalFurnitureCount >= requiredCount;
+    int totalRooms = CountFunctionalRooms();
+    Console.WriteLine($"Functional Rooms: {totalRooms} / 3");
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to update the functional room count based on the new furniture check.
+NEXT: Implement a method to count functional rooms.
