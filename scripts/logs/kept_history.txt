@@ -69,3 +69,4 @@
 - [ ] Step C.150 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs.
 - [ ] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
 - [ ] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
+- [ ] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)

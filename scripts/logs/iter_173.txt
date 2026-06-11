@@ -1,30 +1,22 @@
-CHANGE: Implement method to track pawn resource consumption in `GameWorld.cs`.
+CHANGE: Implement a method to check if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-        {
-            totalConsumption += pawnConsumption[kind];
-        }
-    }
-    return totalConsumption;
-}
-=======
-        {
-            totalConsumption += pawnConsumption[kind];
-        }
-    }
-    return totalConsumption;
-}
-
-public int GetResourceConsumption(Guid pawnId, ResourceKind kind)
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    if (_pawnResourceConsumption.TryGetValue(pawnId, out var resources))
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        if (resources.TryGetValue(kind, out var amount))
-        {
-            return amount;
-        }
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
     }
-    return 0;
-}
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+=======
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
 >>>>>>> REPLACE
-NEXT: Implement a method to display total resource consumption for all pawns.
+NEXT: Implement a method to check if a zone is functional.

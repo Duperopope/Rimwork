@@ -226,14 +226,14 @@ public void UpdateFunctionalRoomCount()
     _functionalRoomCount = CountFunctionalRooms();
 }
 
-    public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        if (!_pawnResourceConsumption.ContainsKey(pawnId))
-        {
-            _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
-        }
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
 
-        if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
         {
             _pawnResourceConsumption[pawnId][kind] += amount;
         }

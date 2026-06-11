@@ -1,49 +1,37 @@
-CHANGE: Add method to track pawn resource consumption in `GameWorld.cs`.
+CHANGE: Implement a method to check if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-    public int GetTotalResourceConsumption(ResourceKind kind)
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        int totalConsumption = 0;
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-        {
-            if (pawnConsumption.ContainsKey(kind))
-            {
-                totalConsumption += pawnConsumption[kind];
-            }
-        }
-        return totalConsumption;
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+=======
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
+    }
+    else
+    {
+        _pawnResourceConsumption[pawnId][kind] = amount;
     }
 }
-=======
-    public int GetTotalResourceConsumption(ResourceKind kind)
-    {
-        int totalConsumption = 0;
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-        {
-            if (pawnConsumption.ContainsKey(kind))
-            {
-                totalConsumption += pawnConsumption[kind];
-            }
-        }
-        return totalConsumption;
-    }
 
-    public void TrackPawnResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
-    {
-        if (!_pawnResourceConsumption.ContainsKey(pawnId))
-        {
-            _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
-        }
-
-        if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
-        {
-            _pawnResourceConsumption[pawnId][kind] += amount;
-        }
-        else
-        {
-            _pawnResourceConsumption[pawnId][kind] = amount;
-        }
-    }
+public bool IsZoneFunctional(Zone zone)
+{
+    // Example: Check if a zone contains functional furniture
+    var functionalFurniture = _furniture.Where(f => f.IsFunctionalFurniture() && zone.Contains(f.X, f.Y)).ToList();
+    return functionalFurniture.Count > 0;
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to display total resource consumption for each pawn.
+NEXT: Implement a method to count functional rooms in the game world.

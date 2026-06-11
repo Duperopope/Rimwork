@@ -133,3 +133,9 @@
 - Always check for existing method signatures before adding new ones to prevent CS0111 errors.
 - Ensure method signatures and types match existing definitions in the file.
 - Ensure method calls and string interpolations are correctly formatted and syntactically valid.
+- Ensure all used fields and properties are declared or passed as parameters in the context.
+- Ensure all referenced collections (Pawns, Zones) exist in GameWorld before adding methods that use them.
+- Check for missing properties or methods on referenced types before adding logic.
+- Ensure correct syntax and placement of code within methods and classes.
+- Ensure method implementations are complete and syntactically correct before adding new methods.
+- Ensure method bodies are correctly closed and placed within classes.

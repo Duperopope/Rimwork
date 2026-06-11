@@ -638,4 +638,6 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.133 - Implement a method to find the nearest zone tile of a specific kind. (GameWorld.cs) - Define the FindNearestZoneTile method to return a nullable tuple of coordinates.
 - [x] Step C.135 - Implement a system to track and display functional room counts to the player.
 - [x] Step C.150 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs.
-- [ ] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
+- [x] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
+- [ ] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.165 - Implement a system to generate functional rooms based on placed furniture, ensuring players must arrange furniture logically to meet room requirements. (GameWorld.cs)

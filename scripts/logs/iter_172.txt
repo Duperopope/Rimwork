@@ -1,37 +1,45 @@
-CHANGE: Implement the missing part of the `GetTotalResourceConsumption` method.
+CHANGE: Implement a method to check if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-        {
-            if (pawnConsumption.ContainsKey(kind))
-            {
-                totalConsumption += pawnConsumption[kind];
-            }
-        }
-        return totalConsumption;
-    }
-}
-=======
-        {
-            if (pawnConsumption.ContainsKey(kind))
-            {
-                totalConsumption += pawnConsumption[kind];
-            }
-        }
-        return totalConsumption;
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
     }
 
-    public int GetResourceConsumption(ResourceKind kind)
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+=======
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        int totalConsumption = 0;
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-        {
-            if (pawnConsumption.ContainsKey(kind))
-            {
-                totalConsumption += pawnConsumption[kind];
-            }
-        }
-        return totalConsumption;
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
+    }
+    else
+    {
+        _pawnResourceConsumption[pawnId][kind] = amount;
     }
 }
+
+public bool IsZoneFunctional(Zone zone)
+{
+    // Example: A zone is functional if it contains at least one functional furniture
+    foreach (var furniture in _furniture)
+    {
+        if (furniture.X >= zone.X && furniture.X < zone.X + zone.Width &&
+            furniture.Y >= zone.Y && furniture.Y < zone.Y + zone.Height &&
+            furniture.IsFunctionalFurniture())
+        {
+            return true;
+        }
+    }
+    return false;
+}
 >>>>>>> REPLACE
-NEXT: Implement a method to track pawn resource consumption in `GameWorld.cs`.
+NEXT: Implement a method to count functional rooms.
