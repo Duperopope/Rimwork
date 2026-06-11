@@ -82,3 +82,4 @@
 - [ ] Step M.2 - Rich soil grows food faster. In
 - [ ] Step M.2.1 - Add private field `cookBonus` in `src/RimWorldLab.Core/GameWorld.cs`.
 - [ ] Step M.2.1 - Add private field `cookBonus` in `src/RimWorldLab.Core/GameWorld.cs`.
+- [ ] Step C.60 - Add a private field `functionalRoomsCount` to the `GameWorld` class.
