@@ -4626,3 +4626,12 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 76] KEPT: Add a private field `int TotalTicks` to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 77] SKIPPED (no SEARCH match): Add a private field `int TotalTicks` to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 78] SKIPPED (no SEARCH match): Add a private field `int TotalTicks` to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 79] SKIPPED (no SEARCH match): Add a private field `int TotalTicks` to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 80] DONE (had past KEPT edits, change already in file): - [ ] Step Z.3.1 - Add a private field `int TotalTicks` to `GameWorld.cs`.
+- [iter 81] SKIPPED (no SEARCH match): Add MicrobialBiomass property to Region class (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 82] SKIPPED (no SEARCH match): Add MicrobialBiomass property to Region class (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 83] SKIPPED (no SEARCH match): Add MicrobialBiomass property to Region class (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 84] SKIPPED (no SEARCH match): Add MicrobialBiomass property to Region class (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 85] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step M.1 - In src/RimWorldLab.Core/GameWorld.cs, find the exact line: `Macro.Tick(TotalTicks);` Immediately AFTER that line, insert these new lines: `if (TotalTicks % 1600 == 0) { float biomass = Macro.Regions[2, 2].MicrobialBiomass; if (biomass > 0.75f) LogEvent($"Microbial bloom enriches the soil (biomass {biomass:P0})."); }`
+- [startup] Stack relaunched after boot (2026-06-12 00:14).
+- [iter 86] KEPT: Add microbial biomass tracking and logging to GameWorld. (src/RimWorldLab.Core/GameWorld.cs)

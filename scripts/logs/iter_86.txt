@@ -1,0 +1,11 @@
+CHANGE: Add microbial biomass tracking and logging to GameWorld.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+private int Tools = 0;
+private int Food = 0;
+=======
+private int Tools = 0;
+private int Food = 0;
+private float[,] _microbialBiomass = new float[100, 100]; // Example size
+>>>>>>> REPLACE
+NEXT: Implement microbial biomass regeneration and update logic.
