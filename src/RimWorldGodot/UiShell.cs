@@ -249,7 +249,8 @@ public partial class UiShell : CanvasLayer
         var w = _game.World;
 
         _resources.Text = $"Bois {w.Wood}   Pierre {w.Stone}   Eau {w.Water}   Nourriture {w.Food}   Métal {w.Metal}   Outils {w.Tools}   Pop {w.Pawns.Count(p => p.HP > 0)}";
-        _clock.Text = $"[{_game.ViewLayer}] Jour {w.DayNumber}, {w.HourOfDay:00}:00" + (_game.Paused ? "  [PAUSE]" : $"  [{_game.SpeedMultiplier:0}x]");
+        string meteo = _game.LocalWeather switch { WeatherKind.Rain => "🌧 pluie", WeatherKind.Storm => "⛈ orage", WeatherKind.Fog => "🌫 brume", _ => "☀ clair" };
+        _clock.Text = $"[{_game.ViewLayer}] Jour {w.DayNumber}, {(int)_game.LocalHourF:00}:00  {meteo}" + (_game.Paused ? "  [PAUSE]" : $"  [{_game.SpeedMultiplier:0}x]");
         _pauseBtn.Text = _game.Paused ? "▶" : "II";
 
         int rooms = w.GetRooms().Count(r => r.Function != RoomFunction.Empty);

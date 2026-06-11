@@ -118,6 +118,8 @@ public partial class Game3D : Node3D
         }
         World = w;
         VisitedTileIdx = tileIdx;
+        if (_tiles != null && tileIdx < _tiles.Count)
+            LocalLonDeg = Mathf.RadToDeg(Mathf.Atan2(_tiles[tileIdx].Center.X, _tiles[tileIdx].Center.Z));
         RebuildLocalVisuals();
         SetViewLayer("Local");
         _camRig.Position = new Vector3(32, 0, 32);
@@ -156,6 +158,14 @@ public partial class Game3D : Node3D
 
     public float OrbitSpeedMult { get; set; } = 1f;
 
+    /// <summary>Longitude of the tile we are currently living on - shifts
+    /// the local solar hour (orbital day/night, Down Here! charter).</summary>
+    public float LocalLonDeg { get; private set; } = MacroSim.ColonyLon;
+    public float LocalHourF => WeatherSystem.LocalHour(World.TotalTicks, LocalLonDeg);
+    public WeatherKind LocalWeather => WeatherSystem.At(World.Macro.Gen.Seed,
+        VisitedTileIdx >= 0 && _tiles != null ? Mathf.RadToDeg(Mathf.Asin(Mathf.Clamp(_tiles[VisitedTileIdx].Center.Y, -1f, 1f))) : MacroSim.ColonyLat,
+        LocalLonDeg, World.TotalTicks);
+
     /// <summary>Swap in a loaded world (save system) and rebuild visuals.</summary>
     public void LoadWorld(GameWorldManager w)
     {
@@ -171,6 +181,7 @@ public partial class Game3D : Node3D
     {
         if (_colonyWorld != null) World = _colonyWorld;
         VisitedTileIdx = -1;
+        LocalLonDeg = MacroSim.ColonyLon;
         RebuildLocalVisuals();
         SetViewLayer("Local");
         _camRig.Position = new Vector3(14, 0, 12);
@@ -338,8 +349,11 @@ public partial class Game3D : Node3D
         // Day/night cycle: HourOfDay 0-23 -> sun energy and ambient tint.
         if (_sun != null && World != null && ViewLayer == "Local")
         {
-            int h = World.HourOfDay;
+            float h = LocalHourF;
             float dayness = Mathf.Clamp(1f - Math.Abs(h - 13f) / 9f, 0.12f, 1f);
+            if (LocalWeather == WeatherKind.Fog) dayness *= 0.75f;
+            if (LocalWeather == WeatherKind.Storm) dayness *= 0.55f;
+            if (LocalWeather == WeatherKind.Rain) dayness *= 0.85f;
             _sun.LightEnergy = 0.25f + dayness * 1.1f;
             _sun.LightColor = new Color(1f, 0.75f + dayness * 0.25f, 0.55f + dayness * 0.45f);
             if (_envRes != null)

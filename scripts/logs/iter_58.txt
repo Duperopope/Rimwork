@@ -1,4 +1,4 @@
-CHANGE: Add hunting logic before the existing resource regeneration check.
+CHANGE: Add hunting logic for pawns standing next to SmallAnimal
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
         if (TotalTicks % 1500 == 0)
@@ -20,4 +20,4 @@ FILE: src/RimWorldLab.Core/GameWorld.cs
 
         if (TotalTicks % 1500 == 0)
 >>>>>>> REPLACE
-NEXT: Implement the logic to generate small animals in the game world.
+NEXT: Implement logic to generate SmallAnimal population

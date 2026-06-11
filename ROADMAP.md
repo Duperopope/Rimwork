@@ -14,7 +14,7 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 
 ## PRIORITE: la vie sur les cartes (Down Here! chantier faune)
 - [ ] Step D.1 - In src/RimWorldLab.Core/GameWorld.cs, immediately after the line `Macro.Tick(TotalTicks);`, insert the following line:
-- [ ] Step D.2 - Hunting: a pawn standing next to a SmallAnimal harvests it
+- [x] Step D.2 - Hunting: a pawn standing next to a SmallAnimal harvests it
       for food. In src/RimWorldLab.Core/GameWorld.cs, find the exact line:
       `        if (TotalTicks % 1500 == 0)`
       Immediately BEFORE that line, insert these new lines:
