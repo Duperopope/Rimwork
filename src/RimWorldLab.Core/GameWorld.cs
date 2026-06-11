@@ -22,7 +22,7 @@ public GameWorld()
 private int Tools = 0;
 private int Food = 0;
 private float[,] _microbialBiomass = new float[100, 100]; // Example size
-// private int _functionalRoomsCount = 0; // Uncomment this line
+private int _functionalRoomsCount = 0; // Uncomment this line
 
 public static class Macro
 {

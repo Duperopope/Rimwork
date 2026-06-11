@@ -485,3 +485,5 @@ GameWorld
 _functionalRoomsCount
 GameWorld
 _functionalRoomsCount
+_resources
+_resources

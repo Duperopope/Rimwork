@@ -108,7 +108,7 @@ public partial class Game3D : Node3D
         if (tileIdx == _colonyTileIdx) { ReturnToColony(); return; }
 
         int msize = Math.Clamp(World.Macro.Gen.MapSize, 50, 128);
-        var w = new GameWorldManager(msize, msize); // size from world creation
+        var w = new GameWorldManager(msize, msize, biome, World.Macro.Gen.Seed * 31 + tileIdx);
         w.ApplyGenSettings(World.Macro.Gen);
         var rng2 = new Random(World.Macro.Gen.Seed * 31 + tileIdx);
         string[] scouts = { "Eclaireur A", "Eclaireur B", "Eclaireur C" };
@@ -132,7 +132,7 @@ public partial class Game3D : Node3D
     /// creation-screen settings (seed, size, pawns, planets, orbits).</summary>
     public void NewGame(WorldGenSettings gen)
     {
-        var w = new GameWorldManager(gen.MapSize, gen.MapSize);
+        var w = new GameWorldManager(gen.MapSize, gen.MapSize, "forest", gen.Seed);
         w.ApplyGenSettings(gen);
         var rng = new Random(gen.Seed);
         string[] names = { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt", "Iris", "Joren", "Kira", "Lund", "Mara", "Nils", "Opal", "Pell" };
@@ -262,10 +262,20 @@ public partial class Game3D : Node3D
         _terrainRoot = new Node3D();
         AddChild(_terrainRoot);
         // One MultiMesh per tile type: cheap, single draw call each.
+        Color groundCol = World.Map.Biome switch
+        {
+            "dunes" or "scorched" or "ash" => new Color(0.55f, 0.45f, 0.28f),
+            "lava rock" or "crater" => new Color(0.3f, 0.22f, 0.18f),
+            "tundra" or "snowfield" or "ice" or "frost rock" or "crevasse" => new Color(0.75f, 0.8f, 0.86f),
+            "marsh" => new Color(0.2f, 0.3f, 0.22f),
+            "hills" or "rocky" => new Color(0.36f, 0.34f, 0.28f),
+            _ => new Color(0.22f, 0.34f, 0.18f)
+        };
         foreach (var (type, color, height) in new[]
         {
-            ("Grass", new Color(0.22f, 0.34f, 0.18f), 0.20f),
+            ("Grass", groundCol, 0.20f),
             ("Water", new Color(0.15f, 0.30f, 0.55f), 0.12f),
+            ("Ice", new Color(0.65f, 0.8f, 0.95f), 0.16f),
         })
         {
             var tiles = new List<Vector3>();
@@ -273,8 +283,9 @@ public partial class Game3D : Node3D
                 for (int x = 0; x < World.Map.Width; x++)
                 {
                     bool isWater = World.Map.IsWater(x, y);
-                    if (type == "Water" ? isWater : !isWater)
-                        tiles.Add(new Vector3(x, 0, y));
+                    bool isIce = World.Map.GetCell(x, y).TileType == "Ice";
+                    bool match = type switch { "Water" => isWater, "Ice" => isIce, _ => !isWater && !isIce };
+                    if (match) tiles.Add(new Vector3(x, 0, y));
                 }
             var mm = new MultiMesh
             {
