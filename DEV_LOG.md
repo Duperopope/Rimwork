@@ -3430,3 +3430,17 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 105] PREDICTED-FAIL (skipped before build): Add a method to check if the colony can afford to build additional rooms. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 106] PREDICTED-FAIL (skipped before build): Add a method to check if the colony can afford to build a new room. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 108] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.6 - Organic village growth: Add a method to check if a pawn is at the edge of a region's map in GameWorld.cs.
+- [iter 109] SKIPPED (no SEARCH match): Add a method to check if a pawn is at the edge of a region's map in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 110] SKIPPED (no SEARCH match): Implement the `IsPawnAtEdge` method in `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 111] SKIPPED (no SEARCH match): Implement the method to check if a pawn is at the edge of a region's map. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 112] SKIPPED (no SEARCH match): Implement the `IsPawnAtEdge` method in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 113] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.6.1 - Organic village growth: Add a method to get the pawn's current map in GameWorld.cs.
+- [iter 114] SKIPPED (no SEARCH match): Add a method to get the pawn's current map in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 115] SKIPPED (no SEARCH match): Add a method to get the pawn's current map in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 116] SKIPPED (no SEARCH match): Add a method to get the pawn's current map in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 117] SKIPPED (no SEARCH match): Add a method to get the pawn's current map in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 118] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step W.6.1 - Organic village growth: Add a method to get the pawn's current map in GameWorld.cs. Ensure the method uses an existing property or method to avoid errors.
+- [iter 119] SKIPPED (no SEARCH match): Add a method to get the pawn's current map in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 120] CRITIC TASK: - [ ] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs
+- [iter 120] SKIPPED (no SEARCH match): Add a method to get the pawn's current map in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 121] SKIPPED (no SEARCH match): Add a method to get the pawn's current map in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)

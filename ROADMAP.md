@@ -506,7 +506,7 @@ renderer from Node2D to a 3D/iso pipeline) - but we CAN make the current
       to staff it (a "Cook" task, gated on a Food resource from W.3).
       Eating a Meal restores Hunger faster than the current direct
       recovery. Needs Step W.3 (Food resource) first.
-- [ ] Step W.6 - Organic village growth: Add a method to check if a pawn is at the edge of a region's map in GameWorld.cs.
+- [ ] Step W.6.1 - Organic village growth: Add a method to get the pawn's current map in GameWorld.cs. Ensure the method uses an existing property or method to avoid errors.
 - [ ] Step W.7 - Raider reproduction: surviving raiders that retreat (or
       a raider "camp" off-map) periodically spawn reinforcements, scaling
       with colony wealth/population, so the threat grows over time.
@@ -603,3 +603,4 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.60 - Implement a system to automatically generate functional rooms to ensure win conditions can be reached.
 - [ ] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
 - [ ] Step C.90 - Implement a room detection system to identify functional rooms in the colony.
+- [ ] Step C.120 - Implement a system to automatically generate functional rooms based on furniture placement in GameWorld.cs
