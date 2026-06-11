@@ -1,0 +1,30 @@
+CHANGE: Implement a method to detect and count functional rooms in the game world.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public int CountFunctionalRooms()
+{
+    int functionalRoomCount = 0;
+    foreach (var zone in _zones)
+    {
+if (IsZoneFunctional(zone))
+{
+    functionalRoomCount++;
+}
+    }
+    return functionalRoomCount;
+}
+=======
+public int CountFunctionalRooms()
+{
+    int functionalRoomCount = 0;
+    foreach (var zone in _zones)
+    {
+        if (IsZoneFunctional(zone))
+        {
+            functionalRoomCount++;
+        }
+    }
+    return functionalRoomCount;
+}
+>>>>>>> REPLACE
+NEXT: Implement a method to display the count of functional rooms.

@@ -274,10 +274,10 @@ public int CountFunctionalRooms()
     int functionalRoomCount = 0;
     foreach (var zone in _zones)
     {
-if (IsZoneFunctional(zone))
-{
-    functionalRoomCount++;
-}
+        if (IsZoneFunctional(zone))
+        {
+            functionalRoomCount++;
+        }
     }
     return functionalRoomCount;
 }

@@ -60,3 +60,4 @@
 - [ ] Step C.165 - Add the missing condition to check if a pawn's sleep need is less than 50 in the `AssignPawnsToTasks` method in GameWorld.cs
 - [ ] Step C.180 - Implement a method to check if a room is functional and add it to the list of functional rooms in `src/RimWorldLab.Core/GameWorld.cs`.
 - [ ] Step C.75 - Implement the `IsZoneFunctional` method in src/RimWorldLab.Core/GameWorld.cs.
+- [ ] Step C.105 - Ensure the `TrackResourceConsumption` method has the correct method signature and opening brace in `GameWorld.cs`.

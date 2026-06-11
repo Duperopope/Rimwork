@@ -119,3 +119,11 @@
 - Ensure all method syntax is correct before adding logic.
 - Ensure all code blocks are properly closed and formatted.
 - Ensure all code within methods is properly indented and closed.
+- Ensure method signatures match existing types and avoid introducing new syntax errors.
+- Ensure all referenced types and properties exist before implementing methods.
+- Ensure method signatures match existing declarations and types are correctly defined.
+- Ensure method parameters and logic match expected types and structures.
+- Ensure all referenced types and properties exist in the project.
+- Ensure method signatures match existing definitions in the class.
+- Ensure method signatures match existing definitions in the file.
+- Ensure method signatures match and types are correctly defined in GameWorld.cs.
