@@ -174,6 +174,6 @@ tout en geometrie procedurale; chaque mutation doit avoir un effet REEL.
 - [ ] Step C.180 - Extract the repeated pawn registration logic into a separate method in Main.cs. Ensure the method is correctly defined and called in both _Ready and _Process methods.
 - [ ] Step C.195 - Implement a system to track and display the progress towards building functional rooms, providing players with clear feedback on their progress.
 - [ ] Step C.15.1 - Add a method to check if the population is less than 30 in `src/RimWorldLab.Core/GameWorld.cs`. Ensure the method is correctly placed and uses the existing `Pawns` field.
-- [ ] Step C.30 - Implement a system to track and display room completion progress to the player.
+- [ ] Step C.30a - Add a method to check if the population is less than 30 in `GameWorld.cs`.
 - [ ] Step C.45 - Implement a system to track and display progress towards building additional rooms, providing clear feedback to the player on what they need to do next.
 - [ ] Step C.60 - Implement a system to track and display the progress towards building additional rooms, providing clear feedback on the player's progress.
