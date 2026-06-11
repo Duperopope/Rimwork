@@ -611,7 +611,7 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [x] Step C.90 - Implement a resource consumption system that requires players to manage food, water, and energy for their pawns, forcing them to prioritize building functional rooms to meet basic needs.
 - [x] Step C.105 - Implement a resource consumption system that forces players to manage their colony's food and materials to prevent starvation and resource depletion.
 - [ ] Step C.120 - Implement a method to check if a room is functional in GameMap.cs.
-- [ ] Step C.135.1 - Implement a method to check if a room is functional in GameWorld.cs.
+- [x] Step C.135.1 - Implement a method to check if a room is functional in GameWorld.cs.
 - [ ] Step C.150 - Implement a resource consumption system for pawns to ensure they use resources like wood and stone to build furniture and walls, preventing infinite building without resource management. (GameWorld.cs)
 - [ ] Step C.165 - Implement a resource consumption system for pawns to simulate hunger and thirst, forcing players to manage food and water production. (GameWorld.cs)
 - [ ] Step C.180 - Add a system to generate resources over time, such as trees regrowing or rocks respawning, to ensure players have a sustainable source of materials. (GameWorld.cs)
