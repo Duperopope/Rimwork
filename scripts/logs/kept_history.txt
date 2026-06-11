@@ -27,3 +27,4 @@
 - [ ] Step Q1 - Add a method to check if a pawn is at the edge of the current region's hex map in GameWorld.cs.
 - [ ] Step S - Ambient sound hooks: add an `AudioStreamPlayer` node that
 - [ ] Step E.39 - Implement a simple weather system that affects resource availability in src/RimWorldLab.Core/GameWorld.cs
+- [ ] Step E.39 - Implement a simple weather system that affects resource availability in src/RimWorldLab.Core/GameWorld.cs

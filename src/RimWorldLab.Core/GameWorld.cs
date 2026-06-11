@@ -166,10 +166,21 @@ public class GameMap
         InitializeMap();
     }
 
-    public void ToggleRain()
+public void ToggleRain()
+{
+    _isRaining = !_isRaining;
+    if (_isRaining)
     {
-        _isRaining = !_isRaining;
+        // Reduce resource availability during rain
+        foreach (var resource in _resources.ToList())
+        {
+            if (resource.Kind == ResourceKind.Tree)
+            {
+                RemoveResourceAt(resource.X, resource.Y);
+            }
+        }
     }
+}
 
 public void AddZone(Zone zone) => _zones.Add(zone);
 

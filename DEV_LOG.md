@@ -3607,3 +3607,4 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 119] REVERTED (build failed): Verify the correct number of arguments for the Pawn constructor. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 120] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step E.33 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) - Ensure the Pawn constructor is called with the correct number of arguments. (Verify the correct number of arguments for the Pawn constructor.)
 - [iter 121] KEPT: Add a simple weather system to affect resource availability. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 122] KEPT: Add a simple weather system that toggles rain on the map. (src/RimWorldLab.Core/GameWorld.cs)
