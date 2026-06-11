@@ -117,3 +117,5 @@
 - Ensure method bodies are properly enclosed in braces and syntax is correct.
 - Ensure all syntax elements are correctly placed and match C# language rules.
 - Ensure all method syntax is correct before adding logic.
+- Ensure all code blocks are properly closed and formatted.
+- Ensure all code within methods is properly indented and closed.

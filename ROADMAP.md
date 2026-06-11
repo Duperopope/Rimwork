@@ -631,4 +631,6 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [x] Step C.30.1 - Add a private dictionary `_recycledResources` to `GameWorld.cs` by inserting it inside the `GameWorld` class.
 - [x] Step C.64.1 - Implement the method `GetTotalResourceConsumption` in `GameWorld.cs` to iterate over `_pawnResourceConsumption.Values` and sum the consumption for the specified `ResourceKind`.
 - [ ] Step C.75 - Implement the `IsZoneFunctional` method in src/RimWorldLab.Core/GameWorld.cs.
-- [ ] Step C.90a - Implement a method to simulate resource regeneration for a single resource type, such as trees regrowing, in the `GameWorld` class.
+- [x] Step C.90a - Implement a method to simulate resource regeneration for a single resource type, such as trees regrowing, in the `GameWorld` class.
+- [ ] Step E.99a - Implement the `IsZoneFunctional` method in src/RimWorldLab.Core/GameWorld.cs.
+- [ ] Step C.105 - Implement a system to track and display resource consumption rates to help players plan their colony's needs more effectively. (GameWorld.cs)
