@@ -80,3 +80,4 @@
 - [ ] Step M.1 - In src/RimWorldLab.Core/GameWorld.cs, find the exact line: `Macro.Tick(TotalTicks);` Immediately AFTER that line, insert these new lines: `if (TotalTicks % 1600 == 0) { float biomass = Macro.Regions[2, 2].MicrobialBiomass; if (biomass > 0.75f) LogEvent($"Microbial bloom enriches the soil (biomass {biomass:P0})."); }`
 - [ ] Step M.2 - Rich soil grows food faster. In
 - [ ] Step M.2 - Rich soil grows food faster. In
+- [ ] Step M.2.1 - Add private field `cookBonus` in `src/RimWorldLab.Core/GameWorld.cs`.

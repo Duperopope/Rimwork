@@ -55,12 +55,7 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 
 ## PRIORITE: la couche primordiale (depart Spore - LOD Micro)
 - [x] Step M.1 - In src/RimWorldLab.Core/GameWorld.cs, find the exact line: `Macro.Tick(TotalTicks);` Immediately AFTER that line, insert these new lines: `if (TotalTicks % 1600 == 0) { float biomass = Macro.Regions[2, 2].MicrobialBiomass; if (biomass > 0.75f) LogEvent($"Microbial bloom enriches the soil (biomass {biomass:P0})."); }`
-- [ ] Step M.2 - Rich soil grows food faster. In
-      src/RimWorldLab.Core/GameWorld.cs, find the exact line:
-      `        if (TotalTicks % 800 == 0 && Wood >= 1 && Food < _pawns.Count * 3 &&`
-      and REPLACE it with:
-      `        int cookBonus = Macro.Regions[2, 2].MicrobialBiomass > 0.7f ? 1 : 0;`
-      `        if (TotalTicks % 800 == 0 && Wood >= 1 && Food < _pawns.Count * 3 + cookBonus * 4 &&`
+- [ ] Step M.2.1 - Add private field `cookBonus` in `src/RimWorldLab.Core/GameWorld.cs`.
 
 ## ARCHIVE (accompli - ne pas retoucher)
 - [x] Step W.1 - Mining is already implemented (Mine furniture,

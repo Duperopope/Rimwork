@@ -4640,3 +4640,8 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 88] DONE (after 2 consecutive KEPT changes): - [ ] Step M.1 - In src/RimWorldLab.Core/GameWorld.cs, find the exact line: `Macro.Tick(TotalTicks);` Immediately AFTER that line, insert these new lines: `if (TotalTicks % 1600 == 0) { float biomass = Macro.Regions[2, 2].MicrobialBiomass; if (biomass > 0.75f) LogEvent($"Microbial bloom enriches the soil (biomass {biomass:P0})."); }`
 - [iter 89] KEPT: Add the `Macro` class with the `Regions` property to the `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 90] KEPT: Add `MicrobialBiomass` property to `Macro` class (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 91] SKIPPED (no SEARCH match): Add `TotalTicks` field to `GameWorld` class (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 92] SKIPPED (no SEARCH match): Add TotalTicks field to GameWorld class (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 93] SKIPPED (no SEARCH match): Add `TotalTicks` field to `GameWorld` if it doesn't already exist. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 94] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step M.2.1 - Add private field `cookBonus` in `src/RimWorldLab.Core/GameWorld.cs`.
+- [iter 95] KEPT: Add private field `cookBonus` in `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
