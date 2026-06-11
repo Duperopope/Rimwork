@@ -220,6 +220,10 @@ $($diag.Summary)
 $(if ($dupReport) { "CODE HYGIENE ISSUES:`n$dupReport" })
 RECENTLY SHIPPED: $doneTitles
 
+RULES: never propose cheating the objective (no auto-completing goals, no
+free resources, no skipping challenges) - propose gameplay that makes the
+player WORK for the win. No placeholder/dummy/stub tasks.
+
 As a critical gamer, what is the SINGLE biggest weakness a player would feel
 in this build right now? Then, as the developer, write ONE small, concretely
 implementable roadmap item to fix it (a few lines of code in GameWorld.cs,
