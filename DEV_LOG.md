@@ -3693,3 +3693,4 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 199] SKIPPED (no-op patch): Ensure the Cell class has properties X and Y defined only once. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 200] SKIPPED (no-op patch): Ensure the Cell class has properties X and Y defined only once. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 1] KEPT: Ensure the Cell class has properties X and Y defined only once. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 2] KEPT: Ensure the Cell class has properties X and Y defined only once in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)

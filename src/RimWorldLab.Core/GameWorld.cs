@@ -34,10 +34,6 @@ public class Cell
     public int X { get; set; }
     public int Y { get; set; }
 
-    // Remove duplicate properties
-    // public int X { get; set; }
-    // public int Y { get; set; }
-
     public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
     {
         IsSolid = isSolid;
