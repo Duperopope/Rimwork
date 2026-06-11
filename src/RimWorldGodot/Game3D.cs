@@ -26,6 +26,8 @@ public partial class Game3D : Node3D
     private float _savedZoom;
 
     private double _accumulator;
+    private double _shotTimer = 5.0;
+    private int _shotIndex = 0;
     private double _roomTimer;
     private Camera3D _cam;
     private Node3D _camRig;
@@ -190,6 +192,22 @@ public partial class Game3D : Node3D
     public override void _Process(double delta)
     {
         HandleCamera(delta);
+
+        // Self-verification: periodic viewport screenshots so the AI
+        // supervisor can SEE the real game instead of trusting the build.
+        _shotTimer -= delta;
+        if (_shotTimer <= 0)
+        {
+            _shotTimer = 12.0;
+            try
+            {
+                var img = GetViewport().GetTexture().GetImage();
+                System.IO.Directory.CreateDirectory(@"g:/Rimwork/scripts/logs/shots");
+                img.SavePng($"g:/Rimwork/scripts/logs/shots/shot_{_shotIndex % 8}.png");
+                _shotIndex++;
+            }
+            catch { }
+        }
 
         if (!Paused)
         {
@@ -538,6 +556,35 @@ public partial class Game3D : Node3D
                     _worldViewRoot.AddChild(new Label3D { Text = "COLONIE", Position = hexPos + new Vector3(0, 2.4f, 0), FontSize = 64, Billboard = BaseMaterial3D.BillboardModeEnum.Enabled });
                 }
             }
+        // Ocean ring + planetary curve so the board reads as a PLANET,
+        // not floating tiles: water hexes around the land, sphere beneath.
+        for (int ox = -3; ox < 8; ox++)
+            for (int oy = -3; oy < 8; oy++)
+            {
+                if (ox >= 0 && ox < 5 && oy >= 0 && oy < 5) continue;
+                var oceanPos = new Vector3(ox * 3.1f, -0.15f, oy * 3.58f + (((ox % 2) + 2) % 2) * 1.79f);
+                _worldViewRoot.AddChild(new MeshInstance3D
+                {
+                    Mesh = new CylinderMesh { TopRadius = 1.95f, BottomRadius = 1.95f, Height = 0.22f, RadialSegments = 6 },
+                    MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.10f, 0.22f, 0.42f) },
+                    Position = oceanPos,
+                    RotationDegrees = new Vector3(0, 30, 0)
+                });
+            }
+        _worldViewRoot.AddChild(new MeshInstance3D
+        {
+            Mesh = new SphereMesh { Radius = 26f, Height = 52f },
+            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.07f, 0.13f, 0.24f) },
+            Position = new Vector3(7f, -27.5f, 9f)
+        });
+        _worldViewRoot.AddChild(new Label3D
+        {
+            Text = "RIM — VUE PLANÉTAIRE (Tab/M: retour colonie, clic: fiche région)",
+            Position = new Vector3(7f, 5.5f, -9f),
+            FontSize = 96,
+            Billboard = BaseMaterial3D.BillboardModeEnum.Enabled
+        });
+
         int si = 0;
         foreach (var site in m.Sites)
         {

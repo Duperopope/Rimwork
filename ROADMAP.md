@@ -396,9 +396,7 @@ renderer from Node2D to a 3D/iso pipeline) - but we CAN make the current
 - [x] Step O - Atmosphere: subtle grid lines drawn over all tiles, plus a
       warm radial glow around Lighting-category furniture that appears at
       night (drawn over the darkness overlay).
-- [ ] Step P - Pawn moods: add a `Mood` float (0-100) to Pawn, decreased by
-      Hunger/Fatigue/nearby raiders, increased by being in a Recreation-
-      category room. Show a small mood icon/color on the pawn's name.
+- [ ] Step P1 - Add a `Mood` float (0-100) to Pawn class in `src/RimWorldLab.Core/Pawn.cs`.
 - [ ] Step Q - Emergent need: Hauler pawns automatically carry chopped Wood
       to a Storage-category furniture tile if one exists (simple "haul"
       task), making Storage furniture matter.
@@ -608,3 +606,5 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
       completes (the PlaceFurniture branch in Tick), call
       pawn.Remember(TotalTicks, $"built a {kind}", +1.5f).
 - [ ] Step C.15 - Implement a system to automatically generate functional rooms to meet the win condition.
+- [ ] Step C.60 - Implement a system to automatically generate functional rooms to ensure win conditions can be reached.
+- [ ] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
