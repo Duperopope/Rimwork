@@ -377,6 +377,15 @@ public partial class Game3D : Node3D
                 node.Scale = Vector3.One * 0.55f;
                 AddChild(node);
                 _pawnNodes[p.Id] = node;
+                var tag = new Label3D
+                {
+                    Name = "tag",
+                    FontSize = 56,
+                    OutlineSize = 14,
+                    Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
+                    Position = new Vector3(0, 2.6f, 0)
+                };
+                node.AddChild(tag);
             }
             var target = new Vector3(p.X + 0.5f, 0.1f, p.Y + 0.5f);
             bool moving = node.Position.DistanceTo(target) > 0.15f;
@@ -388,6 +397,13 @@ public partial class Game3D : Node3D
                     node.Rotation = new Vector3(0, Mathf.Atan2(dir.X, dir.Z), 0);
             }
             PlayAnim(p.Id, node, moving);
+            if (node.GetNodeOrNull<Label3D>("tag") is Label3D tagL)
+            {
+                var drv = World.GetDriver(p);
+                string job = drv?.Current?.Order != null ? drv.Current.Order.Kind.ToString() : "repos";
+                tagL.Text = $"{p.Name}\n{job}";
+                tagL.Modulate = p.HP < 40 ? new Color(1f, 0.4f, 0.35f) : (p.Mood < 30 ? new Color(1f, 0.75f, 0.3f) : new Color(0.9f, 0.95f, 1f));
+            }
             modelIdx++;
         }
     }
