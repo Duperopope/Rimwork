@@ -1,31 +1,56 @@
-CHANGE: Add missing closing brace in `GetTotalResourceConsumption` method.
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Extract repeated pawn registration logic into a separate method.
+FILE: src/RimWorldGodot/Main.cs
 <<<<<<< SEARCH
-    public int GetTotalResourceConsumption(ResourceKind kind)
-    {
-        int totalConsumption = 0;
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-        {
-            if (pawnConsumption.ContainsKey(kind))
-            {
-                totalConsumption += pawnConsumption[kind];
-            }
-        }
-        return totalConsumption;
-    }
+foreach (string name in array)
+{
+	int num;
+// ... (lines omitted) ...
+	if (_world.Tasks.Pending.Count == 0)
+	{
+		int num;
+		int num2;
+		do
+		{
+			num = _rng.Next(0, _world.Map.Width);
+			num2 = _rng.Next(0, _world.Map.Height);
+		}
+		while (!_world.Map.IsPassable(num, num2));
+		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
+	}
+	_world.Tick();
+}
 =======
-    public int GetTotalResourceConsumption(ResourceKind kind)
-    {
-        int totalConsumption = 0;
-        foreach (var pawnConsumption in _pawnResourceConsumption.Values)
-        {
-            if (pawnConsumption.ContainsKey(kind))
-            {
-                totalConsumption += pawnConsumption[kind];
-            }
-        }
-        return totalConsumption;
-    }
+foreach (string name in array)
+{
+	RegisterPawn(name);
+	if (_world.Tasks.Pending.Count == 0)
+	{
+		int num;
+		int num2;
+		do
+		{
+			num = _rng.Next(0, _world.Map.Width);
+			num2 = _rng.Next(0, _world.Map.Height);
+		}
+		while (!_world.Map.IsPassable(num, num2));
+		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
+	}
+	_world.Tick();
+}
+
+private void RegisterPawn(string name)
+{
+	int num;
+	int num2;
+	do
+	{
+		num = _rng.Next(0, _world.Map.Width);
+		num2 = _rng.Next(0, _world.Map.Height);
+	}
+	while (!_world.Map.IsPassable(num, num2));
+	// Assuming Pawn class has a constructor that takes name, X, Y, and other necessary parameters
+	Pawn pawn = new Pawn(name, num, num2, /* other parameters */);
+	_world.Registry.Add(pawn.Id, pawn);
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to display resource consumption summary.
+NEXT: Implement the rest of the pawn registration logic in the new method.

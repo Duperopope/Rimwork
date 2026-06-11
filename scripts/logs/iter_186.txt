@@ -1,15 +1,47 @@
-CHANGE: Add a method to check if a zone has sufficient functional furniture.
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Extract repeated pawn registration logic into a separate method.
+FILE: src/RimWorldGodot/Main.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+foreach (string name in array)
 {
-    // ... (lines omitted) ...
+	int num;
+// ... (lines omitted) ...
+	if (_world.Tasks.Pending.Count == 0)
+	{
+		int num;
+		int num2;
+		do
+		{
+			num = _rng.Next(0, _world.Map.Width);
+			num2 = _rng.Next(0, _world.Map.Height);
+		}
+		while (!_world.Map.IsPassable(num, num2));
+		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
+	}
+	_world.Tick();
 }
 =======
-public bool IsZoneFunctional(Zone zone)
+foreach (string name in array)
 {
-    var functionalFurnitureCount = zone.LocalMap.Furniture.Count(f => f.IsFunctionalFurniture());
-    return functionalFurnitureCount > 0;
+	RegisterPawn(name);
+	if (_world.Tasks.Pending.Count == 0)
+	{
+		int num;
+		int num2;
+		do
+		{
+			num = _rng.Next(0, _world.Map.Width);
+			num2 = _rng.Next(0, _world.Map.Height);
+		}
+		while (!_world.Map.IsPassable(num, num2));
+		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
+	}
+	_world.Tick();
+}
+
+private void RegisterPawn(string name)
+{
+	int num;
+	// ... (lines omitted) ...
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to assign pawns to zones based on their needs.
+NEXT: Implement the logic for RegisterPawn method.

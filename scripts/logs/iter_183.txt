@@ -1,36 +1,57 @@
-CHANGE: Add a method to determine if a zone is functional.
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Simplify and deduplicate code in Main.cs by extracting repeated pawn generation logic into a method.
+FILE: src/RimWorldGodot/Main.cs
 <<<<<<< SEARCH
-public class GameWorld
+```csharp
+foreach (string name in array)
 {
-    private Dictionary<ResourceKind, int> _recycledResources = new();
-    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-
-public GameWorld()
-{
-    // Initialize resource regeneration rates
-    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
-    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
+    int num;
+    int num2;
+    do
+    {
+        num = _rng.Next(0, _world.Map.Width);
+        num2 = _rng.Next(0, _world.Map.Height);
+    }
+    while (!_world.Map.IsPassable(num, num2));
+    _world.RegisterThing(new Pawn(name, num, num2));
 }
+```
+```csharp
+foreach (string name in rebirth)
+{
+    int px;
+    int py;
+    do
+    {
+        px = _rng.Next(0, _world.Map.Width);
+        py = _rng.Next(0, _world.Map.Height);
+    }
+    while (!_world.Map.IsPassable(px, py));
+    _world.RegisterThing(new Pawn(name, px, py));
+}
+```
 =======
-public class GameWorld
+```csharp
+private void GeneratePawns(string[] names)
 {
-    private Dictionary<ResourceKind, int> _recycledResources = new();
-    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-
-public GameWorld()
-{
-    // Initialize resource regeneration rates
-    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
-    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
+    foreach (string name in names)
+    {
+        int x;
+        int y;
+        do
+        {
+            x = _rng.Next(0, _world.Map.Width);
+            y = _rng.Next(0, _world.Map.Height);
+        }
+        while (!_world.Map.IsPassable(x, y));
+        _world.RegisterThing(new Pawn(name, x, y));
+    }
 }
-
-public bool IsZoneFunctional(Zone zone)
-{
-    // Example: Check if the zone has enough functional furniture
-    int requiredFurnitureCount = 5; // Example requirement
-    int functionalFurnitureCount = zone.LocalMap.Furniture.Count(f => f.IsFunctionalFurniture());
-    return functionalFurnitureCount >= requiredFurnitureCount;
-}
+```
+```csharp
+GeneratePawns(array);
+```
+```csharp
+GeneratePawns(rebirth);
+```
 >>>>>>> REPLACE
-NEXT: Implement a method to count the number of functional rooms in the game world.
+NEXT: Simplify and deduplicate code in Main.cs by extracting repeated task generation logic into a method.

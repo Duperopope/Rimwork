@@ -162,4 +162,4 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [ ] Step C.135 - Add a private field to track the number of rooms being built in GameWorld.cs. Define the field in the GameWorld class.
 - [ ] Step C.150 - Add a private field to track resources in GameWorld.cs.
 - [ ] Step C.165 - Change the type of `_resourceRegenerationRates` values from `int` to `double` in `src/RimWorldLab.Core/GameWorld.cs`.
-- [ ] Step C.180 - Simplify and deduplicate code in Main.cs and GameWorld.cs to improve maintainability and reduce bugs.
+- [ ] Step C.180 - Extract the repeated pawn registration logic into a separate method in Main.cs.

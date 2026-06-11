@@ -4744,3 +4744,10 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 180] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.165 - Change the type of `_resourceRegenerationRates` values from `int` to `double` in `src/RimWorldLab.Core/GameWorld.cs`.
 - [iter 181] REVERTED (build failed): Simplify the repeated pawn registration logic in `_Ready` and `_Process` methods. (src/RimWorldGodot/Main.cs)
 - [iter 182] REVERTED (tests failed): Simplify the repeated pawn registration logic by extracting it to a method. (src/RimWorldGodot/Main.cs)
+- [iter 183] SKIPPED (no SEARCH match): Simplify and deduplicate code in Main.cs by extracting repeated pawn generation logic into a method. (src/RimWorldGodot/Main.cs)
+- [startup] Stack relaunched after boot (2026-06-12 00:54).
+- [iter 184] SKIPPED (no SEARCH match): Deduplicate the code for spawning pawns in `_Ready` and `_Process`. (src/RimWorldGodot/Main.cs)
+- [iter 185] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.180 - Extract the repeated pawn registration logic into a separate method in Main.cs.
+- [iter 186] SKIPPED (no SEARCH match): Extract repeated pawn registration logic into a separate method. (src/RimWorldGodot/Main.cs)
+- [iter 187] SKIPPED (no SEARCH match): Extract repeated pawn registration logic into a separate method. (src/RimWorldGodot/Main.cs)
+- [iter 188] SKIPPED (no SEARCH match): Extract repeated pawn registration logic into a separate method. (src/RimWorldGodot/Main.cs)

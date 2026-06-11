@@ -1,39 +1,73 @@
-CHANGE: Add a method to determine if a zone has enough functional furniture
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Extract repeated pawn registration logic into a separate method.
+FILE: src/RimWorldGodot/Main.cs
 <<<<<<< SEARCH
-public void TrackRecycledResource(ResourceKind kind, int amount)
+foreach (string name in array)
 {
-    if (_recycledResources.ContainsKey(kind))
-    {
-        _recycledResources[kind] += amount;
-    }
-    else
-    {
-        _recycledResources[kind] = amount;
-    }
+	int num;
+// ... (lines omitted) ...
+	if (_world.Tasks.Pending.Count == 0)
+	{
+		int num;
+		int num2;
+		do
+		{
+			num = _rng.Next(0, _world.Map.Width);
+			num2 = _rng.Next(0, _world.Map.Height);
+		}
+		while (!_world.Map.IsPassable(num, num2));
+		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
+	}
+	_world.Tick();
 }
 =======
-public void TrackRecycledResource(ResourceKind kind, int amount)
+foreach (string name in array)
 {
-    if (_recycledResources.ContainsKey(kind))
-    {
-        _recycledResources[kind] += amount;
-    }
-    else
-    {
-        _recycledResources[kind] = amount;
-    }
+	RegisterPawn(name);
+	if (_world.Tasks.Pending.Count == 0)
+	{
+		int num;
+		int num2;
+		do
+		{
+			num = _rng.Next(0, _world.Map.Width);
+			num2 = _rng.Next(0, _world.Map.Height);
+		}
+		while (!_world.Map.IsPassable(num, num2));
+		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
+	}
+	_world.Tick();
 }
 
-public bool HasEnoughFunctionalFurniture(Zone zone, int requiredCount)
+private void RegisterPawn(string name)
 {
-    if (zone == null)
-    {
-        return false;
-    }
-
-    var functionalFurnitureCount = zone.LocalMap._furniture.Count(furniture => furniture.IsFunctionalFurniture());
-    return functionalFurnitureCount >= requiredCount;
+	int num;
+	int num2;
+	do
+	{
+		num = _rng.Next(0, _world.Map.Width);
+		num2 = _rng.Next(0, _world.Map.Height);
+	}
+	while (!_world.Map.IsPassable(num, num2));
+	Pawn newPawn = new Pawn
+	{
+		Name = name,
+		X = num,
+		Y = num2,
+		Sex = (PawnSex)_rng.Next(2), // Random sex
+		SkillXP = new Dictionary<SkillKind, float>
+		{
+			{ SkillKind.Construction, _rng.Next(100) },
+			{ SkillKind.Mining, _rng.Next(100) },
+			{ SkillKind.Woodcutting, _rng.Next(100) }
+		},
+		Hunger = _rng.Next(100),
+		Mood = _rng.Next(100),
+		Fatigue = _rng.Next(100),
+		HP = _rng.Next(100),
+		Thirst = _rng.Next(100),
+		Stress = _rng.Next(100)
+	};
+	_world.Registry.Add(newPawn.Id, newPawn);
 }
 >>>>>>> REPLACE
-NEXT: Add a method to update the functional room count based on furniture requirements
+NEXT: Implement volume dip during raids

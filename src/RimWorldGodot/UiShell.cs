@@ -114,7 +114,8 @@ public partial class UiShell : CanvasLayer
         box.AddChild(sub);
         box.AddChild(new Control { CustomMinimumSize = new Vector2(0, 16) });
 
-        box.AddChild(Btn("Nouvelle partie", () => OpenWorldGenScreen()));
+        box.AddChild(Btn("Nouvelle partie — Origines (stade microbien)", () => StartMicroStage()));
+        box.AddChild(Btn("Colonie (stade avancé / debug)", () => OpenWorldGenScreen()));
         box.AddChild(Btn("Continuer", () => OpenSaveScreen(saveMode: false)));
         box.AddChild(Btn("Options", () => ShowOnly(_options)));
         box.AddChild(Btn("Dev / Diagnostics", () => ShowOnly(_devTab)));
@@ -280,6 +281,31 @@ public partial class UiShell : CanvasLayer
                 $"Relations: {p.Relationships.Count} connaissances\n" +
                 $"Souvenirs récents:\n{(mem.Length > 0 ? mem : "  (aucun)")}";
         }
+    }
+
+    // ==================================================================
+    // MICRO STAGE (Spore-like opening - the game starts here)
+    // ==================================================================
+    private MicroStage _micro;
+
+    private void StartMicroStage()
+    {
+        GD.Print("[FLOW] New Game: Origines (micro stage).");
+        _micro = new MicroStage();
+        _micro.Configure(new Random().Next(1, 999999));
+        _micro.ExitRequested += () =>
+        {
+            _micro.QueueFree(); _micro = null;
+            ShowOnly(_menu);
+        };
+        _micro.StageCompleted += () =>
+        {
+            _game.AlertText = "✨ 10 évolutions ! Le stade supérieur t'attend...";
+        };
+        GetParent().AddChild(_micro);
+        foreach (var c in new[] { _menu, _hud, _options, _devTab, _credits, _saveScreen, _genScreen })
+            if (c != null) c.Visible = false;
+        _game.Paused = true;
     }
 
     // ==================================================================
