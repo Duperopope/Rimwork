@@ -4399,3 +4399,29 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 68] REVERTED (build failed): Add a method to calculate the total resource consumption for a specific resource kind. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 69] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.64.1 - Implement the method `GetTotalResourceConsumption` in `GameWorld.cs` to iterate over `_pawnResourceConsumption.Values` and sum the consumption for the specified `ResourceKind`.
 - [iter 70] KEPT: Implement the method `GetTotalResourceConsumption` in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 71] SKIPPED (no-op patch): Implement the method `GetTotalResourceConsumption` in `GameWorld.cs` to iterate over `_pawnResourceConsumption.Values` and sum the consumption for the specified `ResourceKind`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 72] SKIPPED (no-op patch): Implement the method `GetTotalResourceConsumption` in `GameWorld.cs` to iterate over `_pawnResourceConsumption.Values` and sum the consumption for the specified `ResourceKind`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 73] SKIPPED (no-op patch): Implement the method `GetTotalResourceConsumption` in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 74] DONE (had past KEPT edits, change already in file): - [ ] Step C.64.1 - Implement the method `GetTotalResourceConsumption` in `GameWorld.cs` to iterate over `_pawnResourceConsumption.Values` and sum the consumption for the specified `ResourceKind`.
+- [iter 75] CRITIC TASK: - [ ] Step C.75 - Implement a basic room validation system to ensure at least three functional rooms are required to win.
+- [iter 75] REVERTED (build failed): Implement basic room validation system to ensure at least three functional rooms are required to win. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 76] REVERTED (build failed): Implement a basic room validation system to ensure at least three functional rooms are required to win. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 77] REVERTED (build failed): Implement a basic room validation system to ensure at least three functional rooms are required to win. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 78] REVERTED (build failed): Add a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 22:54).
+- [iter 79] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.75 - Implement a method to check if a zone is functional in src/RimWorldLab.Core/GameWorld.cs.
+- [iter 82] SKIPPED (no SEARCH match): Implement a method to check if a zone is functional in `GameWorld`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 83] SKIPPED (no SEARCH match): Ensure `CountFunctionalRooms` method properly increments the functional room count. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 84] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.75 - Implement the `IsZoneFunctional` method in src/RimWorldLab.Core/GameWorld.cs.
+- [iter 85] SKIPPED (no-op patch): Implement the `IsZoneFunctional` method in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 86] SKIPPED (no-op patch): Implement the `IsZoneFunctional` method in `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 87] SKIPPED (no-op patch): Implement the `IsZoneFunctional` method in `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 88] SKIPPED (no-op patch): Implement the `IsZoneFunctional` method in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 89] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.75 - Implement the `IsZoneFunctional` method in src/RimWorldLab.Core/GameWorld.cs.
+- [iter 90] CRITIC TASK: - [ ] Step C.90 - Implement a system to generate resources over time, such as trees regrowing or rocks respawning, to provide a sustainable resource supply.
+- [iter 92] PREDICTED-FAIL (skipped before build): Add a method to generate resources over time - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 93] SKIPPED (no SEARCH match): Implement the logic to get total resource consumption for a specific kind. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 94] SKIPPED (bogus brace-fix, build was already OK): Add missing closing brace in `GetTotalResourceConsumption` method. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 95] PREDICTED-FAIL (skipped before build): Add a method to simulate resource regeneration over time. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 96] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.90a - Implement a method to simulate resource regeneration for a single resource type, such as trees regrowing, in the `GameWorld` class.
+- [iter 97] KEPT: Add a method to simulate resource regeneration for a single resource type in the `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)

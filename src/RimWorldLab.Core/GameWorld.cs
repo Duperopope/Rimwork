@@ -8,6 +8,24 @@ using System.Linq;
 public class GameWorld
 {
     private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+
+    public GameWorld()
+    {
+        // Initialize resource regeneration rates
+        _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    }
+
+    public void RegenerateResource(ResourceKind kind, int amount)
+    {
+        if (_resourceRegenerationRates.TryGetValue(kind, out int rate))
+        {
+            int newAmount = amount + rate;
+            // Ensure the new amount does not exceed a maximum limit
+            int maxAmount = 100; // Example maximum limit
+            _recycledResources[kind] = Math.Min(newAmount, maxAmount);
+        }
+    }
 }
 
 /// <summary>

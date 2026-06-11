@@ -1,0 +1,32 @@
+CHANGE: Add a method to simulate resource regeneration for a single resource type in the `GameWorld` class.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public class GameWorld
+{
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+}
+=======
+public class GameWorld
+{
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+
+    public GameWorld()
+    {
+        // Initialize resource regeneration rates
+        _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    }
+
+    public void RegenerateResource(ResourceKind kind, int amount)
+    {
+        if (_resourceRegenerationRates.TryGetValue(kind, out int rate))
+        {
+            int newAmount = amount + rate;
+            // Ensure the new amount does not exceed a maximum limit
+            int maxAmount = 100; // Example maximum limit
+            _recycledResources[kind] = Math.Min(newAmount, maxAmount);
+        }
+    }
+}
+>>>>>>> REPLACE
+NEXT: Implement a method to simulate resource regeneration for a single resource type, such as trees regrowing, in the `GameWorld` class.

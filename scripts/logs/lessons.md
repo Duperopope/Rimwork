@@ -113,3 +113,7 @@
 - Ensure foreach loop syntax is correct and matches collection type.
 - Ensure foreach syntax is correct and matches expected collection types.
 - Ensure foreach syntax is correct and matches collection type.
+- Ensure method bodies are properly enclosed in braces and syntax is correct.
+- Ensure method bodies are properly enclosed in braces and syntax is correct.
+- Ensure all syntax elements are correctly placed and match C# language rules.
+- Ensure all method syntax is correct before adding logic.
