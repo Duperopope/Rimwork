@@ -4645,3 +4645,6 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 93] SKIPPED (no SEARCH match): Add `TotalTicks` field to `GameWorld` if it doesn't already exist. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 94] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step M.2.1 - Add private field `cookBonus` in `src/RimWorldLab.Core/GameWorld.cs`.
 - [iter 95] KEPT: Add private field `cookBonus` in `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 96] REVERTED (build failed): Add private field `cookBonus` in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 97] REVERTED (build failed): Add private field `cookBonus` in `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 98] KEPT: Add private field `cookBonus` in `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)

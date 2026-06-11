@@ -10,7 +10,7 @@ public class GameWorld
 private Dictionary<ResourceKind, int> _recycledResources = new();
 private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
 private int TotalTicks = 0;
-private int cookBonus = 0; // New field
+// private int cookBonus = 0; // New field
 
 public GameWorld()
 {

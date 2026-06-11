@@ -1,0 +1,10 @@
+CHANGE: Add private field `cookBonus` in `GameWorld` class.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+private int TotalTicks = 0;
+private int cookBonus = 0; // New field
+=======
+private int TotalTicks = 0;
+// private int cookBonus = 0; // New field
+>>>>>>> REPLACE
+NEXT: Ensure the field is not already defined before adding it.

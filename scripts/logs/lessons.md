@@ -155,3 +155,5 @@
 - Define necessary properties and methods in `GameWorld` before using them.
 - Ensure all used variables and methods are defined in the current context or properly imported namespaces.
 - "Ensure fields are not already defined before adding them."
+- Check for existing field names before adding new ones in the same class.
+- Check for existing field definitions before adding a new one.
