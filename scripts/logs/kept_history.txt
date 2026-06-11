@@ -34,3 +34,4 @@
 - [ ] Step C.75.1 - Ensure the Cell class in GameWorld.cs has properties X and Y defined only once.
 - [ ] Step C.45.1 - Ensure the Cell class has properties X and Y defined only once in GameWorld.cs
 - [ ] Step C.45.1 - Ensure the Cell class has properties X and Y defined only once in GameWorld.cs
+- [ ] Step C.105 - Implement a basic room detection system to count functional rooms and trigger win condition in GameWorld.cs

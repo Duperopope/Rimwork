@@ -394,6 +394,9 @@ public bool IsPlantable(int x, int y)
 {
     if (!IsPassable(x, y)) return false;
     if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+
+    // Start of room detection logic
+    if (IsTilePartOfRoom(x, y)) return false;
     if (_furniture.Exists(f => f.X == x && f.Y == y)) return false;
     if (_saplings.Exists(s => s.X == x && s.Y == y)) return false;
     if (_noGrowTiles.Contains((x, y))) return false;

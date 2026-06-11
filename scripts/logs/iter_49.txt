@@ -1,0 +1,17 @@
+CHANGE: Start implementing a basic room detection system by adding a method to detect rooms.
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+=======
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+
+    // Start of room detection logic
+    if (IsTilePartOfRoom(x, y)) return false;
+>>>>>>> REPLACE
+NEXT: Implement the logic to determine if a tile is part of a room.

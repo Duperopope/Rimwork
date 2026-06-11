@@ -38,3 +38,5 @@
 - Ensure `Cell` has `X` and `Y` properties before using them.
 - Avoid duplicating property declarations in the same class.
 - Ensure tuple syntax is correct and complete, avoiding missing elements or braces.
+- Check for existing class definitions before adding new ones.
+- Check for existing class definitions before adding new ones to prevent namespace conflicts.
