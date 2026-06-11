@@ -37,3 +37,4 @@
 - Check for existing method signatures before adding new ones.
 - Ensure `Cell` has `X` and `Y` properties before using them.
 - Avoid duplicating property declarations in the same class.
+- Ensure tuple syntax is correct and complete, avoiding missing elements or braces.

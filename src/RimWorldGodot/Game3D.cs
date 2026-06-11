@@ -236,7 +236,7 @@ public partial class Game3D : Node3D
         }
 
         // Day/night cycle: HourOfDay 0-23 -> sun energy and ambient tint.
-        if (_sun != null && World != null)
+        if (_sun != null && World != null && ViewLayer == "Local")
         {
             int h = World.HourOfDay;
             float dayness = Mathf.Clamp(1f - Math.Abs(h - 13f) / 9f, 0.12f, 1f);
@@ -250,8 +250,8 @@ public partial class Game3D : Node3D
         }
 
         // Living macro layers: planet spins, bodies orbit the star.
-        if (_planetSpin != null && _worldViewRoot.Visible)
-            _planetSpin.RotateY((float)delta * 0.015f);
+        if (_planetSpin != null && _worldViewRoot.Visible && !Input.IsMouseButtonPressed(MouseButton.Right))
+            _planetSpin.RotateY((float)delta * 0.01f);
         if (_solarRoot != null && _solarRoot.Visible)
             foreach (var (nodeO, _, speed, _) in _orbiters)
                 nodeO.RotateY((float)delta * speed);
@@ -312,10 +312,19 @@ public partial class Game3D : Node3D
             if (mb.ButtonIndex == MouseButton.WheelDown) _zoom = Math.Clamp(_zoom + CamZoomSpeed, 8f, 45f);
             if (mb.ButtonIndex == MouseButton.Left) PickPawn(mb.Position);
         }
-        if (ev is InputEventMouseMotion mm && Input.IsMouseButtonPressed(MouseButton.Middle))
+        if (ev is InputEventMouseMotion mm)
         {
-            var d = mm.Relative * 0.03f * (_zoom / 22f);
-            _camRig.Position += new Vector3(-d.X - d.Y, 0, d.X - d.Y) * 0.7f;
+            if (Input.IsMouseButtonPressed(MouseButton.Middle))
+            {
+                var d = mm.Relative * 0.03f * (_zoom / 22f);
+                _camRig.Position += new Vector3(-d.X - d.Y, 0, d.X - d.Y) * 0.7f;
+            }
+            // RimWorld-style: hold RIGHT CLICK to rotate the planet.
+            if (ViewLayer == "Planet" && Input.IsMouseButtonPressed(MouseButton.Right) && _planetSpin != null)
+            {
+                _planetSpin.RotateY(mm.Relative.X * 0.008f);
+                _planetSpin.RotateObjectLocal(Vector3.Right, mm.Relative.Y * 0.006f);
+            }
         }
     }
 
@@ -331,6 +340,24 @@ public partial class Game3D : Node3D
             if (d < bestDist) { bestDist = d; best = p; }
         }
         SelectedPawn = best;
+
+        // Solar view: click a planet to visit its tiled globe.
+        if (ViewLayer == "Solar")
+        {
+            int pi = 0;
+            foreach (var (holder, _, _, _) in _orbiters)
+            {
+                var planetNode = holder.GetChild<Node3D>(0);
+                var sp2 = _cam.UnprojectPosition(planetNode.GlobalPosition);
+                if (sp2.DistanceTo(screenPos) < 50f)
+                {
+                    BuildGlobeFor(pi);
+                    SetViewLayer("Planet");
+                    return;
+                }
+                pi++;
+            }
+        }
 
         // Threat under the cursor? Order a defense: idle colonists converge.
         if (best == null && ViewLayer == "Local")
@@ -357,21 +384,37 @@ public partial class Game3D : Node3D
             PickRegion(screenPos);
     }
 
-    /// <summary>Click a planet hex: nearest region by screen distance.</summary>
+    /// <summary>Left-click on the globe: ray-sphere intersection, then
+    /// nearest Goldberg tile; shows its sheet and highlights it.</summary>
     private void PickRegion(Vector2 screenPos)
     {
-        (int, int)? bestHex = null; float bd = 60f;
-        foreach (var (key, latlon) in _hexCenters)
+        if (_tiles == null) return;
+        var origin = _cam.ProjectRayOrigin(screenPos);
+        var dir = _cam.ProjectRayNormal(screenPos);
+        var center = _worldViewRoot.GlobalPosition;
+        var oc = origin - center;
+        float b = oc.Dot(dir);
+        float disc = b * b - (oc.LengthSquared() - GlobeRadius * GlobeRadius);
+        if (disc < 0) return;
+        var hit = origin + dir * (-b - Mathf.Sqrt(disc));
+        // into planet-local (un-spin) unit space
+        var local = (_planetSpin.GlobalTransform.AffineInverse() * hit).Normalized();
+
+        int best = -1; float bd = float.MaxValue;
+        for (int i = 0; i < _tiles.Count; i++)
         {
-            var world = _planetSpin.ToGlobal(LatLon(latlon.X, latlon.Y, GlobeRadius + 0.1f));
-            var sp = _cam.UnprojectPosition(world);
-            float d = sp.DistanceTo(screenPos);
-            if (d < bd) { bd = d; bestHex = key; }
+            float d = _tiles[i].Center.DistanceSquaredTo(local);
+            if (d < bd) { bd = d; best = i; }
         }
-        if (bestHex == null) return;
-        var reg = World.Macro.Regions[bestHex.Value.Item1, bestHex.Value.Item2];
-        AlertText = $"Région ({reg.X},{reg.Y}) — biome {reg.Biome}, fertilité {reg.Fertility:P0}, danger {reg.Danger:P0}" +
-            (reg.IsColonyRegion ? "  ← VOTRE COLONIE" : "");
+        if (best < 0) return;
+        var (rx, ry) = TileToRegion(_tiles[best].Center);
+        var body = World.Macro.System.Bodies[_currentBodyIdx];
+        var reg = body.Regions[rx, ry];
+        _tileMarker.Visible = true;
+        _tileMarker.Position = _tiles[best].Center * (GlobeRadius + 0.25f);
+        _tileMarker.LookAt(_planetSpin.ToGlobal(_tiles[best].Center * (GlobeRadius + 5f)), Vector3.Up);
+        AlertText = $"{body.Name} — tuile #{best} ({(_tiles[best].Polygon.Length == 5 ? "pentagone" : "hexagone")})  biome {reg.Biome}, fertilité {reg.Fertility:P0}, danger {reg.Danger:P0}" +
+            (best == _colonyTileIdx ? "  ← VOTRE COLONIE" : "");
     }
 
     /// <summary>Math ray->ground intersection: screen position to tile coords.</summary>
@@ -574,87 +617,121 @@ public partial class Game3D : Node3D
         node.Transform = new Transform3D(new Basis(east, up, north), pos);
     }
 
+    private int _currentBodyIdx = 0;
+    private List<HexPlanet.Tile> _tiles;
+    private int _colonyTileIdx = -1;
+    private Node3D _tileMarker;
+    private Label3D _planetTitle;
+
+    private static readonly Dictionary<string, Color> BiomeColors = new()
+    {
+        ["forest"] = new Color(0.16f, 0.42f, 0.18f),
+        ["plains"] = new Color(0.45f, 0.52f, 0.24f),
+        ["hills"] = new Color(0.42f, 0.36f, 0.26f),
+        ["marsh"] = new Color(0.2f, 0.38f, 0.32f),
+        ["rocky"] = new Color(0.45f, 0.45f, 0.48f),
+        ["ash"] = new Color(0.32f, 0.28f, 0.28f),
+        ["dunes"] = new Color(0.72f, 0.55f, 0.32f),
+        ["scorched"] = new Color(0.5f, 0.3f, 0.2f),
+        ["lava rock"] = new Color(0.35f, 0.18f, 0.14f),
+        ["crater"] = new Color(0.42f, 0.36f, 0.33f),
+        ["ice"] = new Color(0.82f, 0.88f, 0.95f),
+        ["tundra"] = new Color(0.55f, 0.62f, 0.6f),
+        ["snowfield"] = new Color(0.9f, 0.92f, 0.96f),
+        ["frost rock"] = new Color(0.6f, 0.66f, 0.75f),
+        ["crevasse"] = new Color(0.4f, 0.5f, 0.65f),
+    };
+
+    /// <summary>Map a unit-sphere tile center to one of the body's 5x5 sim
+    /// regions (whole sphere bucketed by lat/lon).</summary>
+    private (int X, int Y) TileToRegion(Vector3 c)
+    {
+        float lat = Mathf.RadToDeg(Mathf.Asin(Mathf.Clamp(c.Y, -1f, 1f)));
+        float lon = Mathf.RadToDeg(Mathf.Atan2(c.X, c.Z));
+        int rx = Math.Clamp((int)((lon + 180f) / 72f), 0, 4);
+        int ry = Math.Clamp((int)((lat + 90f) / 36f), 0, 4);
+        return (rx, ry);
+    }
+
     private void BuildWorldView()
     {
         _worldViewRoot = new Node3D { Position = new Vector3(200, 0, 200), Visible = false };
         AddChild(_worldViewRoot);
-        var m = World.Macro;
-
-        // The globe itself: ocean sphere, slowly spinning.
-        // Face the land patch (lon 0 = +Z) toward the camera diagonal (+X+Z)
-        _planetSpin = new Node3D { RotationDegrees = new Vector3(0, 45, 0) };
+        _planetSpin = new Node3D();
         _worldViewRoot.AddChild(_planetSpin);
-        _planetSpin.AddChild(new MeshInstance3D
+        _planetTitle = new Label3D
         {
-            Mesh = new SphereMesh { Radius = GlobeRadius, Height = GlobeRadius * 2f, RadialSegments = 48, Rings = 24 },
-            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.10f, 0.22f, 0.42f), Roughness = 0.7f }
-        });
-
-        // Land regions: 5x5 hex patch wrapped between lat 5..45, lon -25..25.
-        for (int rx = 0; rx < 5; rx++)
-            for (int ry = 0; ry < 5; ry++)
-            {
-                var reg = m.Regions[rx, ry];
-                Color c = reg.Biome switch
-                {
-                    "forest" => new Color(0.15f, 0.4f, 0.18f),
-                    "plains" => new Color(0.45f, 0.5f, 0.25f),
-                    "hills" => new Color(0.4f, 0.35f, 0.28f),
-                    "marsh" => new Color(0.2f, 0.35f, 0.3f),
-                    _ => new Color(0.42f, 0.42f, 0.45f)
-                };
-                float lat = 5f + ry * 10f + (rx % 2) * 5f;
-                float lon = -25f + rx * 12.5f;
-                var hex = new MeshInstance3D
-                {
-                    Mesh = new CylinderMesh { TopRadius = 1.85f, BottomRadius = 1.85f, Height = 0.6f, RadialSegments = 6 },
-                    MaterialOverride = new StandardMaterial3D { AlbedoColor = c }
-                };
-                _planetSpin.AddChild(hex);
-                PlaceOnGlobe(hex, lat, lon, 0.1f);
-                _hexCenters[(rx, ry)] = new Vector3(lat, lon, 0); // store lat/lon for picking
-                if (reg.IsColonyRegion)
-                {
-                    var marker = new MeshInstance3D
-                    {
-                        Mesh = new CylinderMesh { TopRadius = 0f, BottomRadius = 0.7f, Height = 1.8f },
-                        MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.36f, 0.78f, 0.46f), ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded }
-                    };
-                    _planetSpin.AddChild(marker);
-                    PlaceOnGlobe(marker, lat, lon, 1.4f);
-                    var lbl = new Label3D { Text = "COLONIE", FontSize = 72, Billboard = BaseMaterial3D.BillboardModeEnum.Enabled };
-                    _planetSpin.AddChild(lbl);
-                    PlaceOnGlobe(lbl, lat, lon, 3.2f);
-                }
-            }
-
-        // External sites pinned to the globe at their own coordinates.
-        float[][] sitePos = { new[] { 55f, -40f }, new[] { -12f, 35f }, new[] { 30f, 55f } };
-        int si = 0;
-        foreach (var site in m.Sites)
-        {
-            var box = new MeshInstance3D
-            {
-                Mesh = new BoxMesh { Size = new Vector3(1.3f, 1.3f, 1.3f) },
-                MaterialOverride = new StandardMaterial3D { AlbedoColor = site.Attitude < 0 ? new Color(0.8f, 0.25f, 0.2f) : new Color(0.3f, 0.55f, 0.8f) }
-            };
-            _planetSpin.AddChild(box);
-            PlaceOnGlobe(box, sitePos[si][0], sitePos[si][1], 0.6f);
-            var lbl = new Label3D { Text = site.Name + "\n[" + site.Faction + "]", FontSize = 56, Billboard = BaseMaterial3D.BillboardModeEnum.Enabled };
-            _planetSpin.AddChild(lbl);
-            PlaceOnGlobe(lbl, sitePos[si][0], sitePos[si][1], 2.6f);
-            si++;
-        }
-
-        _worldViewRoot.AddChild(new Label3D
-        {
-            Text = "RIM — VUE PLANÉTAIRE   (Tab: système solaire, clic: fiche région)",
             Position = new Vector3(0, GlobeRadius + 6f, 0),
             FontSize = 96,
             Billboard = BaseMaterial3D.BillboardModeEnum.Enabled
-        });
-
+        };
+        _worldViewRoot.AddChild(_planetTitle);
+        BuildGlobeFor(World.Macro.System.HomeBodyIndex);
         BuildSolarView();
+    }
+
+    /// <summary>(Re)build the tiled Goldberg globe for any system body -
+    /// every planet is fully tiled with its own biome palette.</summary>
+    public void BuildGlobeFor(int bodyIdx)
+    {
+        _currentBodyIdx = bodyIdx;
+        var body = World.Macro.System.Bodies[bodyIdx];
+        foreach (Node child in _planetSpin.GetChildren()) child.QueueFree();
+
+        _tiles = HexPlanet.Generate(6); // 362 tiles per planet
+        bool isHome = bodyIdx == World.Macro.System.HomeBodyIndex;
+        var rng = new Random(body.Name.GetHashCode() & 0x7fffffff);
+        _colonyTileIdx = -1;
+        float bestColonyDist = float.MaxValue;
+
+        var tileColors = new Color[_tiles.Count];
+        for (int i = 0; i < _tiles.Count; i++)
+        {
+            var (rx, ry) = TileToRegion(_tiles[i].Center);
+            var reg = body.Regions[rx, ry];
+            var baseCol = BiomeColors.TryGetValue(reg.Biome, out var bc) ? bc : new Color(0.4f, 0.4f, 0.4f);
+            // ocean: low-fertility tiles near the "equatorial seas" band
+            bool ocean = ((i * 2654435761u) % 100) < (uint)(28 + (1f - body.Habitability) * 25);
+            tileColors[i] = ocean
+                ? new Color(0.10f, 0.24f, 0.45f)
+                : baseCol * (0.85f + (float)rng.NextDouble() * 0.3f);
+            if (isHome && reg.IsColonyRegion && !ocean)
+            {
+                float d = _tiles[i].Center.DistanceTo(new Vector3(0, 0.42f, 0.91f));
+                if (d < bestColonyDist) { bestColonyDist = d; _colonyTileIdx = i; }
+            }
+        }
+        int idx = 0;
+        var globe = HexPlanet.BuildMesh(_tiles, _ => tileColors[idx++], GlobeRadius);
+        _planetSpin.AddChild(globe);
+
+        if (_colonyTileIdx >= 0)
+        {
+            var cpos = _tiles[_colonyTileIdx].Center * (GlobeRadius + 0.6f);
+            var marker = new MeshInstance3D
+            {
+                Mesh = new CylinderMesh { TopRadius = 0f, BottomRadius = 0.6f, Height = 1.6f },
+                MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.36f, 0.9f, 0.5f), ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded },
+                Position = cpos
+            };
+            _planetSpin.AddChild(marker);
+            var lbl = new Label3D { Text = "COLONIE", FontSize = 72, Billboard = BaseMaterial3D.BillboardModeEnum.Enabled, Position = cpos + cpos.Normalized() * 2.2f };
+            _planetSpin.AddChild(lbl);
+        }
+
+        // Selected-tile marker (hidden until a tile is picked)
+        _tileMarker = new MeshInstance3D
+        {
+            Mesh = new TorusMesh { InnerRadius = 0.9f, OuterRadius = 1.15f },
+            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(1f, 0.85f, 0.2f), ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded },
+            Visible = false
+        };
+        _planetSpin.AddChild(_tileMarker);
+
+        _planetTitle.Text = body.Name.ToUpper() + " — " + body.Kind + "  (molette: zoom, clic droit: pivoter, clic: tuile, Tab: système)";
+        // Face the colony/land toward the camera at first sight.
+        _planetSpin.Rotation = Vector3.Zero;
+        _planetSpin.RotateY(Mathf.DegToRad(45));
     }
 
     // ---- Solar system layer: star + animated orbits ----
@@ -739,6 +816,8 @@ public partial class Game3D : Node3D
         {
             _camRig.Position = _worldViewRoot.Position + new Vector3(0, 6, 0);
             _zoom = 42f;
+            _sun.LightEnergy = 1.3f;
+            if (_envRes != null) _envRes.AmbientLightEnergy = 0.85f;
         }
         else if (layer == "Solar")
         {
