@@ -14,3 +14,4 @@
 - [ ] Step E.33 - Add a method to randomly generate small animal populations in GameWorldManager.cs (src/RimWorldLab.Core/GameWorld.cs) - Ensure the Pawn constructor is called with the correct number of arguments. (Verify the correct number of arguments for the Pawn constructor.)
 - [ ] Step C.15.1 - Implement a method to check if a tile is part of a room in the colony. (src/RimWorldLab.Core/GameWorld.cs) - Add a new method signature for checking if a tile is part of a room.
 - [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs by adding a method to check if a cell is adjacent to another cell. Start by adding a method signature for IsAdjacent.
+- [ ] Step C.15 - Implement a basic room detection system to identify functional rooms in GameWorld.cs

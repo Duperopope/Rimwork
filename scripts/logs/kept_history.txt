@@ -32,3 +32,4 @@
 - [ ] Step C.60 - Add properties X and Y to the Cell class. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.75.1 - Ensure the Cell class in GameWorld.cs has properties X and Y defined only once.
 - [ ] Step C.75.1 - Ensure the Cell class in GameWorld.cs has properties X and Y defined only once.
+- [ ] Step C.45.1 - Ensure the Cell class has properties X and Y defined only once in GameWorld.cs

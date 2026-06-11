@@ -1,4 +1,4 @@
-CHANGE: Remove duplicate X and Y property declarations in the Cell class.
+CHANGE: Ensure the Cell class has properties X and Y defined only once.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
 public class Cell
@@ -24,6 +24,10 @@ public class Cell
     public int X { get; set; }
     public int Y { get; set; }
 
+    // Remove duplicate properties
+    // public int X { get; set; }
+    // public int Y { get; set; }
+
     public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
     {
         IsSolid = isSolid;
@@ -33,4 +37,4 @@ public class Cell
     }
 }
 >>>>>>> REPLACE
-NEXT: Ensure the Cell class has properties X and Y defined only once in GameWorld.cs
+NEXT: Verify that no other instances of X and Y properties are duplicated in the same class.

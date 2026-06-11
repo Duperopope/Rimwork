@@ -1,10 +1,64 @@
-
-
-CHANGE: Adjust crate icon color for better contrast in resource visualization
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a basic method to detect functional rooms in GameWorld.cs
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+// ... (lines omitted) ...
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+
+    // Check for furniture or saplings
+    if (_furniture.Any(f => f.X == x && f.Y == y)) return false;
+    if (_saplings.Any(s => s.X == x && s.Y == y)) return false;
+
+    return true;
+}
+
+// Method to detect functional rooms
+public List<Room> GetFunctionalRooms()
+{
+    List<Room> rooms = new List<Room>();
+    bool[,] visited = new bool[Height, Width];
+
+    for (int y = 0; y < Height; y++)
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            if (!visited[y, x] && IsPassable(x, y))
+            {
+                Room room = new Room();
+                ExploreRoom(x, y, ref visited, room);
+                if (room.Cells.Count >= 10) // Minimum size for a functional room
+                {
+                    rooms.Add(room);
+                }
+            }
+        }
+    }
+
+    return rooms;
+}
+
+private void ExploreRoom(int x, int y, ref bool[,] visited, Room room)
+{
+    if (x < 0 || x >= Width || y < 0 || y >= Height || visited[y, x] || !IsPassable(x, y))
+    {
+        return;
+    }
+
+    visited[y, x] = true;
+    room.Cells.Add((x, y));
+
+    ExploreRoom(x + 1, y, ref visited, room);
+    ExploreRoom(x - 1, y, ref visited, room);
+    ExploreRoom(x, y + 1, ref visited, room);
+    ExploreRoom(x, y - 1, ref visited, room);
+}
 >>>>>>> REPLACE
-NEXT: Consider adjusting other icon colors for consistent visual harmony across resources, furniture, and pawns.
+NEXT: Implement additional checks for room functionality (e.g., presence of zones)

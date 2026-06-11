@@ -550,9 +550,9 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.30 - Implement basic room detection logic in GameWorld.cs by adding a method to check if a cell is adjacent to another cell. Start by adding a method signature for IsAdjacent.
 - [x] Step C.45 - Add a basic room detection system to identify functional rooms in GameWorld.cs by defining a method to check if a given tile is part of a room.
 - [x] Step C.60 - Add properties X and Y to the Cell class. (src/RimWorldLab.Core/GameWorld.cs)
-- [ ] Step C.75.1 - Ensure the Cell class in GameWorld.cs has properties X and Y defined only once.
+- [x] Step C.75.1 - Ensure the Cell class in GameWorld.cs has properties X and Y defined only once.
 - [ ] Step C.15 - Implement a basic room detection system to identify functional rooms in GameWorld.cs
-- [ ] Step C.45 - Implement basic room detection to track functional rooms in GameWorld.cs
+- [ ] Step C.45.1 - Ensure the Cell class has properties X and Y defined only once in GameWorld.cs
 - [ ] Step C.60 - Implement room detection and validation logic in GameWorld.cs to ensure functional rooms are counted towards win conditions.
 - [ ] Step C.75 - Implement a basic room detection system in GameWorld.cs to count functional rooms.
 - [ ] Step C.90 - Implement a basic room detection system in GameWorld.cs to identify functional rooms based on connected walkable tiles.
@@ -598,3 +598,4 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.90 - Implement a resource consumption system that forces players to manage their colony's needs, such as food and shelter, to progress. (GameWorld.cs)
 - [ ] Step C.105 - Implement a system to automatically generate functional rooms as pawns complete tasks, ensuring the win condition is reachable through gameplay.
 - [ ] Step C.180 - Implement a resource management system to ensure players gather and store resources efficiently.
+- [ ] Step C.195 - Implement a resource consumption system for pawns to ensure they deplete resources over time, forcing players to manage their colony's needs effectively. (GameWorld.cs)

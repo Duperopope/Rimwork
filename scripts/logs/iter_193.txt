@@ -1,10 +1,55 @@
-
-
-CHANGE: Adjust crate icon color for better contrast in resource visualization
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a method to detect basic rooms in the GameWorld class.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+// ... (lines omitted) ...
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+    if (_furniture.Exists(f => f.X == x && f.Y == y)) return false;
+    if (_saplings.Exists(s => s.X == x && s.Y == y)) return false;
+    return true;
+}
+
+public List<Room> GetRooms()
+{
+    List<Room> rooms = new List<Room>();
+    bool[,] visited = new bool[Height, Width];
+
+    for (int y = 0; y < Height; y++)
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            if (!visited[y, x] && IsPassable(x, y))
+            {
+                Room room = new Room();
+                ExploreRoom(x, y, visited, room);
+                rooms.Add(room);
+            }
+        }
+    }
+
+    return rooms;
+}
+
+private void ExploreRoom(int x, int y, bool[,] visited, Room room)
+{
+    if (x < 0 || x >= Width || y < 0 || y >= Height || visited[y, x] || !IsPassable(x, y))
+        return;
+
+    visited[y, x] = true;
+    room.Tiles.Add((x, y));
+
+    ExploreRoom(x + 1, y, visited, room);
+    ExploreRoom(x - 1, y, visited, room);
+    ExploreRoom(x, y + 1, visited, room);
+    ExploreRoom(x, y - 1, visited, room);
+}
 >>>>>>> REPLACE
-NEXT: Consider adjusting crate overlay color for consistent visual theme across resources and furniture
+NEXT: Implement a Room class to store room information.

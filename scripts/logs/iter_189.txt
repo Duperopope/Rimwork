@@ -1,10 +1,37 @@
-
-
-CHANGE: Adjust crate icon color for better contrast in resource visualization
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a method to detect if a region is a functional room.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+// ... (lines omitted) ...
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+    if (_furniture.Any(f => f.X == x && f.Y == y)) return false;
+    if (_saplings.Any(s => s.X == x && s.Y == y)) return false;
+    return true;
+}
+
+private bool IsFunctionalRoom(int x, int y, int width, int height)
+{
+    // Basic check: room must be enclosed by walls
+    for (int i = x; i < x + width; i++)
+    {
+        if (!IsSolid(i, y) || !IsSolid(i, y + height - 1))
+            return false;
+    }
+    for (int j = y; j < y + height; j++)
+    {
+        if (!IsSolid(x, j) || !IsSolid(x + width - 1, j))
+            return false;
+    }
+    // Additional checks can be added here
+    return true;
+}
 >>>>>>> REPLACE
-NEXT: Consider adjusting crate overlay color for consistent visual theme across resources and furniture
+NEXT: Implement a method to find all functional rooms in the game world.

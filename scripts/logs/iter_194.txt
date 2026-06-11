@@ -1,10 +1,55 @@
-
-
-CHANGE: Adjust crate icon color for better contrast in resource visualization
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a method to detect rooms in GameWorld.cs
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+// ... (lines omitted) ...
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public bool IsPlantable(int x, int y)
+{
+    if (!IsPassable(x, y)) return false;
+    if (_resources.Exists(r => r.X == x && r.Y == y)) return false;
+    if (_furniture.Any(f => f.X == x && f.Y == y)) return false;
+    if (_saplings.Any(s => s.X == x && s.Y == y)) return false;
+    return true;
+}
+
+private List<Room> DetectRooms()
+{
+    List<Room> rooms = new List<Room>();
+    bool[,] visited = new bool[Height, Width];
+
+    for (int y = 0; y < Height; y++)
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            if (IsPassable(x, y) && !visited[y, x])
+            {
+                Room room = new Room();
+                ExploreRoom(x, y, visited, room);
+                rooms.Add(room);
+            }
+        }
+    }
+
+    return rooms;
+}
+
+private void ExploreRoom(int x, int y, bool[,] visited, Room room)
+{
+    if (x < 0 || x >= Width || y < 0 || y >= Height || !IsPassable(x, y) || visited[y, x])
+        return;
+
+    visited[y, x] = true;
+    room.Tiles.Add((x, y));
+
+    ExploreRoom(x + 1, y, visited, room);
+    ExploreRoom(x - 1, y, visited, room);
+    ExploreRoom(x, y + 1, visited, room);
+    ExploreRoom(x, y - 1, visited, room);
+}
 >>>>>>> REPLACE
-NEXT: Consider adjusting the crate overlay color to ensure it stands out against different background themes
+NEXT: Implement the Room class and integrate room detection into the game world.
