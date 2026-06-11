@@ -3223,3 +3223,31 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 25] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step P.2b - Implement the `TryClaimBest` method in `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
 - [startup] Stack relaunched after boot (2026-06-11 14:14).
 - [iter 28] SKIPPED (no SEARCH match): Implement the `TryClaimBest` method in `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [startup] Stack relaunched after boot (2026-06-11 14:24).
+- [iter 1] SKIPPED (no SEARCH match): Implement the `TryClaimBest` method in `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 2] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in `TaskBoard`. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 3] SKIPPED (no SEARCH match): Implement the `TryClaimBest` method in `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 4] SKIPPED (no SEARCH match): Implement the `TryClaimBest` method in `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 5] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step P.2b - Add the `_pending` list and `IsTileReserved`/`ReserveTile` methods to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
+- [iter 6] PREDICTED-FAIL (skipped before build): Add the `_pending` list and `IsTileReserved`/`ReserveTile` methods to `TaskBoard`. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 7] PREDICTED-FAIL (skipped before build): Add the `_pending` list and `IsTileReserved`/`ReserveTile` methods to `TaskBoard`. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 8] PREDICTED-FAIL (skipped before build): Add the `_pending` list and `IsTileReserved`/`ReserveTile` methods to `TaskBoard`. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 9] PREDICTED-FAIL (skipped before build): Add the `_pending` list and `IsTileReserved`/`ReserveTile` methods to `TaskBoard`. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 10] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step P.2b - Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
+- [iter 11] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 12] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 13] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 14] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs)
+- [iter 15] CRITIC TASK: - [ ] Step C.15 - Implement a basic room detection algorithm in GameWorld.cs to identify functional rooms.
+- [iter 15] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step P.2b - Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
+- [iter 16] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs)
+- [iter 17] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 18] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs)
+- [iter 19] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs)
+- [iter 20] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step P.2b - Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
+- [iter 21] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 22] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 23] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 24] SKIPPED (no SEARCH match): Add the `_pending` list to `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 25] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step P.2b - Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
+- [iter 26] KEPT: Add Mood property to Pawn class (src/RimWorldLab.Core/GameWorld.cs)

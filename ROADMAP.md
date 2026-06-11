@@ -203,7 +203,7 @@ task queue - and stop doing absurd things like building bridges nobody needs.
       `    /// <summary>0 (miserable) to 100 (happy). Driven by needs and events.</summary>`
       `    public float Mood { get; set; } = 70f;`
 - [ ] Step P.1b - Implement the `TryClaimBest` method in the `TaskBoard` class by adding the following lines after the existing `TryClaimNext` method:
-- [ ] Step P.2b - Implement the `TryClaimBest` method in `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
+- [ ] Step P.2b - Add the `_pending` list to `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
 - [ ] Step P.3b - The Pawn class lives in src/RimWorldLab.Core/GameWorld.cs
       (there is NO Pawn.cs file). SEARCH for exactly this one line:
       `    public float Hunger { get; set; } = 0f;`
@@ -595,3 +595,4 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.105 - Implement a basic room detection system to count functional rooms and trigger win condition in GameWorld.cs
 - [ ] Step C.135 - Implement a basic room detection system to count functional rooms and track progress towards win conditions in GameWorld.cs
 - [ ] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.
+- [ ] Step C.15 - Implement a basic room detection algorithm in GameWorld.cs to identify functional rooms.

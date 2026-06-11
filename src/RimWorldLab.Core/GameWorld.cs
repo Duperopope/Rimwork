@@ -509,6 +509,9 @@ public class Pawn : Thing
     /// <summary>0 (fine) to 100 (critical). Rises over time.</summary>
     public float Hunger { get; set; } = 0f;
 
+    /// <summary>0 (miserable) to 100 (happy). Driven by needs and events.</summary>
+    public float Mood { get; set; } = 70f;
+
     /// <summary>0 (rested) to 100 (exhausted). Rises over time.</summary>
     public float Fatigue { get; set; } = 0f;
 
