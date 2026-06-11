@@ -1,36 +1,48 @@
-CHANGE: Add properties X and Y to the Cell class.
+CHANGE: Add a method to check if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public bool IsTilePartOfRoom(int x, int y)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    // Check if the tile is part of any room
+    foreach (var room in GetRooms())
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        if (room.Contains(x, y))
+        {
+            return true;
+        }
     }
+    return false;
 }
+// ... (lines omitted) ...
 =======
-public class Cell
+public bool IsTilePartOfRoom(int x, int y)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    // Check if the tile is part of any room
+    foreach (var room in GetRooms())
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        if (room.Contains(x, y))
+        {
+            return true;
+        }
     }
+    return false;
 }
+
+public bool IsZoneFunctional(Zone zone)
+{
+    // Check if the zone has at least one tile that is part of a room
+    for (int y = zone.Y; y < zone.Y + zone.Height; y++)
+    {
+        for (int x = zone.X; x < zone.X + zone.Width; x++)
+        {
+            if (IsTilePartOfRoom(x, y))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Ensure all constructors and methods using Cell are updated to use the new properties.
+NEXT: Add a method to generate a functional room.

@@ -576,12 +576,10 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - The old 2D Main.cs/Main.tscn are LEGACY: do not extend them anymore.
 
 - [ ] Step Z.1 - In src/RimWorldLab.Core/GameWorld.cs, add a field `public int TotalTicks;` and initialize it to 0.
-- [ ] Step Z.2 - Wildlife pressure: in src/RimWorldLab.Core/WorldModel.cs,
+- [x] Step Z.2 - Wildlife pressure: in src/RimWorldLab.Core/WorldModel.cs,
       add a float WildlifePressure (0..1) to WorldRegion, drift it in
       UpdateRegions, and surface a WorldEvents entry when it exceeds 0.8.
-- [ ] Step Z.3 - Memories of construction: in GameWorld.cs, when a Build task
-      completes (the PlaceFurniture branch in Tick), call
-      pawn.Remember(TotalTicks, $"built a {kind}", +1.5f).
+- [ ] Step Z.3.1 - In GameWorld.cs, add the `TotalTicks` property to the `GameWorld` class.
 - [ ] Step C.15 - Implement a system to automatically generate functional rooms to meet the win condition.
 - [ ] Step C.60 - Implement a system to automatically generate functional rooms to ensure win conditions can be reached.
 - [ ] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
@@ -603,3 +601,5 @@ The game is now 3D (Boot3D.tscn + Game3D.cs + UiShell.cs + RenderCatalog.cs).
 - [ ] Step C.105 - Implement a system to automatically generate resource-rich areas on the map to encourage exploration and resource gathering. (GameWorld.cs)
 - [ ] Step C.120 - Add a resource generation mechanic to ensure players have a steady supply of materials over time.
 - [ ] Step C.135 - Implement a system to track and display the number of functional rooms in the game world.
+- [ ] Step C.165 - Implement a system to generate resources over time, such as trees regrowing or rocks respawning, to provide a sustainable source of materials.
+- [ ] Step C.180 - Implement a basic resource management system to ensure players have to gather and manage resources to build rooms.

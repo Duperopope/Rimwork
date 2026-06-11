@@ -1,36 +1,38 @@
-CHANGE: Add properties X and Y to the Cell class.
+CHANGE: Add a method to generate functional rooms
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class Cell
+public bool IsTilePartOfRoom(int x, int y)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    // Check if the tile is part of any room
+    foreach (var room in GetRooms())
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        if (room.Contains(x, y))
+        {
+            return true;
+        }
     }
+    return false;
 }
+// ... (lines omitted) ...
 =======
-public class Cell
+public bool IsTilePartOfRoom(int x, int y)
 {
-    public bool IsSolid { get; set; }
-    public string TileType { get; set; } // e.g., "Grass", "Water", "Wall"
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cell(bool isSolid = false, string tileType = "Ground", int x = 0, int y = 0)
+    // Check if the tile is part of any room
+    foreach (var room in GetRooms())
     {
-        IsSolid = isSolid;
-        TileType = tileType;
-        X = x;
-        Y = y;
+        if (room.Contains(x, y))
+        {
+            return true;
+        }
     }
+    return false;
 }
+
+private void GenerateFunctionalRooms()
+{
+    // Placeholder for generating functional rooms
+    // This will be expanded in future steps
+}
+// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Verify the properties are correctly added and used in the Cell class.
+NEXT: Implement the logic to generate a Canteen room

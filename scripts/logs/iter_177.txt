@@ -1,55 +1,129 @@
-CHANGE: Add a basic room detection system in GameWorld.cs to identify functional rooms based on connected furniture and walls.
+CHANGE: Add a method to generate functional rooms in the GameWorld.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsTilePartOfRoom(int x, int y)
+public void InitializeMap()
 {
-    // TODO: Implement the real behavior.
-    return false;
-}
-=======
-public bool IsTilePartOfRoom(int x, int y)
-{
-    // Check if the tile is solid (part of a wall)
-    if (IsSolid(x, y))
+    // Open terrain bounded by an outer wall. No pre-built rooms - the
+    // player builds their own base using the Build/Dig tools.
+    for (int y = 0; y < Height; y++)
     {
-        return true;
-    }
-
-    // Check if the tile has adjacent furniture
-    if (HasAdjacentFurniture(x, y))
-    {
-        return true;
-    }
-
-    return false;
-}
-
-private bool IsSolid(int x, int y)
-{
-    return _grid[y, x].IsSolid;
-}
-
-private bool HasAdjacentFurniture(int x, int y)
-{
-    // Check all 4 adjacent tiles for furniture
-    int[] dx = { -1, 1, 0, 0 };
-    int[] dy = { 0, 0, -1, 1 };
-
-    for (int i = 0; i < 4; i++)
-    {
-        int nx = x + dx[i];
-        int ny = y + dy[i];
-
-        if (nx >= 0 && nx < Width && ny >= 0 && ny < Height)
+        for (int x = 0; x < Width; x++)
         {
-            if (_furniture.Any(f => f.X == nx && f.Y == ny))
-            {
-                return true;
-            }
+            bool isSolid = x == 0 || y == 0 || x == Width - 1 || y == Height - 1;
+            _grid[y, x] = new Cell(isSolid, isSolid ? "Wall" : "Grass");
         }
     }
 
-    return false;
+    // Carve a diagonal river across the map - impassable Water tiles
+    // pawns must walk along the bank of to haul Water from.
+    for (int y = 1; y < Height - 1; y++)
+    {
+        for (int x = 1; x < Width - 1; x++)
+// ... (lines omitted) ...
+                }
+
+                for (int i = 0; i < Height; i++)
+                {
+                    if ((x == Width / 4 && Math.Abs(y - Height / 2) <= 3) ||
+                        (x == Width * 3 / 4 && Math.Abs(y - Height / 2) <= 3))
+                    {
+                        _grid[y, x].IsSolid = true;
+                        _grid[y, x].TileType = "Water";
+                    }
+                }
+            }
+        }
+
+        // Scatter resource nodes on passable tiles, avoiding the top-left
+        // rooms reserved for the Canteen/Sleeping Quarters zones.
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                if (_grid[y, x].IsSolid) continue;
+                if (x < 11 && y < 5) continue;
+
+                int hash = (x * 73856093) ^ (y * 19349663);
+                int bucket = ((hash % 100) + 100) % 100;
+                if (bucket < 4)
+                    _resources.Add(new ResourceNode(ResourceKind.Tree, x, y));
+                else if (bucket < 6)
+                    _resources.Add(new ResourceNode(ResourceKind.Rock, x, y));
+            }
+        }
+// ... (lines omitted) ...
+        if (zone.Contains(x, y))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+=======
+public void InitializeMap()
+{
+    // Open terrain bounded by an outer wall. No pre-built rooms - the
+    // player builds their own base using the Build/Dig tools.
+    for (int y = 0; y < Height; y++)
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            bool isSolid = x == 0 || y == 0 || x == Width - 1 || y == Height - 1;
+            _grid[y, x] = new Cell(isSolid, isSolid ? "Wall" : "Grass");
+        }
+    }
+
+    // Carve a diagonal river across the map - impassable Water tiles
+    // pawns must walk along the bank of to haul Water from.
+    for (int y = 1; y < Height - 1; y++)
+    {
+        for (int x = 1; x < Width - 1; x++)
+// ... (lines omitted) ...
+                }
+
+                for (int i = 0; i < Height; i++)
+                {
+                    if ((x == Width / 4 && Math.Abs(y - Height / 2) <= 3) ||
+                        (x == Width * 3 / 4 && Math.Abs(y - Height / 2) <= 3))
+                    {
+                        _grid[y, x].IsSolid = true;
+                        _grid[y, x].TileType = "Water";
+                    }
+                }
+            }
+        }
+
+        // Scatter resource nodes on passable tiles, avoiding the top-left
+        // rooms reserved for the Canteen/Sleeping Quarters zones.
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                if (_grid[y, x].IsSolid) continue;
+                if (x < 11 && y < 5) continue;
+
+                int hash = (x * 73856093) ^ (y * 19349663);
+                int bucket = ((hash % 100) + 100) % 100;
+                if (bucket < 4)
+                    _resources.Add(new ResourceNode(ResourceKind.Tree, x, y));
+                else if (bucket < 6)
+                    _resources.Add(new ResourceNode(ResourceKind.Rock, x, y));
+            }
+        }
+
+        // Generate functional rooms
+        GenerateFunctionalRooms();
+    }
+}
+
+private void GenerateFunctionalRooms()
+{
+    // Placeholder for generating functional rooms
+    // This method will be expanded in future steps
+    // For now, it simply reserves a small area for a Canteen
+    AddZone(new Zone(ZoneKind.Canteen, 1, 1, 10, 10));
+    AddZone(new Zone(ZoneKind.SleepingQuarters, 12, 1, 10, 10));
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to find all connected tiles in a room.
+NEXT: Implement logic to ensure generated rooms

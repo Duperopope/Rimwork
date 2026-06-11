@@ -1,10 +1,46 @@
-
-
-CHANGE: Adjust crate icon color for better contrast with walls
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a method to check if a zone is functional.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // Check if the tile is part of any room
+    foreach (var zone in Zones)
+    {
+        if (zone.Contains(x, y))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 =======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
+public bool IsTilePartOfRoom(int x, int y)
+{
+    // Check if the tile is part of any room
+    foreach (var zone in Zones)
+    {
+        if (zone.Contains(x, y))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+public bool IsZoneFunctional(Zone zone)
+{
+    // A zone is considered functional if it has at least one passable tile
+    for (int y = zone.Y; y < zone.Y + zone.Height; y++)
+    {
+        for (int x = zone.X; x < zone.X + zone.Width; x++)
+        {
+            if (IsPassable(x, y))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 >>>>>>> REPLACE
-NEXT: Consider adjusting other icon colors for consistency with the updated crate icon color
+NEXT: Implement a method to generate functional rooms.

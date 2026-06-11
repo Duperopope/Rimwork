@@ -1,23 +1,40 @@
-CHANGE: Add a method to check if a tile is part of a room in GameWorld.cs
+CHANGE: Add a method to check if a zone is functional.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsTilePartOfRoom(int x, int y)
+public class Zone
 {
-    // TODO: Implement the real behavior.
-    return false;
+    public ZoneKind Kind { get; }
+    public int X { get; }
+    public int Y { get; }
+    public int Width { get; }
+    public int Height { get; }
+// ... (lines omitted) ...
 }
 =======
-public bool IsTilePartOfRoom(int x, int y)
+public class Zone
 {
-    // Check if the tile is part of any zone
-    foreach (var zone in Zones)
+    public ZoneKind Kind { get; }
+    public int X { get; }
+    public int Y { get; }
+    public int Width { get; }
+    public int Height { get; }
+
+    public bool IsFunctional(GameMap map)
     {
-        if (zone.Contains(x, y))
+        // A zone is functional if it has at least one passable tile
+        for (int y = Y; y < Y + Height; y++)
         {
-            return true;
+            for (int x = X; x < X + Width; x++)
+            {
+                if (map.IsPassable(x, y))
+                {
+                    return true;
+                }
+            }
         }
+        return false;
     }
-    return false;
+// ... (lines omitted) ...
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to detect connected furniture and walls to form rooms.
+NEXT: Implement a method to count functional rooms in the game world.

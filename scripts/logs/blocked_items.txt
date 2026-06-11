@@ -26,3 +26,6 @@
 - [ ] Step C.75 - Implement basic room detection logic to identify functional rooms in the colony.
 - [ ] Step C.90 - Implement a basic room detection system in GameWorld.cs to identify functional rooms.
 - [ ] Step Z.1 - In src/RimWorldLab.Core/GameWorld.cs, add a field `public int TotalTicks;` and initialize it to 0.
+- [ ] Step Z.3.1 - In GameWorld.cs, add the `TotalTicks` property to the `GameWorld` class.
+- [ ] Step C.15 - Implement a system to automatically generate functional rooms to meet the win condition.
+- [ ] Step C.60 - Implement a system to automatically generate functional rooms to ensure win conditions can be reached.

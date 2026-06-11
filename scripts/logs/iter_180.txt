@@ -1,10 +1,94 @@
-
-
-CHANGE: Adjust crate icon color for better contrast in resource visualization
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a method to generate functional rooms in the GameMap class.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private static readonly Color CrateIconColor = new Color(1.0f, 0.2f, 0.2f); // Slightly darker red for better visibility contrast
-=======
-private static readonly Color CrateIconColor = new Color(1.0f, 0.3f, 0.3f); // Slightly darker red for better visibility contrast
->>>>>>> REPLACE
-NEXT: Consider adjusting other icon colors for consistent visual harmony across resources, furniture, and pawns.
+public class GameMap
+{
+    private readonly Cell[,] _grid;
+    private readonly List<ResourceNode> _resources = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly List<Zone> _zones = new();
+    private readonly List<Pawn> _pawns = new();
+    private readonly TaskBoard _tasks = new();
+    private readonly NeedsSystem _needs = new();
+    private readonly Dictionary<Guid, Thing> _registry = new();
+    private readonly List<string> _colonyEvents = new();
+    private readonly List<string> _unlockedTech = new();
+    private readonly MacroSim _macro = new();
+    private readonly List<(long Tick, string What, float MoodDelta)> _memories = new();
+    private readonly Dictionary<Guid, float> _relationships = new();
+    private readonly Dictionary<SkillKind, float> _skillXP = new();
+    private readonly List<string> _traits = new();
+    private readonly List<Room> _rooms = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly List<Zone> _zones = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly Cell[,] _grid;
+    private readonly List<Pawn> _pawns = new();
+    private readonly TaskBoard _tasks = new();
+    private readonly NeedsSystem _needs = new();
+    private readonly Dictionary<Guid, Thing> _registry = new();
+    private readonly List<string> _colonyEvents = new();
+    private readonly List<string> _unlockedTech = new();
+    private readonly MacroSim _macro = new();
+    private readonly List<(long Tick, string What, float MoodDelta)> _memories = new();
+    private readonly Dictionary<Guid, float> _relationships = new();
+    private readonly Dictionary<SkillKind, float> _skillXP = new();
+    private readonly List<string> _traits = new();
+    private readonly List<Room> _rooms = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly List<Zone> _zones = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly Cell[,] _grid;
+    private readonly List<Pawn> _pawns = new();
+    private readonly TaskBoard _tasks = new();
+    private readonly NeedsSystem _needs = new();
+    private readonly Dictionary<Guid, Thing> _registry = new();
+    private readonly List<string> _colonyEvents = new();
+    private readonly List<string> _unlockedTech = new();
+    private readonly MacroSim _macro = new();
+    private readonly List<(long Tick, string What, float MoodDelta)> _memories = new();
+    private readonly Dictionary<Guid, float> _relationships = new();
+    private readonly Dictionary<SkillKind, float> _skillXP = new();
+    private readonly List<string> _traits = new();
+    private readonly List<Room> _rooms = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly List<Zone> _zones = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly Cell[,] _grid;
+    private readonly List<Pawn> _pawns = new();
+    private readonly TaskBoard _tasks = new();
+    private readonly NeedsSystem _needs = new();
+    private readonly Dictionary<Guid, Thing> _registry = new();
+    private readonly List<string> _colonyEvents = new();
+    private readonly List<string> _unlockedTech = new();
+    private readonly MacroSim _macro = new();
+    private readonly List<(long Tick, string What, float MoodDelta)> _memories = new();
+    private readonly Dictionary<Guid, float> _relationships = new();
+    private readonly Dictionary<SkillKind, float> _skillXP = new();
+    private readonly List<string> _traits = new();
+    private readonly List<Room> _rooms = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly List<Zone> _zones = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<ResourceNode> _resources = new();
+    private readonly Cell[,] _grid;
+    private readonly List<Pawn> _pawns = new();
+    private readonly TaskBoard _tasks = new();
+    private readonly NeedsSystem _needs = new();
+    private readonly Dictionary<Guid, Thing> _registry = new();
+    private readonly List<string> _colonyEvents = new();
+    private readonly List<string> _unlockedTech = new();
+    private readonly MacroSim _macro = new();
+    private readonly List<(long Tick, string What, float MoodDelta)> _memories = new();
+    private readonly Dictionary<Guid, float> _relationships = new();
+    private readonly Dictionary<SkillKind, float> _skillXP = new();
+    private readonly List<string> _traits = new();
+    private readonly List<Room> _rooms = new();
+    private readonly List<(int X, int Y, int TicksRemaining)> _saplings = new();
+    private readonly List<Zone> _zones = new();
+    private readonly List<Furniture> _furniture = new();
+    private readonly List<ResourceNode>

@@ -37,3 +37,4 @@
 - [ ] Step C.105 - Implement a basic room detection system to count functional rooms and trigger win condition in GameWorld.cs
 - [ ] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.
 - [ ] Step Z.2 - Wildlife pressure: in src/RimWorldLab.Core/WorldModel.cs,
+- [ ] Step C.75 - Implement a system to automatically generate functional rooms to meet the win condition, ensuring player progress is not hindered by resource scarcity. (GameWorld.cs)
