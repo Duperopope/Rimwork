@@ -1,22 +1,37 @@
-CHANGE: Add a method to the `GameWorld` class to simulate tree regrowth over time.
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Extract repeated pawn registration logic into a separate method in Main.cs.
+FILE: src/RimWorldGodot/Main.cs
 <<<<<<< SEARCH
-public class GameWorld
+foreach (string name in array)
 {
-    // ... (lines omitted) ...
+	int num;
+	int num2;
+	do
+	{
+		num = _rng.Next(0, _world.Map.Width);
+		num2 = _rng.Next(0, _world.Map.Height);
+	}
+	while (!_world.Map.IsPassable(num, num2));
+	_world.RegisterThing(new Pawn(name, num, num2));
 }
 =======
-public class GameWorld
+private void RegisterPawns(string[] names)
 {
-    // ... (lines omitted) ...
-
-    /// <summary>
-    /// Simulates tree regrowth over time.
-    /// </summary>
-    public void SimulateTreeRegrowth()
-    {
-        // Placeholder for tree regrowth logic
-    }
+	foreach (string name in names)
+	{
+		int num;
+		int num2;
+		do
+		{
+			num = _rng.Next(0, _world.Map.Width);
+			num2 = _rng.Next(0, _world.Map.Height);
+		}
+		while (!_world.Map.IsPassable(num, num2));
+		_world.RegisterThing(new Pawn(name, num, num2));
+	}
 }
+// Call RegisterPawns in _Ready
+RegisterPawns(array);
+// Call RegisterPawns in _Process
+RegisterPawns(rebirth);
 >>>>>>> REPLACE
-NEXT: Implement the logic for tree regrowth within the `SimulateTreeRegrowth` method.
+NEXT: Ensure the method is correctly defined and called in both _Ready and _Process methods.

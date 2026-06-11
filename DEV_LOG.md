@@ -4751,3 +4751,14 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 186] SKIPPED (no SEARCH match): Extract repeated pawn registration logic into a separate method. (src/RimWorldGodot/Main.cs)
 - [iter 187] SKIPPED (no SEARCH match): Extract repeated pawn registration logic into a separate method. (src/RimWorldGodot/Main.cs)
 - [iter 188] SKIPPED (no SEARCH match): Extract repeated pawn registration logic into a separate method. (src/RimWorldGodot/Main.cs)
+- [iter 189] SKIPPED (no SEARCH match): Extract repeated pawn registration logic into a separate method. (src/RimWorldGodot/Main.cs)
+- [iter 190] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.180 - Extract the repeated pawn registration logic into a separate method in Main.cs. Ensure the method is correctly defined and called in both _Ready and _Process methods.
+- [iter 191] REVERTED (build failed): Extract repeated pawn registration logic into a separate method in Main.cs. (src/RimWorldGodot/Main.cs)
+- [iter 192] REVERTED (build failed): Extract repeated pawn registration logic into a separate method in Main.cs. (src/RimWorldGodot/Main.cs)
+- [iter 193] REVERTED (build failed): Extract pawn registration logic into a separate method (src/RimWorldGodot/Main.cs)
+- [iter 194] SKIPPED (no SEARCH match): Extract pawn registration logic into a separate method in Main.cs. (src/RimWorldGodot/Main.cs)
+- [iter 195] CRITIC TASK: - [ ] Step C.195 - Implement a system to track and display the progress towards building functional rooms, providing players with clear feedback on their progress.
+- [iter 195] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.180 - Extract the repeated pawn registration logic into a separate method in Main.cs. Ensure the method is correctly defined and called in both _Ready and _Process methods.
+- [iter 196] SKIPPED (no SEARCH match): Add a method to track and display the progress towards building functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 197] REVERTED (build failed): Add a method to display the progress towards building functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 198] REVERTED (build failed): Add a method to track and display the progress towards building functional rooms. (src/RimWorldLab.Core/GameWorld.cs)

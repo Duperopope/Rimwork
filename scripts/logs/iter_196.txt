@@ -1,22 +1,32 @@
-CHANGE: Add a method to check if a zone is functional based on its kind and furniture.
+CHANGE: Add a method to track and display the progress towards building functional rooms.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+private int _functionalRoomCount = 0;
+public void UpdateFunctionalRoomCount()
 {
-    // Example: Define which zones contribute to room functionality
-    return zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters;
+    _functionalRoomCount = CountFunctionalRooms();
 }
-=======
-public bool IsZoneFunctional(Zone zone)
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    // Check if the zone kind contributes to room functionality
-    if (zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters)
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        // Check if there is at least one functional furniture in the zone
-        var furnitureInZone = _furniture.Where(f => zone.Contains(f.X, f.Y)).ToList();
-        return furnitureInZone.Any(f => f.IsFunctionalFurniture());
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
     }
-    return false;
+=======
+private int _functionalRoomCount = 0;
+public void UpdateFunctionalRoomCount()
+{
+    _functionalRoomCount = CountFunctionalRooms();
 }
+public void DisplayFunctionalRoomProgress()
+{
+    Console.WriteLine($"Functional Rooms: {_functionalRoomCount}");
+}
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
 >>>>>>> REPLACE
-NEXT: Implement a method to generate basic room layouts based on available resources and pawn needs.
+NEXT: Implement the `CountFunctionalRooms` method to accurately count functional rooms.

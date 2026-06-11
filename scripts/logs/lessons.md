@@ -168,3 +168,8 @@
 - Always check the data types of dictionary keys and values to avoid implicit conversion errors.
 - Always ensure type consistency when updating resource spawn rates.
 - Ensure all method definitions and declarations are properly closed and placed before any instructions.
+- Ensure method extraction doesn't disrupt existing block structures or missing braces.
+- Ensure method calls are properly placed within existing code blocks and methods.
+- Ensure all methods are properly closed with `}` and check for missing identifiers or misplaced tokens.
+- Ensure method signatures and calls match defined types and parameters.
+- Ensure method parameters and types match existing definitions in GameWorld.cs.

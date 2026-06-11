@@ -50,6 +50,11 @@ public partial class UiShell : CanvasLayer
         if (OS.GetEnvironment("RIMWORK_AUTOSTART") == "1" || System.IO.File.Exists(@"g:/Rimwork/scripts/autostart.flag"))
         {
             GD.Print("[FLOW] Autostart: New Game (verification mode).");
+            if (System.IO.File.Exists(@"g:/Rimwork/scripts/microtest.flag"))
+            {
+                StartMicroStage();
+                return;
+            }
             _game.AlertText = "Colonie fondée — bonne chance !";
             ShowOnly(_hud);
         }
@@ -302,7 +307,7 @@ public partial class UiShell : CanvasLayer
         {
             _game.AlertText = "✨ 10 évolutions ! Le stade supérieur t'attend...";
         };
-        GetParent().AddChild(_micro);
+        GetParent().CallDeferred(Node.MethodName.AddChild, _micro);
         foreach (var c in new[] { _menu, _hud, _options, _devTab, _credits, _saveScreen, _genScreen })
             if (c != null) c.Visible = false;
         _game.Paused = true;

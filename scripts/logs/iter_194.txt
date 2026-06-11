@@ -1,16 +1,23 @@
-CHANGE: Add a method to check if a zone is functional.
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Extract pawn registration logic into a separate method in Main.cs.
+FILE: src/RimWorldGodot/Main.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+```csharp
+foreach (string name in array)
 {
-    // Example: Define which zones contribute to room functionality
-    return zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters;
+    int num;
+    int num2;
+    do
+    {
+        num = _rng.Next(0, _world.Map.Width);
+        num2 = _rng.Next(0, _world.Map.Height);
+    }
+    while (!_world.Map.IsPassable(num, num2));
+    _world.RegisterThing(new Pawn(name, num, num2));
 }
+```
 =======
-public bool IsZoneFunctional(Zone zone)
-{
-    // Example: Define which zones contribute to room functionality
-    return zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters;
-}
+```csharp
+RegisterPawns(array);
+```
 >>>>>>> REPLACE
-NEXT: Implement a method to count functional rooms in the game world.
+NEXT: Ensure the new method is correctly defined and called in both _Ready and _Process methods.

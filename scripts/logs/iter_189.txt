@@ -1,22 +1,75 @@
-CHANGE: Add a method to determine if a zone has enough functional furniture
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Extract repeated pawn registration logic into a separate method.
+FILE: src/RimWorldGodot/Main.cs
 <<<<<<< SEARCH
-public class GameWorld
+foreach (string name in array)
 {
-    private Dictionary<ResourceKind, int> _recycledResources = new();
-    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+	int num;
 // ... (lines omitted) ...
+	if (_world.Tasks.Pending.Count == 0)
+	{
+		int num;
+		int num2;
+		do
+		{
+			num = _rng.Next(0, _world.Map.Width);
+			num2 = _rng.Next(0, _world.Map.Height);
+		}
+		while (!_world.Map.IsPassable(num, num2));
+		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
+	}
+	_world.Tick();
+}
 =======
-public class GameWorld
+foreach (string name in array)
 {
-    private Dictionary<ResourceKind, int> _recycledResources = new();
-    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+	RegisterPawn(name);
+	if (_world.Tasks.Pending.Count == 0)
+	{
+		int num;
+		int num2;
+		do
+		{
+			num = _rng.Next(0, _world.Map.Width);
+			num2 = _rng.Next(0, _world.Map.Height);
+		}
+		while (!_world.Map.IsPassable(num, num2));
+		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
+	}
+	_world.Tick();
+}
 
-    public bool HasEnoughFunctionalFurnitureInZone(Zone zone, int requiredCount)
-    {
-        var functionalFurnitureCount = _furniture.Count(f => f.IsFunctionalFurniture() && zone.Contains(f.X, f.Y));
-        return functionalFurnitureCount >= requiredCount;
-    }
-// ... (lines omitted) ...
+private void RegisterPawn(string name)
+{
+	int num;
+	int num2;
+	do
+	{
+		num = _rng.Next(0, _world.Map.Width);
+		num2 = _rng.Next(0, _world.Map.Height);
+	}
+	while (!_world.Map.IsPassable(num, num2));
+	var pawn = new Pawn
+	{
+		Name = name,
+		Sex = (PawnSex)_rng.Next(2), // Random sex
+		SkillXP = new Dictionary<SkillKind, float>
+		{
+			{ SkillKind.Construction, 0f },
+			{ SkillKind.Mining, 0f },
+			{ SkillKind.Woodcutting, 0f }
+		},
+		Hunger = 0f,
+		Mood = 0f,
+		Fatigue = 0f,
+		HP = 100f,
+		Thirst = 0f,
+		Stress = 0f,
+		Traits = new List<string>(),
+		Memories = new List<(long, string, float)>(),
+		Relationships = new Dictionary<Guid, float>()
+	};
+	_world.Map.Registry[pawn.Id] = pawn;
+	_world.Map.Pawns.Add(pawn);
+}
 >>>>>>> REPLACE
-NEXT: Implement the logic to check if a zone has enough functional furniture based on the existing properties and methods.
+NEXT: Continue extracting logic to improve code organization.

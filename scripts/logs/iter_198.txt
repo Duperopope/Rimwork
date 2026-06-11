@@ -1,35 +1,47 @@
-CHANGE: Add a method to assign pawns to tasks based on their sleep need in GameWorld.cs
+CHANGE: Add a method to track and display the progress towards building functional rooms.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
 {
-    // Implementation not shown
-}
-=======
-public bool IsZoneFunctional(Zone zone)
-{
-    // Implementation not shown
-}
-
-public void AssignPawnsToTasksBasedOnSleepNeed()
-{
-    foreach (var pawn in Pawns)
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
     {
-        if (pawn.Needs.Mood < 50) // Example threshold for sleep need
-        {
-            var sleepZone = Zones.FirstOrDefault(z => z.Kind == ZoneKind.SleepingQuarters);
-            if (sleepZone != null)
-            {
-                var task = new TaskBoard.Task
-                {
-                    PawnId = pawn.Id,
-                    Kind = TaskBoard.TaskKind.GoToSleep,
-                    Target = sleepZone.CenterTile
-                };
-                Tasks.Add(task);
-            }
-        }
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+=======
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    if (!_pawnResourceConsumption.ContainsKey(pawnId))
+    {
+        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
+    }
+
+    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
+    {
+        _pawnResourceConsumption[pawnId][kind] += amount;
+    }
+    else
+    {
+        _pawnResourceConsumption[pawnId][kind] = amount;
     }
 }
+
+public int GetTotalResourceConsumption(ResourceKind kind)
+{
+    int totalConsumption = 0;
+    foreach (var pawnConsumption in _pawnResourceConsumption.Values)
+    {
+        if (pawnConsumption.ContainsKey(kind))
+        {
+            totalConsumption += pawnConsumption[kind];
+        }
+    }
+    return totalConsumption;
+}
+
+public void DisplayFunctionalRoomsProgress()
+{
+    int functionalRooms = CountFunctionalRooms();
+    Console.WriteLine($"Functional Rooms: {functionalRooms} / 3");
+}
 >>>>>>> REPLACE
-NEXT: Implement the logic to check if a pawn is sleepy and assign them to a sleeping quarters.
+NEXT: Implement a method to count functional rooms based on furniture types.
