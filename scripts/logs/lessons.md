@@ -3,3 +3,6 @@
 - Verify properties and methods exist before using them in code.
 - Always ensure the target method exists in the class before making changes.
 - Verify that the class and its constructor exist before implementing.
+- Ensure enums and types are unique across all files to avoid namespace conflicts.
+- Ensure enums are declared only once, preferably in a dedicated file.
+- Avoid defining enums in multiple files; consolidate enum definitions in a single common file.

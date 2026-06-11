@@ -55,6 +55,17 @@ private const int CellSize = 16;
 private Texture2D _treeIcon;
 private const GridShape GridShape = GridShape.Hex;
 
+private Vector2 HexToPixel(int q, int r)
+{
+    float size = CellSize;
+    float sqrt3 = Mathf.Sqrt(3);
+    float width = size * sqrt3;
+    float height = size * 1.5f;
+    float x = width * q + width / 2 * r;
+    float y = height * r;
+    return new Vector2(x, y);
+}
+
 	private const int TicksPerSecond = 20;
 
 	private GameWorldManager _world;

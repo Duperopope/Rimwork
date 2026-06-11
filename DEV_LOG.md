@@ -3325,3 +3325,12 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 90] PREDICTED-FAIL (skipped before build): Add a `GridShape` property to `GameMap` with a default value of "Square". - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 91] PREDICTED-FAIL (skipped before build): Add a `GridShape` property to GameMap with a default value of "Square". - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 92] PREDICTED-FAIL (skipped before build): Add a `GridShape` property to `GameMap` with a default value of "Square". - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [startup] Stack relaunched after boot (2026-06-11 15:24).
+- [iter 1] SKIPPED (no-op patch): Add `GridShape` property to `GameMap` with a default value of "Square". (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 2] REVERTED (build failed): Add a `GridShape` enum and update `GameMap` to use it with a default value of "Square". (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 3] REVERTED (build failed): Add `GridShape` enum and default value to `GameMap`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 4] REVERTED (build failed): Add `GridShape` enum and default value to `GameMap` (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 5] DONE (had past KEPT edits, change already in file): - [ ] Step V.2 - Add a `GridShape` property to GameMap with a default value of "Square".
+- [iter 6] SKIPPED (no SEARCH match): Add HexToPixel method to convert hex coordinates to pixel coordinates. (src/RimWorldGodot/Main.cs)
+- [iter 7] PREDICTED-FAIL (skipped before build): Add HexToPixel and PixelToHex methods for hex grid conversion. - Identifier 'Round' does not exist in the target file or the game API - it would not compile.
+- [iter 8] KEPT: Add HexToPixel method for converting hex coordinates to pixel coordinates. (src/RimWorldGodot/Main.cs)

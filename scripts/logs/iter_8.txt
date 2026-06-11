@@ -1,0 +1,19 @@
+CHANGE: Add HexToPixel method for converting hex coordinates to pixel coordinates.
+FILE: src/RimWorldGodot/Main.cs
+<<<<<<< SEARCH
+private const GridShape GridShape = GridShape.Hex;
+=======
+private const GridShape GridShape = GridShape.Hex;
+
+private Vector2 HexToPixel(int q, int r)
+{
+    float size = CellSize;
+    float sqrt3 = Mathf.Sqrt(3);
+    float width = size * sqrt3;
+    float height = size * 1.5f;
+    float x = width * q + width / 2 * r;
+    float y = height * r;
+    return new Vector2(x, y);
+}
+>>>>>>> REPLACE
+NEXT: Implement PixelToHex method for converting pixel coordinates to hex coordinates.

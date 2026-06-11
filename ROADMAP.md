@@ -378,7 +378,7 @@ step N+1 until N builds and runs correctly.
       ToPixel/FromPixel for pointy-top hexes, DistanceTo. Pure helper, not
       yet wired into GameMap/Pathfinder/rendering - existing square-grid
       game is untouched.
-- [ ] Step V.2 - Add a `GridShape` property to GameMap with a default value of "Square".
+- [x] Step V.2 - Add a `GridShape` property to GameMap with a default value of "Square".
 - [ ] Step V.3 - Main.cs._Draw: when GridShape==Hex, draw each tile as a
       flat-top hexagon (DrawColoredPolygon with 6 points from HexToPixel)
       instead of a square Rect2. Update click-to-tile (PixelToHex) in
