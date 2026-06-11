@@ -45,4 +45,7 @@ if (-not $gameWd) {
     Start-Process pwsh -ArgumentList '-NoProfile','-File','g:\Rimwork\scripts\game_watchdog.ps1' -WindowStyle Hidden
 }
 
+# 6. Publish the public progress site if it changed
+pwsh -NoProfile -File "g:\Rimwork\scripts\publish_site.ps1" 2>$null
+
 Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [startup] Stack relaunched after boot ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))."

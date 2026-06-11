@@ -55,7 +55,7 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 
 ## PRIORITE: la couche primordiale (depart Spore - LOD Micro)
 - [x] Step M.1 - In src/RimWorldLab.Core/GameWorld.cs, find the exact line: `Macro.Tick(TotalTicks);` Immediately AFTER that line, insert these new lines: `if (TotalTicks % 1600 == 0) { float biomass = Macro.Regions[2, 2].MicrobialBiomass; if (biomass > 0.75f) LogEvent($"Microbial bloom enriches the soil (biomass {biomass:P0})."); }`
-- [ ] Step M.2.1 - Add private field `cookBonus` in `src/RimWorldLab.Core/GameWorld.cs`.
+- [x] Step M.2.1 - Add private field `cookBonus` in `src/RimWorldLab.Core/GameWorld.cs`.
 
 ## ARCHIVE (accompli - ne pas retoucher)
 - [x] Step W.1 - Mining is already implemented (Mine furniture,
@@ -155,5 +155,5 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [x] Step C.150 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs.
 - [x] Step C.161 - Implement a mechanism to generate resources over time to encourage sustainable resource management.
 - [x] Step C.164 - Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)
-- [ ] Step C.60 - Implement a system to track and display the number of functional rooms in the game world.
+- [ ] Step C.60 - Add a private field `functionalRoomsCount` to the `GameWorld` class.
 - [ ] Step C.75 - Implement a basic room detection system to count functional rooms towards the win condition.
