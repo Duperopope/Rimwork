@@ -4029,3 +4029,4 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 121] SKIPPED (no SEARCH match): Add a method to count functional rooms in the colony. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 122] SKIPPED (no SEARCH match): Add a method to count functional rooms in the colony. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 123] KEPT: Add a method to count functional rooms in the colony. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 124] KEPT: Add a method to display the number of functional rooms in the colony. (src/RimWorldLab.Core/GameWorld.cs)

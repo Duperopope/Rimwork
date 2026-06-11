@@ -194,6 +194,12 @@ public int CountFunctionalRooms()
     return functionalRoomCount;
 }
 
+public void DisplayFunctionalRooms()
+{
+    int functionalRoomCount = CountFunctionalRooms();
+    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
+}
+
 public void GenerateResourcesOverTime()
 {
     // Example: Generate resources based on some logic
