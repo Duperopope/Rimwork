@@ -927,10 +927,14 @@ DrawColoredPolygon(new[] { p1, p2, p3 }, facetColor);
 				{
 					DrawRect(new Rect2(rect2.Position.X + rect2.Size.X / 2f - 2f, rect2.Position.Y + rect2.Size.Y / 2f - 2f, 4f, 4f), new Color(0.85f, 0.85f, 0.7f));
 				}
-if (item.Kind == FurnitureKind.Chair)
-{
-    DrawRect(new Rect2(rect2.Position.X, rect2.Position.Y, rect2.Size.X, 2f), new Color(0.4f, 0.3f, 0.2f));
-}
+				if (item.Kind == FurnitureKind.Chair)
+				{
+					DrawRect(new Rect2(rect2.Position.X, rect2.Position.Y, rect2.Size.X, 2f), new Color(0.4f, 0.3f, 0.2f));
+				}
+				if (item.Kind == FurnitureKind.Door)
+				{
+					DrawLine(new Vector2(rect2.Position.X, rect2.Position.Y + rect2.Size.Y / 2f), new Vector2(rect2.Position.X + rect2.Size.X, rect2.Position.Y + rect2.Size.Y / 2f), new Color(0.6f, 0.4f, 0.2f), 2f);
+				}
 
 if (item.Kind == FurnitureKind.Door)
 {

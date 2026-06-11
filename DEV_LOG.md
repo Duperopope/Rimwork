@@ -3311,3 +3311,4 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 77] SKIPPED (no SEARCH match): Add the new `if (item.Kind == FurnitureKind.Door)` block after the `if (item.Kind == FurnitureKind.Chair)` block. (src/RimWorldGodot/Main.cs)
 - [iter 78] SKIPPED (no SEARCH match): Add the new `if (item.Kind == FurnitureKind.Door)` block after the existing `if (item.Kind == FurnitureKind.Chair)` block. (src/RimWorldGodot/Main.cs)
 - [iter 79] KEPT: Add the new `if (item.Kind == FurnitureKind.Door)` block after the existing `if (item.Kind == FurnitureKind.Chair)` block. (src/RimWorldGodot/Main.cs)
+- [iter 80] KEPT: Add Door furniture kind check and draw line for door. (src/RimWorldGodot/Main.cs)
