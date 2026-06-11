@@ -1,0 +1,13 @@
+CHANGE: Add a method to count functional rooms
+FILE: src/RimWorldLab.Core/GameWorld.cs
+<<<<<<< SEARCH
+public void DisplayFunctionalRooms()
+{
+    int functionalRoomCount = CountFunctionalRooms();
+=======
+public void DisplayFunctionalRooms()
+{
+    int functionalRoomCount = CountFunctionalRooms();
+    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
+>>>>>>> REPLACE
+NEXT: Implement the CountFunctionalRooms method to count zones that are functional.

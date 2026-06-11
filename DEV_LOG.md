@@ -4486,3 +4486,11 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 149] PREDICTED-FAIL (skipped before build): Add a method to count functional rooms. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
 - [iter 150] CRITIC TASK: - [ ] Step C.150 - Implement a system to automatically assign pawns to tasks based on their needs and skills in GameWorld.cs.
 - [iter 150] KEPT: Add a method to track functional rooms and update the GameWorld class to use it. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 151] SKIPPED (no SEARCH match): Add a method to track resource consumption for pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 152] SKIPPED (no SEARCH match): Add a method to track and display functional room counts. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 153] SKIPPED (no SEARCH match): Add a method to track and display functional room counts. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 154] DONE (had past KEPT edits, change already in file): - [ ] Step C.135 - Implement a system to track and display functional room counts to the player.
+- [iter 155] PREDICTED-FAIL (skipped before build): Start implementing a method to assign pawns to tasks based on their needs and skills. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 156] REVERTED (build failed): Add a method to assign pawns to tasks based on their needs and skills. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-11 23:24).
+- [iter 157] KEPT: Add a method to count functional rooms (src/RimWorldLab.Core/GameWorld.cs)
