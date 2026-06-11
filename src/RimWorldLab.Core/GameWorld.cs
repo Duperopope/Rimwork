@@ -1426,6 +1426,69 @@ public static class GameWorldTests
             failed++;
         }
 
+        // Test 4: Mine passive Stone production (regression test for the
+        // verified W.1b deadlock: Stone stayed 0 forever, no wall was ever
+        // built and no room could close - see docs/AUTONOMOUS_AUDIT.md).
+        try
+        {
+            var world = new GameWorldManager(50, 50);
+            bool minePlaced = false;
+            for (int y = 2; y < 48 && !minePlaced; y++)
+                for (int x = 2; x < 48 && !minePlaced; x++)
+                    if (world.Map.IsPassable(x, y) && world.Map.PlaceFurniture(FurnitureKind.Mine, x, y))
+                        minePlaced = true;
+            int stoneBefore = world.Stone;
+            for (int t = 0; t < 450; t++) world.Tick();
+            if (minePlaced && world.Stone > stoneBefore)
+            {
+                Console.WriteLine("✓ [PASS] MinePassiveStoneTest");
+                passed++;
+            }
+            else
+            {
+                Console.WriteLine($"✗ [FAIL] MinePassiveStoneTest - Stone did not increase (before={stoneBefore}, after={world.Stone}, minePlaced={minePlaced})");
+                failed++;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ [FAIL] MinePassiveStoneTest - {ex.Message}");
+            failed++;
+        }
+
+        // Test 5: Functional room detection (regression test for the
+        // observed "walls+door+bed built but 0 rooms reported" bug class).
+        try
+        {
+            var map = new GameMap(20, 20);
+            // Deterministic arena: clear generated water/resources inside
+            // the future room so furniture placement cannot silently fail.
+            for (int x = 5; x <= 9; x++)
+                for (int y = 5; y <= 9; y++) { map.SetSolid(x, y, false); map.RemoveResourceAt(x, y); }
+            for (int x = 5; x <= 9; x++) { map.SetSolid(x, 5, true); map.SetSolid(x, 9, true); }
+            for (int y = 5; y <= 9; y++) { map.SetSolid(5, y, true); map.SetSolid(9, y, true); }
+            map.SetSolid(7, 9, false); // door gap
+            bool doorOk = map.PlaceFurniture(FurnitureKind.Door, 7, 9);
+            bool bedOk = map.PlaceFurniture(FurnitureKind.Bed, 7, 7);
+            var rooms = RoomDetector.DetectRooms(map);
+            bool hasBedroom = doorOk && bedOk && rooms.Exists(r => r.Function == RoomFunction.Bedroom);
+            if (hasBedroom)
+            {
+                Console.WriteLine("✓ [PASS] FunctionalRoomDetectionTest");
+                passed++;
+            }
+            else
+            {
+                Console.WriteLine($"✗ [FAIL] FunctionalRoomDetectionTest - expected 1 Bedroom, rooms found: {rooms.Count}");
+                failed++;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ [FAIL] FunctionalRoomDetectionTest - {ex.Message}");
+            failed++;
+        }
+
         Console.WriteLine($"\n{passed + failed} tests ran: {passed} passed, {failed} failed\n");
     }
 }

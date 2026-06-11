@@ -19,3 +19,16 @@ Room
 IsFunctional
 IsFunctional
 Room
+_pending
+IsTileReserved
+_pending
+ReserveTile
+_pending
+TaskBoard
+TryClaimBest
+TryClaimBest
+TaskBoard
+TaskBoard
+TryClaimBest
+TryClaimBest
+TaskBoard

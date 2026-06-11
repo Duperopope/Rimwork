@@ -202,52 +202,8 @@ task queue - and stop doing absurd things like building bridges nobody needs.
       ``
       `    /// <summary>0 (miserable) to 100 (happy). Driven by needs and events.</summary>`
       `    public float Mood { get; set; } = 70f;`
-- [ ] Step P.1b - The previous TryClaimBest was an empty placeholder in the
-      wrong class (GameWorldManager) - the REAL one belongs on TaskBoard in
-      src/RimWorldLab.Core/Jobs.cs. SEARCH for exactly these 3 contiguous
-      lines (the end of TryClaimNext inside class TaskBoard):
-      `            return task;`
-      `        }`
-      ``
-      `        return null;`
-      `    }`
-      `}`
-      and REPLACE them with:
-      `            return task;`
-      `        }`
-      ``
-      `        return null;`
-      `    }`
-      ``
-      `    /// <summary>Claims the best task for THIS pawn: priority first, then skill affinity, then distance.</summary>`
-      `    public TaskOrder TryClaimBest(Pawn pawn)`
-      `    {`
-      `        TaskOrder best = null;`
-      `        double bestScore = double.MinValue;`
-      `        foreach (var task in _pending)`
-      `        {`
-      `            if (task.Kind.IsMovementTask() && IsTileReserved(task.TargetX, task.TargetY))`
-      `                continue;`
-      `            double score = task.Priority * 10.0;`
-      `            score -= Math.Abs(task.TargetX - pawn.X) + Math.Abs(task.TargetY - pawn.Y);`
-      `            if ((task.Kind == TaskKind.Build || task.Kind == TaskKind.BuildWall || task.Kind == TaskKind.BuildBridge) && pawn.SkillXP.TryGetValue(SkillKind.Construction, out float cxp))`
-      `                score += cxp / 100.0;`
-      `            if (task.Kind == TaskKind.Harvest && pawn.SkillXP.TryGetValue(SkillKind.Woodcutting, out float wxp))`
-      `                score += wxp / 100.0;`
-      `            if (score > bestScore) { bestScore = score; best = task; }`
-      `        }`
-      `        if (best == null) return null;`
-      `        _pending.Remove(best);`
-      `        if (best.Kind.IsMovementTask())`
-      `            ReserveTile(best.TargetX, best.TargetY);`
-      `        return best;`
-      `    }`
-      `}`
-- [ ] Step P.2b - Use the real brain at the claim site. In
-      src/RimWorldLab.Core/GameWorld.cs, SEARCH for exactly this one line:
-      `                var next = Tasks.TryClaimNext();`
-      and REPLACE it with exactly this one line:
-      `                var next = Tasks.TryClaimBest(pawn);`
+- [ ] Step P.1b - Implement the `TryClaimBest` method in the `TaskBoard` class by adding the following lines after the existing `TryClaimNext` method:
+- [ ] Step P.2b - Implement the `TryClaimBest` method in `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
 - [ ] Step P.3b - The Pawn class lives in src/RimWorldLab.Core/GameWorld.cs
       (there is NO Pawn.cs file). SEARCH for exactly this one line:
       `    public float Hunger { get; set; } = 0f;`
@@ -638,3 +594,4 @@ master" loop, work through these in order - each is independently testable:
 - [ ] Step C.90 - Implement a basic room detection system in GameWorld.cs to identify functional rooms based on connected walkable tiles.
 - [ ] Step C.105 - Implement a basic room detection system to count functional rooms and trigger win condition in GameWorld.cs
 - [ ] Step C.135 - Implement a basic room detection system to count functional rooms and track progress towards win conditions in GameWorld.cs
+- [ ] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.

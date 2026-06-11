@@ -3193,3 +3193,33 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 4] SKIPPED (no SEARCH match): Add the new `if (item.Kind == FurnitureKind.Workbench)` block after the existing `if (item.Kind == FurnitureKind.Stove)` block. (src/RimWorldGodot/Main.cs)
 - [iter 6] SKIPPED (no SEARCH match): Add a new method to handle the drawing of pawns. (src/RimWorldGodot/Main.cs)
 - [iter 7] KEPT: Remove unused AudioStreamPlayer creation in HandleSubViewportPattern (src/RimWorldGodot/Main.cs)
+- [iter 8] REVERTED (build failed): Implement TryClaimNext method in TaskBoard (src/RimWorldLab.Core/Jobs.cs)
+- [startup] Stack relaunched after boot (2026-06-11 14:04).
+- [iter 1] PREDICTED-FAIL (skipped before build): Add the TryClaimBest method to TaskBoard class. - Identifier 'TryGetValue' does not exist in the target file or the game API - it would not compile.
+- [iter 2] PREDICTED-FAIL (skipped before build): Add the TryClaimBest method to TaskBoard class. - Identifier 'TryGetValue' does not exist in the target file or the game API - it would not compile.
+- [iter 3] PREDICTED-FAIL (skipped before build): Add the `TryClaimBest` method to `TaskBoard` class. - Identifier 'TryGetValue' does not exist in the target file or the game API - it would not compile.
+- [iter 4] PREDICTED-FAIL (skipped before build): Add the `TryClaimBest` method to the `TaskBoard` class. - Identifier 'TryGetValue' does not exist in the target file or the game API - it would not compile.
+- [iter 5] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step P.1b - Implement the `TryClaimBest` method in the `TaskBoard` class by adding the following lines after the existing `TryClaimNext` method:
+- [iter 6] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class. - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 7] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class. - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 8] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 9] PREDICTED-FAIL (skipped before build): Add the `TryClaimBest` method to the `TaskBoard` class. - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 10] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step P.1b - Implement the `TryClaimBest` method in the `TaskBoard` class by adding the following lines after the existing `TryClaimNext` method:
+- [iter 11] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class. - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 12] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class. - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 13] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class. - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 14] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class. - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 15] CRITIC TASK: - [ ] Step C.15 - Implement a system to generate functional rooms automatically to meet the win condition.
+- [iter 15] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step P.1b - Implement the `TryClaimBest` method in the `TaskBoard` class by adding the following lines after the existing `TryClaimNext` method:
+- [iter 16] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 17] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class. - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 18] PREDICTED-FAIL (skipped before build): Implement the `TryClaimBest` method in the `TaskBoard` class. - Patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 19] SKIPPED (no SEARCH match): Implement the `TryClaimNext` method in the `TaskBoard` class. (src/RimWorldLab.Core/Jobs.cs)
+- [iter 20] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step P.1b - Implement the `TryClaimBest` method in the `TaskBoard` class by adding the following lines after the existing `TryClaimNext` method:
+- [iter 21] REVERTED (build failed): Replace `Tasks.TryClaimNext()` with `Tasks.TryClaimBest(pawn)` in the `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 22] PREDICTED-FAIL (skipped before build): Ensure `pawn` is declared and in scope before using it in the `TryClaimBest` method call. - Identifier 'TryClaimBest' caused a compile failure before (learned blocklist).
+- [iter 23] PREDICTED-FAIL (skipped before build): Replace `TryClaimNext` with `TryClaimBest` in the task claiming logic. - Identifier 'TryClaimBest' caused a compile failure before (learned blocklist).
+- [iter 24] PREDICTED-FAIL (skipped before build): Replace `TryClaimNext` with `TryClaimBest` in the task claiming logic. - Identifier 'TryClaimBest' caused a compile failure before (learned blocklist).
+- [iter 25] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step P.2b - Implement the `TryClaimBest` method in `TaskBoard` (src/RimWorldLab.Core/Jobs.cs).
+- [startup] Stack relaunched after boot (2026-06-11 14:14).
+- [iter 28] SKIPPED (no SEARCH match): Implement the `TryClaimBest` method in `TaskBoard`. (src/RimWorldLab.Core/Jobs.cs)

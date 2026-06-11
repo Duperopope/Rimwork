@@ -29,9 +29,27 @@ while ($true) {
         $reverted = ($devlog | Select-String 'REVERTED').Count
         $predicted = ($devlog | Select-String 'PREDICTED-FAIL').Count
 
-        # Last game-health line from the loop output
-        $health = (Get-Content "g:\Rimwork\scripts\loop_stdout.log" -Tail 400 -ErrorAction SilentlyContinue |
-            Select-String '\[tick|VERDICT' | Select-Object -Last 2 | ForEach-Object { $_.Line }) -join "<br>"
+        # Structured health published by the dev loop each iteration
+        $health = "<span class='muted'>en attente de la premiere iteration...</span>"
+        $hj = $null
+        if (Test-Path "g:\Rimwork\scripts\logs\health.json") {
+            try { $hj = Get-Content "g:\Rimwork\scripts\logs\health.json" -Raw | ConvertFrom-Json } catch {}
+        }
+        $revertsLast20 = ($devlog | Select-Object -Last 20 | Select-String 'REVERTED').Count
+        $lastCommit = (git -C g:\Rimwork log -1 --format="%h %s (%cr)" 2>$null)
+        if ($hj) {
+            $rooms = if ($hj.simSummary -match 'VERDICT: (\d+) functional rooms') { $Matches[1] } else { "?" }
+            $simTick = if ($hj.simSummary -match '(\[tick[^\r\n]+)') { Esc($Matches[1]) } else { "" }
+            $buildCol = if ($hj.build -eq 'OK') { '#3fb950' } else { '#f85149' }
+            $simCol = if ($hj.simOk) { '#3fb950' } else { '#f85149' }
+            $health = "<b style='color:$buildCol'>BUILD $($hj.build)</b> &nbsp; " +
+                "<b style='color:$simCol'>SIM $(if ($hj.simOk) { 'OK' } else { 'CRASH' })</b> &nbsp; " +
+                "<b>$rooms pieces fonctionnelles</b><br>" +
+                "<span class='health'>$simTick</span><br>" +
+                "iteration $($hj.iter) en $($hj.iterSeconds)s ($($hj.timestamp))<br>" +
+                "annulations (20 dernieres iterations): <b>$revertsLast20</b><br>" +
+                "dernier commit: <span class='health'>$(Esc($lastCommit))</span>"
+        }
 
         # Friendly translation of the last 25 dev log events
         $events = $devlog | Select-Object -Last 25

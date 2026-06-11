@@ -117,6 +117,22 @@ function Test-PatchPrediction {
     $kbFile = "g:\Rimwork\scripts\logs\bad_identifiers.txt"
     if (Test-Path $kbFile) { Get-Content $kbFile | ForEach-Object { $knownBad[$_] = $true } }
 
+    # The model sometimes "completes" a task with an empty stub that
+    # compiles and passes tests (observed: a TryClaimBest placeholder
+    # returning null). Reject placeholder patches outright.
+    if ($Replace -match '(?i)placeholder|will be (expanded|implemented)|// TODO: implement|throw new NotImplementedException') {
+        return "REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic."
+    }
+    # Structural stub: a newly added method whose whole body is empty or a
+    # bare 'return null;'/'return;' (the TryClaimBest incident). Methods
+    # like that compile, pass tests, and do nothing.
+    foreach ($m in [regex]::Matches($Replace, '(?ms)(public|private|protected)\s+[\w<>\[\]?, ]+\s+(\w+)\s*\([^)]*\)\s*\{(.*?)\}')) {
+        $body = $m.Groups[3].Value.Trim() -replace '//.*', ''
+        if ($body -match '^\s*(return\s+(null|false|0f?|"")\s*;)?\s*$') {
+            return "REJECTED anti-stub: method '$($m.Groups[2].Value)' has an empty/trivial body (returns nothing useful). Implement the real behavior."
+        }
+    }
+
     # Identifiers used as members/calls in the replace text: Foo.Bar / .Baz(
     $ids = [regex]::Matches($Replace, '\.([A-Z]\w{3,})\s*\(') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique
     foreach ($id in $ids) {
@@ -138,6 +154,26 @@ function Add-BadIdentifiers {
     foreach ($m in [regex]::Matches($BuildErrors, "'(\w{4,})'")) {
         Add-Content -Path "g:\Rimwork\scripts\logs\bad_identifiers.txt" -Value $m.Groups[1].Value
     }
+}
+
+function Test-ItemEvidence {
+    # ANTI-FALSE-SUCCESS: a roadmap item may only be checked off if the code
+    # it quotes actually exists in the target file. Two confirmed incidents
+    # of "marked done, code absent" (TryClaimBest stub, phantom Pawn.Mood)
+    # motivated this. Returns $true when evidence is sufficient OR the item
+    # quotes no code (nothing checkable). Whitespace-normalized comparison.
+    param([string]$ItemText, [string]$TargetContent)
+    $quoted = [regex]::Matches($ItemText, '(?m)^\s*`(.+)`\s*$') |
+        ForEach-Object { Get-NormalizedLine $_.Groups[1].Value } |
+        Where-Object { $_.Length -gt 10 -and $_ -notmatch '^//' }
+    if (-not $quoted -or @($quoted).Count -eq 0) { return $true }
+    $normContent = ($TargetContent -split "`n" | ForEach-Object { Get-NormalizedLine $_ })
+    $found = 0
+    foreach ($q in $quoted) { if ($normContent -contains $q) { $found++ } }
+    $ratio = $found / @($quoted).Count
+    if ($ratio -ge 0.6) { return $true }
+    Write-Host "EVIDENCE CHECK FAILED: only $found/$(@($quoted).Count) quoted code lines present in target file." -ForegroundColor Red
+    return $false
 }
 
 function Find-DuplicateBlocks {
@@ -448,6 +484,7 @@ $rewriteCounts = @{}
 
 for ($i = 1; $i -le $MaxIterations; $i++) {
     Write-Host "`n--- Iteration $i ---" -ForegroundColor Yellow
+    $iterStart = Get-Date
 
     # Every 15 iterations the model steps back, plays its own build and
     # writes the next improvement task as a "ruthless gamer" - continuous
@@ -519,6 +556,16 @@ Reply with EXACTLY one line in this format and nothing else:
         # metrics from a 5000-tick headless playthrough, not just compile state.
         $diag = Invoke-DiagSim
         $testSummary += "`nGAME HEALTH (5000-tick simulation): " + $diag.Summary
+
+        # Publish structured health for the dashboard (real metrics, not vibes).
+        @{
+            iter        = $i
+            timestamp   = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+            build       = if ($build.Ok) { "OK" } else { "FAIL" }
+            simOk       = $diag.Ok
+            simSummary  = $diag.Summary
+            iterSeconds = [math]::Round(((Get-Date) - $iterStart).TotalSeconds)
+        } | ConvertTo-Json -Compress | Set-Content -Path "g:\Rimwork\scripts\logs\health.json" -Encoding utf8
     } else {
         $testSummary = "(skipped, build failed)"
     }
@@ -553,7 +600,16 @@ Reply with EXACTLY one line in this format and nothing else:
         # "re-doing" it) - mark it done instead of burning more attempts.
         # U.3.1 burned ~30 iterations exactly this way.
         $keptHistoryFile = "g:\Rimwork\scripts\logs\kept_history.txt"
-        if ((Test-Path $keptHistoryFile) -and ((Get-Content $keptHistoryFile) -contains $itemKey)) {
+        # Evidence gate: never trust KEPT history alone - the quoted code
+        # must actually be in the file named by the item.
+        $evidenceOk = $true
+        if ($firstUnchecked -match '(src/[\w./]+\.cs)') {
+            $evPath = "g:\Rimwork\" + ($Matches[1] -replace '/', '\')
+            if (Test-Path $evPath) {
+                $evidenceOk = Test-ItemEvidence -ItemText $firstUnchecked -TargetContent (Get-Content $evPath -Raw)
+            }
+        }
+        if ((Test-Path $keptHistoryFile) -and ((Get-Content $keptHistoryFile) -contains $itemKey) -and $evidenceOk) {
             Write-Host "Item had KEPT edits in past runs and no longer matches - marking done." -ForegroundColor Green
             $roadmapNow = Get-Content "g:\Rimwork\ROADMAP.md"
             for ($r = 0; $r -lt $roadmapNow.Count; $r++) {
@@ -818,7 +874,7 @@ for the exact format). Do NOT output the full file.
     }
 
     $editFingerprint = (($edits | ForEach-Object { $_.Search + "|||" + $_.Replace }) -join "###")
-    if ($itemKey -eq $lastEditItem -and $editFingerprint -eq $lastEditFingerprint) {
+    if ($itemKey -eq $lastEditItem -and $editFingerprint -eq $lastEditFingerprint -and (Test-ItemEvidence -ItemText $firstUnchecked -TargetContent $targetContent)) {
         # Same item, byte-identical patch as last time it was applied - the
         # model thinks it's done and is repeating itself. Don't duplicate
         # the code block again; mark the item done and move on.
@@ -893,7 +949,7 @@ for the exact format). Do NOT output the full file.
             git -C g:\Rimwork commit -q -m "[ai-loop iter $i] $changeDesc ($targetRelPath)" 2>$null | Out-Null
             git -C g:\Rimwork push -q origin master 2>$null | Out-Null
 
-            if ($keptStreak -ge $KeptDoneThreshold) {
+            if ($keptStreak -ge $KeptDoneThreshold -and (Test-ItemEvidence -ItemText $firstUnchecked -TargetContent $newContent)) {
                 Write-Host "$keptStreak consecutive KEPT changes on this item - marking it done." -ForegroundColor Green
                 $roadmapNow = Get-Content "g:\Rimwork\ROADMAP.md"
                 for ($r = 0; $r -lt $roadmapNow.Count; $r++) {
