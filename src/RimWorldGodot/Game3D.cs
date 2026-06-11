@@ -267,7 +267,17 @@ public partial class Game3D : Node3D
                 if (System.IO.File.Exists(@"g:/Rimwork/scripts/viewcmd.txt"))
                 {
                     var want = System.IO.File.ReadAllText(@"g:/Rimwork/scripts/viewcmd.txt").Trim();
-                    if ((want == "Local" || want == "Planet" || want == "Solar") && want != ViewLayer)
+                    if (want.StartsWith("Planet:"))
+                    {
+                        int bodyN = int.Parse(want.Substring(7));
+                        if (bodyN != _currentBodyIdx || ViewLayer != "Planet")
+                        {
+                            if (ViewLayer == "Local") { _savedRigPos = _camRig.Position; _savedZoom = _zoom; }
+                            BuildGlobeFor(bodyN);
+                            SetViewLayer("Planet");
+                        }
+                    }
+                    else if ((want == "Local" || want == "Planet" || want == "Solar") && want != ViewLayer)
                     {
                         if (ViewLayer == "Local") { _savedRigPos = _camRig.Position; _savedZoom = _zoom; }
                         SetViewLayer(want);
@@ -690,11 +700,14 @@ public partial class Game3D : Node3D
             var (rx, ry) = TileToRegion(_tiles[i].Center);
             var reg = body.Regions[rx, ry];
             var baseCol = BiomeColors.TryGetValue(reg.Biome, out var bc) ? bc : new Color(0.4f, 0.4f, 0.4f);
-            // ocean: low-fertility tiles near the "equatorial seas" band
-            bool ocean = ((i * 2654435761u) % 100) < (uint)(28 + (1f - body.Habitability) * 25);
+            // Contiguous seas: smooth low-frequency noise over the sphere
+            // (sum of sines), threshold scaled by habitability.
+            var cc = _tiles[i].Center;
+            float n = Mathf.Sin(cc.X * 3.1f + cc.Y * 1.7f) + Mathf.Sin(cc.Y * 2.3f - cc.Z * 2.9f) + Mathf.Sin(cc.Z * 3.7f + cc.X * 1.3f);
+            bool ocean = n < -0.55f + (1f - body.Habitability) * 1.1f;
             tileColors[i] = ocean
-                ? new Color(0.10f, 0.24f, 0.45f)
-                : baseCol * (0.85f + (float)rng.NextDouble() * 0.3f);
+                ? new Color(0.09f, 0.27f, 0.52f)
+                : baseCol * (0.95f + (float)rng.NextDouble() * 0.25f);
             if (isHome && reg.IsColonyRegion && !ocean)
             {
                 float d = _tiles[i].Center.DistanceTo(new Vector3(0, 0.42f, 0.91f));

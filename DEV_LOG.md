@@ -3709,3 +3709,8 @@ Open this file (or watch it) to see what the autonomous loop is building.
 - [iter 13] SKIPPED (no SEARCH match): Ensure tuple syntax in the `ExploreRoom` method by ensuring each tuple contains at least two elements. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 14] PREDICTED-FAIL (skipped before build): Ensure tuple syntax in the `ExploreRoom` method by ensuring each tuple contains at least two elements. - Identifier 'Dequeue' does not exist in the target file or the game API - it would not compile.
 - [iter 15] CRITIC TASK: - [ ] Step C.15 - Implement a resource generation system to provide players with wood and stone over time, ensuring they have resources to build functional rooms. (GameWorld.cs)
+- [iter 15] SKIPPED (no SEARCH match): Ensure each tuple in the `ExploreRoom` method contains at least two elements. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 16] SKIPPED (no SEARCH match): Ensure tuple syntax is correct in the `ExploreRoom` method by ensuring each tuple contains at least two elements. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 17] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.60 - Fix tuple syntax in the `ExploreRoom` method by ensuring each tuple contains at least two elements.
+- [iter 18] SKIPPED (no SEARCH match): Add a method to detect functional rooms in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 19] PREDICTED-FAIL (skipped before build): Add a method to detect rooms in GameWorld.cs - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
