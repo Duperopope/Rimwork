@@ -419,3 +419,4 @@
 - NEVER reference identifiers you have not SEEN in the provided file excerpt (PlaceFurniture, LocalMap, GetCell do NOT exist).
 - Ensure all variables used in method calls are defined within the current scope or passed as parameters.
 - Ensure code additions are within valid method blocks and not standalone statements outside methods.
+- Ensure all referenced properties and fields exist in the current context before adding new methods.

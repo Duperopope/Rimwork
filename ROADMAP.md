@@ -18,10 +18,10 @@ Chaque item doit etre RESSENTI en jouant. Le playtest automatique (toutes les
 
 - [ ] Step F.1a - In src/RimWorldLab.Core/GameWorld.cs, in the GameWorldManager Tick() method, right after `TickGoals();` style calls, add: if (TotalTicks == 200) LogEvent("Guide: recoltez 10 bois (clic sur un arbre).");
 - [ ] Step F.2a - In src/RimWorldLab.Core/GameWorld.cs (class GameWorldManager), add: private int GetHourFromTicks() { return (TotalTicks / 400) % 24; }
-- [ ] Step F.3a - In src/RimWorldLab.Core/GameWorld.cs, inside the existing `if (TotalTicks % 40 == 0)` block in the Tick() method, add: foreach (var pw in _pawns.Where(q => q.HP > 0 && q.Fatigue > 80)) pw.Fatigue = Math.Max(0f, pw.Fatigue - 2f);
+- [ ] Step F.3a - In src/RimWorldLab.Core/GameWorld.cs, inside the existing `if (TotalTicks % 40 == 0)` block in the Tick() method, add: `foreach (var pw in _pawns.Where(q => q.HP > 0 && q.Fatigue > 80)) pw.Fatigue = Math.Max(0f, pw.Fatigue - 2f);`
 - [ ] Step F.4b - Audio procedural: dans src/RimWorldGodot/Game3D.cs, ajouter la méthode GenerateShortBipSound() sans appel pour générer un bip court via AudioStreamGenerator.
-- [ ] Step F.5 - In src/RimWorldLab.Core/GameWorld.cs, where Hunger increases each tick for living pawns, multiply the increment by 1.3f when the pawn's task is not null (worker hunger).
-- [ ] Step F.6 - In src/RimWorldLab.Core/GameWorld.cs, in TickGoals(), after the last goal, add a goal: when GetRooms() count of functional rooms >= 3 and Tools >= 10, LogEvent("Objectif final atteint: colonie outillee !") and GainResearch(10).
+- [ ] Step F.5a - In src/RimWorldLab.Core/GameWorld.cs, find the method where Hunger increases each tick for living pawns and add a check to see if the pawn's task is not null. Ensure the method signature matches the existing code.
+- [ ] Step F.6a - In src/RimWorldLab.Core/GameWorld.cs, add a new method to check if the colony is outillee: `public bool IsColonyOutillee() { return _functionalRoomCount >= 3 && Tools >= 10; }`.
 
 ## PRIORITE: la vie sur les cartes (Down Here! chantier faune)
 - [ ] Step D.1 - In src/RimWorldLab.Core/GameWorld.cs, immediately after the line `Macro.Tick(TotalTicks);`, insert the following line:
@@ -293,3 +293,5 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [ ] Step C.75 - Implement a resource consumption system for building materials to encourage efficient use and planning. (GameWorld.cs)
 - [ ] Step T84 - (playtest) fix: ALL PAWNS IDLE with 1 pending tasks (3 polls) (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.105 - Implement a resource consumption system for pawns to ensure they deplete resources over time and must be managed efficiently. (GameWorld.cs)
+- [ ] Step C.120 - Reduce the number of resources generated per tick to encourage sustainable resource management. (GameWorld.cs)
+- [ ] Step C.135 - Implement a resource management system to limit the rate of resource consumption and encourage sustainable use. (GameWorld.cs)

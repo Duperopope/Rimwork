@@ -13,13 +13,13 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
-$llm = "http://localhost:1234"
+$llm = "http://localhost:1235"  # arena-private port: nothing else may answer here
 $arenaLog = "g:\Rimwork\scripts\logs\model_arena.json"
 $championFile = "g:\Rimwork\scripts\llm_champion.txt"
 
 # ---- Candidates (GGUF fitting a 16GB RX 7800 XT; MoE may spill to CPU) ----
 $candidates = @(
-    @{ key = "qwen25-14b";  file = "Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf"; repo = $null }  # baseline, already installed
+    @{ key = "qwen25-14b";  file = "Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf"; repo = "bartowski/Qwen2.5-Coder-14B-Instruct-GGUF" }  # baseline
     @{ key = "devstral";    file = "Devstral-Small-2505-Q4_K_M.gguf";        repo = "mistralai/Devstral-Small-2505_gguf" }
     @{ key = "qwen3-coder-30b"; file = "Qwen3-Coder-30B-A3B-Instruct-Q3_K_M.gguf"; repo = "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF" }
 )
@@ -77,8 +77,18 @@ function Wait-Llm([int]$timeoutSec = 240) {
 }
 
 function Start-Model([string]$file) {
-    wsl -d Ubuntu -u root -- bash -c "pkill -f llama-server; sleep 2; nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$file -ngl 99 -c 16384 --host 0.0.0.0 --port 1234 > /var/log/llama-server.log 2>&1 &" | Out-Null
-    return (Wait-Llm)
+    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*1235'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$file -ngl 99 -c 16384 --host 0.0.0.0 --port 1235 > /var/log/llama-arena.log 2>&1 &" | Out-Null
+    if (-not (Wait-Llm)) { return $false }
+    # Identity check: refuse to bench if the served model is not the candidate.
+    try {
+        $served = (Invoke-RestMethod "$llm/v1/models" -TimeoutSec 15).data[0].id
+        $stem = [System.IO.Path]::GetFileNameWithoutExtension($file)
+        if ($served -notmatch [regex]::Escape($stem.Substring(0, [Math]::Min(12, $stem.Length)))) {
+            Write-Host "  IDENTITY MISMATCH: port serves '$served', wanted '$stem' - aborting candidate"
+            return $false
+        }
+    } catch { return $false }
+    return $true
 }
 
 function Get-HfFile([string]$repo, [string]$file) {
@@ -92,11 +102,13 @@ function Get-HfFile([string]$repo, [string]$file) {
     }
     if (-not $entry) { return $null }
     $name = [System.IO.Path]::GetFileName($entry.path)
-    Write-Host "downloading $repo / $($entry.path) ..."
-    wsl -d Ubuntu -u root -- bash -c "cd /root/models && wget -q -c 'https://huggingface.co/$repo/resolve/main/$($entry.path)' -O '$name'"
-    $ok = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$name && [ `$(stat -c%s /root/models/$name) -gt 3000000000 ] && [ `$(head -c4 /root/models/$name) = 'GGUF' ] && echo OK || rm -f /root/models/$name"
-    if ($ok -match "OK") { return $name }
-    Write-Host "  download invalid (not a multi-GB GGUF) - removed"
+    $want = [long]($entry.lfs.size ?? $entry.size)
+    Write-Host "downloading $repo / $($entry.path) ($([math]::Round($want/1GB,1)) GB)..."
+    wsl -d Ubuntu -u root -- bash -c "cd /root/models && wget -q -c --tries=3 'https://huggingface.co/$repo/resolve/main/$($entry.path)' -O '$name'"
+    $size = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name 2>/dev/null || echo 0")
+    if ($size -eq $want -and $want -gt 3000000000) { return $name }
+    Write-Host "  download incomplete ($size / $want bytes) - removed"
+    wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$name"
     return $null
 }
 
@@ -176,7 +188,9 @@ if ($ranked.Count -gt 0) {
         Write-Host "deleting loser model: $($r.file)"
         wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$($r.file)"
     }
-    # Relaunch the champion for the dev loop
-    Start-Model $champ.file | Out-Null
+    # Relaunch the champion for the dev loop on the PRODUCTION port 1234.
+    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*1234'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$($champ.file) -ngl 99 -c 16384 --host 0.0.0.0 --port 1234 > /var/log/llama-server.log 2>&1 &" | Out-Null
+    # Stop the arena server (port 1235).
+    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*1235'" | Out-Null
 }
 $ranked | Format-Table key, score, speedPts, minutes
