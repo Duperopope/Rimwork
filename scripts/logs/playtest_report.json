@@ -1,25 +1,25 @@
 {
-  "timestamp": "2026-06-12 16:10:38",
+  "timestamp": "2026-06-12 16:21:18",
   "steps": 8,
   "issued": [
-    "harvest 30 50"
+    "harvest 3 4",
+    "harvest 20 45"
   ],
   "anomalies": [],
   "llmNotes": [
-    "rejected model output: Harvest 5 5.",
-    "rejected model output: Aiden: harvest 20 37",
-    "rejected model output: harvest 9 30.",
-    "rejected model output: Since the game state indicates that the pawns are idle and the goal is to build 3 functional rooms, the first step is to make the pawns gather resources. In this case, the most important resource is wood, so the command should be to make the pawns harvest wood.",
-    "rejected model output: select 0, harvest 7,31, select 1, harvest 44,2, select 2, harvest 44,4, select 3, harvest 9,30, select 4, harvest 44,8, select 5, harvest",
+    "rejected model output: harvest 29 48 1",
+    "rejected model output: Harvest 9 30.",
     "rejected model output: harvest 7 31 select 0",
-    "rejected model output: Harvest 7 31."
+    "rejected model output: harvest 7 31 select 0",
+    "rejected model output: harvest 7 31 select 0",
+    "rejected model output: harvest 7 31, harvest 44 2, harvest 44 4, harvest 9 30, harvest 44 8, harvest 39 35, harvest 43 14, harvest 24 36"
   ],
   "final": {
+    "pawns": 8,
+    "wood": 5,
     "rooms": 0,
-    "ticks": 2436,
     "goalsDone": 0,
-    "wood": 8,
-    "stone": 12,
-    "pawns": 8
+    "stone": 11,
+    "ticks": 2366
   }
 }

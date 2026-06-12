@@ -293,6 +293,20 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 window.addEventListener('beforeunload', () => {
   try { sessionStorage.setItem('scrollY', String(window.scrollY)); } catch (e) {}
+  // Inner scrollable panes (Release View columns, etc.) reset on every
+  // 10s reload too: save each pane's scrollTop keyed by its index.
+  try {
+    const tops = Array.from(document.querySelectorAll('.rel-body')).map(el => el.scrollTop);
+    sessionStorage.setItem('relScroll', JSON.stringify(tops));
+  } catch (e) {}
+});
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    const tops = JSON.parse(sessionStorage.getItem('relScroll') || '[]');
+    document.querySelectorAll('.rel-body').forEach((el, i) => {
+      if (typeof tops[i] === 'number') el.scrollTop = tops[i];
+    });
+  } catch (e) {}
 });
 // Collapsible groups: remember which ones the user opened/closed so the
 // 10s data refresh never undoes a manual fold.

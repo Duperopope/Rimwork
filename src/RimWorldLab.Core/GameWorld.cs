@@ -1423,11 +1423,7 @@ private void UpdateHeaderText()
         {
             LogEvent("Moral de la colonie au plus bas — construisez des lits et nourrissez vos colons !");
         }
-if (TotalTicks % 2000 == 0 && _pawns.Count(p => p.HP > 0) > 0 && _pawns.Where(p => p.HP > 0).Average(p => p.Mood) < 30)
-{
-    LogEvent("Moral de la colonie au plus bas — construisez des lits et nourrissez vos colons !");
-}
-if (TotalTicks % 100 == 0)
+        if (TotalTicks % 100 == 0)
         {
             var alive = _pawns.Where(p => p.HP > 0).ToList();
             foreach (var p in alive)

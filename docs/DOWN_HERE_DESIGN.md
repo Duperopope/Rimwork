@@ -1,78 +1,114 @@
-# DOWN HERE ! — Document de design directeur (2026-06-11)
+# DOWN HERE ! — Document directeur UNIQUE (12/06/2026)
 
-**Pitch** : gestion de colonie · stratégie temps réel/tour par tour · 4X ·
-exploration spatiale et développement de civilisation, avec comportements
-émergents et histoires auto-générées, et un endgame façon Kerbal Space
-Program. Différenciateur face à Before We Leave (référence UX planète) :
-la couche RimWorld/Bannerlord qui vit SOUS la couche 4X.
+CE FICHIER EST LA SEULE SOURCE DE VÉRITÉ DU DESIGN. Toute idée de jeu va
+ICI (pas dans le ROADMAP, pas dans le DEV_LOG, pas dans le dashboard).
+Le ROADMAP.md ne contient QUE la file d'exécution dérivée du jalon actif.
 
-## Échelles (toutes naviguables, zoom continu molette)
-(à venir) Micro/bactérien (départ Spore: piscine primordiale, évolution) ↔
-(à venir) Organisme (créature individuelle, stade Spore 2) ↔
-Tuile locale (carte jouable) ↔ Planète hex (Goldberg) ↔ Système solaire ↔
-(à venir) Multi-systèmes connectés.
-Le JEU COMMENCE au niveau bactérie: on évolue de la cellule à la
-civilisation interstellaire - Spore-like en début de partie, RimWorld au
-milieu, 4X/KSP en fin.
+**Pitch** : de la bactérie aux étoiles. Spore-like en début de partie,
+RimWorld/Bannerlord au milieu, 4X/KSP en fin — un seul zoom continu,
+comportements émergents, histoires auto-générées.
 
-## Chantiers actés — état
-| Chantier | État |
-|---|---|
-| Planète Goldberg ~1212 tuiles, biome par tuile, props, lune, atmosphère | ✅ vérifié à l'image |
-| Tuile illuminée à la sélection + fiche ressources | ✅ |
-| Nuages stylisés BWL (amas joufflus) + toggle C | ✅ ce commit |
-| Bouton Visiter → carte d'expédition par tuile + retour par dézoom | ✅ ce commit (v1: 64x64) |
-| Pause machine depuis le dashboard (/pause /resume) | ✅ |
-| Renommage Down Here !, version down-here-0.2 | ✅ |
+---
 
-## Chantiers suivants (ordre de dépendance)
-1. **Sauvegardes multi-slots** : sérialisation GameWorldManager (JSON) →
-   user://saves/slotN.json ; menu Continuer = liste des slots; Nouvelle
-   partie → écran de création de monde.
-2. **Écran de création de monde** (seed, nb de planètes, vitesse d'orbite,
-   mix de biomes, densité pawns/animaux, taille des cartes locales) —
-   toutes les variables alimentent la génération déterministe.
-3. **Cartes locales ×10** (512+) avec génération PAR BIOME de la tuile
-   (désert sans rivières, toundra gelée, forêt dense) — streaming/chunks si
-   nécessaire; l'eau avec une vraie logique (rivières qui coulent vers les
-   océans, lacs dans les dépressions).
-4. **Jour/nuit orbital** : la position de la tuile sur le globe + la
-   rotation de la planète + son orbite déterminent l'heure locale ; la lune
-   module marées/raids nocturnes. Météo DÉTERMINISTE par tuile (seed +
-   climat + saison orbitale).
-5. **Vue 4X des unités** : pions/armées visibles sur les tuiles planète =
-   agrégats réels des pawns présents dans la tuile (pas de fiction).
-6. **Formes de vie par biome** : tables de faune par biome (toundra:
-   caribous; forêt: cerfs/loups; désert: scarabées géants...) — d'abord en
-   pression régionale (LOD), matérialisées en entités sur la carte locale.
-7. **Gravité/atmosphère/composition par planète** : modificateurs réels
-   (vitesse de déplacement, coût de construction, besoin d'équipement) —
-   pont vers l'endgame spatial KSP.
-8. **Échelles micro (départ Spore)** : SimLOD.Micro - biomasse microbienne
-   par tuile (nourrit la fertilité), mini-jeu d'évolution cellulaire comme
-   ouverture de partie; SimLOD.Organism - le stade créature avant la tribu.
-9. **Multi-systèmes** : graphe d'étoiles connectées, l'échelle au-dessus de
-   Solar (SimLOD.Galaxy), navigation par le même zoom continu.
+## 1. L'EXPÉRIENCE JOUEUR CIBLE (dans l'ordre où elle se vit)
 
-## PROGRAMME PRIORITAIRE: la période Spore (décision 12/06/2026)
-Le jeu COMMENCE au stade microbien (ORIGINES, jouable depuis e7eee44) et on
-ne passe à l'échelle supérieure qu'après 10 évolutions. Philosophie
-100% PROCÉDURAL/SHADERS, zéro asset (paradigme post-1995: le calcul
-remplace les assets - efficacité matérielle, pertinence Game Awards).
-- Créatures: système de création organique modelable, au moins aussi
-  profond que Spore mais JOLI (membranes multi-sinus, métaballes, pas de
-  formes simples). Les ANIMAUX du jeu suivent le même système.
-- Boucle micro: manger (plantes/espèces plus petites) -> énergie (coût
-  selon la taille) -> reproduction -> menu d'évolution (objectif: ~100
-  mutations) -> grossir = nouveaux prédateurs ET nouvelles proies.
-- Échelles suivantes (organisme, tribu, colonie, 4X) déverrouillées par
-  paliers d'évolution. Assets/bâtiments: bien plus tard.
-- Jouable sur le web: export C# Godot indisponible (4.6) -> teaser JS
-  procédural sur la GitHub Pages en attendant le support moteur.
+1. **Menu** : titre, Continuer/Nouvelle partie/Charger/Options. Sobre, beau.
+2. **Origines (microbe)** : on naît cellule dans la soupe primordiale.
+   Manger → énergie → reproduction → mutations. ~10 évolutions débloquent
+   la suite. L'ADN choisi LÈGUE des traits à la civilisation.
+3. **Transition** : cinématique courte / fondu — "des éons passent" — la
+   espèce devient tribu puis colonie. L'héritage microbe est visible
+   (traits de départ des colons, biome de naissance).
+4. **Colonie (cœur RimWorld)** : survie, besoins, humeur, pièces, économie,
+   tech, raids, caravanes. Un ARC: survie précaire → base stable → fusée.
+5. **Planète (hex Goldberg)** : expéditions sur les tuiles, sites
+   extérieurs, factions, ressources régionales qui REMONTENT à la colonie.
+6. **Système solaire** : observer, puis voyager (endgame fusée KSP-light),
+   coloniser un second corps.
+7. **Multi-systèmes** : la civilisation essaime (très long terme).
 
-## Règles de fabrication
-- Toute affirmation visuelle se vérifie par screenshot auto avant d'être
-  annoncée. Toute mécanique par test ou simulation headless.
-- Le LLM local continue le gameplay coeur (GameWorld/WorldModel/Needs/Jobs)
-  via le roadmap; les passes lourdes (3D/UI/architecture) restent frontier.
-- UI freeze contract toujours en vigueur (structure, pas le contenu).
+## 2. ÉTAT RÉEL — audit du 12/06/2026 (honnête, vérifié en jeu)
+
+| Phase | État | Écart principal |
+|---|---|---|
+| Menu | ✅ propre (backdrop cellules, slots, options) | RAS |
+| Origines | ⚠️ fork de Thrive lancé en PROCESSUS SÉPARÉ | aucun retour vers la colonie, aucun héritage: c'est un autre jeu |
+| Transition | ❌ inexistante | on tombe direct sur la carte |
+| Colonie | ⚠️ sim riche (besoins/humeur/pièces/éco/raids/tech) | pas d'arc, contenu mince, finit par "3 pièces" sans suite ressentie |
+| Planète | ⚠️ belle vue + expéditions v1 | les expéditions ne rapportent rien à la colonie |
+| Système | ⚠️ vue contemplative + HUD contextuel | zéro gameplay |
+| Spatial/KSP | ❌ rien | — |
+
+NB: si le jeu s'ouvre directement sur la carte SANS menu, c'est l'instance
+de VÉRIFICATION du watchdog (RIMWORK_AUTOSTART=1). Un lancement normal
+passe par le menu.
+
+## 3. INCOHÉRENCES TRANCHÉES (décisions du 12/06/2026)
+
+- **Fork Thrive vs MicroStage interne** : un processus séparé ne peut PAS
+  porter la progression. DÉCISION: le stade Origines redevient INTERNE
+  (MicroStage.cs, qui existe et marchait à la jam). Le fork Thrive reste
+  un mode "bac à sable" optionnel dans le menu, hors progression.
+- **Pawns KayKit vs "100% procédural"** : contradiction de l'ancien doc.
+  DÉCISION: KayKit assumé à court terme (lisible, fini), le système de
+  créature procédurale est le chantier M4 et remplacera les assets quand
+  il sera MEILLEUR, pas avant.
+- **Qui fait quoi** : l'IA locale (Qwen) ne fait QUE des micro-pas ancrés
+  dans la sim (GameWorld/Needs/Jobs/WorldModel). Tout ce qui est
+  structurel (flux de jeu, UI, 3D, transitions) = sessions superviseur.
+  C'est une limite assumée: un modèle 30B ne game-designe pas.
+
+## 4. ORDRE DE PRODUCTION (jalons, dans l'ordre, avec critère de fin)
+
+### M0 — Une session cohérente de bout en bout  [superviseur] ← ACTIF
+Menu → Nouvelle partie → Origines INTERNE (MicroStage) → 10 évolutions →
+écran de transition (texte + héritage: 2 traits hérités par les colons) →
+création du monde → colonie. Continuer/Charger reprennent au bon stade.
+**Fini quand**: un playtest vidéo complet menu→colonie sans toucher au
+code, et l'héritage visible dans la fiche d'un colon.
+
+### M1 — La boucle colonie SENTIE (arc complet)  [IA locale + superviseur]
+Arc: jour 1 précaire → stabilité (3 pièces, stocks) → événement de bascule
+(gros raid / hiver) → objectif long (atelier fusée). Défaite possible et
+annoncée, victoire d'étape célébrée. Guide contextuel (déjà commencé).
+**Fini quand**: 30 min de jeu sans temps mort ni écran figé, défaite ET
+victoire d'étape atteignables, 12 événements distincts minimum.
+
+### M2 — La planète qui compte  [superviseur structure, IA locale règles]
+Expéditions qui RAPPORTENT (ressources/colons/artefacts), tuiles aux
+biomes réellement différents (génération par biome), sites extérieurs
+visitables, faune par biome.
+**Fini quand**: une expédition modifie mesurablement l'économie colonie.
+
+### M3 — Spatial v1 (endgame KSP-light)  [superviseur]
+Atelier fusée = projet long de colonie (matériaux, tech, échecs), lancement,
+voyage dans la vue système, seconde colonie sur un autre corps.
+**Fini quand**: une partie "gagnée" = seconde colonie fondée.
+
+### M4 — Créature procédurale  [superviseur]
+Système organique (membranes multi-sinus, métaballes) pour animaux PUIS
+colons; remplace KayKit quand c'est plus beau.
+
+### M5 — Multi-systèmes  [horizon]
+Graphe d'étoiles, même zoom continu (SimLOD.Galaxy).
+
+## 5. BACKLOG D'IDÉES CONSOLIDÉ (tout ce qui traînait ailleurs)
+- Cartes locales ×10 (512+), eau logique (rivières → océans, lacs).
+- Jour/nuit orbital par tuile + lune (marées, raids nocturnes). [partiel ✅]
+- Météo déterministe par tuile (seed + climat + saison). [✅ v1]
+- Vue 4X: pions/armées = agrégats RÉELS des pawns des tuiles.
+- Gravité/atmosphère/composition par planète (modificateurs réels).
+- Sauvegardes multi-slots [✅], écran création de monde [✅].
+- Caravanes commerciales, factions avec attitude [partiel: sites/attitude].
+- Besoin social (les relations existent déjà; en faire une jauge visible).
+- Audio procédural (bips d'événements via AudioStreamGenerator).
+- Teaser web JS procédural sur la Pages (export C# Godot indispo en 4.6).
+
+## 6. RÈGLES DE FABRICATION (inchangées)
+- Toute affirmation visuelle se vérifie par screenshot auto. Toute
+  mécanique par test ou simulation headless.
+- L'IA locale travaille UNIQUEMENT via ROADMAP.md (items ancrés, un par
+  itération, fichiers sim autorisés seulement).
+- UI freeze contract en vigueur (structure figée, contenu libre).
+- Avant toute session superviseur: arrêter dev_loop + watchdog, commiter,
+  relancer après.
