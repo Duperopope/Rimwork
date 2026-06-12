@@ -1,1 +1,1 @@
-Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf
+Qwen3-Coder-30B-A3B-Instruct-Q3_K_M.gguf
