@@ -23,3 +23,8 @@ scripts/logs/shots/
 scripts/logs/health.json
 scripts/logs/bad_identifiers.txt
 scripts/logs/blocked_items.txt
+scripts/logs/agent_state.json
+scripts/logs/playtest_report.json
+scripts/logs/health_origines.json
+scripts/logs/playtest_origines.log
+scripts/logs/fork_*.png
