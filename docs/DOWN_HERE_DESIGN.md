@@ -32,8 +32,8 @@ comportements émergents, histoires auto-générées.
 | Phase | État | Écart principal |
 |---|---|---|
 | Menu | ✅ propre (backdrop cellules, slots, options) | RAS |
-| Origines | ⚠️ fork de Thrive lancé en PROCESSUS SÉPARÉ | aucun retour vers la colonie, aucun héritage: c'est un autre jeu |
-| Transition | ❌ inexistante | on tombe direct sur la carte |
+| Origines | ✅ MicroStage interne (12/06 soir) | v1 = 3 mutations au choix; la CIBLE est l'éditeur d'assemblage (M4) |
+| Transition | ✅ écran d'ascension + héritage (2 traits légués aux colons) | cinématique plus riche plus tard |
 | Colonie | ⚠️ sim riche (besoins/humeur/pièces/éco/raids/tech) | pas d'arc, contenu mince, finit par "3 pièces" sans suite ressentie |
 | Planète | ⚠️ belle vue + expéditions v1 | les expéditions ne rapportent rien à la colonie |
 | Système | ⚠️ vue contemplative + HUD contextuel | zéro gameplay |
@@ -46,9 +46,10 @@ passe par le menu.
 ## 3. INCOHÉRENCES TRANCHÉES (décisions du 12/06/2026)
 
 - **Fork Thrive vs MicroStage interne** : un processus séparé ne peut PAS
-  porter la progression. DÉCISION: le stade Origines redevient INTERNE
-  (MicroStage.cs, qui existe et marchait à la jam). Le fork Thrive reste
-  un mode "bac à sable" optionnel dans le menu, hors progression.
+  porter la progression. DÉCISION (confirmée par le directeur 12/06): les
+  sources de Thrive dans reference/ sont du MATÉRIEL DE LECTURE
+  (s'inspirer des mécaniques), on ne lance JAMAIS Thrive depuis le jeu —
+  "pour jouer à Thrive, y'a Thrive". Origines = MicroStage interne. ✅ fait
 - **Pawns KayKit vs "100% procédural"** : contradiction de l'ancien doc.
   DÉCISION: KayKit assumé à court terme (lisible, fini), le système de
   créature procédurale est le chantier M4 et remplacera les assets quand
@@ -85,9 +86,19 @@ Atelier fusée = projet long de colonie (matériaux, tech, échecs), lancement,
 voyage dans la vue système, seconde colonie sur un autre corps.
 **Fini quand**: une partie "gagnée" = seconde colonie fondée.
 
-### M4 — Créature procédurale  [superviseur]
-Système organique (membranes multi-sinus, métaballes) pour animaux PUIS
-colons; remplace KayKit quand c'est plus beau.
+### M4 — L'ÉDITEUR D'ASSEMBLAGE du vivant  [superviseur]
+Référence assumée (directeur, 12/06): ce qu'on aime dans Thrive, c'est
+qu'on ASSEMBLE littéralement son être vivant — pas un menu de mutations,
+un éditeur. C'est pour ça que les sources de Thrive sont dans reference/:
+étudier leur éditeur cellulaire (grille hex d'organites, coûts, stats
+dérivées de la forme), pas lancer leur jeu.
+- v1 (Origines): à chaque division, ouvrir un ÉDITEUR: placer les
+  organites sur la membrane (flagelle, cils, vacuole, chloroplaste,
+  pointes) — la forme assemblée détermine vitesse/énergie/défense, et le
+  rendu procédural (membrane multi-sinus, métaballes) suit la forme.
+- v2 (Organisme): même éditeur à l'échelle créature (membres, bouches,
+  yeux); les ANIMAUX du jeu sont générés par le même système.
+- v3: remplace les pawns KayKit quand c'est plus beau qu'eux.
 
 ### M5 — Multi-systèmes  [horizon]
 Graphe d'étoiles, même zoom continu (SimLOD.Galaxy).

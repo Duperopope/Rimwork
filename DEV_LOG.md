@@ -334,3 +334,9 @@
 - [iter 6] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.1 - Add a "Social" need to the needs system, which decreases over time and increases when a pawn interacts with another. (src/RimWorldLab.Core/Needs.cs)
 - [iter 7] SKIPPED (no SEARCH match): Add a "Social" need to the needs system. (src/RimWorldLab.Core/Needs.cs)
 - [iter 1] KEPT: M1.1 - Trade caravan event. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-12 16:44).
+- [iter 1] SKIPPED (no SEARCH match): Step M1.1 - Trade caravan event. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 2] SKIPPED (no SEARCH match): M1.1 - Trade caravan event (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 3] SKIPPED (no SEARCH match): M1.1 - Trade caravan event. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 4] SKIPPED (no SEARCH match): Add caravan trading event. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 5] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step M1.1 - Trade caravan event. In src/RimWorldLab.Core/GameWorld.cs,

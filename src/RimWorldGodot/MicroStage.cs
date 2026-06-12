@@ -42,6 +42,9 @@ public partial class MicroStage : Node2D
 
     // ---------- Evolution ----------
     public int Evolutions { get; private set; } = 0;
+    /// <summary>Mutation names picked by the player, in order — the
+    /// ascension screen turns these into colony-pawn heritage traits.</summary>
+    public List<string> ChosenTraits { get; } = new();
     public const int EvolutionsToAscend = 10;
     private bool _choosing;
     private readonly List<(string Name, string Desc, Action<Organism> Apply)> _traitPool = new();
@@ -355,9 +358,11 @@ public partial class MicroStage : Node2D
         {
             var b = new Button { Text = $"{name} — {desc}", CustomMinimumSize = new Vector2(420, 40) };
             var applyLocal = apply;
+            var nameLocal = name;
             b.Pressed += () =>
             {
                 applyLocal(_player);
+                ChosenTraits.Add(nameLocal);
                 Evolutions++;
                 _choosing = false;
                 _evolveBox.QueueFree();

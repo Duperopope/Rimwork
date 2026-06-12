@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
@@ -469,26 +470,30 @@ public partial class UiShell : CanvasLayer
     // ==================================================================
     private MicroStage _micro;
 
+    // Heritage carried from the microbe stage into the colony: micro
+    // mutations map onto colony pawn traits (Pawn.TraitPool vocabulary).
+    private List<string> _pendingHeritage;
+    private static readonly System.Collections.Generic.Dictionary<string, string> MicroToColonyTrait = new()
+    {
+        ["Cils vibratiles"] = "diligent",
+        ["Flagelle"] = "diligent",
+        ["Compacité"] = "diligent",
+        ["Membrane épaisse"] = "hardy",
+        ["Croissance"] = "hardy",
+        ["Métabolisme lent"] = "hardy",
+        ["Chloroplastes"] = "jovial",
+        ["Bioluminescence"] = "jovial",
+        ["Vacuole"] = "jovial",
+        ["Toxines"] = "loner",
+    };
+
     private void StartMicroStage()
     {
-        // DOWN HERE! decision (12/06/2026, final): the microbe stage is our
-        // FORK of Thrive (reference/thrive, branch down-here) - gameplay
-        // code and graphics used directly (both projects are GPL), only the
-        // branding swapped. Launched via the same Godot runtime; our hub
-        // minimizes itself so the stage takes the screen.
-        const string forkProject = @"g:/Rimwork/reference/thrive/project.godot";
-        const string godotExe = @"C:/Users/Smedj/AppData/Local/Microsoft/WinGet/Packages/GodotEngine.GodotEngine.Mono_Microsoft.Winget.Source_8wekyb3d8bbwe/Godot_v4.6.3-stable_mono_win64/Godot_v4.6.3-stable_mono_win64.exe";
-        if (System.IO.File.Exists(forkProject) && System.IO.File.Exists(godotExe))
-        {
-            GD.Print("[FLOW] New Game: Origines -> launching the Down Here fork of Thrive.");
-            // DOWNHERE_QUICKSTART=1 makes the fork skip its menu and dive
-            // straight into a new microbe game (inherited by CreateProcess).
-            System.Environment.SetEnvironmentVariable("DOWNHERE_QUICKSTART", "1");
-            OS.CreateProcess(godotExe, new[] { "--path", System.IO.Path.GetDirectoryName(forkProject) });
-            DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
-            return;
-        }
-        GD.Print("[FLOW] New Game: Origines (fallback micro stage - fork missing).");
+        // Origines = OUR internal micro stage (decision 12/06/2026): the
+        // Thrive sources in reference/ are reading material, not a game we
+        // launch. The whole run lives in this process so the player's
+        // evolutions flow into the colony as heritage.
+        GD.Print("[FLOW] New Game: Origines (internal micro stage).");
         _micro = new MicroStage();
         _micro.Configure(new Random().Next(1, 999999));
         _micro.ExitRequested += () =>
@@ -496,14 +501,63 @@ public partial class UiShell : CanvasLayer
             _micro.QueueFree(); _micro = null;
             ShowOnly(_menu);
         };
-        _micro.StageCompleted += () =>
-        {
-            _game.AlertText = "✨ 10 évolutions ! Le stade supérieur t'attend...";
-        };
+        _micro.StageCompleted += () => CallDeferred(nameof(ShowAscension));
         GetParent().CallDeferred(Node.MethodName.AddChild, _micro);
         foreach (var c in new[] { _menu, _hud, _options, _devTab, _credits, _saveScreen, _genScreen })
             if (c != null) c.Visible = false;
         _game.Paused = true;
+    }
+
+    // ==================================================================
+    // ASCENSION (transition Origines -> colonie, l'héritage se décide ici)
+    // ==================================================================
+    private Control _ascension;
+
+    private void ShowAscension()
+    {
+        // Derive up to 2 distinct colony traits from the picked mutations,
+        // most-picked lineages first.
+        _pendingHeritage = (_micro?.ChosenTraits ?? new List<string>())
+            .Where(t => MicroToColonyTrait.ContainsKey(t))
+            .GroupBy(t => MicroToColonyTrait[t])
+            .OrderByDescending(g => g.Count())
+            .Take(2)
+            .Select(g => g.Key)
+            .ToList();
+        if (_micro != null) { _micro.QueueFree(); _micro = null; }
+
+        if (_ascension != null) _ascension.QueueFree();
+        _ascension = new Control { AnchorRight = 1, AnchorBottom = 1 };
+        AddChild(_ascension);
+        _ascension.AddChild(new MenuBackdrop());
+        var center = new CenterContainer { AnchorRight = 1, AnchorBottom = 1 };
+        _ascension.AddChild(center);
+        var panel = Panel(); center.AddChild(panel);
+        var box = new VBoxContainer { CustomMinimumSize = new Vector2(520, 0) };
+        box.AddThemeConstantOverride("separation", 10);
+        panel.AddChild(box);
+
+        var t = Title("DES ÉONS PASSENT…", 34);
+        t.HorizontalAlignment = HorizontalAlignment.Center;
+        box.AddChild(t);
+        string heritageText = _pendingHeritage.Count > 0
+            ? string.Join(" et ", _pendingHeritage)
+            : "(aucun trait dominant)";
+        box.AddChild(new Label
+        {
+            Text = "Ta lignée microbienne a survécu, grandi, conquis la terre ferme.\n" +
+                   "Des espèces, des tribus, puis une civilisation prête à coloniser.\n\n" +
+                   $"Héritage des origines — tes colons naîtront: {heritageText}",
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            HorizontalAlignment = HorizontalAlignment.Center
+        });
+        box.AddChild(new Control { CustomMinimumSize = new Vector2(0, 14) });
+        var go = MenuBtn("Fonder la civilisation", () =>
+        {
+            _ascension.QueueFree(); _ascension = null;
+            OpenWorldGenScreen();
+        }, primary: true);
+        box.AddChild(go);
     }
 
     // ==================================================================
@@ -568,6 +622,17 @@ public partial class UiShell : CanvasLayer
             };
             GD.Print($"[FLOW] New Game: world created (seed {seed}).");
             _game.NewGame(gen);
+            if (_pendingHeritage is { Count: > 0 })
+            {
+                foreach (var p in _game.World.Pawns)
+                {
+                    foreach (var trait in _pendingHeritage)
+                        if (!p.Traits.Contains(trait)) p.Traits.Add(trait);
+                    p.Remember(0, "héritage des origines", +2f);
+                }
+                _game.AlertText = $"Civilisation fondée — héritage des origines: {string.Join(", ", _pendingHeritage)}.";
+                _pendingHeritage = null;
+            }
             ShowOnly(_hud);
         };
         box.AddChild(create);

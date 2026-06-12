@@ -51,10 +51,11 @@ pluie→eau, repeuplement de la faune.
 - [x] Steps G.10-G.13 - faits (pluie→eau, faune, nuit, alerte moral).
 - [x] Steps F.1a-F.6a, D.1, E.x - faits/obsolètes (détail: git log).
 
-## NOTE: stade ORIGINES
-Décision M0 (voir design doc): MicroStage INTERNE redevient le vrai début
-de partie; le fork Thrive (reference/thrive) devient un mode bac à sable.
-NE TOUCHE PAS au fork ni à MicroStage.cs — chantier superviseur.
+## NOTE: stade ORIGINES (M0 câblé le 12/06 soir par le superviseur)
+Nouvelle partie → MicroStage interne → 10 évolutions → écran d'ascension →
+héritage (2 traits) → création du monde → colonie. Le code de Thrive dans
+reference/ est de la LECTURE uniquement, on ne le lance jamais.
+NE TOUCHE PAS à MicroStage.cs ni UiShell.cs — domaine superviseur.
 
 ## ARCHIVE (avant le nettoyage du 12/06 — détail dans git history)
 - [x] Gameplay de base: combat, raids, ressources, pièces, économie, météo,
