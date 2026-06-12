@@ -45,11 +45,7 @@ pièces fonctionnelles, save/load, recherche/tech.
       `            LogEvent("La faune locale se repeuple.");`
       `        }`
 
-- [ ] Step G.12 - Night rest is deeper. In
-      src/RimWorldLab.Core/GameWorld.cs, find the exact line:
-      `                pw.Fatigue = Math.Max(0f, pw.Fatigue - 2f);`
-      and REPLACE it with:
-      `                pw.Fatigue = Math.Max(0f, pw.Fatigue - (IsNight ? 4f : 2f));`
+- [x] Step G.12 - Night rest is deeper (fait à l'iter 6: `pw.Fatigue - (IsNight ? 4f : 2f)` est en place l.~1349).
 
 - [ ] Step G.13 - Collective morale warning. In
       src/RimWorldLab.Core/GameWorld.cs, find the exact line:

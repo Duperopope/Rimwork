@@ -281,3 +281,8 @@
 - [iter 4] KEPT: Step G.11 - Wildlife respawns when hunted out. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 5] DONE (repeated identical patch): - [ ] Step G.11 - Wildlife respawns when hunted out. In
 - [iter 6] KEPT: Make Pawn's Fatigue decrease faster during night. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 7] SKIPPED (no SEARCH match): Implement fatigue reduction during night time. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 8] SKIPPED (no SEARCH match): Step G.12 - Night rest is deeper. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 9] SKIPPED (no SEARCH match): Implement fatigue reduction depending on whether it is night or not. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 10] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step G.12 - Night rest is deeper. In
+- [iter 11] REVERTED (build failed): Step G.12 - Night rest is deeper. Increment fatigue of all pawns by a smaller amount during the day and a larger amount at night. (src/RimWorldLab.Core/GameWorld.cs)

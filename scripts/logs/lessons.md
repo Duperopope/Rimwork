@@ -438,3 +438,4 @@
 - The lesson is to always double-check that the method signatures, types, and properties match exactly with the existing file content, and to avoid inventing new types or properties that do not exist in the shown code.
 - The lesson is to carefully read and understand the existing code before making changes. The error messages are revealing - they suggest that there are missing or improperly placed brackets or comparison operators in the code. Always double-check your syntax to avoid such issues.
 - The C# compiler is strict about syntax. Make sure all braces, semicolons, and other symbols are used correctly. Also, ensure that all types are defined and the correct method of accessing properties and methods is used.
+- The lesson is: Be sure that the variable you're trying to use is defined in the current context. In this case, 'pw' should be defined before its usage.
