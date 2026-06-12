@@ -89,3 +89,4 @@
 - [ ] Step C.105 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to ensure players have a steady supply of materials.
 - [ ] Step G.10 - Rain refills the water stores. In
 - [ ] Step G.10 - Rain refills the water stores. In
+- [ ] Step G.11 - Wildlife respawns when hunted out. In

@@ -1361,6 +1361,11 @@ private void UpdateHeaderText()
             if (Food == 0) LogEvent("Food stores are empty!");
         }
         if (TotalTicks % 200 == 0)
+        if (TotalTicks % 6000 == 0 && !_pawns.Any(p => p.Name == "SmallAnimal" && p.HP > 0))
+        {
+            GenerateSmallAnimalPopulation();
+            LogEvent("The local wildlife replenishes.");
+        }
         {
             foreach (var hunter in _pawns.Where(p => p.HP > 0 && p.Name != "SmallAnimal"))
             {

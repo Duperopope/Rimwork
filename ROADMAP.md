@@ -28,7 +28,7 @@ pièces fonctionnelles, save/load, recherche/tech.
 
 ## FILE DE TRAVAIL (un item à la fois, ancres vérifiées le 12/06/2026)
 
-- [ ] Step G.10 - Rain refills the water stores. In
+- [x] Step G.10 - Rain refills the water stores. In
       src/RimWorldLab.Core/GameWorld.cs, find the exact line:
       `        if (TotalTicks % 1500 == 0)`
       Immediately BEFORE that line, insert:
