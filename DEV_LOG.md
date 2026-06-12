@@ -286,3 +286,5 @@
 - [iter 9] SKIPPED (no SEARCH match): Implement fatigue reduction depending on whether it is night or not. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 10] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step G.12 - Night rest is deeper. In
 - [iter 11] REVERTED (build failed): Step G.12 - Night rest is deeper. Increment fatigue of all pawns by a smaller amount during the day and a larger amount at night. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 12] PLAYTEST: 1 actions, 0 anomalies, pieces=0
+- [iter 12] KEPT: Add collective morale warning. (src/RimWorldLab.Core/GameWorld.cs)

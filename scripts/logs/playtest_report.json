@@ -1,25 +1,25 @@
 {
-  "timestamp": "2026-06-12 15:54:42",
+  "timestamp": "2026-06-12 16:10:38",
   "steps": 8,
   "issued": [
-    "select 1",
-    "harvest 5 18",
-    "select 0"
+    "harvest 30 50"
   ],
   "anomalies": [],
   "llmNotes": [
-    "rejected model output: Since the goal is to build 3 functional rooms, the first priority should be to gather resources such as wood and stone. The pawns are currently idle, so the best command would be to make them harvest. The nearest resources are likely to be within a range of 5 from the pawns",
-    "rejected model output: Avec ce jeu, il est important de stratégier son temps pour construire les murs et les chambres. Pour cela, nous allons définir une stratégie de recherche de ressources, de construction de murs et de ch",
-    "rejected model output: Since the game state does not provide any information about the presence of resources or pawns, we will assume that the pawns are located near the resources. We will start by harvesting the resources. After that, we will build walls to form rooms and put beds inside. Here is the command:",
-    "rejected model output: Avec cet état de jeu, nous avons 8 pawns et une quantité limitée de ressources (bois, pierre, eau, nourriture, métal, outils). Nous devons maximiser l'utilisation",
-    "rejected model output: Since the goal is to build 3 rooms, the first priority should be to build walls and then beds. The pawns can move around and gather resources while we build the rooms."
+    "rejected model output: Harvest 5 5.",
+    "rejected model output: Aiden: harvest 20 37",
+    "rejected model output: harvest 9 30.",
+    "rejected model output: Since the game state indicates that the pawns are idle and the goal is to build 3 functional rooms, the first step is to make the pawns gather resources. In this case, the most important resource is wood, so the command should be to make the pawns harvest wood.",
+    "rejected model output: select 0, harvest 7,31, select 1, harvest 44,2, select 2, harvest 44,4, select 3, harvest 9,30, select 4, harvest 44,8, select 5, harvest",
+    "rejected model output: harvest 7 31 select 0",
+    "rejected model output: Harvest 7 31."
   ],
   "final": {
-    "pawns": 8,
-    "stone": 21,
     "rooms": 0,
-    "ticks": 1360,
-    "wood": 9,
-    "goalsDone": 0
+    "ticks": 2436,
+    "goalsDone": 0,
+    "wood": 8,
+    "stone": 12,
+    "pawns": 8
   }
 }
