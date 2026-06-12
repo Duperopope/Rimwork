@@ -340,3 +340,12 @@
 - [iter 3] SKIPPED (no SEARCH match): M1.1 - Trade caravan event. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 4] SKIPPED (no SEARCH match): Add caravan trading event. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 5] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step M1.1 - Trade caravan event. In src/RimWorldLab.Core/GameWorld.cs,
+- [iter 1] SKIPPED (no SEARCH match): M1.1 - Trade caravan event. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 2] SKIPPED (no SEARCH match): M1.1 - Trade caravan event. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 3] SKIPPED (no SEARCH match): M1.1 - Trade caravan event. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 4] SKIPPED (no SEARCH match): M1.1 - Trade caravan event. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 5] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step M1.1 - Trade caravan event. In src/RimWorldLab.Core/GameWorld.cs,
+- [iter 6] PREDICTED-FAIL (skipped before build): Add a method to GameWorldManager to handle the trade caravan event. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 7] PREDICTED-FAIL (skipped before build): Implement the Trade Caravan event. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 10] DONE (had past KEPT edits, change already in file): - [ ] Step M1.1 - Trade caravan event. In src/RimWorldLab.Core/GameWorld.cs,
+- [iter 11] KEPT: Step M1.2 - Colony festival lifts spirits. (src/RimWorldLab.Core/GameWorld.cs)

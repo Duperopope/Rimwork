@@ -25,15 +25,7 @@ pluie→eau, repeuplement de la faune.
 
 ## FILE DE TRAVAIL — jalon M1 (ancres vérifiées le 12/06/2026 16h40)
 
-- [ ] Step M1.1 - Trade caravan event. In src/RimWorldLab.Core/GameWorld.cs,
-      find the exact line:
-      `        // --- Cooking: a built Stove slowly turns Wood into Food ---`
-      Immediately BEFORE that line, insert:
-      `        if (TotalTicks % 12000 == 0 && Wood >= 10)`
-      `        {`
-      `            Wood -= 10; Metal += 2;`
-      `            LogEvent("Une caravane marchande échange 10 bois contre 2 métal.");`
-      `        }`
+- [x] Step M1.1 - Trade caravan event. In src/RimWorldLab.Core/GameWorld.cs,
 
 - [ ] Step M1.2 - Colony festival lifts spirits. In
       src/RimWorldLab.Core/GameWorld.cs, find the exact line:

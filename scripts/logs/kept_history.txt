@@ -94,3 +94,4 @@
 - [ ] Step G.13 - Collective morale warning. In
 - [ ] Step G.13 - Collective morale warning. In
 - [ ] Step M1.1 - Trade caravan event. In src/RimWorldLab.Core/GameWorld.cs,
+- [ ] Step M1.2 - Colony festival lifts spirits. In

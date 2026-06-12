@@ -1412,7 +1412,13 @@ private void UpdateHeaderText()
             if (Tools % 4 == 0) LogEvent($"Workshop output: tool stock at {Tools}.");
         }
 
-        // --- Metallurgy: sustained mining smelts Metal from Stone ---
+// --- Metallurgy: sustained mining smelts Metal from Stone ---
+        if (TotalTicks % 24000 == 0 && Food >= _pawns.Count(p => p.HP > 0))
+        {
+            foreach (var fp in _pawns.Where(p => p.HP > 0)) { fp.Mood = Math.Clamp(fp.Mood + 8f, 0f, 100f); fp.Remember(TotalTicks, "fete au village", +3f); }
+            LogEvent("Festival ! La colonie celebre — moral en hausse.");
+        }
+// --- Metallurgy: sustained mining smelts Metal from Stone ---
         if (TotalTicks % 1000 == 0 && Stone >= 5 && _map.Furniture.Any(f => f.Kind == FurnitureKind.Mine))
         {
             Stone -= 5; Metal++;
