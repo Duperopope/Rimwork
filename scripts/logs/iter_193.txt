@@ -1,9 +1,0 @@
-CHANGE: Add a dictionary to track resource consumption for building materials.
-FILE: src/RimWorldLab.Core/GameWorld.cs
-<<<<<<< SEARCH
-private Dictionary<ResourceKind, int> _recycledResources = new();
-=======
-private Dictionary<ResourceKind, int> _recycledResources = new();
-private Dictionary<ResourceKind, int> _buildingMaterialConsumption = new(); // New dictionary to track building material consumption
->>>>>>> REPLACE
-NEXT: Implement a method to update the building material consumption.

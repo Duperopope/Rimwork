@@ -1,8 +1,0 @@
-CHANGE: Add public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`.
-FILE: src/RimWorldLab.Core/GameWorld.cs
-<<<<<<< SEARCH
-private List<Pawn> _pawns = new();
-=======
-public List<Pawn> Pawns { get; private set; } = new();
->>>>>>> REPLACE
-NEXT: Ensure all method declarations are syntactically correct and complete before adding new methods.
