@@ -430,3 +430,6 @@
 - Ensure all new methods and fields are properly placed within class definitions.
 - Ensure Enum.GetValues returns correct type by casting: `Enum.GetValues(typeof(ZoneKind)).Cast<ZoneKind>()`.
 - Ensure all new methods and fields are properly placed within existing types and adhere to access modifiers.
+- Ensure all referenced types and fields exist in the current context before adding new code.
+- Ensure all referenced fields and methods exist in the current context before adding new code.
+- Ensure all referenced fields and methods exist before adding code in GameWorld.cs.

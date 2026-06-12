@@ -26,16 +26,19 @@ if (-not $llmAlive) {
     # (scripts/llm_champion.txt, fallback = Qwen2.5-Coder-14B baseline).
     $champ = "Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf"
     try { $c = (Get-Content "g:\Rimwork\scripts\llm_champion.txt" -Raw -ErrorAction Stop).Trim(); if ($c) { $champ = $c } } catch {}
-    wsl -d Ubuntu -u root -- bash -c "pgrep -f llama-server >/dev/null || nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$champ -ngl 99 -c 16384 --host 0.0.0.0 --port 1234 > /var/log/llama-server.log 2>&1 &"
+    # The server must be hosted by a PERSISTENT hidden wsl.exe process:
+    # background (&/nohup/setsid) children die when their wsl session ends.
+    $up = wsl -d Ubuntu -u root -- bash -c "pgrep -x llama-server >/dev/null && echo UP"
+    if ($up -notmatch "UP") {
+        Start-Process wsl -ArgumentList "-d","Ubuntu","-u","root","--","/root/llama.cpp/build/bin/llama-server","-m","/root/models/$champ","-ngl","99","-c","16384","--host","0.0.0.0","--port","1234" -WindowStyle Hidden
+    }
     # Big models (MoE 14GB) can take ~2 min to load into VRAM.
     foreach ($w in 1..8) { Start-Sleep -Seconds 20; $llmAlive = Test-WslLlm; if ($llmAlive) { break } }
     if (-not $llmAlive) {
-        # Fallback: LM Studio (Vulkan, slower but battle-tested)
-        lms server start 2>$null
-        $loaded = (lms ps 2>$null | Out-String)
-        if ($loaded -notmatch "qwen2.5-coder-14b-instruct") {
-            lms load "qwen2.5-coder-14b-instruct" --gpu max --context-length 16384 --parallel 1 -y 2>$null
-        }
+        # NO LM Studio fallback: it squats port 1234 + VRAM and silently
+        # starves the WSL server (root cause of the 12/06 outage). If WSL
+        # cannot come up, log it loudly and let the loop wait.
+        Add-Content "g:\Rimwork\scripts\logs\watchdog.log" -Value "[$(Get-Date -Format HH:mm:ss)] LLM WSL DOWN apres attente - PAS de fallback LM Studio (voir /var/log/llama-server.log)"
     }
 }
 

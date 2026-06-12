@@ -159,3 +159,72 @@
   docs/index.html depuis le repo (Pages reste bloqué par le lock facturation
   GitHub - rien à payer normalement: vérifier github.com/settings/billing,
   sinon contacter le support GitHub, le lock est peut-être une erreur).
+- [iter 181] SKIPPED (no SEARCH match): Add a method to initialize room goals in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 182] PREDICTED-FAIL (skipped before build): Add a method to initialize room goals in GameWorld.cs. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 183] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.30 - Add a method to initialize room goals (GameWorld.cs).
+- [iter 184] SKIPPED (no SEARCH match): Add a method to track and display progress towards building additional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 185] SKIPPED (no SEARCH match): Add a method to track progress towards building additional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 188] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.45 - Implement a system to track and display progress towards building additional rooms in the game world.
+- [iter 192] PLAYTEST: 0 actions, 0 anomalies, pieces=0
+- [iter 193] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.60 - Implement a system to track and display the progress towards building additional rooms.
+- [iter 198] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.75 - Implement a resource consumption system for building materials to encourage efficient use and planning. (GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-12 13:15).
+- [iter 2] PREDICTED-FAIL (skipped before build): Add a method to assign tasks to pawns - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 3] PREDICTED-FAIL (skipped before build): Add a method to assign tasks to pawns. - Identifier 'HasPendingTasks' does not exist in the target file or the game API - it would not compile.
+- [iter 4] PREDICTED-FAIL (skipped before build): Add a method to check if any pawn has pending tasks. - Identifier 'HasPendingTasks' does not exist in the target file or the game API - it would not compile.
+- [iter 5] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step T84 - (playtest) fix: Ensure `UpdateFunctionalRoomCount` correctly updates `_functionalRoomCount` by removing invalid type casting in `InitializeRoomGoals`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 6] REVERTED (tests failed): Ensure `UpdateFunctionalRoomCount` correctly updates `_functionalRoomCount` by removing invalid type casting in `InitializeRoomGoals`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 7] REVERTED (tests failed): Ensure `UpdateFunctionalRoomCount` correctly updates `_functionalRoomCount` by removing invalid type casting in `InitializeRoomGoals`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 8] SKIPPED (no SEARCH match): Ensure `UpdateFunctionalRoomCount` correctly updates `_functionalRoomCount` by removing invalid type casting in `InitializeRoomGoals`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 9] REVERTED (tests failed): Ensure `UpdateFunctionalRoomCount` correctly updates `_functionalRoomCount` by removing invalid type casting in `InitializeRoomGoals`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 10] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step T84 - Fix invalid type casting in `InitializeRoomGoals` by ensuring `Enum.GetValues(typeof(ZoneKind))` is cast to `ZoneKind`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 11] SKIPPED (no SEARCH match): Ensure `Enum.GetValues(typeof(ZoneKind))` is cast to `ZoneKind` in `InitializeRoomGoals`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 12] PLAYTEST: 8 actions, 0 anomalies, pieces=0
+- [iter 12] SKIPPED (no SEARCH match): Ensure `Enum.GetValues(typeof(ZoneKind))` is cast to `ZoneKind` in `InitializeRoomGoals`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 13] SKIPPED (no SEARCH match): Ensure `Enum.GetValues(typeof(ZoneKind))` is cast to `ZoneKind` in `InitializeRoomGoals`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 14] SKIPPED (no SEARCH match): Fix invalid type casting in `InitializeRoomGoals` by ensuring `Enum.GetValues(typeof(ZoneKind))` is cast to `ZoneKind`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 15] CRITIC TASK: - [ ] Step C.15 - Implement a system to track and display progress towards building functional rooms in the game world. (GameWorld.cs)
+- [iter 15] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step T84 - Fix invalid type casting in `InitializeRoomGoals` by ensuring `Enum.GetValues(typeof(ZoneKind))` is cast to `ZoneKind`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 16] REVERTED (build failed): Add a method to track resource consumption by pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 17] REVERTED (build failed): Add a method to track resource consumption for pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 18] REVERTED (build failed): Add a method to track resource consumption by pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 19] REVERTED (tests failed): Add a method to track resource consumption for pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 20] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.105a - Add a private field to store pawns and a public property to access them in GameWorld.cs.
+- [iter 21] REVERTED (tests failed): Add a private field to store pawns and a public property to access them in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 22] REVERTED (tests failed): Add a private field to store pawns and a public property to access them in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 23] REVERTED (tests failed): Add a private field to store pawns and a public property to access them in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-12 13:24).
+- [iter 24] PLAYTEST: 8 actions, 0 anomalies, pieces=0
+- [iter 24] REVERTED (tests failed): Add a private field to store pawns and a public property to access them in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 25] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.105a - Add a private field to store pawns and a public property to access them in GameWorld.cs.
+- [iter 30] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.120 - Reduce the number of resources generated per tick to encourage sustainable resource management. (GameWorld.cs)
+- [iter 35] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.135 - Implement a resource management system to limit the rate of resource consumption and encourage sustainable use. (GameWorld.cs)
+- [iter 36] PLAYTEST: 0 actions, 0 anomalies, pieces=0
+- [iter 40] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.150 - Add a resource management system to limit the rate of furniture placement based on available resources. (GameWorld.cs)
+- [iter 45] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.165 - Implement a resource management system to limit the number of concurrent tasks based on available resources, ensuring players must prioritize and manage their colony's needs effectively. (GameWorld.cs)
+- [iter 48] PLAYTEST: 0 actions, 0 anomalies, pieces=0
+- [iter 50] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.180 - Implement a resource management system to track and limit resource consumption by pawns, ensuring they must ration their use of wood, stone, etc., to build more rooms. (GameWorld.cs)
+- [iter 55] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.15 - Implement a system to track and display progress towards building functional rooms in the game world. (GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-12 13:37).
+- [startup] Stack relaunched after boot (2026-06-12 13:48).
+- [iter 59] CRITIC TASK: - [ ] Step C.59 - Implement a resource management system to track and limit the consumption of resources like wood and stone, forcing players to prioritize their use. (GameWorld.cs)
+- [iter 60] CRITIC TASK: - [ ] Step C.60 - Implement a system to track and display progress towards building functional rooms, providing clear feedback on what needs to be done to reach the win condition. (GameWorld.cs)
+- [iter 60] PLAYTEST: 8 actions, 0 anomalies, pieces=0
+- [iter 60] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 64] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.59 - Implement a resource management system to track and limit the consumption of resources like wood and stone, forcing players to prioritize their use. (GameWorld.cs)
+- [iter 69] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.60 - Implement a system to track and display progress towards building functional rooms, providing clear feedback on what needs to be done to reach the win condition. (GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-12 13:57).
+- [iter 72] PLAYTEST: 0 actions, 0 anomalies, pieces=0
+- [iter 1] EMERGENT TASK PROPOSED: - [ ] Step E.1 - Add a random chance to generate a new 'Need' for a Pawn every time they complete a job, drawing from a predefined list of needs (like hunger, sleep, social, etc.) in GameWorld.cs.
+- [iter 2] SKIPPED (no SEARCH match): Add a new method to generate a random need for a Pawn every time they complete a job. (src/RimWorldLab.Core/Needs.cs)
+- [iter 3] SKIPPED (no-op patch): Add a random chance to generate a new 'Need' for a Pawn every time they complete a job. (src/RimWorldLab.Core/Needs.cs)
+- [iter 4] SKIPPED (no-op patch): Add a new method to the NeedsSystem class for generating a new 'Need' for a Pawn every time they complete a job. (src/RimWorldLab.Core/Needs.cs)
+- [iter 6] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.1 - In GameWorld.cs, for each Pawn after they complete a job, add a random chance to generate a new 'Need' from a predefined list of needs (like hunger, sleep, social, etc.).
+- [iter 7] SKIPPED (no SEARCH match): Step E.1 - In GameWorld.cs, for each Pawn after they complete a job, add a random chance to generate a new 'Need' from a predefined list of needs (like hunger, sleep, social, etc.). (src/RimWorldLab.Core/Needs.cs)
+- [iter 8] PREDICTED-FAIL (skipped before build): Add a new method to generate a random 'Need' for a Pawn after completing a job. - Identifier 'NextDouble' does not exist in the target file or the game API - it would not compile.
+- [startup] Stack relaunched after boot (2026-06-12 14:44).
+- [iter 11] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step E.1 - In GameWorld.cs, for each Pawn after they complete a job, add a random chance to generate a new 'Need' from a predefined list of needs (like hunger, sleep, social, etc.).
+- [iter 12] PLAYTEST: 1 actions, 0 anomalies, pieces=0
+- [iter 12] PREDICTED-FAIL (skipped before build): Add a new method to generate a new 'Need' for a Pawn after they complete a job. - Identifier 'ElementAt' does not exist in the target file or the game API - it would not compile.
+- [iter 13] REVERTED (build failed): Add a new method to generate a new 'Need' for each Pawn after they complete a job. (src/RimWorldLab.Core/Needs.cs)
+- [iter 14] PREDICTED-FAIL (skipped before build): Add a new method to the NeedsSystem class to generate a new 'Need' for a Pawn after they complete a job. - Identifier 'ElementAt' does not exist in the target file or the game API - it would not compile.

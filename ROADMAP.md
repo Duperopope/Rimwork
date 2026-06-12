@@ -291,10 +291,14 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [ ] Step C.45 - Implement a system to track and display progress towards building additional rooms in the game world.
 - [ ] Step C.60 - Implement a system to track and display the progress towards building additional rooms.
 - [ ] Step C.75 - Implement a resource consumption system for building materials to encourage efficient use and planning. (GameWorld.cs)
-- [ ] Step T84 - (playtest) fix: ALL PAWNS IDLE with 1 pending tasks (3 polls) (src/RimWorldLab.Core/GameWorld.cs)
-- [ ] Step C.105 - Implement a resource consumption system for pawns to ensure they deplete resources over time and must be managed efficiently. (GameWorld.cs)
+- [ ] Step T84 - Fix invalid type casting in `InitializeRoomGoals` by ensuring `Enum.GetValues(typeof(ZoneKind))` is cast to `ZoneKind`. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.105a - Add a private field to store pawns and a public property to access them in GameWorld.cs.
 - [ ] Step C.120 - Reduce the number of resources generated per tick to encourage sustainable resource management. (GameWorld.cs)
 - [ ] Step C.135 - Implement a resource management system to limit the rate of resource consumption and encourage sustainable use. (GameWorld.cs)
 - [ ] Step C.150 - Add a resource management system to limit the rate of furniture placement based on available resources. (GameWorld.cs)
 - [ ] Step C.165 - Implement a resource management system to limit the number of concurrent tasks based on available resources, ensuring players must prioritize and manage their colony's needs effectively. (GameWorld.cs)
 - [ ] Step C.180 - Implement a resource management system to track and limit resource consumption by pawns, ensuring they must ration their use of wood, stone, etc., to build more rooms. (GameWorld.cs)
+- [ ] Step C.15 - Implement a system to track and display progress towards building functional rooms in the game world. (GameWorld.cs)
+- [ ] Step C.59 - Implement a resource management system to track and limit the consumption of resources like wood and stone, forcing players to prioritize their use. (GameWorld.cs)
+- [ ] Step C.60 - Implement a system to track and display progress towards building functional rooms, providing clear feedback on what needs to be done to reach the win condition. (GameWorld.cs)
+- [ ] Step E.1 - In GameWorld.cs, for each Pawn after they complete a job, add a random chance to generate a new 'Need' from a predefined list of needs (like hunger, sleep, social, etc.).

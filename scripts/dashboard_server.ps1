@@ -46,6 +46,10 @@ function Start-Stack {
 while ($true) {
     try { $ctx = $listener.GetContext() } catch { Start-Sleep -Seconds 1; continue }
     if ($ctx.Request.Url.AbsolutePath -eq "/pause") {
+        # POST only: browsers (especially mobile) PREFETCH plain GET links,
+        # which used to pause the whole stack just by opening the page.
+        if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
+        Add-Content "g:\Rimwork\scripts\logs\watchdog.log" -Value "[$(Get-Date -Format HH:mm:ss)] /pause by $($ctx.Request.RemoteEndPoint)"
         Stop-Stack
         $ctx.Response.Redirect("/")
         $ctx.Response.Close()
@@ -68,6 +72,7 @@ while ($true) {
         continue
     }
     if ($ctx.Request.Url.AbsolutePath -eq "/resume") {
+        if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
         Start-Stack
         $ctx.Response.Redirect("/")
         $ctx.Response.Close()

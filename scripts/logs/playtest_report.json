@@ -1,24 +1,25 @@
 {
-  "timestamp": "2026-06-12 13:07:19",
+  "timestamp": "2026-06-12 14:46:09",
   "steps": 8,
   "issued": [
-    "harvest 12 24",
-    "harvest 31 22",
-    "harvest 32 18",
-    "harvest 17 24",
-    "harvest 29 48",
-    "harvest 17 24",
-    "harvest 17 24",
-    "harvest 17 24"
+    "harvest 29 48"
   ],
   "anomalies": [],
-  "llmNotes": [],
+  "llmNotes": [
+    "rejected model output: Brynn, Corwin, Dara, Elsie, et Greta doivent recolter du bois et des pierres pour construire des murs. Aiden, Fin et Holt doivent rester à la guilde pour nourrir leur f",
+    "rejected model output: Harvest 17 47.",
+    "rejected model output: harvest 10 30 15 35 2 24 36 46 29 43 14 44 8 46 29 43 14 44 8 46",
+    "rejected model output: harvest 5 35 select 0 harvest 6 26 select 1 harvest 39 14 select 2 harvest 37 40 select 3 harvest 44 2 select 4 harvest 10 42 select 5 harvest",
+    "rejected model output: Since the game state does not provide any information about the location of resources, I will assume that the pawns are close to the resources. I will start by selecting each pawn one by one and then instruct them to harvest wood and stone. After that, I will instruct them to build walls and",
+    "rejected model output: harvest 5 35 select 0 harvest 6 26 select 1 harvest 39 14 select 2 harvest 37 40 select 3 harvest 44 2 select 4 harvest 10 42 select 5 harvest",
+    "rejected model output: harvest 5 35 select 0 harvest 6 26 select 1 harvest 39 14 select 2 harvest 37 40 select 3 harvest 44 2 select 4 harvest 10 42 select 5 harvest"
+  ],
   "final": {
+    "stone": 12,
+    "ticks": 2438,
     "goalsDone": 0,
-    "rooms": 0,
-    "ticks": 1469,
-    "stone": 20,
     "pawns": 8,
-    "wood": 7
+    "wood": 8,
+    "rooms": 0
   }
 }

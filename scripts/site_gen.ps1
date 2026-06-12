@@ -161,7 +161,7 @@ function Get-DownHereSiteHtml {
 <div class='card'><h2>&#127918; Sant&eacute; en direct</h2><div>$h</div>
 <div style='margin-top:8px'><b>T&Acirc;CHE EN COURS:</b> $taskLine</div>
 <div style='margin-top:4px'><b>JEU:</b> $gameLine$pt</div>
-<div style='margin-top:8px'><a class='btnp' href='/pause'>&#9208; PAUSE MACHINE</a> <a class='btnr' href='/resume'>&#9654; REPRENDRE</a> <span class='muted'>&eacute;tat: $StackState</span></div></div>
+<div style='margin-top:8px'><button class='btnp' onclick="if(confirm('Mettre toute la machine en pause ?')){fetch('/pause',{method:'POST'}).then(()=>location.reload())}">&#9208; PAUSE MACHINE</button> <button class='btnr' onclick="fetch('/resume',{method:'POST'}).then(()=>location.reload())">&#9654; REPRENDRE</button> <span class='muted'>&eacute;tat: $StackState</span></div></div>
 <div class='card'><h2>&#129504; Le&ccedil;ons r&eacute;centes de l'IA</h2><ul>$lessons</ul></div>
 "@
     }

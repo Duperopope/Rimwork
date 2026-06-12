@@ -1,1 +1,1 @@
-Qwen3-Coder-30B-A3B-Instruct-Q3_K_M.gguf
+Yi-Coder-9B-Chat-Q4_K_M.gguf
