@@ -1346,7 +1346,7 @@ private void UpdateHeaderText()
             }
             // Exhausted pawns slowly catch their breath even without a bed.
             foreach (var pw in _pawns.Where(q => q.HP > 0 && q.Fatigue > 80))
-                pw.Fatigue = Math.Max(0f, pw.Fatigue - 2f);
+                pw.Fatigue = Math.Max(0f, pw.Fatigue - (IsNight ? 4f : 2f));
         }
 
         // --- Survival economy: food & water are consumed by living pawns ---

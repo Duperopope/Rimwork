@@ -279,3 +279,5 @@
 - [iter 3] KEPT: Step G.10 - Rain refills the water stores. (src/RimWorldLab.Core/GameWorld.cs)
 - [iter 3] DONE (after 2 consecutive KEPT changes): - [ ] Step G.10 - Rain refills the water stores. In
 - [iter 4] KEPT: Step G.11 - Wildlife respawns when hunted out. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 5] DONE (repeated identical patch): - [ ] Step G.11 - Wildlife respawns when hunted out. In
+- [iter 6] KEPT: Make Pawn's Fatigue decrease faster during night. (src/RimWorldLab.Core/GameWorld.cs)

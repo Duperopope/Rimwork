@@ -35,7 +35,7 @@ pièces fonctionnelles, save/load, recherche/tech.
       `        if (TotalTicks % 600 == 0 && Macro.ColonyWeather == WeatherKind.Rain)`
       `            Water++;`
 
-- [ ] Step G.11 - Wildlife respawns when hunted out. In
+- [x] Step G.11 - Wildlife respawns when hunted out. In
       src/RimWorldLab.Core/GameWorld.cs, find the exact line:
       `        if (TotalTicks % 200 == 0)`
       Immediately BEFORE that line, insert:
