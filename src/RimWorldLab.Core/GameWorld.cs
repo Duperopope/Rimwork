@@ -1395,7 +1395,7 @@ private void UpdateHeaderText()
             }
         }
 
-        // --- Cooking: a built Stove slowly turns Wood into Food ---
+// --- Trade: a caravan comes every 12000 ticks and offers a trade ---
         if (TotalTicks % 800 == 0 && Wood >= 1 && Food < _pawns.Count * 3 &&
             _map.Furniture.Any(f => f.Kind == FurnitureKind.Stove))
         {
