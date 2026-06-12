@@ -14,8 +14,12 @@ comportements émergents, histoires auto-générées.
 
 1. **Menu** : titre, Continuer/Nouvelle partie/Charger/Options. Sobre, beau.
 2. **Origines (microbe)** : on naît cellule dans la soupe primordiale.
-   Manger → énergie → reproduction → mutations. ~10 évolutions débloquent
-   la suite. L'ADN choisi LÈGUE des traits à la civilisation.
+   PROFONDEUR CIBLE = celle de Thrive, réécrite chez nous (voir
+   docs/ORIGINES_REBOOT.md): économie de composés, organites à assembler
+   sur grille hex, métabolisme/photosynthèse, membrane procédurale,
+   auto-evo. ~10 évolutions débloquent la suite. L'ADN choisi LÈGUE des
+   traits à la civilisation. État: fondation simulation posée + testée
+   (compounds/organites/métabolisme), éditeur hex = prochaine tranche.
 3. **Transition** : cinématique courte / fondu — "des éons passent" — la
    espèce devient tribu puis colonie. L'héritage microbe est visible
    (traits de départ des colons, biome de naissance).

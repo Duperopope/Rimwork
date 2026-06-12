@@ -2085,6 +2085,62 @@ public static class GameWorldTests
             failed++;
         }
 
+        // Test 10: ORIGINES — un assemblage d'organites produit des stats
+        // dérivées cohérentes (le pilier "ta forme détermine tes stats").
+        try
+        {
+            var m = DownHere.Origins.Microbe.Starter();
+            var baseStats = m.ComputeStats();
+            // Ajouter une mitochondrie doit améliorer le bilan ATP en eau de surface.
+            m.Place(DownHere.Origins.OrganelleRegistry.Mitochondrion, 0, 1);
+            var withMito = m.ComputeStats();
+            // Ajouter un flagelle doit augmenter la vitesse.
+            m.Place(DownHere.Origins.OrganelleRegistry.Flagellum, 1, -1);
+            var withFlag = m.ComputeStats();
+            bool ok = withMito.AtpBalance > baseStats.AtpBalance
+                && withFlag.BaseSpeed > withMito.BaseSpeed
+                && withFlag.HexSize == 4 && withFlag.MaxHp > 0;
+            if (ok) { Console.WriteLine("✓ [PASS] OriginsCellStatsTest"); passed++; }
+            else { Console.WriteLine($"✗ [FAIL] OriginsCellStatsTest - atp {baseStats.AtpBalance}->{withMito.AtpBalance}, spd {withMito.BaseSpeed}->{withFlag.BaseSpeed}"); failed++; }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ [FAIL] OriginsCellStatsTest - {ex.Message}");
+            failed++;
+        }
+
+        // Test 11: ORIGINES — le métabolisme tue une cellule sans source
+        // d'énergie (osmorégulation > production), mais une cellule
+        // photosynthétique survit à la lumière (profondeur réelle).
+        try
+        {
+            // Cellule "morte-née": 6 vacuoles, aucune production d'ATP.
+            var starve = new DownHere.Origins.Microbe();
+            starve.Place(DownHere.Origins.OrganelleRegistry.Vacuole, 0, 0);
+            for (int i = 1; i <= 5; i++)
+                starve.Place(DownHere.Origins.OrganelleRegistry.Vacuole, i, 0);
+            starve.Stored[DownHere.Origins.Compound.ATP] = 2f;
+            var surface = DownHere.Origins.Environment.SurfaceWater();
+            surface.GlucosePatch = 0f; // pas de sucre ambiant
+            for (int t = 0; t < 200 && !starve.IsDead; t++) starve.Tick(0.1f, surface);
+
+            // Cellule photosynthétique: chloroplaste, survit à la lumière.
+            var photo = DownHere.Origins.Microbe.Starter();
+            photo.Place(DownHere.Origins.OrganelleRegistry.Chloroplast, 2, 0);
+            photo.Place(DownHere.Origins.OrganelleRegistry.Mitochondrion, 0, 1);
+            for (int t = 0; t < 600; t++) photo.Tick(0.1f, DownHere.Origins.Environment.SurfaceWater());
+
+            if (starve.IsDead && !photo.IsDead)
+            { Console.WriteLine("✓ [PASS] OriginsMetabolismTest"); passed++; }
+            else
+            { Console.WriteLine($"✗ [FAIL] OriginsMetabolismTest - starve.dead={starve.IsDead} photo.dead={photo.IsDead}"); failed++; }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ [FAIL] OriginsMetabolismTest - {ex.Message}");
+            failed++;
+        }
+
         Console.WriteLine($"\n{passed + failed} tests ran: {passed} passed, {failed} failed\n");
     }
 }

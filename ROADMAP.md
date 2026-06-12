@@ -27,7 +27,7 @@ pluie→eau, repeuplement de la faune.
 
 - [x] Step M1.1 - Trade caravan event. In src/RimWorldLab.Core/GameWorld.cs,
 
-- [ ] Step M1.2 - Colony festival lifts spirits. In
+- [x] Step M1.2 - Colony festival lifts spirits. In
       src/RimWorldLab.Core/GameWorld.cs, find the exact line:
       `        // --- Metallurgy: sustained mining smelts Metal from Stone ---`
       Immediately BEFORE that line, insert:
@@ -52,3 +52,5 @@ NE TOUCHE PAS à MicroStage.cs ni UiShell.cs — domaine superviseur.
 ## ARCHIVE (avant le nettoyage du 12/06 — détail dans git history)
 - [x] Gameplay de base: combat, raids, ressources, pièces, économie, météo,
       jour/nuit, sauvegarde, hex/planète, chasse, humeur→travail.
+- [ ] Step E.13 - Randomly trigger a "Colony surprise" event, increasing colony morale and potentially spawning a caravan, in src/RimWorldLab.Core/GameWorld.cs.
+- [ ] Step E.29 - Add a new method `TriggerColonySurpriseEvent` to the `GameWorld` class in `GameWorld.cs` that randomly triggers a "Colony surprise" event, increasing colony morale and potentially spawning a caravan.
