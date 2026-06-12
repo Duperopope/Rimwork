@@ -1,25 +1,25 @@
 {
-  "timestamp": "2026-06-12 14:46:09",
+  "timestamp": "2026-06-12 15:54:42",
   "steps": 8,
   "issued": [
-    "harvest 29 48"
+    "select 1",
+    "harvest 5 18",
+    "select 0"
   ],
   "anomalies": [],
   "llmNotes": [
-    "rejected model output: Brynn, Corwin, Dara, Elsie, et Greta doivent recolter du bois et des pierres pour construire des murs. Aiden, Fin et Holt doivent rester à la guilde pour nourrir leur f",
-    "rejected model output: Harvest 17 47.",
-    "rejected model output: harvest 10 30 15 35 2 24 36 46 29 43 14 44 8 46 29 43 14 44 8 46",
-    "rejected model output: harvest 5 35 select 0 harvest 6 26 select 1 harvest 39 14 select 2 harvest 37 40 select 3 harvest 44 2 select 4 harvest 10 42 select 5 harvest",
-    "rejected model output: Since the game state does not provide any information about the location of resources, I will assume that the pawns are close to the resources. I will start by selecting each pawn one by one and then instruct them to harvest wood and stone. After that, I will instruct them to build walls and",
-    "rejected model output: harvest 5 35 select 0 harvest 6 26 select 1 harvest 39 14 select 2 harvest 37 40 select 3 harvest 44 2 select 4 harvest 10 42 select 5 harvest",
-    "rejected model output: harvest 5 35 select 0 harvest 6 26 select 1 harvest 39 14 select 2 harvest 37 40 select 3 harvest 44 2 select 4 harvest 10 42 select 5 harvest"
+    "rejected model output: Since the goal is to build 3 functional rooms, the first priority should be to gather resources such as wood and stone. The pawns are currently idle, so the best command would be to make them harvest. The nearest resources are likely to be within a range of 5 from the pawns",
+    "rejected model output: Avec ce jeu, il est important de stratégier son temps pour construire les murs et les chambres. Pour cela, nous allons définir une stratégie de recherche de ressources, de construction de murs et de ch",
+    "rejected model output: Since the game state does not provide any information about the presence of resources or pawns, we will assume that the pawns are located near the resources. We will start by harvesting the resources. After that, we will build walls to form rooms and put beds inside. Here is the command:",
+    "rejected model output: Avec cet état de jeu, nous avons 8 pawns et une quantité limitée de ressources (bois, pierre, eau, nourriture, métal, outils). Nous devons maximiser l'utilisation",
+    "rejected model output: Since the goal is to build 3 rooms, the first priority should be to build walls and then beds. The pawns can move around and gather resources while we build the rooms."
   ],
   "final": {
-    "stone": 12,
-    "ticks": 2438,
-    "goalsDone": 0,
     "pawns": 8,
-    "wood": 8,
-    "rooms": 0
+    "stone": 21,
+    "rooms": 0,
+    "ticks": 1360,
+    "wood": 9,
+    "goalsDone": 0
   }
 }

@@ -18,6 +18,9 @@ public partial class UiShell : CanvasLayer
     // HUD live labels
     private Label _resources, _clock, _objective, _alert, _macro, _events;
     private Label _inspector;
+    // HUD panels toggled per view layer (Local / Planet / Solar)
+    private PanelContainer _objPanel, _macroPanel, _evPanel, _rightPanel;
+    private Label _macroTitle, _hint;
     private Button _pauseBtn;
     private PanelContainer _visitPanel;
     private Button _visitBtn;
@@ -311,20 +314,21 @@ public partial class UiShell : CanvasLayer
         left.MouseFilter = Control.MouseFilterEnum.Ignore;
         _hud.AddChild(left);
 
-        var objP = Panel(); left.AddChild(objP);
-        var objBox = new VBoxContainer(); objP.AddChild(objBox);
+        _objPanel = Panel(); left.AddChild(_objPanel);
+        var objBox = new VBoxContainer(); _objPanel.AddChild(objBox);
         objBox.AddChild(Title("OBJECTIF", 13));
         _objective = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
         objBox.AddChild(_objective);
 
-        var macroP = Panel(); left.AddChild(macroP);
-        var macroBox = new VBoxContainer(); macroP.AddChild(macroBox);
-        macroBox.AddChild(Title("MONDE (macro → local)", 13));
+        _macroPanel = Panel(); left.AddChild(_macroPanel);
+        var macroBox = new VBoxContainer(); _macroPanel.AddChild(macroBox);
+        _macroTitle = Title("MONDE (macro → local)", 13);
+        macroBox.AddChild(_macroTitle);
         _macro = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
         macroBox.AddChild(_macro);
 
-        var evP = Panel(); left.AddChild(evP);
-        var evBox = new VBoxContainer(); evP.AddChild(evBox);
+        _evPanel = Panel(); left.AddChild(_evPanel);
+        var evBox = new VBoxContainer(); _evPanel.AddChild(evBox);
         evBox.AddChild(Title("ÉVÉNEMENTS", 13));
         _events = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
         evBox.AddChild(_events);
@@ -335,6 +339,7 @@ public partial class UiShell : CanvasLayer
         right.AnchorLeft = 1; right.OffsetLeft = -340; right.OffsetRight = -10;
         right.AnchorTop = 0.12f; right.AnchorBottom = 0.7f;
         right.MouseFilter = Control.MouseFilterEnum.Ignore;
+        _rightPanel = right;
         _hud.AddChild(right);
         var insBox = new VBoxContainer(); right.AddChild(insBox);
         insBox.AddChild(Title("COLON SÉLECTIONNÉ", 13));
@@ -371,15 +376,11 @@ public partial class UiShell : CanvasLayer
             _visitPanel.Visible = true;
         };
 
-        // ---- Bottom hint ----
-        var hint = new Label
-        {
-            Text = "clic: sélection/ordre récolte  |  Shift+clic: mur  |  Ctrl+clic: lit  |  Tab/M: planète (hex cliquables)  |  molette: zoom  |  Échap: menu",
-            HorizontalAlignment = HorizontalAlignment.Center
-        };
-        hint.SetAnchorsPreset(Control.LayoutPreset.BottomWide);
-        hint.AddThemeColorOverride("font_color", new Color(0.5f, 0.55f, 0.6f));
-        _hud.AddChild(hint);
+        // ---- Bottom hint (text follows the active view layer) ----
+        _hint = new Label { HorizontalAlignment = HorizontalAlignment.Center };
+        _hint.SetAnchorsPreset(Control.LayoutPreset.BottomWide);
+        _hint.AddThemeColorOverride("font_color", new Color(0.5f, 0.55f, 0.6f));
+        _hud.AddChild(_hint);
     }
 
     public override void _UnhandledKeyInput(InputEvent ev)
@@ -402,14 +403,46 @@ public partial class UiShell : CanvasLayer
         _clock.Text = $"[{_game.ViewLayer}] Jour {w.DayNumber}, {(int)_game.LocalHourF:00}:00  {meteo}" + (_game.Paused ? "  [PAUSE]" : $"  [{_game.SpeedMultiplier:0}x]");
         _pauseBtn.Text = _game.Paused ? "▶" : "II";
 
-        int rooms = w.GetRooms().Count(r => r.Function != RoomFunction.Empty);
-        _objective.Text = $"{w.CurrentGoalText}\nPièces fonctionnelles: {rooms}   Objectifs accomplis: {w.GoalIndex}\nRecherche: {w.ResearchPoints} pts ({string.Join(", ", w.UnlockedTech.DefaultIfEmpty("aucune tech"))})";
-
+        // --- Context-sensitive HUD: each view layer gets its own panels ---
         var m = w.Macro;
-        _macro.Text = $"Système {m.System.StarName} — colonie sur {m.System.HomeBody.Name}\n" +
-            $"Pression de raid: {m.RaidPressure:0.0}x   Climat: {m.ClimatePulse:0.00}\n" +
-            $"Demande commerciale: {m.TradeDemand:P0}\n" +
-            $"Sites extérieurs: {string.Join(", ", m.Sites.Select(s => s.Name))}";
+        string layer = _game.ViewLayer;
+        _objPanel.Visible = layer == "Local";
+        _rightPanel.Visible = layer == "Local";
+        _evPanel.Visible = layer != "Solar";
+
+        if (layer == "Local")
+        {
+            int rooms = w.GetRooms().Count(r => r.Function != RoomFunction.Empty);
+            _objective.Text = $"{w.CurrentGoalText}\nPièces fonctionnelles: {rooms}   Objectifs accomplis: {w.GoalIndex}\nRecherche: {w.ResearchPoints} pts ({string.Join(", ", w.UnlockedTech.DefaultIfEmpty("aucune tech"))})";
+            _macroTitle.Text = "MONDE (macro → local)";
+            _macro.Text = $"Système {m.System.StarName} — colonie sur {m.System.HomeBody.Name}\n" +
+                $"Pression de raid: {m.RaidPressure:0.0}x   Climat: {m.ClimatePulse:0.00}\n" +
+                $"Demande commerciale: {m.TradeDemand:P0}\n" +
+                $"Sites extérieurs: {string.Join(", ", m.Sites.Select(s => s.Name))}";
+            _hint.Text = "clic: sélection/ordre récolte  |  Shift+clic: mur  |  Ctrl+clic: lit  |  Tab/M: planète (hex cliquables)  |  molette: zoom  |  Échap: menu";
+        }
+        else if (layer == "Planet")
+        {
+            var body = m.System.Bodies[Math.Clamp(_game.CurrentBodyIdx, 0, m.System.Bodies.Count - 1)];
+            bool home = body == m.System.HomeBody;
+            _macroTitle.Text = $"PLANÈTE — {body.Name}";
+            _macro.Text = $"{body.Kind}   habitabilité {body.Habitability:0.0}   T {body.ClimateTemp:+0.0;-0.0}\n" +
+                (home
+                    ? $"Colonie ici — pression de raid {m.RaidPressure:0.0}x, climat {m.ClimatePulse:0.00}\n" +
+                      $"Sites extérieurs: {string.Join(", ", m.Sites.Select(s => s.Name))}"
+                    : "Aucune colonie sur ce corps.");
+            _hint.Text = "clic sur un hex: sélectionner la tuile (Visiter)  |  clic droit + glisser: tourner  |  molette à fond: vue système  |  Tab: retour colonie";
+        }
+        else // Solar
+        {
+            _macroTitle.Text = $"SYSTÈME {m.System.StarName}";
+            _macro.Text = $"Activité solaire: {m.System.SolarActivity:0.00}\n" +
+                string.Join("\n", m.System.Bodies.Select(b =>
+                    $"• {b.Name} ({b.Kind}, hab {b.Habitability:0.0}, T {b.ClimateTemp:+0.0;-0.0})" +
+                    (b == m.System.HomeBody ? "  ← colonie" : ""))) +
+                $"\nDemande commerciale: {m.TradeDemand:P0}";
+            _hint.Text = "clic sur un corps: vue planète  |  molette: zoom  |  Tab: retour colonie  |  Échap: menu";
+        }
 
         _events.Text = string.Join("\n", w.ColonyEvents.TakeLast(6));
         _alert.Text = _game.AlertText;

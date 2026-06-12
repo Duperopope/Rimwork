@@ -66,8 +66,10 @@ public class NeedsSystem
     /// </summary>
 public void Tick(GameWorldManager world, PawnTaskDriver driver, Pawn pawn, Random rng)
 {
-    pawn.Hunger = Math.Min(100f, pawn.Hunger + NeedRates.HungerPerTick);
-    pawn.Fatigue = Math.Min(100f, pawn.Fatigue + NeedRates.FatiguePerTick);
+    // Idle pawns burn fewer calories than working ones.
+    float effort = driver.Current != null ? 1f : 0.6f;
+    pawn.Hunger = Math.Min(100f, pawn.Hunger + NeedRates.HungerPerTick * effort);
+    pawn.Fatigue = Math.Min(100f, pawn.Fatigue + NeedRates.FatiguePerTick * effort);
 
     // A need maxed out at 100 starts costing HP - starving or collapsing
     // from exhaustion can kill a pawn if left unmet.

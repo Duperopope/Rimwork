@@ -433,3 +433,8 @@
 - Ensure all referenced types and fields exist in the current context before adding new code.
 - Ensure all referenced fields and methods exist in the current context before adding new code.
 - Ensure all referenced fields and methods exist before adding code in GameWorld.cs.
+- The lesson is: Be sure to check the existing code thoroughly and understand its structure and components before adding new features or methods.
+- The lesson is to always double-check the existing file and method signatures before adding a new one, and to make sure that the types and properties used in the new method exist in the file.
+- The lesson is to always double-check that the method signatures, types, and properties match exactly with the existing file content, and to avoid inventing new types or properties that do not exist in the shown code.
+- The lesson is to carefully read and understand the existing code before making changes. The error messages are revealing - they suggest that there are missing or improperly placed brackets or comparison operators in the code. Always double-check your syntax to avoid such issues.
+- The C# compiler is strict about syntax. Make sure all braces, semicolons, and other symbols are used correctly. Also, ensure that all types are defined and the correct method of accessing properties and methods is used.

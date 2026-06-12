@@ -5,99 +5,6 @@ using System.Linq;
 // =====================================================================
 // 1. Core Data Structures (Map & Collision)
 // =====================================================================
-public class GameWorld
-{
-private Dictionary<ResourceKind, int> _recycledResources = new();
-private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-private int TotalTicks = 0;
-// private int cookBonus = 0; // New field
-
-public GameWorld()
-{
-    // Initialize resource regeneration rates
-    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
-    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
-}
-
-private int Tools = 0;
-private int Food = 0;
-private float[,] _microbialBiomass = new float[100, 100]; // Example size
-// private int _functionalRoomsCount = 0; // Uncomment this line
-
-public static class Macro
-{
-    public static float[,] Regions { get; } = new float[100, 100];
-    public static float[,] MicrobialBiomass { get; } = new float[100, 100];
-}
-
-public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
-{
-    if (_resourceRegenerationRates.ContainsKey(kind))
-    {
-        _resourceRegenerationRates[kind] = rate;
-    }
-}
-
-public void RegenerateResource(ResourceKind kind, int amount)
-{
-    if (_resourceRegenerationRates.TryGetValue(kind, out int rate))
-    {
-        int newAmount = amount + rate;
-        // Ensure the new amount does not exceed a maximum limit
-        int maxAmount = 100; // Example maximum limit
-        _recycledResources[kind] = Math.Min(newAmount, maxAmount);
-    }
-}
-
-public void SimulateResourceRegeneration()
-{
-    foreach (var resource in _recycledResources.Keys)
-    {
-        RegenerateResource(resource, _recycledResources[resource]);
-    }
-}
-
-public void GenerateResourcesOverTime()
-{
-    // Example: Generate resources based on some logic
-    RegenerateResource(ResourceKind.Tree, 5);
-    RegenerateResource(ResourceKind.Rock, 3);
-    SimulateMicrobialBiomassRegeneration();
-    SimulateResourceRegeneration();
-}
-
-private void SimulateMicrobialBiomassRegeneration()
-{
-    for (int x = 0; x < 100; x++)
-    {
-        for (int y = 0; y < 100; y++)
-        {
-            // Simple regeneration logic: increase biomass by 0.01 each tick
-            _microbialBiomass[x, y] = Math.Min(_microbialBiomass[x, y] + 0.01f, 1.0f);
-        }
-    }
-}
-}
-
-/// <summary>
-/// Represents a map of regions on the planet.
-/// </summary>
-public class RegionMap
-{
-private readonly List<(int X, int Y, string Biome)> _regions = new();
-private Dictionary<ResourceKind, int> _recycledResources = new();
-
-    public RegionMap()
-    {
-        // Initialize with some example regions
-        _regions.Add((0, 0, "Forest"));
-        _regions.Add((10, 10, "Desert"));
-        _regions.Add((20, 20, "Mountain"));
-    }
-
-    public List<(int X, int Y, string Biome)> Regions => _regions;
-}
-
 /// <summary>
 /// Represents a single cell in the 2D map.
 /// </summary>
@@ -225,12 +132,9 @@ public class GameMap
     private readonly HashSet<(int X, int Y)> _noGrowTiles = new();
     private readonly HashSet<(int X, int Y)> _bridges = new();
     private bool _isRaining = false;
-    private List<(int X, int Y, string Biome)> _regions = new();
 
     // Resource consumption tracking
 private int _foodConsumption = 0;
-private int _waterConsumption = 0;
-private int _energyConsumption = 0;
 private Dictionary<Guid, Dictionary<ResourceKind, int>> _pawnResourceConsumption = new();
 private Dictionary<ResourceKind, int> _recycledResources = new();
 
@@ -363,7 +267,6 @@ public bool IsPawnSkilledEnough(Pawn pawn, SkillKind requiredSkill, float requir
 public void DisplayFunctionalRooms()
 {
     int functionalRoomCount = CountFunctionalRooms();
-    Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
     Console.WriteLine($"Number of functional rooms: {functionalRoomCount}");
 }
 
@@ -522,14 +425,19 @@ public bool IsTilePartOfRoom(int x, int y)
                 }
             }
             // Lakes pool along the river course (depressions).
+            // Margins shrink on tiny maps (tests) so rng.Next(min, max) stays valid.
+            int lm = Math.Min(6, Math.Max(1, Width / 2 - 1));
+            int lmy = Math.Min(6, Math.Max(1, Height / 2 - 1));
             int lakes = wet ? 4 + rng.Next(3) : 1 + rng.Next(2);
             for (int l = 0; l < lakes; l++)
-                Splash(rng.Next(6, Width - 6), rng.Next(6, Height - 6), wet ? 2 + rng.Next(2) : 3 + rng.Next(2), wtype, wsolid);
+                Splash(rng.Next(lm, Width - lm), rng.Next(lmy, Height - lmy), wet ? 2 + rng.Next(2) : 3 + rng.Next(2), wtype, wsolid);
         }
         else if (rng.Next(2) == 0)
         {
             // Desert: at most one small oasis.
-            Splash(rng.Next(8, Width - 8), rng.Next(8, Height - 8), 2, "Water", true);
+            int om = Math.Min(8, Math.Max(1, Width / 2 - 1));
+            int omy = Math.Min(8, Math.Max(1, Height / 2 - 1));
+            Splash(rng.Next(om, Width - om), rng.Next(omy, Height - omy), 2, "Water", true);
         }
 
         // --- Keep the starter-colony plot dry and clear (home maps build
@@ -637,10 +545,6 @@ public bool IsPlantable(int x, int y)
         }
     }
 
-    return true;
-    if (_furniture.Exists(f => f.X == x && f.Y == y)) return false;
-    if (_saplings.Exists(s => s.X == x && s.Y == y)) return false;
-    if (_noGrowTiles.Contains((x, y))) return false;
     return true;
 }
 
@@ -1427,15 +1331,23 @@ private void UpdateHeaderText()
             foreach (var sp in _pawns.Where(pp => pp.HP > 0))
                 sp.Stress = Math.Clamp(sp.Stress + 2f, 0f, 100f);
 
+        // Early-game guidance so a new player knows what to do first.
+        if (TotalTicks == 200) LogEvent("Guide: recoltez 10 bois (clic sur un arbre).");
+
         if (TotalTicks % 50 == 0)
             AssignPersonalFurniture();
 
         if (TotalTicks % 40 == 0)
+        {
             foreach (var an in _pawns.Where(p => p.Name == "SmallAnimal" && p.HP > 0))
             {
                 int nx = an.X + _rng.Next(-1, 2), ny = an.Y + _rng.Next(-1, 2);
                 if (_map.IsPassable(nx, ny)) { an.X = nx; an.Y = ny; }
             }
+            // Exhausted pawns slowly catch their breath even without a bed.
+            foreach (var pw in _pawns.Where(q => q.HP > 0 && q.Fatigue > 80))
+                pw.Fatigue = Math.Max(0f, pw.Fatigue - 2f);
+        }
 
         // --- Survival economy: food & water are consumed by living pawns ---
         int mealInterval = UnlockedTech.Contains("Granary") ? 2600 : 2000;
@@ -1463,6 +1375,8 @@ private void UpdateHeaderText()
             }
         }
 
+        if (TotalTicks % 600 == 0 && Macro.ColonyWeather == WeatherKind.Rain)
+            Water++;
         if (TotalTicks % 1500 == 0)
         {
             foreach (var p in _pawns.Where(p => p.HP > 0))

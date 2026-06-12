@@ -940,6 +940,8 @@ public partial class Game3D : Node3D
     }
 
     private int _currentBodyIdx = 0;
+    /// <summary>Body currently shown in the Planet view (HUD reads this).</summary>
+    public int CurrentBodyIdx => _currentBodyIdx;
     private List<HexPlanet.Tile> _tiles;
     private int _colonyTileIdx = -1;
     private string[] _tileBiomes;
