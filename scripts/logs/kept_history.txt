@@ -92,3 +92,4 @@
 - [ ] Step G.11 - Wildlife respawns when hunted out. In
 - [ ] Step G.12 - Night rest is deeper. In
 - [ ] Step G.13 - Collective morale warning. In
+- [ ] Step G.13 - Collective morale warning. In
