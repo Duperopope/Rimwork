@@ -38,6 +38,9 @@ public partial class UiShell : CanvasLayer
         _game = GetParent().GetNode<Game3D>("Game3D");
         bool unattended = OS.GetEnvironment("RIMWORK_AUTOSTART") == "1" || System.IO.File.Exists(@"g:/Rimwork/scripts/autostart.flag");
         _game.ThreatSpawned += () => { if (PauseOnThreat && _hud.Visible && !unattended) _game.Paused = true; };
+        // Agent-started games (bridge 'newgame'/'load') must dismiss the
+        // menu - the AI plays the same UI flow as a human.
+        _game.GameStarted += () => CallDeferred(nameof(ShowHudDeferred));
         BuildMenu();
         BuildHud();
         BuildOptions();
@@ -59,6 +62,8 @@ public partial class UiShell : CanvasLayer
             ShowOnly(_hud);
         }
     }
+
+    private void ShowHudDeferred() => ShowOnly(_hud);
 
     // ==================================================================
     // Helpers (consistent visual identity)
@@ -95,6 +100,7 @@ public partial class UiShell : CanvasLayer
         foreach (var c in new[] { _menu, _hud, _options, _devTab, _credits, _saveScreen, _genScreen })
             if (c != null) c.Visible = c == screen;
         _game.Paused = screen != _hud;
+        _game.MenuOpen = screen != _hud;
     }
 
     // ==================================================================

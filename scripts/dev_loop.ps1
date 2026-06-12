@@ -625,6 +625,13 @@ Reply with EXACTLY one line in this format and nothing else:
     }
     $firstUnchecked = $itemLines -join "`n"
 
+    # Task timer for the dashboard: which item the AI works on, since when.
+    $ciPath = "g:\Rimwork\scripts\logs\current_item.json"
+    $prevCi = $null
+    try { $prevCi = Get-Content $ciPath -Raw -ErrorAction Stop | ConvertFrom-Json } catch {}
+    $since = if ($prevCi -and $prevCi.item -eq $itemKey) { $prevCi.since } else { (Get-Date -Format "yyyy-MM-dd HH:mm:ss") }
+    @{ item = $itemKey; since = $since; iter = $i } | ConvertTo-Json -Compress | Set-Content $ciPath -Encoding utf8
+
     if ($itemKey -eq $prevItem) {
         $failStreak++
     } else {

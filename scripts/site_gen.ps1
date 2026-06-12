@@ -132,8 +132,36 @@ function Get-DownHereSiteHtml {
         } else { "en attente d'itération..." }
         $lessons = ""
         try { $lessons = (Get-Content "g:\Rimwork\scripts\logs\lessons.md" | Select-Object -Last 5 | ForEach-Object { "<li>$(E($_ -replace '^- ',''))</li>" }) -join "" } catch {}
+
+        # Task timer: which roadmap item the AI works on and for how long.
+        $taskLine = "<span class='muted'>aucune t&acirc;che en cours</span>"
+        try {
+            $ci = Get-Content "g:\Rimwork\scripts\logs\current_item.json" -Raw -ErrorAction Stop | ConvertFrom-Json
+            $mins = [int]((Get-Date) - [datetime]::ParseExact($ci.since, "yyyy-MM-dd HH:mm:ss", $null)).TotalMinutes
+            $itTxt = $ci.item; if ($itTxt.Length -gt 130) { $itTxt = $itTxt.Substring(0, 130) + "..." }
+            $warn = if ($mins -ge 30) { " <b style='color:#f85149'>&#9888; bloqu&eacute; depuis $mins min</b>" } elseif ($mins -ge 10) { " <b style='color:#d29922'>$mins min</b>" } else { " <span class='muted'>depuis $mins min</span>" }
+            $taskLine = "$(E($itTxt))$warn"
+        } catch {}
+
+        # Game state from the agent bridge: never silently stuck at the menu.
+        $gameLine = "<span class='muted'>&eacute;tat du jeu inconnu (bridge muet)</span>"
+        try {
+            $ast = Get-Item "g:\Rimwork\scripts\logs/agent_state.json" -ErrorAction Stop
+            $ageS = [int]((Get-Date) - $ast.LastWriteTime).TotalSeconds
+            $as = Get-Content $ast.FullName -Raw | ConvertFrom-Json
+            if ($ageS -gt 30) { $gameLine = "<b style='color:#f85149'>jeu arr&ecirc;t&eacute; ou gel&eacute; (dernier &eacute;tat il y a ${ageS}s)</b>" }
+            elseif ($as.menuOpen) { $gameLine = "<b style='color:#d29922'>AU MENU PRINCIPAL</b> &middot; l'agent peut le sortir (newgame)" }
+            else { $gameLine = "EN JEU &middot; jour $($as.day), $($as.hour)h &middot; vue $($as.view) &middot; $(@($as.pawns).Count) pawns &middot; $($as.rooms) pi&egrave;ces$(if ($as.paused) { " &middot; <b style='color:#d29922'>PAUSE</b>" })" }
+        } catch {}
+        $pt = ""
+        try {
+            $ptr = Get-Content "g:\Rimwork\scripts\logs\playtest_report.json" -Raw -ErrorAction Stop | ConvertFrom-Json
+            $pt = " &middot; dernier playtest IA: $($ptr.issued.Count) actions, $($ptr.anomalies.Count) anomalies ($($ptr.timestamp))"
+        } catch {}
         $liveBlock = @"
 <div class='card'><h2>&#127918; Sant&eacute; en direct</h2><div>$h</div>
+<div style='margin-top:8px'><b>T&Acirc;CHE EN COURS:</b> $taskLine</div>
+<div style='margin-top:4px'><b>JEU:</b> $gameLine$pt</div>
 <div style='margin-top:8px'><a class='btnp' href='/pause'>&#9208; PAUSE MACHINE</a> <a class='btnr' href='/resume'>&#9654; REPRENDRE</a> <span class='muted'>&eacute;tat: $StackState</span></div></div>
 <div class='card'><h2>&#129504; Le&ccedil;ons r&eacute;centes de l'IA</h2><ul>$lessons</ul></div>
 "@

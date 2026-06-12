@@ -5814,3 +5814,33 @@ Open this file (or watch it) to see what the autonomous loop is building.
   injectées dans le prompt. ROADMAP: section FINITION & POLISH en tête
   (onboarding, sommeil, juice, audio procédural, équilibrage, win étendue);
   items MicroStage S.x gelés (le fork Thrive possède le stade microbien).
+- [iter 2] REVERTED (tests failed): Add a list to track onboarding objectives and a method to check them. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 3] REVERTED (tests failed): Add a list to track the onboarding objectives and a method to log when an objective is completed. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 4] REVERTED (tests failed): Add a simple task queue for onboarding objectives (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 5] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step F.1 - Ajouter un message LogEvent pour la première étape de la file d'objectifs guides (recolter 10 bois) dans src/RimWorldLab.Core/GameWorld.cs.
+- [iter 6] REVERTED (tests failed): Add a LogEvent call for the first task in the TaskBoard. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 7] REVERTED (tests failed): Add a LogEvent call for the first task in the TaskBoard. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 8] REVERTED (tests failed): Add a LogEvent call for the first task in the task queue. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 9] REVERTED (tests failed): Add a LogEvent call for the initial Harvest task in GameWorldManager. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 10] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step F.1a - Add a private field to store the list of pawns in src/RimWorldLab.Core/GameWorld.cs.
+- [iter 11] REVERTED (tests failed): Add a private field to store the list of pawns in GameWorld. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 12] PLAYTEST: 8 actions, 0 anomalies, pieces=1
+- [iter 12] REVERTED (tests failed): Add a private field to store the list of pawns in GameWorld. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 13] REVERTED (tests failed): Add a private field to store the list of pawns in GameWorld. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 14] REVERTED (tests failed): Add a private field to store the list of pawns in GameWorld. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 15] CRITIC TASK: - [ ] Step C.15 - Implement a system to track and display progress towards building additional rooms.
+- [iter 15] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step F.1a - Add a private field to store the list of pawns in src/RimWorldLab.Core/GameWorld.cs.
+- [iter 16] SKIPPED (no SEARCH match): Add a method to check if it's night time in the game world. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 17] SKIPPED (no SEARCH match): Add a method to simulate night time effects on pawns' fatigue and sleep. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 18] SKIPPED (no SEARCH match): Add method to check if it's night time. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 19] REVERTED (tests failed): Add method to check if it's nighttime (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 20] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step F.2a - Add a method to check if it's nighttime (hour >= 22 or <= 5). (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 21] SKIPPED (no SEARCH match): Add a method to check if it's nighttime (hour >= 22 or <= 5). (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 1] SKIPPED (no SEARCH match): Add a method to check if it's nighttime in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-12 07:04).
+- [12/06 suivi] Dashboard: TÂCHE EN COURS avec chrono (orange >10 min, rouge
+  "bloqué" >30 min, source current_item.json écrit par la boucle) + état JEU
+  en direct via le bridge (EN JEU jour/heure/vue/pawns, AU MENU en orange,
+  rouge si l'état date de >30 s). Anti-blocage menu: Game3D.GameStarted →
+  UiShell bascule sur le HUD quand l'agent lance newgame (vérifié:
+  menuOpen true→false). Piège \a (cloche) corrigé dans site_gen.

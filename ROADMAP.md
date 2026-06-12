@@ -16,8 +16,8 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 Chaque item doit etre RESSENTI en jouant. Le playtest automatique (toutes les
 12 iterations) verifie tes changements en jouant vraiment.
 
-- [ ] Step F.1 - Onboarding jour 1: dans src/RimWorldLab.Core/GameWorld.cs, ajouter une file d'objectifs guides au demarrage (recolter 10 bois -> construire 4 murs -> 1 lit) avec un message LogEvent a chaque etape franchie.
-- [ ] Step F.2 - Sommeil reel: la nuit (hour >= 22 ou <= 5), les pawns avec Fatigue > 60 cherchent leur lit et dorment (Fatigue baisse 3x plus vite dans un lit). (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step F.1a - Add a private field to store the list of pawns in src/RimWorldLab.Core/GameWorld.cs.
+- [ ] Step F.2a - Add a method to check if it's nighttime (hour >= 22 or <= 5). (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step F.3 - Feedback de pose: dans src/RimWorldGodot/Game3D.cs, quand un mur ou un meuble vient d'etre construit, faire apparaitre le node avec un petit tween de scale (0.2 -> 1.0 en 0.25s).
 - [ ] Step F.4 - Audio procedural: dans src/RimWorldGodot/Game3D.cs, generer un bip court via AudioStreamGenerator quand un ordre est donne et un son grave quand une menace apparait (zero asset).
 - [ ] Step F.5 - Equilibrage faim/soif: la faim monte 30% plus vite quand le pawn travaille, la soif 50% plus vite sous climat chaud (BiomeShift > 0.3). (src/RimWorldLab.Core/GameWorld.cs)
@@ -244,3 +244,4 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [ ] Step C.1a - Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. Ensure the property returns the `_pawns` field.
 - [ ] Step C.15a - Add a public property to access the `_pawns` list in `GameWorld.cs`.
 - [ ] Step C.30a - Add a private field to store resource consumption rates in GameWorld.cs
+- [ ] Step C.15 - Implement a system to track and display progress towards building additional rooms.

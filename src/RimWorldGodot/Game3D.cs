@@ -17,6 +17,10 @@ public partial class Game3D : Node3D
     public float SpeedMultiplier { get; set; } = 1f;
     public Pawn SelectedPawn { get; private set; }
     public string AlertText { get; set; } = "";
+    // Agent bridge / UI handshake: UiShell keeps MenuOpen in sync and
+    // listens to GameStarted so an agent 'newgame' also dismisses the menu.
+    public bool MenuOpen { get; set; } = true;
+    public event Action GameStarted;
 
     /// <summary>Active zoom layer: "Local" or "Planet" (Tab/M to toggle).</summary>
     public string ViewLayer { get; private set; } = "Local";
@@ -156,6 +160,7 @@ public partial class Game3D : Node3D
         SetViewLayer("Local");
         _camRig.Position = new Vector3(gen.MapSize * 0.28f, 0, gen.MapSize * 0.24f);
         AlertText = $"Monde créé (seed {gen.Seed}) — système {World.Macro.System.StarName}, {World.Macro.System.Bodies.Count} corps.";
+        GameStarted?.Invoke();
     }
 
     public float OrbitSpeedMult { get; set; } = 1f;
@@ -714,6 +719,7 @@ public partial class Game3D : Node3D
                 day = World.DayNumber,
                 hour = (int)LocalHourF,
                 paused = Paused,
+                menuOpen = MenuOpen,
                 speed = SpeedMultiplier,
                 view = ViewLayer,
                 weather = LocalWeather.ToString(),
