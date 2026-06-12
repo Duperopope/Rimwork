@@ -306,3 +306,5 @@
 - Ensure all referenced types and methods exist before adding new code.
 - Ensure all referenced members and methods exist before adding new code.
 - Ensure unique constructor signatures when adding new fields or methods in the same class.
+- Ensure all referenced members and types exist in the current context before adding new code.
+- Ensure all used properties and methods are defined in the current context or imported namespaces.

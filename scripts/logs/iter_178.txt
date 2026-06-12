@@ -1,4 +1,4 @@
-CHANGE: Add a method to track resource consumption for building and maintenance tasks.
+CHANGE: Add a method to track resource consumption.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
 public void SimulateResourceRegeneration()
@@ -17,14 +17,18 @@ public void SimulateResourceRegeneration()
     }
 }
 
+private Dictionary<ResourceKind, int> _resourceConsumption = new();
+
 public void TrackResourceConsumption(ResourceKind kind, int amount)
 {
-    if (_recycledResources.ContainsKey(kind))
+    if (_resourceConsumption.ContainsKey(kind))
     {
-        _recycledResources[kind] -= amount;
-        // Ensure the resource amount does not go below zero
-        _recycledResources[kind] = Math.Max(_recycledResources[kind], 0);
+        _resourceConsumption[kind] += amount;
+    }
+    else
+    {
+        _resourceConsumption[kind] = amount;
     }
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to limit resource consumption based on available resources.
+NEXT: Implement a method to get the total resource consumption.

@@ -1,9 +1,37 @@
-CHANGE: Add a dictionary to track resource consumption for building and maintenance tasks.
+CHANGE: Add a method to track and limit resource usage.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private Dictionary<ResourceKind, int> _recycledResources = new();
+public void SimulateResourceRegeneration()
+{
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
 =======
-private Dictionary<ResourceKind, int> _recycledResources = new();
-private Dictionary<ResourceKind, int> _resourceConsumption = new();
+public void SimulateResourceRegeneration()
+{
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+
+    LimitResourceUsage();
+}
+
+private void LimitResourceUsage()
+{
+    // Example: Limit wood usage to 50 units
+    if (_recycledResources.TryGetValue(ResourceKind.Tree, out int woodAmount))
+    {
+        _recycledResources[ResourceKind.Tree] = Math.Min(woodAmount, 50);
+    }
+
+    // Example: Limit stone usage to 30 units
+    if (_recycledResources.TryGetValue(ResourceKind.Rock, out int stoneAmount))
+    {
+        _recycledResources[ResourceKind.Rock] = Math.Min(stoneAmount, 30);
+    }
+}
 >>>>>>> REPLACE
-NEXT: Implement methods to update and track resource consumption during tasks.
+NEXT: Implement a method to update resource consumption based on pawn actions.

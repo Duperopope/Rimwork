@@ -1,8 +1,11 @@
-CHANGE: Add `Wood` and `Stone` to the `ResourceKind` enum.
-FILE: src/RimWorldLab.Core/Enums.cs
+CHANGE: Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public enum ResourceKind { /* complete, do not modify */ }
+private float[,] _microbialBiomass = new float[100, 100]; // Example size
+// private int _functionalRoomsCount = 0; // Uncomment this line
 =======
-public enum ResourceKind { Tree, Rock, Water, Energy, Wood, Stone }
+private float[,] _microbialBiomass = new float[100, 100]; // Example size
+private List<Pawn> _pawns = new(); // New field
+// private int _functionalRoomsCount = 0; // Uncomment this line
 >>>>>>> REPLACE
-NEXT: Ensure properties like Wood and Stone are declared in GameWorld before initializing them.
+NEXT: Initialize the `_pawns` list in the `GameWorld` constructor.

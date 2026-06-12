@@ -1,22 +1,39 @@
-CHANGE: Add properties for Wood and Stone in GameWorld.
+CHANGE: Add a method to track resource consumption for building materials.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public class GameWorld
+public void SimulateResourceRegeneration()
 {
-    private Dictionary<ResourceKind, int> _recycledResources = new();
-    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-    private int TotalTicks = 0;
-// ... (lines omitted) ...
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
 =======
-public class GameWorld
+public void SimulateResourceRegeneration()
 {
-    private Dictionary<ResourceKind, int> _recycledResources = new();
-    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-    private int TotalTicks = 0;
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
 
-    public int Wood { get; private set; }
-    public int Stone { get; private set; }
+private Dictionary<ResourceKind, int> _buildingMaterialConsumption = new();
 
-// ... (lines omitted) ...
+public void TrackBuildingMaterialConsumption(ResourceKind kind, int amount)
+{
+    if (_buildingMaterialConsumption.ContainsKey(kind))
+    {
+        _buildingMaterialConsumption[kind] += amount;
+    }
+    else
+    {
+        _buildingMaterialConsumption[kind] = amount;
+    }
+}
+
+public int GetTotalBuildingMaterialConsumption(ResourceKind kind)
+{
+    return _buildingMaterialConsumption.TryGetValue(kind, out int consumption) ? consumption : 0;
+}
 >>>>>>> REPLACE
-NEXT: Implement methods to update and consume Wood and Stone resources.
+NEXT: Implement a system to limit resource consumption for building materials.

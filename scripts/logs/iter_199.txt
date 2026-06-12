@@ -1,16 +1,34 @@
-CHANGE: Add `ResourceKind.Wood` and `ResourceKind.Stone` to the `ResourceKind` enumeration.
-FILE: src/RimWorldLab.Core/Enums.cs
+CHANGE: Add a method to track resource consumption.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public enum ResourceKind { /* complete, do not modify */ }
-=======
-public enum ResourceKind
+public void SimulateResourceRegeneration()
 {
-    Tree,
-    Rock,
-    Water,
-    Energy,
-    Wood,
-    Stone
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
+=======
+public void SimulateResourceRegeneration()
+{
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
+
+private Dictionary<ResourceKind, int> _resourceConsumption = new();
+
+public void TrackResourceConsumption(ResourceKind kind, int amount)
+{
+    if (_resourceConsumption.ContainsKey(kind))
+    {
+        _resourceConsumption[kind] += amount;
+    }
+    else
+    {
+        _resourceConsumption[kind] = amount;
+    }
 }
 >>>>>>> REPLACE
-NEXT: Ensure `ResourceKind` enum includes all referenced types before initialization.
+NEXT: Implement a method to limit resource usage based on consumption.

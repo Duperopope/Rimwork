@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-06-12 06:48:29",
+  "steps": 4,
+  "issued": [
+    "harvest 12 14",
+    "harvest 8 5",
+    "harvest 41 48",
+    "harvest 5 30"
+  ],
+  "anomalies": [],
+  "llmNotes": [],
+  "final": {
+    "goalsDone": 0,
+    "rooms": 0,
+    "wood": 12,
+    "pawns": 8,
+    "ticks": 2782,
+    "stone": 12
+  }
+}

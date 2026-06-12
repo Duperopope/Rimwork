@@ -419,6 +419,12 @@ public partial class Game3D : Node3D
             catch { }
         }
 
+        // Agent bridge: full game control + machine-readable state, so an AI
+        // can play the game like a human (commands in scripts/agent_cmd.txt,
+        // state in scripts/logs/agent_state.json).
+        ProcessAgentCommands();
+        WriteAgentState(delta);
+
         SyncPawns(delta);
         SyncThreatNodes(delta);
 
@@ -618,6 +624,131 @@ public partial class Game3D : Node3D
 
     /// <summary>Player orders: click a tree/rock = harvest; Shift+click open
     /// ground = build wall; Ctrl+click open ground = build a bed.</summary>
+    // ------------------------------------------------------------------
+    // AGENT BRIDGE - lets an AI play the game like a human player.
+    // Commands (scripts/agent_cmd.txt, one per line, consumed once):
+    //   newgame [seed] | pause | resume | speed <f>
+    //   view <Local|Planet|Solar|Planet:N> | select <i>
+    //   harvest <x> <y> | wall <x> <y> | bed <x> <y> | move <x> <y>
+    //   save <1-3> | load <1-3> | visit <tileIdx> [biome] | return | shot <name>
+    // Observation: scripts/logs/agent_state.json rewritten every second.
+    // ------------------------------------------------------------------
+    private double _agentStateTimer;
+
+    private void ProcessAgentCommands()
+    {
+        const string cmdPath = @"g:/Rimwork/scripts/agent_cmd.txt";
+        if (!System.IO.File.Exists(cmdPath)) return;
+        string[] lines;
+        try { lines = System.IO.File.ReadAllLines(cmdPath); System.IO.File.Delete(cmdPath); }
+        catch { return; }
+        foreach (var raw in lines)
+        {
+            var c = raw.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (c.Length == 0) continue;
+            try
+            {
+                RunAgentCommand(c);
+                GD.Print($"[AGENT] ok: {raw}");
+            }
+            catch (Exception e) { GD.Print($"[AGENT] failed: {raw} -> {e.Message}"); }
+        }
+    }
+
+    private static string AgentSlot(int n) =>
+        System.IO.Path.Combine(OS.GetUserDataDir(), "saves", $"slot{n}.json");
+
+    private void RunAgentCommand(string[] c)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        switch (c[0].ToLowerInvariant())
+        {
+            case "newgame":
+                NewGame(new WorldGenSettings { Seed = c.Length > 1 ? int.Parse(c[1]) : new Random().Next(1, 999999) });
+                Paused = false;
+                break;
+            case "pause": Paused = true; break;
+            case "resume": Paused = false; break;
+            case "speed": SpeedMultiplier = float.Parse(c[1], inv); break;
+            case "view":
+                System.IO.File.WriteAllText(@"g:/Rimwork/scripts/viewcmd.txt", c[1]);
+                _viewCmdTimer = 0; // reuse the one-shot view protocol immediately
+                break;
+            case "select":
+            {
+                var alive = World.Pawns.Where(p => p.HP > 0).ToList();
+                int i = int.Parse(c[1]);
+                if (i >= 0 && i < alive.Count) SelectedPawn = alive[i];
+                break;
+            }
+            case "harvest": World.QueueHarvest(int.Parse(c[1]), int.Parse(c[2])); break;
+            case "wall": World.QueueBuildWall(int.Parse(c[1]), int.Parse(c[2])); break;
+            case "bed": World.QueueBuild(FurnitureKind.Bed, int.Parse(c[1]), int.Parse(c[2])); break;
+            case "move": World.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, int.Parse(c[1]), int.Parse(c[2]), priority: 90)); break;
+            case "save": SaveLoad.Save(World, AgentSlot(int.Parse(c[1]))); break;
+            case "load": LoadWorld(SaveLoad.Load(AgentSlot(int.Parse(c[1])))); break;
+            case "visit": VisitTile(int.Parse(c[1]), c.Length > 2 ? c[2] : "Forest"); break;
+            case "return": ReturnToColony(); break;
+            case "shot":
+            {
+                var img = GetViewport().GetTexture().GetImage();
+                System.IO.Directory.CreateDirectory(@"g:/Rimwork/scripts/logs/shots");
+                img.SavePng($@"g:/Rimwork/scripts/logs/shots/{c[1]}.png");
+                break;
+            }
+        }
+    }
+
+    private void WriteAgentState(double delta)
+    {
+        _agentStateTimer -= delta;
+        if (_agentStateTimer > 0) return;
+        _agentStateTimer = 1.0;
+        if (World == null) return;
+        try
+        {
+            var alive = World.Pawns.Where(p => p.HP > 0).ToList();
+            var state = new
+            {
+                ticks = World.TotalTicks,
+                day = World.DayNumber,
+                hour = (int)LocalHourF,
+                paused = Paused,
+                speed = SpeedMultiplier,
+                view = ViewLayer,
+                weather = LocalWeather.ToString(),
+                wood = World.Wood,
+                stone = World.Stone,
+                water = World.Water,
+                food = World.Food,
+                metal = World.Metal,
+                tools = World.Tools,
+                goal = World.CurrentGoalText,
+                goalsDone = World.GoalIndex,
+                rooms = World.GetRooms().Count(r => r.Function != RoomFunction.Empty),
+                pendingTasks = World.Tasks.Pending.Count,
+                threats = Threats.Count,
+                alert = AlertText,
+                events = World.ColonyEvents.TakeLast(4).ToArray(),
+                pawns = alive.Take(12).Select((p, i) => new
+                {
+                    i,
+                    name = p.Name,
+                    hp = (int)p.HP,
+                    hunger = (int)p.Hunger,
+                    thirst = (int)p.Thirst,
+                    mood = (int)p.Mood,
+                    task = World.GetDriver(p).Current?.Order.Kind.ToString() ?? "idle",
+                    x = p.X,
+                    y = p.Y,
+                }).ToArray(),
+            };
+            System.IO.File.WriteAllText(@"g:/Rimwork/scripts/logs/agent_state.json",
+                System.Text.Json.JsonSerializer.Serialize(state));
+        }
+        catch { }
+    }
+
     private void OrderAtTile(Vector2 screenPos)
     {
         var tile = ScreenToTile(screenPos);

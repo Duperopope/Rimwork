@@ -1,16 +1,40 @@
-CHANGE: Add `Wood` and `Stone` to the `ResourceKind` enum.
+CHANGE: Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public enum ResourceKind { /* complete, do not modify */ }
-=======
-public enum ResourceKind
+private Dictionary<ResourceKind, int> _recycledResources = new();
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+private int TotalTicks = 0;
+// private int cookBonus = 0; // New field
+
+public GameWorld()
 {
-    Tree,
-    Rock,
-    Water,
-    Energy,
-    Wood,
-    Stone
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
 }
+
+private int Tools = 0;
+private int Food = 0;
+private float[,] _microbialBiomass = new float[100, 100]; // Example size
+// private int _functionalRoomsCount = 0; // Uncomment this line
+=======
+private Dictionary<ResourceKind, int> _recycledResources = new();
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+private int TotalTicks = 0;
+// private int cookBonus = 0; // New field
+
+private List<Pawn> _pawns = new();
+
+public GameWorld()
+{
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
+}
+
+private int Tools = 0;
+private int Food = 0;
+private float[,] _microbialBiomass = new float[100, 100]; // Example size
+// private int _functionalRoomsCount = 0; // Uncomment this line
 >>>>>>> REPLACE
-NEXT: Ensure properties like `Wood` and `Stone` are declared in `GameWorld`.
+NEXT: Add a method to add pawns to the `_pawns` list.

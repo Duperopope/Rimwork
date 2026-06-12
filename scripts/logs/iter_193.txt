@@ -1,34 +1,9 @@
-CHANGE: Add properties for tracking material usage in GameWorld.
+CHANGE: Add a dictionary to track resource consumption for building materials.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
 private Dictionary<ResourceKind, int> _recycledResources = new();
-private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-private int TotalTicks = 0;
-// private int cookBonus = 0; // New field
-
-public GameWorld()
-{
-    // Initialize resource regeneration rates
-    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
-    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
-}
 =======
 private Dictionary<ResourceKind, int> _recycledResources = new();
-private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-private int TotalTicks = 0;
-private Dictionary<ResourceKind, int> _materialUsage = new();
-
-public GameWorld()
-{
-    // Initialize resource regeneration rates
-    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
-    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
-
-    // Initialize material usage dictionary
-    foreach (var kind in Enum.GetValues<ResourceKind>())
-    {
-        _materialUsage[kind] = 0;
-    }
-}
+private Dictionary<ResourceKind, int> _buildingMaterialConsumption = new(); // New dictionary to track building material consumption
 >>>>>>> REPLACE
-NEXT: Implement a method to update material usage when resources are consumed.
+NEXT: Implement a method to update the building material consumption.

@@ -1033,3 +1033,14 @@ GameWorld
 GameWorld
 GameWorld
 GameWorld
+Pawns
+GetSkillLevel
+ConsumeResource
+ResourceKind
+Wood
+Pawns
+Pawns
+GetSkillLevel
+TrackResourceConsumption
+TrackResourceConsumption
+Pawns

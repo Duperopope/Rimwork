@@ -5722,3 +5722,95 @@ Open this file (or watch it) to see what the autonomous loop is building.
   Origines saute le menu Thrive et démarre direct une partie microbe (vérifié
   en capture: tutoriel + jauges, zéro écran Thrive). Watchdog: relance du hub
   MINIMISÉE (plus de fenêtres surprises). Boucle confirmée vivante (iter 157).
+- [iter 168] SKIPPED (no SEARCH match): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs` and initialize it in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 169] SKIPPED (no SEARCH match): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs` and initialize it in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 170] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.150a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`.
+- [iter 171] REVERTED (tests failed): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 172] REVERTED (tests failed): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 173] REVERTED (tests failed): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 174] REVERTED (tests failed): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 175] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.150a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`.
+- [iter 176] REVERTED (tests failed): Add a method to track and limit resource usage. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 177] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 178] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 179] REVERTED (build failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 180] CRITIC TASK: - [ ] Step C.180 - Implement a system to track and limit resource consumption for building materials, encouraging players to manage their resources efficiently. (GameWorld.cs)
+- [iter 180] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.165 - Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`.
+- [iter 181] SKIPPED (no SEARCH match): Add public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 182] SKIPPED (no SEARCH match): Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 183] SKIPPED (no SEARCH match): Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 184] SKIPPED (no SEARCH match): Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 185] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.165 - Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`.
+- [iter 186] SKIPPED (no SEARCH match): Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 187] SKIPPED (no SEARCH match): Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 188] SKIPPED (no SEARCH match): Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 189] SKIPPED (no SEARCH match): Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 190] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.165 - Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`.
+- [iter 191] REVERTED (tests failed): Add a dictionary to track resource consumption for building materials. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 192] REVERTED (tests failed): Add a method to track resource consumption for building materials. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 193] REVERTED (tests failed): Add a dictionary to track resource consumption for building materials. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 194] REVERTED (tests failed): Add a dictionary to track resource consumption for building materials. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 195] CRITIC TASK: - [ ] Step C.195 - Implement a resource management system to track and limit the use of resources like wood and stone, forcing players to prioritize their usage. (GameWorld.cs)
+- [iter 195] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.180 - Implement a system to track and limit resource consumption for building materials, encouraging players to manage their resources efficiently. (GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-12 06:34).
+- [iter 196] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 197] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 198] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 199] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 200] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.195 - Implement a resource management system to track and limit the use of resources like wood and stone, forcing players to prioritize their usage. (GameWorld.cs)
+- [iter 1] CRITIC TASK: - [ ] Step C.1 - Implement a resource management system to track and limit available materials for building, ensuring players must ration resources effectively. (GameWorld.cs)
+- [iter 2] REVERTED (tests failed): Add a method to track and limit available materials for building. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 3] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 4] REVERTED (tests failed): Add a method to track resource consumption and update available resources. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 5] REVERTED (tests failed): Add a method to track and limit available materials for building. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 6] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.1a - Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`.
+- [iter 7] SKIPPED (no SEARCH match): Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 8] SKIPPED (no SEARCH match): Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 9] SKIPPED (no SEARCH match): Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 10] SKIPPED (no SEARCH match): Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 11] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.1a - Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. Ensure the property returns the `_pawns` field.
+- [iter 12] SKIPPED (no SEARCH match): Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 13] SKIPPED (no SEARCH match): Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 14] SKIPPED (no SEARCH match): Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 15] CRITIC TASK: - [ ] Step C.15 - Implement a resource management system to track and limit resource consumption, encouraging players to plan their colony's growth more strategically. (GameWorld.cs)
+- [iter 15] SKIPPED (no SEARCH match): Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 16] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.1a - Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. Ensure the property returns the `_pawns` field.
+- [iter 17] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 18] REVERTED (tests failed): Add a method to track resource consumption and limit it. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 19] PREDICTED-FAIL (skipped before build): Add a method to track resource consumption. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 20] REVERTED (tests failed): Add a method to track resource consumption by pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 21] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.15 - Add a public property to access the `_pawns` list in `GameWorld.cs`.
+- [iter 22] SKIPPED (no SEARCH match): Add a public property to access the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 23] SKIPPED (no SEARCH match): Add a public property to access the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 24] SKIPPED (no SEARCH match): Add a public property to access the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 25] REVERTED (tests failed): Add a public property to access the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 26] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.15a - Add a public property to access the `_pawns` list in `GameWorld.cs`.
+- [startup] Stack relaunched after boot (2026-06-12 06:44).
+- [iter 27] SKIPPED (no SEARCH match): Add a public property to access the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 28] SKIPPED (no SEARCH match): Add a public property to access the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 29] SKIPPED (no SEARCH match): Add a public property to access the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 30] CRITIC TASK: - [ ] Step C.30 - Implement a system to track and display resource consumption rates to help players plan their colony's needs more effectively (GameWorld.cs)
+- [iter 30] SKIPPED (no SEARCH match): Add a public property to access the `_pawns` list in `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 31] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.15a - Add a public property to access the `_pawns` list in `GameWorld.cs`.
+- [iter 33] PREDICTED-FAIL (skipped before build): Add a method to track resource consumption rates. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 34] SKIPPED (no SEARCH match): Add a method to track resource consumption rates. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 35] REVERTED (build failed): Add a method to track resource consumption rates. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 36] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.30a - Add a private field to store resource consumption rates in GameWorld.cs
+- [iter 37] REVERTED (tests failed): Add a private field to store resource consumption rates in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 38] REVERTED (tests failed): Add a private field to store resource consumption rates in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 39] REVERTED (tests failed): Add a private field to store resource consumption rates in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 40] REVERTED (tests failed): Add a private field to store resource consumption rates in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 41] REVERTED (tests failed): Add a list to track onboarding tasks and log events when tasks are completed. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 42] REVERTED (tests failed): Add a list to track onboarding goals and a method to log when a goal is completed. (src/RimWorldLab.Core/GameWorld.cs)
+- [startup] Stack relaunched after boot (2026-06-12 06:54).
+- [iter 1] REVERTED (tests failed): Add a list to track onboarding objectives and a method to check them. (src/RimWorldLab.Core/GameWorld.cs)
+- [12/06 IA-joueur] AGENT BRIDGE: l'IA a le contrôle TOTAL du jeu
+  (scripts/agent_cmd.txt: newgame/pause/speed/select/harvest/wall/bed/move/
+  save/load/visit/shot, état complet dans logs/agent_state.json chaque sec).
+  playtest_agent.ps1: le LLM local JOUE de vraies sessions (validé: 4 ordres
+  de récolte cohérents, +5 pierre, 0 anomalie) avec garde-fous déterministes
+  (sim gelée, ressources négatives, pawns bloqués) → anomalies filées en
+  items roadmap. dev_loop: playtest auto toutes les 12 itérations + anomalies
+  injectées dans le prompt. ROADMAP: section FINITION & POLISH en tête
+  (onboarding, sommeil, juice, audio procédural, équilibrage, win étendue);
+  items MicroStage S.x gelés (le fork Thrive possède le stade microbien).

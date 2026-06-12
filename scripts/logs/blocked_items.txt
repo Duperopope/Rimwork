@@ -62,3 +62,9 @@
 - [ ] Step C.105b - Implement CountFunctionalRooms method to return an integer count of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.120a - Add `TrackResourceConsumption` method to `GameWorld.cs`.
 - [ ] Step C.135a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. Initialize it in the constructor. Ensure the method references this new field for pawn iteration.
+- [ ] Step C.150a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`.
+- [ ] Step C.165 - Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`.
+- [ ] Step C.180 - Implement a system to track and limit resource consumption for building materials, encouraging players to manage their resources efficiently. (GameWorld.cs)
+- [ ] Step C.195 - Implement a resource management system to track and limit the use of resources like wood and stone, forcing players to prioritize their usage. (GameWorld.cs)
+- [ ] Step C.1a - Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. Ensure the property returns the `_pawns` field.
+- [ ] Step C.15a - Add a public property to access the `_pawns` list in `GameWorld.cs`.

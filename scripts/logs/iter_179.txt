@@ -1,4 +1,4 @@
-CHANGE: Add a method to track resource consumption for building and maintenance tasks.
+CHANGE: Add a method to track resource consumption.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
 public void SimulateResourceRegeneration()
@@ -15,20 +15,16 @@ public void SimulateResourceRegeneration()
     {
         RegenerateResource(resource, _recycledResources[resource]);
     }
-}
 
-private Dictionary<ResourceKind, int> _resourceConsumption = new();
-
-public void TrackResourceConsumption(ResourceKind kind, int amount)
-{
-    if (_resourceConsumption.ContainsKey(kind))
+    // Track resource consumption for each pawn
+    foreach (var pawn in Pawns)
     {
-        _resourceConsumption[kind] += amount;
-    }
-    else
-    {
-        _resourceConsumption[kind] = amount;
+        foreach (var skill in pawn.SkillXP.Keys)
+        {
+            int consumption = GetSkillLevel(skill) * 2; // Example consumption logic
+            ConsumeResource(ResourceKind.Wood, consumption);
+        }
     }
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to limit resource consumption based on available resources.
+NEXT: Implement a method to limit resource usage based on player priorities.

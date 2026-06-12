@@ -12,6 +12,17 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
   Main.cs 2D legacy, tout placeholder/stub/dummy.
 - Chaque feature doit avoir un effet MESURABLE dans la simulation.
 
+## PRIORITE ABSOLUE: FINITION & POLISH (un jeu fini, pas une demo)
+Chaque item doit etre RESSENTI en jouant. Le playtest automatique (toutes les
+12 iterations) verifie tes changements en jouant vraiment.
+
+- [ ] Step F.1 - Onboarding jour 1: dans src/RimWorldLab.Core/GameWorld.cs, ajouter une file d'objectifs guides au demarrage (recolter 10 bois -> construire 4 murs -> 1 lit) avec un message LogEvent a chaque etape franchie.
+- [ ] Step F.2 - Sommeil reel: la nuit (hour >= 22 ou <= 5), les pawns avec Fatigue > 60 cherchent leur lit et dorment (Fatigue baisse 3x plus vite dans un lit). (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step F.3 - Feedback de pose: dans src/RimWorldGodot/Game3D.cs, quand un mur ou un meuble vient d'etre construit, faire apparaitre le node avec un petit tween de scale (0.2 -> 1.0 en 0.25s).
+- [ ] Step F.4 - Audio procedural: dans src/RimWorldGodot/Game3D.cs, generer un bip court via AudioStreamGenerator quand un ordre est donne et un son grave quand une menace apparait (zero asset).
+- [ ] Step F.5 - Equilibrage faim/soif: la faim monte 30% plus vite quand le pawn travaille, la soif 50% plus vite sous climat chaud (BiomeShift > 0.3). (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step F.6 - Win etendue: apres "3 functional rooms", nouvel objectif "produire 10 outils et nourrir 12 colons" avec recompense LogEvent. (src/RimWorldLab.Core/GameWorld.cs)
+
 ## PRIORITE: la vie sur les cartes (Down Here! chantier faune)
 - [ ] Step D.1 - In src/RimWorldLab.Core/GameWorld.cs, immediately after the line `Macro.Tick(TotalTicks);`, insert the following line:
 - [x] Step D.2 - Hunting: a pawn standing next to a SmallAnimal harvests it
@@ -53,14 +64,13 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 - [x] Step Z.1 - Trade caravan: Add private fields for Tools and Food in GameWorld.cs.
 - [x] Step Z.3.1 - Add a private field `int TotalTicks` to `GameWorld.cs`.
 
-## PRIORITE ABSOLUE: contenu du stade ORIGINES (MicroStage.cs est OUVERT)
-Le fichier src/RimWorldGodot/MicroStage.cs est jouable et t'appartient:
-ajoute du CONTENU (mutations, especes, comportements). Regles: zero asset,
-tout en geometrie procedurale; chaque mutation doit avoir un effet REEL.
+## NOTE: stade ORIGINES = fork de Thrive (reference/thrive, branche down-here)
+NE TOUCHE PAS au fork. MicroStage.cs ne sert plus que de fond de menu.
+Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 
-- [ ] Step S.1a - In src/RimWorldGodot/MicroStage.cs, find the exact line: `_traitPool.Add(("Compacité", "-15% taille (discret), +10% vitesse", o => { o.Size *= 0.85f; o.Speed *= 1.1f; }));` Immediately AFTER that line, insert this new line: `_traitPool.Add(("Toxines", "Les prédateurs perdent de l'énergie en te mordant", o => o.Spikes += 2));`
-- [ ] Step S.2 - In MicroStage.cs, modify the _Process method to check if the population is less than 30.
-- [ ] Step S.3.1 - Add a method to check if the population is less than 30 in `src/RimWorldLab.Core/GameWorld.cs`. The method should return a boolean indicating the population status.
+- [x] Step S.1a - (gele, fork Thrive) In src/RimWorldGodot/MicroStage.cs, find the exact line: `_traitPool.Add(("Compacité", "-15% taille (discret), +10% vitesse", o => { o.Size *= 0.85f; o.Speed *= 1.1f; }));` Immediately AFTER that line, insert this new line: `_traitPool.Add(("Toxines", "Les prédateurs perdent de l'énergie en te mordant", o => o.Spikes += 2));`
+- [x] Step S.2 - (gele, fork Thrive) In MicroStage.cs, modify the _Process method to check if the population is less than 30.
+- [x] Step S.3.1 - (gele, fork Thrive) Add a method to check if the population is less than 30 in `src/RimWorldLab.Core/GameWorld.cs`. The method should return a boolean indicating the population status.
 
 ## PRIORITE: la couche primordiale (depart Spore - LOD Micro)
 - [x] Step M.1 - In src/RimWorldLab.Core/GameWorld.cs, find the exact line: `Macro.Tick(TotalTicks);` Immediately AFTER that line, insert these new lines: `if (TotalTicks % 1600 == 0) { float biomass = Macro.Regions[2, 2].MicrobialBiomass; if (biomass > 0.75f) LogEvent($"Microbial bloom enriches the soil (biomass {biomass:P0})."); }`
@@ -227,5 +237,10 @@ tout en geometrie procedurale; chaque mutation doit avoir un effet REEL.
 - [ ] Step C.105b - Implement CountFunctionalRooms method to return an integer count of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.120a - Add `TrackResourceConsumption` method to `GameWorld.cs`.
 - [ ] Step C.135a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. Initialize it in the constructor. Ensure the method references this new field for pawn iteration.
-- [ ] Step C.150a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs` and initialize it in the constructor.
-- [ ] Step C.165 - Implement a resource management system to track and limit the use of resources like wood and stone, forcing players to prioritize their usage (GameWorld.cs)
+- [ ] Step C.150a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`.
+- [ ] Step C.165 - Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`.
+- [ ] Step C.180 - Implement a system to track and limit resource consumption for building materials, encouraging players to manage their resources efficiently. (GameWorld.cs)
+- [ ] Step C.195 - Implement a resource management system to track and limit the use of resources like wood and stone, forcing players to prioritize their usage. (GameWorld.cs)
+- [ ] Step C.1a - Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. Ensure the property returns the `_pawns` field.
+- [ ] Step C.15a - Add a public property to access the `_pawns` list in `GameWorld.cs`.
+- [ ] Step C.30a - Add a private field to store resource consumption rates in GameWorld.cs

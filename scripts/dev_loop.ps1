@@ -498,6 +498,24 @@ for ($i = 1; $i -le $MaxIterations; $i++) {
         Invoke-CriticPass -Iter $i
     }
 
+    # Every 12 iterations the model PLAYS its own game end-to-end through
+    # the agent bridge (real session: orders, building, observation) and
+    # files anomalies - the AI tests like a human, not just compiles.
+    if ($i -gt 0 -and $i % 12 -eq 0) {
+        try {
+            & pwsh -NoProfile -File "g:\Rimwork\scripts\playtest_agent.ps1" -Steps 8 -StepWaitSec 6 | Out-Null
+            $ptr = Get-Content "g:\Rimwork\scripts\logs\playtest_report.json" -Raw -ErrorAction Stop | ConvertFrom-Json
+            Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] PLAYTEST: $($ptr.issued.Count) actions, $($ptr.anomalies.Count) anomalies, pieces=$($ptr.final.rooms)"
+            foreach ($an in $ptr.anomalies) {
+                $line = "- [ ] Step T$i - (playtest) fix: $an (src/RimWorldLab.Core/GameWorld.cs)"
+                if (-not ((Get-Content "g:\Rimwork\ROADMAP.md" -Raw) -match [regex]::Escape($an))) {
+                    Add-Content -Path "g:\Rimwork\ROADMAP.md" -Value $line
+                    Write-Host "Playtest anomaly filed: $an" -ForegroundColor Magenta
+                }
+            }
+        } catch { Write-Host "Playtest skipped: $_" -ForegroundColor DarkYellow }
+    }
+
     # Community pipeline: GitHub issues labeled 'approved' become roadmap
     # items (the player files requests without the supervisor in the loop).
     if ($i -gt 0 -and $i % 25 -eq 0) {
@@ -793,6 +811,7 @@ $(if (-not $build.Ok) { "BUILD ERRORS:`n" + ($build.Output -split "`n" | Select-
 TEST SUMMARY: $testSummary
 $(if ($lastFailNote -and $lastFailItem -eq $itemKey) { "`nIMPORTANT - YOUR PREVIOUS ATTEMPT ON THIS ITEM FAILED:`n$lastFailNote`nDo NOT repeat the same approach.`n" })
 $(if ($lessonsText) { "LESSONS FROM YOUR PAST MISTAKES (respect them):`n$lessonsText`n" })
+$(try { $pt = Get-Content "g:\Rimwork\scripts\logs\playtest_report.json" -Raw -ErrorAction Stop | ConvertFrom-Json; if ($pt.anomalies.Count -gt 0) { "LATEST PLAYTEST (you PLAYED the game) FOUND THESE PROBLEMS:`n" + (($pt.anomalies | Select-Object -First 4) -join "`n") + "`n" } } catch { "" })
 AVAILABLE GAME API (these are the ONLY public types/methods/enums that exist
 in the Core - NEVER call anything not listed here or shown in the file below):
 $apiMap
