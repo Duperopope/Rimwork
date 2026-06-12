@@ -1,47 +1,8 @@
-CHANGE: Extract repeated pawn registration logic into a separate method.
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add `Wood` and `Stone` to the `ResourceKind` enum.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-foreach (string name in array)
-{
-	int num;
-// ... (lines omitted) ...
-	if (_world.Tasks.Pending.Count == 0)
-	{
-		int num;
-		int num2;
-		do
-		{
-			num = _rng.Next(0, _world.Map.Width);
-			num2 = _rng.Next(0, _world.Map.Height);
-		}
-		while (!_world.Map.IsPassable(num, num2));
-		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
-	}
-	_world.Tick();
-}
+public enum ResourceKind { /* complete, do not modify */ }
 =======
-foreach (string name in array)
-{
-	RegisterPawn(name);
-	if (_world.Tasks.Pending.Count == 0)
-	{
-		int num;
-		int num2;
-		do
-		{
-			num = _rng.Next(0, _world.Map.Width);
-			num2 = _rng.Next(0, _world.Map.Height);
-		}
-		while (!_world.Map.IsPassable(num, num2));
-		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
-	}
-	_world.Tick();
-}
-
-private void RegisterPawn(string name)
-{
-	int num;
-	// ... (lines omitted) ...
-}
+public enum ResourceKind { Tree, Rock, Water, Energy, Wood, Stone }
 >>>>>>> REPLACE
-NEXT: Implement the logic for RegisterPawn method.
+NEXT: Ensure properties like Wood and Stone are declared in GameWorld before initializing them.

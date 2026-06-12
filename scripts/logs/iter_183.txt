@@ -1,57 +1,16 @@
-CHANGE: Simplify and deduplicate code in Main.cs by extracting repeated pawn generation logic into a method.
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add `ResourceKind.Wood` and `ResourceKind.Stone` to the `ResourceKind` enum.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-```csharp
-foreach (string name in array)
-{
-    int num;
-    int num2;
-    do
-    {
-        num = _rng.Next(0, _world.Map.Width);
-        num2 = _rng.Next(0, _world.Map.Height);
-    }
-    while (!_world.Map.IsPassable(num, num2));
-    _world.RegisterThing(new Pawn(name, num, num2));
-}
-```
-```csharp
-foreach (string name in rebirth)
-{
-    int px;
-    int py;
-    do
-    {
-        px = _rng.Next(0, _world.Map.Width);
-        py = _rng.Next(0, _world.Map.Height);
-    }
-    while (!_world.Map.IsPassable(px, py));
-    _world.RegisterThing(new Pawn(name, px, py));
-}
-```
+public enum ResourceKind { /* complete, do not modify */ }
 =======
-```csharp
-private void GeneratePawns(string[] names)
+public enum ResourceKind
 {
-    foreach (string name in names)
-    {
-        int x;
-        int y;
-        do
-        {
-            x = _rng.Next(0, _world.Map.Width);
-            y = _rng.Next(0, _world.Map.Height);
-        }
-        while (!_world.Map.IsPassable(x, y));
-        _world.RegisterThing(new Pawn(name, x, y));
-    }
+    Tree,
+    Rock,
+    Water,
+    Energy,
+    Wood,
+    Stone
 }
-```
-```csharp
-GeneratePawns(array);
-```
-```csharp
-GeneratePawns(rebirth);
-```
 >>>>>>> REPLACE
-NEXT: Simplify and deduplicate code in Main.cs by extracting repeated task generation logic into a method.
+NEXT: Ensure properties like `Wood` and `Stone` are declared in `GameWorld` before initializing them.

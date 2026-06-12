@@ -100,36 +100,173 @@ public partial class UiShell : CanvasLayer
     // ==================================================================
     // MAIN MENU
     // ==================================================================
+    // Thrive-inspired menu UX: deep dark backdrop with drifting procedural
+    // cells (100% drawn, zero assets), wide flat buttons with an accent
+    // hover, version pinned to a corner.
+    private Button MenuBtn(string text, Action onPress, bool primary = false)
+    {
+        var b = new Button { Text = text, CustomMinimumSize = new Vector2(380, 46) };
+        var normal = new StyleBoxFlat
+        {
+            BgColor = new Color(0.04f, 0.10f, 0.14f, 0.78f),
+            BorderColor = primary ? Accent : new Color(0.18f, 0.30f, 0.34f, 0.9f),
+            ContentMarginLeft = 18, ContentMarginRight = 18, ContentMarginTop = 8, ContentMarginBottom = 8,
+            CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4,
+        };
+        normal.SetBorderWidthAll(1);
+        normal.BorderWidthLeft = 4;
+        var hover = (StyleBoxFlat)normal.Duplicate();
+        hover.BgColor = new Color(0.07f, 0.18f, 0.20f, 0.92f);
+        hover.BorderColor = Accent;
+        var pressed = (StyleBoxFlat)hover.Duplicate();
+        pressed.BgColor = new Color(0.10f, 0.24f, 0.22f, 0.95f);
+        b.AddThemeStyleboxOverride("normal", normal);
+        b.AddThemeStyleboxOverride("hover", hover);
+        b.AddThemeStyleboxOverride("pressed", pressed);
+        b.AddThemeColorOverride("font_color", primary ? new Color(0.75f, 1f, 0.82f) : new Color(0.78f, 0.86f, 0.88f));
+        b.AddThemeColorOverride("font_hover_color", new Color(0.85f, 1f, 0.9f));
+        b.AddThemeFontSizeOverride("font_size", primary ? 18 : 15);
+        b.Pressed += () => onPress();
+        return b;
+    }
+
     private void BuildMenu()
     {
         _menu = new Control { AnchorRight = 1, AnchorBottom = 1 };
         AddChild(_menu);
 
+        // Animated primordial-soup backdrop (dims the 3D scene behind).
+        _menu.AddChild(new MenuBackdrop());
+
         var center = new CenterContainer { AnchorRight = 1, AnchorBottom = 1 };
         _menu.AddChild(center);
         var box = new VBoxContainer { CustomMinimumSize = new Vector2(420, 0) };
-        box.AddThemeConstantOverride("separation", 10);
+        box.AddThemeConstantOverride("separation", 8);
         center.AddChild(box);
 
-        var t = Title("DOWN HERE !", 54);
+        var t = Title("DOWN HERE !", 58);
         t.HorizontalAlignment = HorizontalAlignment.Center;
         box.AddChild(t);
-        var sub = new Label { Text = "Une colonie, une planète, un système.\nChaque ligne de gameplay écrite par une IA locale autonome.", HorizontalAlignment = HorizontalAlignment.Center };
-        sub.AddThemeColorOverride("font_color", new Color(0.7f, 0.74f, 0.8f));
+        var sub = new Label { Text = "De la bactérie aux étoiles.", HorizontalAlignment = HorizontalAlignment.Center };
+        sub.AddThemeColorOverride("font_color", new Color(0.55f, 0.68f, 0.72f));
         box.AddChild(sub);
-        box.AddChild(new Control { CustomMinimumSize = new Vector2(0, 16) });
+        box.AddChild(new Control { CustomMinimumSize = new Vector2(0, 30) });
 
-        box.AddChild(Btn("Nouvelle partie — Origines (stade microbien)", () => StartMicroStage()));
-        box.AddChild(Btn("Colonie (stade avancé / debug)", () => OpenWorldGenScreen()));
-        box.AddChild(Btn("Continuer", () => OpenSaveScreen(saveMode: false)));
-        box.AddChild(Btn("Options", () => ShowOnly(_options)));
-        box.AddChild(Btn("Dev / Diagnostics", () => ShowOnly(_devTab)));
-        box.AddChild(Btn("Crédits", () => ShowOnly(_credits)));
-        box.AddChild(Btn("Quitter", () => GetTree().Quit()));
+        bool hasSave = Enumerable.Range(1, 3).Any(n => System.IO.File.Exists(SlotPath(n)));
+        if (hasSave) box.AddChild(MenuBtn("Continuer", () => ContinueLatest(), primary: true));
+        box.AddChild(MenuBtn("Nouvelle partie", () => StartMicroStage(), primary: !hasSave));
+        box.AddChild(MenuBtn("Charger", () => OpenSaveScreen(saveMode: false)));
+        box.AddChild(MenuBtn("Options", () => ShowOnly(_options)));
+        box.AddChild(MenuBtn("Quitter", () => GetTree().Quit()));
 
-        var ver = new Label { Text = $"build {Version}", HorizontalAlignment = HorizontalAlignment.Center };
-        ver.AddThemeColorOverride("font_color", new Color(0.45f, 0.5f, 0.55f));
-        box.AddChild(ver);
+        // Secondary entries: discreet text links, bottom-left.
+        var corner = new HBoxContainer();
+        corner.AddThemeConstantOverride("separation", 18);
+        corner.SetAnchorsPreset(Control.LayoutPreset.BottomLeft);
+        corner.OffsetLeft = 14; corner.OffsetTop = -34; corner.OffsetBottom = -10;
+        _menu.AddChild(corner);
+        foreach (var (label, act) in new (string, Action)[]
+        {
+            ("colonie (debug)", () => OpenWorldGenScreen()),
+            ("dev / diagnostics", () => ShowOnly(_devTab)),
+            ("crédits", () => ShowOnly(_credits)),
+        })
+        {
+            var lk = new LinkButton { Text = label, Underline = LinkButton.UnderlineMode.OnHover };
+            lk.AddThemeColorOverride("font_color", new Color(0.4f, 0.5f, 0.54f));
+            lk.AddThemeFontSizeOverride("font_size", 13);
+            lk.Pressed += () => act();
+            corner.AddChild(lk);
+        }
+
+        var ver = new Label { Text = $"build {Version}" };
+        ver.AddThemeColorOverride("font_color", new Color(0.35f, 0.42f, 0.46f));
+        ver.SetAnchorsPreset(Control.LayoutPreset.BottomRight);
+        ver.OffsetLeft = -180; ver.OffsetTop = -34; ver.OffsetRight = -14; ver.OffsetBottom = -12;
+        ver.HorizontalAlignment = HorizontalAlignment.Right;
+        _menu.AddChild(ver);
+    }
+
+    // "Continuer" = resume the most recently written save slot directly.
+    private void ContinueLatest()
+    {
+        var latest = Enumerable.Range(1, 3)
+            .Select(n => SlotPath(n))
+            .Where(System.IO.File.Exists)
+            .OrderByDescending(System.IO.File.GetLastWriteTimeUtc)
+            .FirstOrDefault();
+        if (latest == null) return;
+        var w = SaveLoad.Load(latest);
+        _game.LoadWorld(w);
+        _game.AlertText = $"Partie reprise — jour {w.DayNumber}.";
+        ShowOnly(_hud);
+    }
+
+    /// <summary>
+    /// Procedural menu backdrop (Thrive-style mood, our code): a deep-water
+    /// gradient with slow drifting cells - wobbling membranes and nuclei,
+    /// all drawn, zero assets.
+    /// </summary>
+    private sealed partial class MenuBackdrop : Control
+    {
+        private struct Cell { public Vector2 Pos; public float R, Drift, Phase; public Color C; }
+        private Cell[] _cells;
+        private float _t;
+        private readonly Random _rng = new(421);
+
+        public override void _Ready()
+        {
+            SetAnchorsPreset(LayoutPreset.FullRect);
+            MouseFilter = MouseFilterEnum.Ignore;
+            _cells = new Cell[22];
+            for (int i = 0; i < _cells.Length; i++)
+            {
+                float hue = (float)_rng.NextDouble();
+                _cells[i] = new Cell
+                {
+                    Pos = new Vector2((float)_rng.NextDouble() * 1920f, (float)_rng.NextDouble() * 1080f),
+                    R = 14f + (float)_rng.NextDouble() * 46f,
+                    Drift = 0.2f + (float)_rng.NextDouble() * 0.8f,
+                    Phase = (float)_rng.NextDouble() * 20f,
+                    C = hue < 0.6f ? new Color(0.35f, 0.75f, 0.65f, 0.16f)
+                      : hue < 0.85f ? new Color(0.4f, 0.6f, 0.9f, 0.14f)
+                      : new Color(0.85f, 0.55f, 0.75f, 0.13f),
+                };
+            }
+        }
+
+        public override void _Process(double dt) { _t += (float)dt; QueueRedraw(); }
+
+        public override void _Draw()
+        {
+            var size = GetViewportRect().Size;
+            // Deep-water vertical gradient (two stacked translucent rects).
+            DrawRect(new Rect2(Vector2.Zero, size), new Color(0.01f, 0.045f, 0.075f, 0.88f));
+            DrawRect(new Rect2(0, size.Y * 0.55f, size.X, size.Y * 0.45f), new Color(0.0f, 0.02f, 0.045f, 0.55f));
+
+            foreach (var c in _cells)
+            {
+                float drift = _t * c.Drift;
+                var p = new Vector2(
+                    Mathf.PosMod(c.Pos.X + Mathf.Sin(drift * 0.31f + c.Phase) * 140f + drift * 14f, size.X + 2 * c.R) - c.R,
+                    Mathf.PosMod(c.Pos.Y + Mathf.Cos(drift * 0.23f + c.Phase * 1.7f) * 90f, size.Y + 2 * c.R) - c.R);
+
+                // Wobbling membrane polygon (same recipe as MicroStage).
+                const int n = 18;
+                var pts = new Vector2[n];
+                for (int k = 0; k < n; k++)
+                {
+                    float a = Mathf.Tau * k / n;
+                    float w = 1f + 0.1f * Mathf.Sin(a * 3f + _t * 1.4f + c.Phase)
+                                 + 0.06f * Mathf.Sin(a * 5f - _t * 0.9f + c.Phase * 2f);
+                    pts[k] = p + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * c.R * w;
+                }
+                DrawColoredPolygon(pts, c.C);
+                DrawPolyline(pts.Append(pts[0]).ToArray(), c.C with { A = c.C.A * 2.2f }, 1.5f);
+                // Nucleus
+                DrawCircle(p + new Vector2(c.R * 0.18f, -c.R * 0.12f), c.R * 0.28f, c.C with { A = c.C.A * 1.6f });
+            }
+        }
     }
 
     // ==================================================================
@@ -295,19 +432,21 @@ public partial class UiShell : CanvasLayer
 
     private void StartMicroStage()
     {
-        // DOWN HERE! design decision (12/06/2026): the microbe stage IS
-        // Thrive (Revolutionary Games, GPL-3.0, same engine Godot 4.6.3),
-        // taken as-is. Our procedural MicroStage stays as the built-in
-        // fallback when the Thrive release isn't installed.
-        const string thriveExe = @"g:/Rimwork/thirdparty/thrive/Thrive.exe";
-        if (System.IO.File.Exists(thriveExe))
+        // DOWN HERE! decision (12/06/2026, final): the microbe stage is our
+        // FORK of Thrive (reference/thrive, branch down-here) - gameplay
+        // code and graphics used directly (both projects are GPL), only the
+        // branding swapped. Launched via the same Godot runtime; our hub
+        // minimizes itself so the stage takes the screen.
+        const string forkProject = @"g:/Rimwork/reference/thrive/project.godot";
+        const string godotExe = @"C:/Users/Smedj/AppData/Local/Microsoft/WinGet/Packages/GodotEngine.GodotEngine.Mono_Microsoft.Winget.Source_8wekyb3d8bbwe/Godot_v4.6.3-stable_mono_win64/Godot_v4.6.3-stable_mono_win64.exe";
+        if (System.IO.File.Exists(forkProject) && System.IO.File.Exists(godotExe))
         {
-            GD.Print("[FLOW] New Game: Origines -> launching Thrive.");
-            _game.AlertText = "ORIGINES — Thrive se lance... (notre hub reste ouvert)";
-            OS.CreateProcess(thriveExe, new string[] { });
+            GD.Print("[FLOW] New Game: Origines -> launching the Down Here fork of Thrive.");
+            OS.CreateProcess(godotExe, new[] { "--path", System.IO.Path.GetDirectoryName(forkProject) });
+            DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
             return;
         }
-        GD.Print("[FLOW] New Game: Origines (built-in fallback micro stage).");
+        GD.Print("[FLOW] New Game: Origines (fallback micro stage - fork missing).");
         _micro = new MicroStage();
         _micro.Configure(new Random().Next(1, 999999));
         _micro.ExitRequested += () =>

@@ -902,6 +902,18 @@ public class GameWorldManager
     private bool _isRaining = false;
     private int _rainToggleCounter = 0; // Counter to track in-game days
 
+    // Per-resource regeneration rate multipliers (roadmap C.60a/C.75.1/C.165):
+    // how fast each resource family grows back, consumed by the regrowth roll
+    // in Tick(). Doubles so the climate math stays fractional. Rock does not
+    // regenerate (mined, not grown).
+    private static readonly Dictionary<ResourceKind, double> _resourceRegenerationRates = new()
+    {
+        [ResourceKind.Tree] = 1.0,
+        [ResourceKind.Water] = 1.5,
+        [ResourceKind.Energy] = 1.0,
+        [ResourceKind.Rock] = 0.0,
+    };
+
     // Method to generate small animal populations
 public void GenerateSmallAnimalPopulation()
 {

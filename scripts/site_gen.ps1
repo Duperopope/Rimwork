@@ -247,8 +247,26 @@ function show(id, el) {
   document.getElementById(id).classList.add('on');
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('on'));
   el.classList.add('on');
+  try { sessionStorage.setItem('tab', id); } catch (e) {}
 }
-window.addEventListener('DOMContentLoaded', () => document.getElementById('overview').classList.add('on'));
+// The live dashboard reloads itself to refresh data: restore the active
+// tab and the scroll position so a refresh never throws the user back
+// to the overview tab.
+window.addEventListener('DOMContentLoaded', () => {
+  let tab = 'overview';
+  try { tab = sessionStorage.getItem('tab') || 'overview'; } catch (e) {}
+  const link = Array.from(document.querySelectorAll('nav a'))
+    .find(a => (a.getAttribute('onclick') || '').indexOf("'" + tab + "'") >= 0);
+  if (link && document.getElementById(tab)) { show(tab, link); }
+  else { document.getElementById('overview').classList.add('on'); }
+  try {
+    const y = sessionStorage.getItem('scrollY');
+    if (y !== null) window.scrollTo(0, parseFloat(y));
+  } catch (e) {}
+});
+window.addEventListener('beforeunload', () => {
+  try { sessionStorage.setItem('scrollY', String(window.scrollY)); } catch (e) {}
+});
 </script>
 </header>
 <main>

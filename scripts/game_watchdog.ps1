@@ -79,7 +79,10 @@ function Start-Game {
     Clear-StaleGameProcesses
     # --max-fps 20: this is a 20-ticks/sec tile game; uncapped rendering was
     # eating most of the GPU and starving the local LLM (3 tok/s vs 40).
-    $env:RIMWORK_AUTOSTART = "1"
+    # User decision 12/06/2026: the game must boot to the MENU, never
+    # straight into the colony. Gameplay verification uses the headless
+    # diag sim instead of autostart screenshots.
+    $env:RIMWORK_AUTOSTART = "0"
     $p = Start-Process -FilePath "godot" -ArgumentList @("--path", $ProjectDir, "--max-fps", "20") -PassThru
     $p.Id | Out-File -FilePath $pidFile -Encoding ascii -NoNewline
     Write-Log "Launched game pid $($p.Id)"

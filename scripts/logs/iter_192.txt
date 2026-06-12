@@ -1,37 +1,22 @@
-CHANGE: Extract repeated pawn registration logic into a separate method in Main.cs.
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add properties for Wood and Stone in GameWorld.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-foreach (string name in array)
+public class GameWorld
 {
-	int num;
-	int num2;
-	do
-	{
-		num = _rng.Next(0, _world.Map.Width);
-		num2 = _rng.Next(0, _world.Map.Height);
-	}
-	while (!_world.Map.IsPassable(num, num2));
-	_world.RegisterThing(new Pawn(name, num, num2));
-}
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+    private int TotalTicks = 0;
+// ... (lines omitted) ...
 =======
-private void RegisterPawns(string[] names)
+public class GameWorld
 {
-	foreach (string name in names)
-	{
-		int num;
-		int num2;
-		do
-		{
-			num = _rng.Next(0, _world.Map.Width);
-			num2 = _rng.Next(0, _world.Map.Height);
-		}
-		while (!_world.Map.IsPassable(num, num2));
-		_world.RegisterThing(new Pawn(name, num, num2));
-	}
-}
-// Call RegisterPawns in _Ready
-RegisterPawns(array);
-// Call RegisterPawns in _Process
-RegisterPawns(rebirth);
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+    private int TotalTicks = 0;
+
+    public int Wood { get; private set; }
+    public int Stone { get; private set; }
+
+// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Ensure the method is correctly defined and called in both _Ready and _Process methods.
+NEXT: Implement methods to update and consume Wood and Stone resources.

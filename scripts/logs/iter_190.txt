@@ -1,23 +1,39 @@
-CHANGE: Add a method to determine if a zone has enough functional furniture
+CHANGE: Add a method to track and limit resource consumption per tick.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-    public bool Contains(int x, int y) => x >= X && x < X + Width && y >= Y && y < Y + Height;
-
-    /// <summary>Center tile of the zone, used as the default task target.</summary>
-    public (int X, int Y) CenterTile => (X + Width / 2, Y + Height / 2);
+public void SimulateResourceRegeneration()
+{
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
 }
 =======
-    public bool Contains(int x, int y) => x >= X && x < X + Width && y >= Y && y < Y + Height;
-
-    /// <summary>Center tile of the zone, used as the default task target.</summary>
-    public (int X, int Y) CenterTile => (X + Width / 2, Y + Height / 2);
-
-    /// <summary>Determines if the zone has enough functional furniture.</summary>
-    public bool HasEnoughFunctionalFurniture(int requiredCount)
+public void SimulateResourceRegeneration()
+{
+    foreach (var resource in _recycledResources.Keys)
     {
-        var functionalFurnitureCount = LocalMap.Furniture.Count(f => f.IsFunctionalFurniture());
-        return functionalFurnitureCount >= requiredCount;
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+
+    LimitResourceConsumptionPerTick();
+}
+
+private void LimitResourceConsumptionPerTick()
+{
+    // Example: Limit wood consumption to 10 per tick
+    int maxWoodConsumption = 10;
+    if (Wood > maxWoodConsumption)
+    {
+        Wood = maxWoodConsumption;
+    }
+
+    // Example: Limit stone consumption to 5 per tick
+    int maxStoneConsumption = 5;
+    if (Stone > maxStoneConsumption)
+    {
+        Stone = maxStoneConsumption;
     }
 }
 >>>>>>> REPLACE
-NEXT: Implement logic to update functional room count based on zone furniture.
+NEXT: Implement a system to track and limit resource consumption per tick for other resources.

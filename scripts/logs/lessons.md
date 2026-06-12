@@ -180,3 +180,124 @@
 - "Ensure all referenced fields exist in the context before adding methods."
 - Ensure method definitions are correctly placed and formatted within the class structure.
 - Ensure all referenced fields (like `Pawns`) exist in `GameWorld` before adding methods that depend on them.
+- Ensure the referenced property or field exists in the class before adding methods that depend on it.
+- Ensure `Pawns` is a valid property or field in `GameWorld.cs` before using it.
+- Ensure `Pawns` collection is defined in `GameWorld` before using it.
+- Ensure `Pawns` collection is defined in `GameWorld.cs` before using it.
+- Ensure `Pawns` collection exists in `GameWorld.cs` before using it.
+- Ensure `GameWorld` inherits from a class or interface with `AddZone` method before adding it.
+- Ensure method signatures and logic are correctly placed within class definitions.
+- Ensure all used fields and collections exist in the current class or are properly referenced before adding methods.
+- Ensure all referenced fields and collections exist in the current class or are properly imported.
+- Always ensure variable names are consistently updated throughout the file.
+- Ensure all referenced fields and methods exist before implementing new logic.
+- Ensure all referenced properties and methods exist in the class before implementing new functionality.
+- Ensure method declarations are correctly formatted and do not interfere with existing code structure.
+- Check for existing field names before adding new ones to avoid CS0102 errors.
+- Ensure properties like Wood and Stone exist in GameWorld before assigning values.
+- Ensure properties like Wood and Stone exist in GameWorld before initializing them.
+- Ensure properties like Wood and Stone are declared in GameWorld before initialization.
+- Ensure properties like Wood and Stone are defined in GameWorld before initializing them.
+- Ensure all referenced fields and methods exist in the current context before adding new code.
+- Verify all referenced types and properties exist before adding new code.
+- Ensure methods and enums exist before using them to avoid compilation errors.
+- Ensure all referenced fields and methods exist in the current context before adding new code.
+- Ensure `Pawns` collection exists in `GameWorld.cs` before using it.
+- Always verify the existence of referenced fields or properties before adding methods that depend on them.
+- Ensure properties exist before initializing them in constructor.
+- Ensure all renamed variables are fully updated throughout the file.
+- Ensure all referenced methods and properties exist before adding new code.
+- Ensure all used fields are declared before initialization in constructors.
+- Ensure all fields are declared before initialization in constructors.
+- Ensure all new methods are properly closed and placed within existing types or namespaces.
+- Ensure method declarations are correctly formatted and placed within classes.
+- Ensure all new fields are declared at the top of the class before use.
+- "Ensure all references to new fields are updated consistently across the file."
+- Check for existing variable names before adding new ones to avoid CS0102 errors.
+- Ensure all new fields are consistently declared and referenced throughout the file.
+- Check for existing field names before declaring new ones in the same class.
+- Ensure new fields are declared in the correct class scope to avoid CS0103 errors.
+- Check for existing field names before adding new ones to avoid CS0102 errors.
+- Ensure all referenced fields exist in the class before using them.
+- Always check for existing field names before declaring new ones in the same class to avoid CS0102 errors.
+- Always check for existing field names before declaring new ones to avoid CS0102 errors.
+- Ensure dictionary declaration matches usage; verify existence in class scope.
+- Always check for existing field names before declaring new ones in the same class.
+- Always verify field existence before referencing it in other methods.
+- Check for duplicate field declarations before adding new ones.
+- Check for existing field names before declaring new ones in the same class.
+- Ensure all referenced fields are declared before use in the same class.
+- Check for existing field names before declaring new ones to avoid CS0102 errors.
+- Check for existing field names before adding new ones to avoid CS0102 errors.
+- Ensure the dictionary is declared and accessible within the scope where it's used.
+- Ensure dictionary declaration matches usage; verify all references exist.
+- Check for existing field names before adding new ones to avoid CS0102 errors.
+- Ensure all declared fields are used in the class to avoid compiler errors.
+- Check for existing field names before declaring new ones in the same class.
+- Ensure the dictionary is declared before it's used in the class.
+- "Ensure unique field initialization in constructor; avoid duplicate member definitions."
+- Ensure field declaration and usage are in the same class context.
+- Avoid redeclaring fields in constructors; initialize them directly at declaration.
+- Always verify field existence before referencing in methods.
+- Always check for existing field names before adding new ones in the same class.
+- Ensure field initialization in constructor and check for correct field names throughout the class.
+- Always check for existing field names before adding new ones to avoid CS0102 errors.
+- Ensure all fields are declared and initialized before use in constructors.
+- Ensure all fields are declared and initialized before use in constructors.
+- Ensure all fields are declared and initialized before use in constructors.
+- Always verify field declarations and usages within the same class scope.
+- Ensure `_recycledResources` is declared and initialized in `GameWorld` before using it elsewhere.
+- Ensure all declared fields are used within their class scope to avoid CS0103 errors.
+- Avoid redeclaring fields in constructors; initialize them directly.
+- Avoid redeclaring fields in constructors; initialize them directly or use a separate initialization method.
+- Always ensure all fields are declared and initialized before use in constructors.
+- Avoid redeclaring fields in constructors; initialize them directly.
+- Ensure constructors and methods have proper signatures and avoid duplicate definitions.
+- Avoid redeclaring fields initialized in declarations within constructors.
+- Ensure all fields are declared before use in constructors and methods.
+- Ensure no duplicate constructors in GameWorld; initialize dictionaries directly if possible.
+- Ensure `_recycledResources` is declared and initialized before use in `GameWorld`.
+- Ensure all fields are declared and initialized before use in constructors.
+- Ensure `_recycledResources` is declared in `GameWorld` before using it.
+- Ensure `_recycledResources` is declared within `GameWorld` class scope.
+- Check for duplicate variable declarations before adding new ones.
+- Ensure instance variables are declared within the class scope to avoid CS0103 errors.
+- Always check for existing variable names before declaring new ones in the same class.
+- Ensure instance variables are declared at the class level in `GameWorld`.
+- Always check for existing variable names before declaring new ones in the same class.
+- Always check for existing variable names before declaring new ones to avoid CS0102 errors.
+- "Check for existing variable names before declaring new ones in the same class."
+- Double-check for duplicate variable declarations before adding new ones.
+- Check for existing variable names before declaring new ones in the same class.
+- Ensure instance variables are declared before use in the same class.
+- Check for existing variable names before declaring new ones in the same class.
+- "Ensure instance variables are declared before use in the same class."
+- Ensure `ResourceKind` enum includes `Wood` and `Stone` before using them in comparisons.
+- Ensure all referenced enums and properties exist before using them in methods.
+- Ensure proper syntax and structure when adding new methods to avoid unexpected compiler errors.
+- Ensure all method signatures and declarations are correctly formatted and complete before adding new code.
+- Avoid adding methods with syntax errors; ensure correct method declarations and logic.
+- Ensure all referenced fields and methods exist in the current context before adding new code.
+- Ensure resource properties exist in the correct class before using them.
+- Ensure `ResourceKind` enum includes 'Wood' and 'Stone' before using them in `GameWorld.cs`.
+- Ensure `ResourceKind` enum includes `Wood` and `Stone` before using them in collections.
+- Ensure `ResourceKind` enum includes `Wood` and `Stone` before using them in `GameWorld.cs`.
+- Ensure properties like Wood and Stone are declared in GameWorld before initializing them.
+- Ensure properties like Wood and Stone are declared in GameWorld before initializing them.
+- Ensure properties exist before initializing them in constructors.
+- Avoid duplicate constructors in the same class; ensure each constructor has unique parameters or initialization logic.
+- Ensure all referenced methods exist before adding new code.
+- Ensure all used fields are declared before use in the class.
+- Avoid duplicate constructor definitions in the same class.
+- Ensure `ResourceKind` enum includes all referenced types before initialization.
+- Ensure `ResourceKind` enum includes all referenced values before using them in `GameWorld`.
+- Ensure `GameWorldManager` class has method `UpdateResourceRegenerationRate` before using it in `Main.cs`.
+- "Static classes cannot have instance methods; ensure `UpdateResourceRegenerationRate` is static or change class to non-static."
+- "Static classes cannot have instance members; use non-static for stateful data."
+- Ensure all new methods are properly declared and do not interfere with existing syntax.
+- Ensure method signatures and declarations are correctly formatted without syntax errors.
+- Ensure all added methods and properties are correctly defined and do not interfere with existing syntax.
+- Ensure all method declarations are syntactically correct and complete before adding new methods.
+- Verify all `ResourceKind` values exist in `ResourceKind` enum before using them.
+- Ensure all methods used in new implementations exist within the current file or are properly referenced.
+- Ensure all referenced types and methods exist before adding code in GameWorld.cs.

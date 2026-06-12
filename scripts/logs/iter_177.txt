@@ -1,12 +1,37 @@
-CHANGE: Change the type of `_resourceRegenerationRates` values from `int` to `double`.
+CHANGE: Add a property to track resource consumption in GameWorld.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
+public class GameWorld
+{
+private Dictionary<ResourceKind, int> _recycledResources = new();
 private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
-public void RegenerateResource(ResourceKind kind, int amount)
+private int TotalTicks = 0;
+// private int cookBonus = 0; // New field
+
+public GameWorld()
+{
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
+}
 =======
-private Dictionary<ResourceKind, double> _resourceRegenerationRates = new();
-public void UpdateResourceRegenerationRate(ResourceKind kind, double rate)
-public void RegenerateResource(ResourceKind kind, int amount)
+public class GameWorld
+{
+private Dictionary<ResourceKind, int> _recycledResources = new();
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+private Dictionary<ResourceKind, int> _resourceConsumption = new(); // New field to track resource consumption
+private int TotalTicks = 0;
+// private int cookBonus = 0; // New field
+
+public GameWorld()
+{
+    // Initialize resource regeneration rates and consumption
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
+    foreach (var kind in Enum.GetValues<ResourceKind>())
+    {
+        _resourceConsumption[kind] = 0;
+    }
+}
 >>>>>>> REPLACE
-NEXT: Update the initialization of `_resourceRegenerationRates` to use `double` values.
+NEXT: Implement a method to update resource consumption.

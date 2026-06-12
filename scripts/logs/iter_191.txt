@@ -1,55 +1,20 @@
-CHANGE: Extract repeated pawn registration logic into a separate method in Main.cs.
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a property to track total resource consumption for building projects.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-foreach (string name in array)
+public class GameWorld
 {
-	int num;
-	int num2;
-	do
-	{
-		num = _rng.Next(0, _world.Map.Width);
-		num2 = _rng.Next(0, _world.Map.Height);
-	}
-	while (!_world.Map.IsPassable(num, num2));
-	_world.RegisterThing(new Pawn(name, num, num2));
-}
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+    private int TotalTicks = 0;
+// ... (lines omitted) ...
 =======
-private void RegisterPawns(string[] names)
+public class GameWorld
 {
-	foreach (string name in names)
-	{
-		int num;
-		int num2;
-		do
-		{
-			num = _rng.Next(0, _world.Map.Width);
-			num2 = _rng.Next(0, _world.Map.Height);
-		}
-		while (!_world.Map.IsPassable(num, num2));
-		_world.RegisterThing(new Pawn(name, num, num2));
-	}
-}
+    private Dictionary<ResourceKind, int> _recycledResources = new();
+    private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+    private int TotalTicks = 0;
+    private Dictionary<ResourceKind, int> _buildingResourceConsumption = new();
 
-public override void _Ready()
-{
-	_world = new GameWorldManager(50, 50);
-	_rng = new Random(12345);
-	string[] array = new string[8] { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt" };
-
-	// Load dining table icon texture
-	var iconPath = "res://icons/dining_table_icon.png"; // Adjust path as necessary
-	_diningTableIcon = ResourceLoader.Load<Texture2D>(iconPath);
-	RegisterPawns(array);
-	_dialogue = new DialogueService();
-}
-
-public override void _Process(double delta)
-{
-	if (_world.Pawns.Count == 0)
-	{
-		_world = new GameWorldManager(50, 50);
-		string[] rebirth = new string[8] { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt" };
-		RegisterPawns(rebirth);
 // ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Ensure the method is correctly called in both _Ready and _Process methods.
+NEXT: Implement a method to update the building resource consumption.

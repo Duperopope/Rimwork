@@ -1,27 +1,10 @@
-CHANGE: Add a method to check if a zone is functional based on its kind and furniture.
+CHANGE: Add fields for tracking wood and stone resources in GameWorld.cs.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
-{
-    // Example: Define which zones contribute to room functionality
-    return zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters;
-}
+private Dictionary<ResourceKind, int> _recycledResources = new();
 =======
-public bool IsZoneFunctional(Zone zone)
-{
-    // Check if the zone kind contributes to room functionality
-    if (zone.Kind == ZoneKind.Canteen || zone.Kind == ZoneKind.SleepingQuarters)
-    {
-        // Check if there is any functional furniture in the zone
-        foreach (var furniture in _furniture)
-        {
-            if (furniture.IsFunctionalFurniture() && zone.Contains(furniture.X, furniture.Y))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
+private Dictionary<ResourceKind, int> _recycledResources = new();
+private int _wood = 0;
+private int _stone = 0;
 >>>>>>> REPLACE
-NEXT: Implement a method to identify and count functional rooms in the game world.
+NEXT: Initialize wood and stone resources in the GameWorld constructor.

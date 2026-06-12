@@ -1,20 +1,16 @@
-CHANGE: Update the initial resource regeneration rates for Trees and Rocks in the constructor.
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Add `Wood` and `Stone` to the `ResourceKind` enum.
+FILE: src/RimWorldLab.Core/Enums.cs
 <<<<<<< SEARCH
-private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-public GameWorld()
-{
-    // Initialize resource regeneration rates
-    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
-    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
-}
+public enum ResourceKind { /* complete, do not modify */ }
 =======
-private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-public GameWorld()
+public enum ResourceKind
 {
-    // Initialize resource regeneration rates
-    _resourceRegenerationRates[ResourceKind.Tree] = 0.5; // Lowered rate
-    _resourceRegenerationRates[ResourceKind.Rock] = 1; // Lowered rate
+    Tree,
+    Rock,
+    Water,
+    Energy,
+    Wood,
+    Stone
 }
 >>>>>>> REPLACE
-NEXT: Ensure the regeneration rates are correctly applied in the resource regeneration logic.
+NEXT: Ensure properties like `Wood` and `Stone` are declared in `GameWorld`.

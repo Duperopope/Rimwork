@@ -1,23 +1,30 @@
-CHANGE: Extract pawn registration logic into a separate method in Main.cs.
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add a method to track resource usage for building projects.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-```csharp
-foreach (string name in array)
+public void SimulateResourceRegeneration()
 {
-    int num;
-    int num2;
-    do
+    foreach (var resource in _recycledResources.Keys)
     {
-        num = _rng.Next(0, _world.Map.Width);
-        num2 = _rng.Next(0, _world.Map.Height);
+        RegenerateResource(resource, _recycledResources[resource]);
     }
-    while (!_world.Map.IsPassable(num, num2));
-    _world.RegisterThing(new Pawn(name, num, num2));
 }
-```
 =======
-```csharp
-RegisterPawns(array);
-```
+public void SimulateResourceRegeneration()
+{
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
+
+public void TrackResourceUsage(ResourceKind kind, int amount)
+{
+    if (_recycledResources.ContainsKey(kind))
+    {
+        _recycledResources[kind] -= amount;
+        // Ensure the resource amount does not go below zero
+        _recycledResources[kind] = Math.Max(_recycledResources[kind], 0);
+    }
+}
 >>>>>>> REPLACE
-NEXT: Ensure the new method is correctly defined and called in both _Ready and _Process methods.
+NEXT: Implement a method to limit material usage based on available resources.

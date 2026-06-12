@@ -1,82 +1,16 @@
-CHANGE: Deduplicate the code for spawning pawns in `_Ready` and `_Process`.
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add `ResourceKind.Wood` and `ResourceKind.Stone` to the `ResourceKind` enum.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-foreach (string name in array)
-{
-    int num;
-    int num2;
-    do
-    {
-        num = _rng.Next(0, _world.Map.Width);
-        num2 = _rng.Next(0, _world.Map.Height);
-    }
-    while (!_world.Map.IsPassable(num, num2));
-    _world.RegisterThing(new Pawn(name, num, num2));
-}
-foreach (string name in rebirth)
-{
-    int px;
-    int py;
-    do
-    {
-        px = _rng.Next(0, _world.Map.Width);
-        py = _rng.Next(0, _world.Map.Height);
-    }
-    while (!_world.Map.IsPassable(px, py));
-    _world.RegisterThing(new Pawn(name, px, py));
-}
+public enum ResourceKind { /* complete, do not modify */ }
 =======
-private void SpawnPawns(string[] names)
+public enum ResourceKind
 {
-    foreach (string name in names)
-    {
-        int x;
-        int y;
-        do
-        {
-            x = _rng.Next(0, _world.Map.Width);
-            y = _rng.Next(0, _world.Map.Height);
-        }
-        while (!_world.Map.IsPassable(x, y));
-        _world.RegisterThing(new Pawn(name, x, y));
-    }
-}
-
-public override void _Ready()
-{
-    _world = new GameWorldManager(50, 50);
-    _rng = new Random(12345);
-    string[] array = new string[8] { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt" };
-
-    // Load dining table icon texture
-    var iconPath = "res://icons/dining_table_icon.png"; // Adjust path as necessary
-    _diningTableIcon = ResourceLoader.Load<Texture2D>(iconPath);
-    SpawnPawns(array);
-    _dialogue = new DialogueService();
-}
-
-public override void _Process(double delta)
-{
-    if (_world.Pawns.Count == 0)
-    {
-        _world = new GameWorldManager(50, 50);
-        string[] rebirth = new string[8] { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt" };
-        SpawnPawns(rebirth);
-    }
-    _accumulator += delta;
-// ... (lines omitted) ...
-    if (_world.Tasks.Pending.Count == 0)
-    {
-        int num;
-        int num2;
-        do
-        {
-            num = _rng.Next(0, _world.Map.Width);
-            num2 = _rng.Next(0, _world.Map.Height);
-        }
-        while (!_world.Map.IsPassable(num, num2));
-        _world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
-    }
+    Tree,
+    Rock,
+    Water,
+    Energy,
+    Wood,
+    Stone
 }
 >>>>>>> REPLACE
-NEXT: Simplify and deduplicate the code for enqueuing tasks in `_Process`.
+NEXT: Ensure properties like `Wood` and `Stone` are declared in `GameWorld` before initializing them.

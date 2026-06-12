@@ -1,23 +1,23 @@
-CHANGE: Add a method to check if a zone is functional based on placed furniture.
+CHANGE: Add a method to track progress towards building additional rooms.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+public void UpdateFunctionalRoomCount()
 {
-    // Placeholder for future implementation
-    return true;
+    _functionalRoomCount = CountFunctionalRooms();
 }
+// ... (lines omitted) ...
 =======
-public bool IsZoneFunctional(Zone zone)
+public void UpdateFunctionalRoomCount()
 {
-    // Check if the zone contains at least one functional furniture
-    foreach (var furniture in Furniture)
-    {
-        if (furniture.IsFunctionalFurniture() && zone.Contains(furniture.X, furniture.Y))
-        {
-            return true;
-        }
-    }
-    return false;
+    _functionalRoomCount = CountFunctionalRooms();
 }
+
+private int _roomsBuilt = 0;
+
+public void IncrementRoomsBuilt()
+{
+    _roomsBuilt++;
+}
+// ... (lines omitted) ...
 >>>>>>> REPLACE
-NEXT: Implement a method to count functional rooms in the game world.
+NEXT: Implement a method to display the progress towards building additional rooms.

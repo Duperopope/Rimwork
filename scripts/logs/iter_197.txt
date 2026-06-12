@@ -1,33 +1,16 @@
-CHANGE: Add a method to display the progress towards building functional rooms.
-FILE: src/RimWorldLab.Core/GameWorld.cs
+CHANGE: Add `ResourceKind.Wood` and `ResourceKind.Stone` to the `ResourceKind` enumeration.
+FILE: src/RimWorldLab.Core/Enums.cs
 <<<<<<< SEARCH
-public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
-{
-    if (!_pawnResourceConsumption.ContainsKey(pawnId))
-    {
-        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
-    }
+public enum ResourceKind { /* complete, do not modify */ }
 =======
-public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+public enum ResourceKind
 {
-    if (!_pawnResourceConsumption.ContainsKey(pawnId))
-    {
-        _pawnResourceConsumption[pawnId] = new Dictionary<ResourceKind, int>();
-    }
-
-    if (_pawnResourceConsumption[pawnId].ContainsKey(kind))
-    {
-        _pawnResourceConsumption[pawnId][kind] += amount;
-    }
-    else
-    {
-        _pawnResourceConsumption[pawnId][kind] = amount;
-    }
-}
-
-public void DisplayFunctionalRoomsProgress()
-{
-    Console.WriteLine($"Functional Rooms Count: {_functionalRoomCount}");
+    Tree,
+    Rock,
+    Water,
+    Energy,
+    Wood,
+    Stone
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to update the functional room count based on specific criteria.
+NEXT: Initialize `Wood` and `Stone` in the `GameWorld` constructor.

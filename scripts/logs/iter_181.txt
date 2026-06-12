@@ -1,70 +1,8 @@
-CHANGE: Simplify the repeated pawn registration logic in `_Ready` and `_Process` methods.
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add `ResourceKind.Wood` and `ResourceKind.Stone` to the `ResourceKind` enum.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-foreach (string name in array)
-{
-    int num;
-    int num2;
-    do
-    {
-        num = _rng.Next(0, _world.Map.Width);
-        num2 = _rng.Next(0, _world.Map.Height);
-    }
-    while (!_world.Map.IsPassable(num, num2));
-    _world.RegisterThing(new Pawn(name, num, num2));
-}
+public enum ResourceKind { /* complete, do not modify */ }
 =======
-private void RegisterPawns(string[] names)
-{
-    foreach (string name in names)
-    {
-        int num;
-        int num2;
-        do
-        {
-            num = _rng.Next(0, _world.Map.Width);
-            num2 = _rng.Next(0, _world.Map.Height);
-        }
-        while (!_world.Map.IsPassable(num, num2));
-        _world.RegisterThing(new Pawn(name, num, num2));
-    }
-}
-
-public override void _Ready()
-{
-    _world = new GameWorldManager(50, 50);
-    _rng = new Random(12345);
-    string[] array = new string[8] { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt" };
-
-    // Load dining table icon texture
-    var iconPath = "res://icons/dining_table_icon.png"; // Adjust path as necessary
-    _diningTableIcon = ResourceLoader.Load<Texture2D>(iconPath);
-    RegisterPawns(array);
-    _dialogue = new DialogueService();
-}
-
-public override void _Process(double delta)
-{
-    if (_world.Pawns.Count == 0)
-    {
-        _world = new GameWorldManager(50, 50);
-        string[] rebirth = new string[8] { "Aiden", "Brynn", "Corwin", "Dara", "Elsie", "Finn", "Greta", "Holt" };
-        RegisterPawns(rebirth);
-    }
-    _accumulator += delta;
-// ... (lines omitted) ...
-    if (_world.Tasks.Pending.Count == 0)
-    {
-        int num;
-        int num2;
-        do
-        {
-            num = _rng.Next(0, _world.Map.Width);
-            num2 = _rng.Next(0, _world.Map.Height);
-        }
-        while (!_world.Map.IsPassable(num, num2));
-        _world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
-    }
-}
+public enum ResourceKind { Tree, Rock, Water, Energy, Wood, Stone }
 >>>>>>> REPLACE
-NEXT: Simplify and deduplicate code in Main.cs and GameWorld.cs to improve maintainability and reduce bugs.
+NEXT: Ensure properties like Wood and Stone are declared in GameWorld before initializing them.

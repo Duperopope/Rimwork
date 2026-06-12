@@ -1,12 +1,30 @@
-CHANGE: Change the type of `_resourceRegenerationRates` values from `int` to `double`.
+CHANGE: Add a method to track resource consumption for building and maintenance tasks.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-public void UpdateResourceRegenerationRate(ResourceKind kind, int rate)
-public void RegenerateResource(ResourceKind kind, int amount)
+public void SimulateResourceRegeneration()
+{
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
 =======
-private Dictionary<ResourceKind, double> _resourceRegenerationRates = new();
-public void UpdateResourceRegenerationRate(ResourceKind kind, double rate)
-public void RegenerateResource(ResourceKind kind, int amount)
+public void SimulateResourceRegeneration()
+{
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
+
+public void TrackResourceConsumption(ResourceKind kind, int amount)
+{
+    if (_recycledResources.ContainsKey(kind))
+    {
+        _recycledResources[kind] -= amount;
+        // Ensure the resource amount does not go below zero
+        _recycledResources[kind] = Math.Max(_recycledResources[kind], 0);
+    }
+}
 >>>>>>> REPLACE
-NEXT: Update the initialization of `_resourceRegenerationRates` to use `double` values.
+NEXT: Implement a method to limit resource consumption based on available resources.

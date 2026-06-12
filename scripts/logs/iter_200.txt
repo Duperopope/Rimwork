@@ -1,29 +1,12 @@
-CHANGE: Implement a method to check if a zone has enough functional furniture by accessing the zone's map and furniture list.
+CHANGE: Add fields for tracking wood and stone resources in GameWorld.cs.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-```csharp
-public class GameWorld
-{
-    // ... (existing content) ...
-}
-```
+private int Tools = 0;
+private int Food = 0;
 =======
-```csharp
-public class GameWorld
-{
-    // ... (existing content) ...
-
-    public bool HasEnoughFunctionalFurniture(Zone zone, int requiredCount)
-    {
-        if (zone.LocalMap == null)
-        {
-            return false;
-        }
-
-        int functionalFurnitureCount = zone.LocalMap.Furniture.Count(furniture => furniture.IsFunctionalFurniture());
-        return functionalFurnitureCount >= requiredCount;
-    }
-}
-```
+private int Tools = 0;
+private int Food = 0;
+private int Wood = 0;
+private int Stone = 0;
 >>>>>>> REPLACE
-NEXT: Implement a method to check if a zone has enough functional furniture by accessing the zone's map and furniture list.
+NEXT: Implement methods to update and retrieve wood and stone resource amounts.

@@ -1,75 +1,16 @@
-CHANGE: Extract repeated pawn registration logic into a separate method.
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add `Wood` and `Stone` to the `ResourceKind` enum.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-foreach (string name in array)
-{
-	int num;
-// ... (lines omitted) ...
-	if (_world.Tasks.Pending.Count == 0)
-	{
-		int num;
-		int num2;
-		do
-		{
-			num = _rng.Next(0, _world.Map.Width);
-			num2 = _rng.Next(0, _world.Map.Height);
-		}
-		while (!_world.Map.IsPassable(num, num2));
-		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
-	}
-	_world.Tick();
-}
+public enum ResourceKind { /* complete, do not modify */ }
 =======
-foreach (string name in array)
+public enum ResourceKind
 {
-	RegisterPawn(name);
-	if (_world.Tasks.Pending.Count == 0)
-	{
-		int num;
-		int num2;
-		do
-		{
-			num = _rng.Next(0, _world.Map.Width);
-			num2 = _rng.Next(0, _world.Map.Height);
-		}
-		while (!_world.Map.IsPassable(num, num2));
-		_world.Tasks.Enqueue(new TaskOrder(TaskKind.MoveTo, num, num2, 5));
-	}
-	_world.Tick();
-}
-
-private void RegisterPawn(string name)
-{
-	int num;
-	int num2;
-	do
-	{
-		num = _rng.Next(0, _world.Map.Width);
-		num2 = _rng.Next(0, _world.Map.Height);
-	}
-	while (!_world.Map.IsPassable(num, num2));
-	var pawn = new Pawn
-	{
-		Name = name,
-		Sex = (PawnSex)_rng.Next(2), // Random sex
-		SkillXP = new Dictionary<SkillKind, float>
-		{
-			{ SkillKind.Construction, 0f },
-			{ SkillKind.Mining, 0f },
-			{ SkillKind.Woodcutting, 0f }
-		},
-		Hunger = 0f,
-		Mood = 0f,
-		Fatigue = 0f,
-		HP = 100f,
-		Thirst = 0f,
-		Stress = 0f,
-		Traits = new List<string>(),
-		Memories = new List<(long, string, float)>(),
-		Relationships = new Dictionary<Guid, float>()
-	};
-	_world.Map.Registry[pawn.Id] = pawn;
-	_world.Map.Pawns.Add(pawn);
+    Tree,
+    Rock,
+    Water,
+    Energy,
+    Wood,
+    Stone
 }
 >>>>>>> REPLACE
-NEXT: Continue extracting logic to improve code organization.
+NEXT: Ensure `Wood` and `Stone` are declared in `GameWorld` before initializing them.

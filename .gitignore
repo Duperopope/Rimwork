@@ -16,3 +16,10 @@ loop_stdout.log
 # Embedded third-party releases (Thrive) - fetched by script, not committed
 thirdparty/
 reference/thrive/
+
+# Volatile loop telemetry (regenerated every iteration; keeps auto-commits clean)
+scripts/logs/iter_*.txt
+scripts/logs/shots/
+scripts/logs/health.json
+scripts/logs/bad_identifiers.txt
+scripts/logs/blocked_items.txt

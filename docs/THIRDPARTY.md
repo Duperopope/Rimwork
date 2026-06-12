@@ -1,27 +1,29 @@
-# Logiciels tiers embarqués
+# Tiers & références
 
-## Thrive (stade microbien ORIGINES)
+## Thrive — référence design (PAS embarqué)
 - Source: https://github.com/Revolutionary-Games/Thrive (Revolutionary Games)
-- Version embarquée: 1.1.0 (release officielle Windows)
 - Licence code: GPL-3.0 ; assets: CC-BY-SA 3.0
-- Décision (12/06/2026): le stade microbien de DOWN HERE! EST Thrive,
-  pris tel quel — même moteur (Godot.NET.Sdk 4.6.3), zéro modification.
-  Lancé depuis le menu « Nouvelle partie — Origines ». Notre MicroStage
-  procédural reste le fallback intégré si la release n'est pas installée.
-- Installation: scripts/get_thrive.ps1 (téléchargé hors git, ~1 Go)
-- IMPORTANT licence: distribuer DOWN HERE! AVEC les binaires Thrive impose
-  les obligations GPL-3.0/CC-BY-SA (mention, sources, partage à l'identique
-  pour les assets dérivés). v1 = lancement côte à côte (process séparé),
-  ce qui garde nos codes distincts; une fusion de code (v2) placerait la
-  partie fusionnée sous GPL.
+- Copie locale d'étude: `reference/thrive/` (hors git, hors build)
 
-## Architecture validée (12/06/2026)
-- ALPHA: Thrive lancé tel quel depuis le menu (process séparé) - EN PLACE.
-- RELEASE: bridge "Thrive fork -> Down Here!" :
-  1. Fork minimal de Thrive couvrant jusqu'au stade cellulaire.
-  2. À la fin du stade, le fork écrit les données d'espèce (les saves
-     Thrive sont du JSON: organites, membrane, comportement, stats).
-  3. Down Here! se lance en surcouche et IMPORTE ces données pour générer
-     l'organisme/créature du joueur aux échelles suivantes.
-  -> Deux logiciels séparés (GPL contenue dans le fork), pas de fusion de
-     code, et la continuité de progression du joueur est préservée.
+### Décision (12/06/2026, révisée le même jour)
+L'intégration "Thrive lancé tel quel en process séparé" (alpha) a été testée
+puis **abandonnée** : fenêtre séparée = expérience cassée, et Thrive souffre
+de problèmes de performance (lag) qu'on ne veut pas hériter.
+
+**Doctrine actuelle** : le stade microbien tourne sur **notre moteur
+propriétaire** (`src/RimWorldGodot/MicroStage.cs`, 100 % procédural).
+Thrive sert uniquement de **référence design** :
+- direction artistique (membranes organiques, soupe primordiale, lisibilité) ;
+- boucle de gameplay (nage, prédation, organites, éditeur de cellule) ;
+- UX des menus (la grande force de Thrive).
+
+### Règle de licence (stricte)
+On s'inspire des **idées** (non protégées), on réimplémente tout :
+- AUCUN code GPL copié/adapté dans `src/` ;
+- AUCUN asset CC-BY-SA repris (de toute façon : politique zéro-asset) ;
+- `reference/thrive/` reste isolé du build et de la boucle IA (la boucle ne
+  route jamais de patchs vers ce dossier).
+
+## Assets 3D (stade colonie)
+- KayKit (CC0) — Adventurers, Skeletons, Dungeon Remastered, Forest Nature,
+  Furniture/Restaurant/Resource/RPG Tools Bits. Détail: docs/ASSET_CATALOG.md.

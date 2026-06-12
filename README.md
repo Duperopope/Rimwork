@@ -1,169 +1,49 @@
-# RimWorld Lab — Private Reconstruction & Modern Engine R&D
+# DOWN HERE !
 
-## Summary
+Un jeu de gestion de colonie / stratégie temps réel / 4X / exploration spatiale,
+avec comportements émergents et histoires auto-générées. La partie commence au
+stade **bactérie** (à la Spore) et se termine dans les étoiles (endgame façon KSP).
 
-This is a **private research laboratory** to understand colony simulation architecture, progressively reconstruct a minimal working version, and then build a modern, multi-scale simulation engine.
+**Particularité : chaque ligne de gameplay est écrite par une IA locale autonome**
+(Qwen2.5-Coder-14B, ROCm) dans une boucle roadmap → patch → build → tests →
+simulation → commit, supervisée par une IA frontière pour la 3D, l'UI et
+l'architecture.
 
-**Not a commercial clone.** Not a RimWorld redistribution.
+- 🌍 **Suivi public** : https://duperopope.github.io/Rimwork/
+- 📋 **Roadmap** : [ROADMAP.md](ROADMAP.md) (consommée par la boucle IA)
+- 📖 **Design** : [docs/DOWN_HERE_DESIGN.md](docs/DOWN_HERE_DESIGN.md)
+- 🧾 **Journal de dev** : [DEV_LOG.md](DEV_LOG.md)
 
-**Inspired by**: [Underscore's GTA San Andreas Reverse Engineering Pipeline](https://www.youtube.com/watch?v=XbKYW4Pg7QA&t=972s) — using Claude Code agents for controlled reconstruction and validation.
+## Principes
 
----
+- **100 % procédural** : zéro asset pour les stades organiques — membranes,
+  créatures, eau et lumière sont du code et des shaders.
+- **Déterministe** : même seed → même univers (tests reproductibles).
+- **Multi-échelles** : Micro → Organisme → Local → Région → Planète → Système.
+- **Sourcé, pas copié** : [Thrive](https://github.com/Revolutionary-Games/Thrive)
+  (GPL) sert de référence design pour le stade microbien — boucle de gameplay et
+  direction artistique réimplémentées sur notre moteur, aucun code/asset repris.
+  Voir [docs/THIRDPARTY.md](docs/THIRDPARTY.md).
 
-## Key Documents
+## Architecture
 
-- **[PROJECT_CHARTER.md](PROJECT_CHARTER.md)** — Vision, intention, legal framing, rules.
-- **[RESOURCES.md](RESOURCES.md)** — Available reference materials (decompiled code, mods, open-source games).
-- **[LLM_SYSTEM_PROMPT.md](LLM_SYSTEM_PROMPT.md)** — Use this to brief Claude Code or agent dev.
-- **[EXECUTION_PLAN.md](EXECUTION_PLAN.md)** — Phase 0 & 1 detailed roadmap.
+```
+src/RimWorldLab.Core/   Simulation pure .NET (monde, pawns, jobs, météo, saves)
+src/RimWorldGodot/      Présentation Godot 4.6 .NET (3D, planètes hex, UI, MicroStage)
+src/RimWorldLab/        Harnais console headless (tests + simulation diagnostique)
+scripts/dev_loop.ps1    La boucle de développement IA autonome
+scripts/startup_all.ps1 Boot/heal de toute la pile (LLM, boucle, jeu, dashboard)
+scripts/dashboard_server.ps1  Dashboard live sur http://localhost:8765
+docs/                   Design, contrats (UI freeze), audit, tiers
+```
 
----
-
-## Quick Start — Velocity Mode
-
-**Skip research. Code today.**
-
-### 1. Phase 0.1a: Get Code Running (Today)
+## Lancer
 
 ```powershell
-cd g:\Rimwork
+# Toute la pile (LLM local + boucle + jeu + dashboard) :
+powershell -File scripts/startup_all.ps1
 
-# Step 1: Start LM Studio (GUI)
-# -> Load model (e.g., "mistral-7b")
-# -> Click "Start Server"
-
-# Step 2: Verify LM Studio
-& .\scripts\test_lm_api.ps1
-
-# Step 3: Create project + tick loop
-& .\scripts\setup_project.ps1
+# Le jeu seul :
+dotnet build src/RimWorldGodot/RimWorldGodot.csproj -c ExportRelease
+# puis lancer via l'exe Godot 4.6 .NET complet avec --path src/RimWorldGodot
 ```
-
-**Result**: Tick loop runs at 60 ticks/sec. Done in ~20 minutes.
-
-See [START_HERE.md](START_HERE.md) for details.
-
-### 2. Phase 1: Iterate with LLM (Days 2-10)
-
-Ask LM Studio to expand:
-
-```powershell
-$prompt = @"
-I have a deterministic C# tick loop at 60 ticks/sec.
-Add a 50x50 2D map with cell passability and collision.
-Show Map.cs with tests.
-"@
-
-& .\scripts\llm_call.ps1 -UserMessage $prompt -MaxTokens 2000
-```
-
-Copy the code. Paste into project. Compile. Test. Repeat.
-
-See [VELOCITY_MODE.md](VELOCITY_MODE.md) for sample prompts.
-
----
-
-## Directory Structure
-
-```
-RimWork/
-├── START_HERE.md                     ← Read this first (velocity mode)
-├── VELOCITY_MODE.md                 ← New fast iteration plan
-├── LM_STUDIO_SETUP.md               ← Configure local LLM
-├── LLM_SYSTEM_PROMPT.md             ← Full system prompt
-├── 00_QUICK_START.md
-├── PROJECT_CHARTER.md
-├── RESOURCES.md
-├── EXECUTION_PLAN.md
-│
-├── scripts/                          ← PowerShell helpers
-│   ├── setup_project.ps1            ← One-click setup
-│   ├── test_lm_api.ps1              ← Verify LM Studio
-│   └── llm_call.ps1                 ← Query LLM
-│
-├── docs/                            ← Documentation (as you work)
-│   ├── systems/
-│   ├── analysis/
-│   └── reference/
-│
-├── reference/                       ← Cloned repos (to populate)
-│   ├── rimworld-decompiled/
-│   └── ...
-│
-├── src/                             ← Your C# code
-│   └── RimWorldLab/
-│       ├── Program.cs
-│       └── ...
-│
-├── tests/                           ← Unit tests
-│   └── ...
-│
-└── Transcriptionvideounderscore.txt ← Underscore video transcript
-```
-
----
-
-## Legal & Ethical
-
-- **This is private research and learning use only.**
-- **No RimWorld assets, DLLs, or copyrighted code in outputs.**
-- **All code written originally, not copied.**
-- **No redistribution of Ludeon's intellectual property.**
-- **See [PROJECT_CHARTER.md](PROJECT_CHARTER.md) for full framing.**
-
----
-
-## How to Use Local LLM (LM Studio)
-
-1. **Start LM Studio** (GUI app, https://lmstudio.ai/)
-2. **Load a model** (e.g., "mistral-7b" or "codellama-7b")
-3. **Click "Start Server"**
-4. **Use `llm_call.ps1`** to query:
-   ```powershell
-   & .\scripts\llm_call.ps1 -UserMessage "Write a C# class for..."
-   ```
-
-See [LM_STUDIO_SETUP.md](LM_STUDIO_SETUP.md) for details.
-
----
-
-## Success Milestones (Velocity Mode)
-
-### Today
-- ✅ Tick loop running at 60 ticks/sec
-- ✅ LM Studio verified
-- ✅ Project compiles
-
-### Days 2-3
-- ✅ Map + Thing classes
-- ✅ Entities on grid
-
-### Days 4-5
-- ✅ Pawns with hunger/fatigue
-- ✅ Basic jobs (eat, sleep)
-
-### Days 6-7
-- ✅ Reservation system
-- ✅ Pathfinding
-
-### Days 8-10
-- ✅ Save/load + tests
-- ✅ Deterministic replay
-- ✅ Phase 1 MVP complete
-
----
-
-## Next Action
-
-**→ RIGHT NOW:**
-
-```powershell
-cd g:\Rimwork
-& .\scripts\setup_project.ps1
-```
-
-**Then:**
-
-Read [START_HERE.md](START_HERE.md) or [VELOCITY_MODE.md](VELOCITY_MODE.md).
-
-**Go.** 🚀

@@ -1,16 +1,25 @@
-CHANGE: Add a method to determine if a zone is functional based on its furniture.
+CHANGE: Add a method to track resource consumption by pawns in GameWorld.cs
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-public bool IsZoneFunctional(Zone zone)
+public void SimulateResourceRegeneration()
 {
-    // ... (lines omitted) ...
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
 }
 =======
-public bool IsZoneFunctional(Zone zone)
+public void SimulateResourceRegeneration()
 {
-    // Check if the zone contains any functional furniture
-    var functionalFurnitureCount = zone.LocalMap.Furniture.Count(f => f.IsFunctionalFurniture());
-    return functionalFurnitureCount > 0;
+    foreach (var resource in _recycledResources.Keys)
+    {
+        RegenerateResource(resource, _recycledResources[resource]);
+    }
+}
+
+public void TrackResourceConsumption(Guid pawnId, ResourceKind kind, int amount)
+{
+    // Placeholder for tracking resource consumption by pawns
 }
 >>>>>>> REPLACE
-NEXT: Implement a method to assign pawns to rooms based on their needs.
+NEXT: Implement the logic to track resource consumption in the newly added method.

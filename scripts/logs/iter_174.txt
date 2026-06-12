@@ -1,20 +1,16 @@
-CHANGE: Reduce initial resource spawn rate by lowering the regeneration rates for Trees and Rocks.
+CHANGE: Add `Wood` and `Stone` to the `ResourceKind` enum.
 FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-public GameWorld()
-{
-    // Initialize resource regeneration rates
-    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
-    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
-}
+public enum ResourceKind { /* complete, do not modify */ }
 =======
-private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
-public GameWorld()
+public enum ResourceKind
 {
-    // Initialize resource regeneration rates
-    _resourceRegenerationRates[ResourceKind.Tree] = 0.5; // Reduced rate
-    _resourceRegenerationRates[ResourceKind.Rock] = 1; // Reduced rate
+    Tree,
+    Rock,
+    Water,
+    Energy,
+    Wood,
+    Stone
 }
 >>>>>>> REPLACE
-NEXT: Continue to adjust other resource regeneration rates if necessary.
+NEXT: Ensure properties like `Wood` and `Stone` are declared in `GameWorld`.

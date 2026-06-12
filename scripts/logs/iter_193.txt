@@ -1,39 +1,34 @@
-CHANGE: Extract pawn registration logic into a separate method
-FILE: src/RimWorldGodot/Main.cs
+CHANGE: Add properties for tracking material usage in GameWorld.
+FILE: src/RimWorldLab.Core/GameWorld.cs
 <<<<<<< SEARCH
-foreach (string name in array)
+private Dictionary<ResourceKind, int> _recycledResources = new();
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+private int TotalTicks = 0;
+// private int cookBonus = 0; // New field
+
+public GameWorld()
 {
-	int num;
-	int num2;
-	do
-	{
-		num = _rng.Next(0, _world.Map.Width);
-		num2 = _rng.Next(0, _world.Map.Height);
-	}
-	while (!_world.Map.IsPassable(num, num2));
-	_world.RegisterThing(new Pawn(name, num, num2));
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
 }
 =======
-private void RegisterPawns(string[] names)
+private Dictionary<ResourceKind, int> _recycledResources = new();
+private Dictionary<ResourceKind, int> _resourceRegenerationRates = new();
+private int TotalTicks = 0;
+private Dictionary<ResourceKind, int> _materialUsage = new();
+
+public GameWorld()
 {
-	foreach (string name in names)
-	{
-		int num;
-		int num2;
-		do
-		{
-			num = _rng.Next(0, _world.Map.Width);
-			num2 = _rng.Next(0, _world.Map.Height);
-		}
-		while (!_world.Map.IsPassable(num, num2));
-		_world.RegisterThing(new Pawn(name, num, num2));
-	}
+    // Initialize resource regeneration rates
+    _resourceRegenerationRates[ResourceKind.Tree] = 1; // Example rate
+    _resourceRegenerationRates[ResourceKind.Rock] = 2; // Example rate
+
+    // Initialize material usage dictionary
+    foreach (var kind in Enum.GetValues<ResourceKind>())
+    {
+        _materialUsage[kind] = 0;
+    }
 }
-
-// In _Ready method:
-RegisterPawns(array);
-
-// In _Process method:
-RegisterPawns(rebirth);
 >>>>>>> REPLACE
-NEXT: Ensure the method is correctly defined and called in both _Ready and _Process methods.
+NEXT: Implement a method to update material usage when resources are consumed.
