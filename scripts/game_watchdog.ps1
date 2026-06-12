@@ -83,7 +83,9 @@ function Start-Game {
     # straight into the colony. Gameplay verification uses the headless
     # diag sim instead of autostart screenshots.
     $env:RIMWORK_AUTOSTART = "0"
-    $p = Start-Process -FilePath "godot" -ArgumentList @("--path", $ProjectDir, "--max-fps", "20") -PassThru
+    # Minimized: the watchdog needs the game alive for its self-screenshots,
+    # but it has no business popping windows onto the user's screen.
+    $p = Start-Process -FilePath "godot" -ArgumentList @("--path", $ProjectDir, "--max-fps", "20") -PassThru -WindowStyle Minimized
     $p.Id | Out-File -FilePath $pidFile -Encoding ascii -NoNewline
     Write-Log "Launched game pid $($p.Id)"
     return $p

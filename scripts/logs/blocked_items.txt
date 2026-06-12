@@ -60,3 +60,5 @@
 - [ ] Step C.75.1 - Add a private static dictionary `_resourceRegenerationRates` to `GameWorldManager` class. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.90 - Implement `DisplayFunctionalRooms` method to iterate through rooms and print their status. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.105b - Implement CountFunctionalRooms method to return an integer count of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.120a - Add `TrackResourceConsumption` method to `GameWorld.cs`.
+- [ ] Step C.135a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. Initialize it in the constructor. Ensure the method references this new field for pawn iteration.

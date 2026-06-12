@@ -301,3 +301,8 @@
 - Verify all `ResourceKind` values exist in `ResourceKind` enum before using them.
 - Ensure all methods used in new implementations exist within the current file or are properly referenced.
 - Ensure all referenced types and methods exist before adding code in GameWorld.cs.
+- Ensure all referenced methods exist before adding new code.
+- Ensure all referenced fields and methods exist in the current context before adding code.
+- Ensure all referenced types and methods exist before adding new code.
+- Ensure all referenced members and methods exist before adding new code.
+- Ensure unique constructor signatures when adding new fields or methods in the same class.

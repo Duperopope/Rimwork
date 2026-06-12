@@ -226,4 +226,6 @@ tout en geometrie procedurale; chaque mutation doit avoir un effet REEL.
 - [ ] Step C.90 - Implement `DisplayFunctionalRooms` method to iterate through rooms and print their status. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.105b - Implement CountFunctionalRooms method to return an integer count of functional rooms. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.120a - Add `TrackResourceConsumption` method to `GameWorld.cs`.
-- [ ] Step C.135 - Implement a resource management system to track and limit the consumption of resources like wood and stone, ensuring players must manage their colony's needs effectively.
+- [ ] Step C.135a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. Initialize it in the constructor. Ensure the method references this new field for pawn iteration.
+- [ ] Step C.150a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs` and initialize it in the constructor.
+- [ ] Step C.165 - Implement a resource management system to track and limit the use of resources like wood and stone, forcing players to prioritize their usage (GameWorld.cs)

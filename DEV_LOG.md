@@ -5689,3 +5689,36 @@ Open this file (or watch it) to see what the autonomous loop is building.
   supprimés, README réécrit pour DOWN HERE!, logs volatils sortis de git.
 - Boucle locale: vivante (iter ~108), _resourceRegenerationRates implémenté
   (déblocage de 3 items critic dupliqués).
+- [iter 142] REVERTED (tests failed): Add a private dictionary to track resource consumption by pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 143] SKIPPED (no SEARCH match): Add `TrackResourceConsumption` method to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 144] SKIPPED (no SEARCH match): Add `TrackResourceConsumption` method to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 145] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.120a - Add `TrackResourceConsumption` method to `GameWorld.cs`.
+- [iter 146] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 147] REVERTED (tests failed): Add a method to track resource consumption by pawns. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 148] REVERTED (tests failed): Add a method to track resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 149] PREDICTED-FAIL (skipped before build): Add a method to track resource consumption. - REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic.
+- [iter 150] CRITIC TASK: - [ ] Step C.150 - Implement a system to track and display progress towards building additional rooms, providing clear feedback on what is needed to reach win conditions. (GameWorld.cs)
+- [iter 150] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.135a - Implement a method to update resource consumption for a pawn in GameWorld.cs by adding a call to an existing method that tracks resource consumption. Ensure the method references existing properties and types.
+- [iter 151] REVERTED (build failed): Add a method to update resource consumption for a pawn in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 152] REVERTED (build failed): Implement a method to update resource consumption for a pawn in GameWorld.cs by adding a call to an existing method that tracks resource consumption. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 153] REVERTED (build failed): Add a method to update resource consumption for a pawn in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 154] REVERTED (build failed): Add a method to update resource consumption for a pawn. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 155] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.135a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. Initialize it in the constructor. Ensure the method references this new field for pawn iteration.
+- [iter 156] REVERTED (tests failed): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. Initialize it in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 157] REVERTED (tests failed): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs` and initialize it in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 158] REVERTED (build failed): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs` and initialize it in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 159] REVERTED (tests failed): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. Initialize it in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 160] BLOCKED (stuck after 4 attempts, needs manual fix): - [ ] Step C.135a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. Initialize it in the constructor. Ensure the method references this new field for pawn iteration.
+- [iter 161] REVERTED (tests failed): Add a method to track progress towards building additional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 162] REVERTED (tests failed): Add a method to track progress towards building additional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 163] REVERTED (tests failed): Add a method to track progress towards building additional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 164] REVERTED (tests failed): Add a method to track progress towards building additional rooms. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 165] CRITIC TASK: - [ ] Step C.165 - Implement a resource management system to track and limit the use of resources like wood and stone, forcing players to prioritize their usage (GameWorld.cs)
+- [iter 165] SELF-REWRITE: item rewritten by model after 4 failures: - [ ] Step C.150a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs` and initialize it in the constructor.
+- [startup] Stack relaunched after boot (2026-06-12 06:24).
+- [iter 166] REVERTED (tests failed): Add private field `_pawns` to `GameWorld.cs` and initialize it in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 167] REVERTED (tests failed): Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs` and initialize it in the constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [12/06 suite] Quickstart fork: lancé depuis le hub (DOWNHERE_QUICKSTART=1),
+  Origines saute le menu Thrive et démarre direct une partie microbe (vérifié
+  en capture: tutoriel + jauges, zéro écran Thrive). Watchdog: relance du hub
+  MINIMISÉE (plus de fenêtres surprises). Boucle confirmée vivante (iter 157).

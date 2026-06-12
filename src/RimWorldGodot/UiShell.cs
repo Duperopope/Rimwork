@@ -442,6 +442,9 @@ public partial class UiShell : CanvasLayer
         if (System.IO.File.Exists(forkProject) && System.IO.File.Exists(godotExe))
         {
             GD.Print("[FLOW] New Game: Origines -> launching the Down Here fork of Thrive.");
+            // DOWNHERE_QUICKSTART=1 makes the fork skip its menu and dive
+            // straight into a new microbe game (inherited by CreateProcess).
+            System.Environment.SetEnvironmentVariable("DOWNHERE_QUICKSTART", "1");
             OS.CreateProcess(godotExe, new[] { "--path", System.IO.Path.GetDirectoryName(forkProject) });
             DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
             return;
