@@ -53,8 +53,7 @@ function Get-DownHereSiteHtml {
         $dayKeys = @($byDay.Keys)
         for ($di = 0; $di -lt $dayKeys.Count; $di++) {
             $day = $dayKeys[$di]
-            $open = if ($di -eq $dayKeys.Count - 1) { " open" } else { "" }
-            $list += "<details class='day'$open><summary>&#128197; $day <span class='pill'>$($byDay[$day].Count) patchs</span></summary>" + ($byDay[$day] -join "`n") + "</details>"
+            $list += "<details class='day'><summary>&#128197; $day <span class='pill'>$($byDay[$day].Count) patchs</span></summary>" + ($byDay[$day] -join "`n") + "</details>"
         }
         $count = $items.Count
         "<div class='rel-col'><div class='rel-head $cls'>$title<br><span class='rel-tag'>$tag &middot; $count livraisons</span></div><div class='rel-body'>$list</div></div>"
@@ -294,6 +293,21 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 window.addEventListener('beforeunload', () => {
   try { sessionStorage.setItem('scrollY', String(window.scrollY)); } catch (e) {}
+});
+// Collapsible groups: remember which ones the user opened/closed so the
+// 10s data refresh never undoes a manual fold.
+window.addEventListener('DOMContentLoaded', () => {
+  const all = document.querySelectorAll('details');
+  let saved = {};
+  try { saved = JSON.parse(sessionStorage.getItem('folds') || '{}'); } catch (e) {}
+  all.forEach((d, i) => {
+    const key = 'd' + i + ':' + (d.querySelector('summary') ? d.querySelector('summary').textContent.trim().slice(0, 40) : '');
+    if (key in saved) { d.open = saved[key]; }
+    d.addEventListener('toggle', () => {
+      saved[key] = d.open;
+      try { sessionStorage.setItem('folds', JSON.stringify(saved)); } catch (e) {}
+    });
+  });
 });
 </script>
 </header>

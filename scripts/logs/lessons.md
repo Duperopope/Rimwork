@@ -308,3 +308,114 @@
 - Ensure unique constructor signatures when adding new fields or methods in the same class.
 - Ensure all referenced members and types exist in the current context before adding new code.
 - Ensure all used properties and methods are defined in the current context or imported namespaces.
+- Ensure method syntax matches C# conventions; avoid misplaced tokens or incomplete statements.
+- Verify method and property existence before adding logic in `Tick()`.
+- Verify the existence of properties and enums before implementing logic.
+- Ensure all used fields and methods are declared in the class before using them.
+- "Always check for remaining references to old variable names after renaming."
+- Ensure all methods and properties used in new code are defined or exist in the current context.
+- Ensure methods like `AddResourceNode` and `SetSolid` exist in `GameWorld.cs` before using them.
+- Ensure all methods and properties used in new code are pre-defined in the class or imported namespaces.
+- Ensure all methods and properties used in new code are defined or exist in the current context.
+- Ensure all referenced fields and methods exist in the current context before adding code.
+- Ensure all methods used in new logic are defined or exist in the current context.
+- Ensure all used variables and methods are declared before use in `GameWorld.cs`.
+- Ensure all referenced fields and methods exist in the current context or are properly passed as parameters.
+- Ensure all used fields and methods are declared before use in the class.
+- Ensure all referenced fields and methods exist in the current context before adding new code.
+- Ensure `Sapling` type is defined or referenced before using it in `GameWorld.cs`.
+- Ensure `Sapling` type is defined and referenced before using it in `GameWorld.cs`.
+- Ensure all referenced types like `Sapling` are defined or properly imported before use in `GameWorld.cs`.
+- Ensure all types used are defined or referenced in the file.
+- Ensure all referenced fields and collections exist in `GameWorld.cs` before initialization.
+- Ensure field declarations and constructors are distinct to avoid duplicate member errors.
+- Verify all referenced types and properties exist before initializing them.
+- Ensure all dictionary references are correctly initialized and exist in the class context.
+- Ensure all referenced fields and collections exist before using them in constructors.
+- Ensure all referenced types and fields exist in the current context before coding.
+- Ensure all referenced fields and properties exist before using them in constructors.
+- "Ensure new fields are declared within a valid class member context."
+- Always search for and replace all occurrences of renamed variables to avoid missing references.
+- "Ensure all references to renamed fields are updated throughout the file."
+- Avoid reinitializing fields in constructors if they are already initialized at declaration.
+- Ensure all references to renamed fields are updated throughout the file.
+- "Ensure constructor parameters match existing definitions to avoid CS0111 errors."
+- Ensure all fields are declared before use in constructors.
+- Ensure all fields are initialized before constructors in C#.
+- Avoid defining fields and properties with identical names in constructors.
+- Ensure all fields are initialized before constructors.
+- Ensure all fields are initialized before use; avoid redundant constructor definitions.
+- Ensure all fields are initialized in their declarations or in a constructor, not both.
+- Ensure all fields are declared before use in constructors and methods.
+- Avoid redefining constructors in the same class; ensure fields are initialized only once.
+- Ensure all fields are initialized before constructors begin executing code.
+- Check for duplicate constructors before adding initialization code.
+- Ensure all dictionary declarations are initialized before use in constructors to avoid CS0103 errors.
+- Ensure all referenced fields are declared before use in constructors and methods.
+- Ensure all used fields are declared before use in the class.
+- Ensure all methods called in constructors are defined within the class or imported from other classes.
+- "Ensure all methods have a return type or are void; verify method signatures match existing code."
+- Ensure all added methods are syntactically correct and properly integrated into the class structure.
+- Ensure method signatures and logic align with existing types and structures in the file.
+- Check method signatures before passing arguments; ensure types match exactly.
+- Ensure all used properties and methods exist in the current context before adding new code.
+- Ensure all referenced properties and methods exist in the current context before implementing logic.
+- Ensure all used fields are declared in the class before using them.
+- "Ensure all references to new fields are updated or removed accordingly."
+- Always ensure all references to new fields are correctly updated throughout the file.
+- Ensure all references to a new field are updated or removed to avoid compile errors.
+- Always ensure all references to renamed variables are updated throughout the file.
+- Avoid adding duplicate constructors or methods in the same class; ensure unique method signatures.
+- Ensure unique constructor signatures to avoid CS0111 errors.
+- Ensure method signatures and types match existing definitions in GameWorld.cs.
+- Ensure method parameters are used consistently within their scope.
+- Ensure method signatures and implementations are syntactically correct in C#.
+- Ensure all referenced fields and methods exist in the current context before adding new code.
+- Ensure method signatures match exactly in both SEARCH and REPLACE blocks.
+- Ensure method signatures match existing declarations and avoid syntax errors in new code.
+- Ensure method signatures match class definitions and use correct syntax.
+- Ensure method signatures match and avoid syntax errors in new code blocks.
+- Ensure `ZoneKind` enum includes all used zone types before adding new zones in `GenerateBasicRoomLayout`.
+- Ensure all `ZoneKind` values are defined before using them in room layout generation.
+- Ensure `ZoneKind` enum includes all referenced types before using them in layout generation.
+- Ensure ZoneKind enum includes Workshop and Storage definitions before using them in GenerateBasicRoomLayout method.
+- Ensure all referenced fields and methods exist before adding logic.
+- Ensure all used variables and methods are defined in the current context or imported namespaces.
+- Avoid redefining constructors; ensure each constructor signature is unique.
+- Ensure unique constructor signatures when adding new fields or methods in `GameWorld.cs`.
+- Ensure resource regeneration rates match their type's expected format.
+- Ensure resource regeneration rates match the expected data type in GameWorld.cs.
+- "Review method signatures thoroughly before changing types to avoid mismatched parameters."
+- Always check method signatures for type mismatches before changing dictionary value types.
+- "Review method signatures thoroughly before changing dictionary value types."
+- Always check method signatures and ensure type consistency across related fields and parameters.
+- Always ensure all variable renamings are fully propagated throughout the file.
+- Always check method signatures for type mismatches when changing field types.
+- Always check method signatures for type mismatches when changing data types.
+- When changing dictionary value types, ensure all usages are compatible and updated accordingly.
+- Always check method signatures for type mismatches after changing dictionary value types.
+- "Check for dependent types before changing dictionary value types."
+- "Check method signatures for type mismatches before changing field types."
+- Always check for method signatures and type compatibility when changing dictionary value types.
+- "Review method signatures before changing dictionary value types to avoid conversion errors."
+- Ensure all referenced objects and methods exist in the current context before adding new code.
+- Ensure all referenced types and methods exist in the current context before adding new code.
+- Ensure all used variables and methods are defined in the current context or imported namespaces.
+- Ensure all used variables and methods are defined or imported in the current context.
+- Ensure `LocalMap` is defined or passed to methods needing it in `GameWorld.cs`.
+- Ensure method signatures match existing code when adding new methods.
+- Ensure unique constructor signatures to avoid CS0111 errors in C#.
+- Ensure `LocalMap` is declared before initialization in `GameWorld.cs`.
+- Ensure all used fields are declared before initialization in constructors.
+- Ensure `LocalMap` field exists in `GameWorld` before initializing it.
+- Ensure all method calls match defined parameters exactly.
+- Check for existing method signatures before adding new ones to avoid conflicts.
+- Ensure all method calls match updated parameter lists exactly.
+- Ensure all method calls are updated when modifying method signatures in `GameWorld.cs`.
+- Ensure all method calls match updated parameters exactly.
+- Always ensure all method calls are updated when modifying method signatures.
+- Ensure `SimulateResourceRegeneration` method signature includes `colonySize` parameter before calling it.
+- NEVER write "(lines omitted)" or "..." inside a SEARCH block: it must be EXACT verbatim text from the file or the patch is auto-rejected.
+- NEVER reference identifiers you have not SEEN in the provided file excerpt (PlaceFurniture, LocalMap, GetCell do NOT exist).
+- Ensure all variables used in method calls are defined within the current scope or passed as parameters.
+- Ensure code additions are within valid method blocks and not standalone statements outside methods.

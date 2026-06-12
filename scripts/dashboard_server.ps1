@@ -3,12 +3,20 @@
 # Pure tooling: reads DEV_LOG.md / ROADMAP.md / lessons / loop log, writes nothing.
 
 $listener = [System.Net.HttpListener]::new()
-$listener.Prefixes.Add("http://localhost:8765/")
+# http://+ = reachable from the LAN (phone on the same wifi). Needs a
+# one-time urlacl + firewall rule; falls back to localhost-only without them.
+$listener.Prefixes.Add("http://+:8765/")
 try {
     $listener.Start()
 } catch {
-    # Port already owned by another healthy instance - nothing to do.
-    exit 0
+    $listener = [System.Net.HttpListener]::new()
+    $listener.Prefixes.Add("http://localhost:8765/")
+    try {
+        $listener.Start()
+    } catch {
+        # Port already owned by another healthy instance - nothing to do.
+        exit 0
+    }
 }
 Write-Host "Dashboard: http://localhost:8765"
 . "g:\Rimwork\scripts\site_gen.ps1"

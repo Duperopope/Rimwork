@@ -16,12 +16,12 @@ docs/DOWN_HERE_DESIGN.md). Tu es le développeur du GAMEPLAY COEUR.
 Chaque item doit etre RESSENTI en jouant. Le playtest automatique (toutes les
 12 iterations) verifie tes changements en jouant vraiment.
 
-- [ ] Step F.1a - Add a private field to store the list of pawns in src/RimWorldLab.Core/GameWorld.cs.
-- [ ] Step F.2a - Add a method to check if it's nighttime (hour >= 22 or <= 5). (src/RimWorldLab.Core/GameWorld.cs)
-- [ ] Step F.3 - Feedback de pose: dans src/RimWorldGodot/Game3D.cs, quand un mur ou un meuble vient d'etre construit, faire apparaitre le node avec un petit tween de scale (0.2 -> 1.0 en 0.25s).
-- [ ] Step F.4 - Audio procedural: dans src/RimWorldGodot/Game3D.cs, generer un bip court via AudioStreamGenerator quand un ordre est donne et un son grave quand une menace apparait (zero asset).
-- [ ] Step F.5 - Equilibrage faim/soif: la faim monte 30% plus vite quand le pawn travaille, la soif 50% plus vite sous climat chaud (BiomeShift > 0.3). (src/RimWorldLab.Core/GameWorld.cs)
-- [ ] Step F.6 - Win etendue: apres "3 functional rooms", nouvel objectif "produire 10 outils et nourrir 12 colons" avec recompense LogEvent. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step F.1a - In src/RimWorldLab.Core/GameWorld.cs, in the GameWorldManager Tick() method, right after `TickGoals();` style calls, add: if (TotalTicks == 200) LogEvent("Guide: recoltez 10 bois (clic sur un arbre).");
+- [ ] Step F.2a - In src/RimWorldLab.Core/GameWorld.cs (class GameWorldManager), add: private int GetHourFromTicks() { return (TotalTicks / 400) % 24; }
+- [ ] Step F.3a - In src/RimWorldLab.Core/GameWorld.cs, inside the existing `if (TotalTicks % 40 == 0)` block in the Tick() method, add: foreach (var pw in _pawns.Where(q => q.HP > 0 && q.Fatigue > 80)) pw.Fatigue = Math.Max(0f, pw.Fatigue - 2f);
+- [ ] Step F.4b - Audio procedural: dans src/RimWorldGodot/Game3D.cs, ajouter la méthode GenerateShortBipSound() sans appel pour générer un bip court via AudioStreamGenerator.
+- [ ] Step F.5 - In src/RimWorldLab.Core/GameWorld.cs, where Hunger increases each tick for living pawns, multiply the increment by 1.3f when the pawn's task is not null (worker hunger).
+- [ ] Step F.6 - In src/RimWorldLab.Core/GameWorld.cs, in TickGoals(), after the last goal, add a goal: when GetRooms() count of functional rooms >= 3 and Tools >= 10, LogEvent("Objectif final atteint: colonie outillee !") and GainResearch(10).
 
 ## PRIORITE: la vie sur les cartes (Down Here! chantier faune)
 - [ ] Step D.1 - In src/RimWorldLab.Core/GameWorld.cs, immediately after the line `Macro.Tick(TotalTicks);`, insert the following line:
@@ -177,11 +177,11 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [x] Step C.60 - Add a private field `functionalRoomsCount` to the `GameWorld` class.
 - [x] Step C.75 - Implement a basic room detection system by adding a private field to track the number of functional rooms in `GameWorld.cs`.
 - [x] Step C.105 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to ensure players have a steady supply of materials.
-- [ ] Step C.120 - Add the private field `_resources` to the `GameWorld` class.
-- [ ] Step C.135 - Add a private field to track the number of rooms being built in GameWorld.cs. Define the field in the GameWorld class.
-- [ ] Step C.150 - Add a private field to track resources in GameWorld.cs.
-- [ ] Step C.165 - Change the type of `_resourceRegenerationRates` values from `int` to `double` in `src/RimWorldLab.Core/GameWorld.cs`.
-- [ ] Step C.180 - Extract the repeated pawn registration logic into a separate method in Main.cs. Ensure the method is correctly defined and called in both _Ready and _Process methods.
+- [x] Step C.120 - (obsolete, classe poubelle purgee) Add the private field `_resources` to the `GameWorld` class.
+- [x] Step C.135 - (obsolete, classe poubelle purgee) Add a private field to track the number of rooms being built in GameWorld.cs. Define the field in the GameWorld class.
+- [x] Step C.150 - (obsolete, classe poubelle purgee) Add a private field to track resources in GameWorld.cs.
+- [x] Step C.165 - (obsolete, classe poubelle purgee) Change the type of `_resourceRegenerationRates` values from `int` to `double` in `src/RimWorldLab.Core/GameWorld.cs`.
+- [x] Step C.180 - (obsolete, classe poubelle purgee) Extract the repeated pawn registration logic into a separate method in Main.cs. Ensure the method is correctly defined and called in both _Ready and _Process methods.
 - [ ] Step C.195 - Implement a system to track and display the progress towards building functional rooms, providing players with clear feedback on their progress.
 - [ ] Step C.15.1 - Add a method to check if the population is less than 30 in `src/RimWorldLab.Core/GameWorld.cs`. Ensure the method is correctly placed and uses the existing `Pawns` field.
 - [ ] Step C.30a - Add a method to check if the population is less than 30 in `GameWorld.cs`. Ensure the method correctly references the `Pawns` collection.
@@ -195,8 +195,8 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [ ] Step C.75 - Implement a resource consumption system for pawns to ensure they deplete food and water over time, requiring players to manage resources sustainably. (GameWorld.cs)
 - [ ] Step C.90 - Add a private field to track the colony population size in GameWorld.cs and initialize it.
 - [ ] Step C.105a - Add private fields for tracking wood and stone resources in GameWorld.cs. Define `private int Wood;` and `private int Stone;`.
-- [ ] Step C.120 - Initialize _resourceUsage dictionary in the constructor of GameWorld.cs.
-- [ ] Step C.135 - Add a private field to track total resource consumption for each kind in GameWorld.cs. Initialize it in the constructor.
+- [x] Step C.120 - (obsolete, classe poubelle purgee) Initialize _resourceUsage dictionary in the constructor of GameWorld.cs.
+- [x] Step C.135 - (obsolete, classe poubelle purgee) Add a private field to track total resource consumption for each kind in GameWorld.cs. Initialize it in the constructor.
 - [ ] Step C.150a - Initialize _resourceUsage dictionary in GameWorld constructor (GameWorld.cs).
 - [ ] Step C.165.1 - Add the opening brace for the new method `TrackResourceConsumption` in GameWorld.cs. Ensure it is correctly placed within the class and does not cause syntax errors.
 - [ ] Step C.179a - Add opening brace for TrackResourceConsumption method (src/RimWorldLab.Core/GameWorld.cs)
@@ -210,9 +210,9 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [ ] Step C.90a - Initialize `_recycledResources` dictionary in `GameWorld` constructor. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.105a - Ensure `_recycledResources` is declared as an instance variable in `GameWorld`. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.120a - Ensure `_recycledResources` is declared only once in `GameWorld.cs`.
-- [ ] Step C.135 - Ensure `_recycledResources` is declared only once in `GameWorld.cs`.
-- [ ] Step C.165 - Add `Wood` and `Stone` values to the `ResourceKind` enum in `GameWorld.cs`.
-- [ ] Step C.180 - Implement a system to track and display colony progress towards building functional rooms.
+- [x] Step C.135 - (obsolete, classe poubelle purgee) Ensure `_recycledResources` is declared only once in `GameWorld.cs`.
+- [x] Step C.165 - (obsolete, classe poubelle purgee) Add `Wood` and `Stone` values to the `ResourceKind` enum in `GameWorld.cs`.
+- [x] Step C.180 - (obsolete, classe poubelle purgee) Implement a system to track and display colony progress towards building functional rooms.
 - [ ] Step C.186 - Add 'Wood' and 'Stone' to ResourceKind enum in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
 - [ ] Step C.195 - Add private fields for Wood and Stone resources in GameWorld class (GameWorld.cs)
 - [ ] Step C.15a - Add Wood and Stone properties to GameWorld class. (src/RimWorldLab.Core/GameWorld.cs)
@@ -225,7 +225,7 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [ ] Step C.120a - Add `Wood` and `Stone` to the `ResourceKind` enum in `src/RimWorldLab.Core/Enums.cs`.
 - [ ] Step C.135a - Add definitions for 'Wood' and 'Stone' to `ResourceKind` enum in src/RimWorldLab.Core/Enums.cs.
 - [ ] Step C.150a - Add `Wood` and `Stone` to the `ResourceKind` enum in (src/RimWorldLab.Core/Enums.cs).
-- [ ] Step C.165 - Add `Wood` and `Stone` to the `ResourceKind` enum in GameWorld.cs
+- [x] Step C.165 - (obsolete, classe poubelle purgee) Add `Wood` and `Stone` to the `ResourceKind` enum in GameWorld.cs
 - [ ] Step C.180a - Add `Wood` and `Stone` to the `ResourceKind` enumeration in (src/RimWorldLab.Core/Enums.cs). Ensure the values are unique and consistent with existing entries.
 - [ ] Step C.195.1 - Add `Wood` and `Stone` to the `ResourceKind` enum (src/RimWorldLab.Core/Enums.cs)
 - [ ] Step C.15.1 - Add `Wood` and `Stone` values to the `ResourceKind` enum in `GameWorld.cs`.
@@ -238,10 +238,58 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [ ] Step C.120a - Add `TrackResourceConsumption` method to `GameWorld.cs`.
 - [ ] Step C.135a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`. Initialize it in the constructor. Ensure the method references this new field for pawn iteration.
 - [ ] Step C.150a - Add a private field `List<Pawn>` named `_pawns` to `GameWorld.cs`.
-- [ ] Step C.165 - Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`.
-- [ ] Step C.180 - Implement a system to track and limit resource consumption for building materials, encouraging players to manage their resources efficiently. (GameWorld.cs)
+- [x] Step C.165 - (obsolete, classe poubelle purgee) Add a public property `List<Pawn> Pawns` to expose the `_pawns` field in `GameWorld.cs`.
+- [x] Step C.180 - (obsolete, classe poubelle purgee) Implement a system to track and limit resource consumption for building materials, encouraging players to manage their resources efficiently. (GameWorld.cs)
 - [ ] Step C.195 - Implement a resource management system to track and limit the use of resources like wood and stone, forcing players to prioritize their usage. (GameWorld.cs)
 - [ ] Step C.1a - Add a public property `Pawns` to expose the `_pawns` list in `GameWorld.cs`. Ensure the property returns the `_pawns` field.
 - [ ] Step C.15a - Add a public property to access the `_pawns` list in `GameWorld.cs`.
-- [ ] Step C.30a - Add a private field to store resource consumption rates in GameWorld.cs
-- [ ] Step C.15 - Implement a system to track and display progress towards building additional rooms.
+- [ ] Step C.30a - Add a private field `resourceConsumptionRates` of type `Dictionary<string, float>` to store resource consumption rates in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.15.1 - Add a property to the Pawn class that returns true if the pawn's current task kind is TaskKind.Work. Implement this in src/RimWorldLab.Core/Pawn.cs.
+- [ ] Step C.15 - Implement a resource consumption system for pawns to ensure they deplete resources and need to manage them efficiently. (Needs.cs)
+- [ ] Step C.30 - Implement a resource management system to track and limit resource consumption by pawns, ensuring they must prioritize tasks based on available resources. (GameWorld.cs)
+- [ ] Step C.45 - Implement resource consumption for building materials to encourage sustainable use and strategic planning in GameWorld.cs
+- [ ] Step C.60 - Implement a system to generate random resources and obstacles to encourage exploration and resource management. (GameWorld.cs)
+- [ ] Step C.75a - Add private fields `_pawns` and `_resourceConsumptionTracker` to `GameWorld.cs`.
+- [ ] Step C.90a - Implement the `GetTotalResourceConsumption` method to calculate the total resource consumption for a given resource kind in GameWorld.cs.
+- [ ] Step C.105a - Add private fields `_saplings` and `_resources` to `GameWorld.cs`. Initialize them as empty lists or arrays.
+- [x] Step C.120 - (obsolete, classe poubelle purgee) Add private fields `_saplings` and `_resources` to `GameWorld.cs`.
+- [x] Step C.135 - (obsolete, classe poubelle purgee) Add private fields `_saplings` and `_resources` to `GameWorld.cs`.
+- [ ] Step C.150a - Add a private field `_saplings` of type `List<Sapling>` to `GameWorld.cs`.
+- [ ] Step C.165a - Add a private field `_resourceConsumptionRates` of type `Dictionary<Pawn, Dictionary<ResourceKind, int>>` to `GameWorld.cs`. Initialize it in the constructor.
+- [x] Step C.180 - (obsolete, classe poubelle purgee) Add `Pawns` collection to `GameWorld.cs` if it doesn't exist.
+- [ ] Step T180a - Ensure Pawns collection is initialized before use in GameWorld constructor (src/RimWorldLab.Core/GameWorld.cs) by adding a private field for Pawns and initializing it in the constructor.
+- [ ] Step C.195a - Add a field to track the number of rooms required to win in GameWorld.cs. Initialize it to 0 in the constructor.
+- [ ] Step C.15a - Add a private field `_roomsBuilt` to track the number of rooms built in `GameWorld.cs`.
+- [ ] Step C.30a - Ensure `_recycledResources` is initialized before use in `GameWorld` constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.45a - Ensure `_recycledResources` is initialized before use in `GameWorld` constructor (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.60 - Ensure `_recycledResources` is initialized before use by adding `_recycledResources = new();` in the `GameWorld` constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.75a - Ensure `_recycledResources` is initialized before use by adding `_recycledResources = new();` in the `GameWorld` constructor. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.90a - Add a private dictionary to track pawn resource consumption in GameWorld.cs. Initialize it as an empty dictionary.
+- [ ] Step C.105a - Implement the `CountFunctionalRooms` method to count functional rooms in the game world (src/RimWorldLab.Core/GameWorld.cs).
+- [ ] Step C.120a - Add a property `IsRaining` to the `GameWorld` class (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.135a - Initialize the new private dictionary `_pawnResourceConsumption` in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.150a - Add a private dictionary to track resource consumption by pawns in GameWorld.cs. Initialize it in the constructor.
+- [x] Step C.165 - (obsolete, classe poubelle purgee) Ensure LocalMap is accessible within GameWorld.cs and implement the CalculateRoomCompletionProgress method to correctly count functional furniture within a zone's bounds.
+- [x] Step C.180 - (obsolete, classe poubelle purgee) Add a method to handle water consumption for pawns by checking if the pawn's thirst is greater than zero before consuming water. (src/RimWorldLab.Core/Needs.cs)
+- [ ] Step C.195 - Implement a system to generate multiple types of rooms automatically, ensuring players have a diverse set of structures to build towards their win condition. (GameWorld.cs)
+- [ ] Step T12a - Add Workshop and Storage to ZoneKind enumeration (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.15a - Add new ZoneKind values for Workshop and Storage in src/RimWorldLab.Core/ZoneKind.cs. Define `Workshop` and `Storage` as valid enum members of the `ZoneKind` enumeration.
+- [ ] Step C.30a - Add a private field `List<Pawn> Pawns` to GameWorld.cs and initialize it in the constructor. (GameWorld.cs)
+- [ ] Step C.45 - Change the type of `_resourceRegenerationRates` values to `double`. (GameWorld.cs)
+- [ ] Step C.60a - Change the type of `_resourceRegenerationRates` values to `double`. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.75.1 - Add a method to check if a furniture placement is isolated by defining `LocalMap` within `IsPlacementIsolated`. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.90a - Add a private field `LocalMap` to the `GameWorld` class and initialize it in the constructor.
+- [ ] Step T96a - Define `LocalMap` property in `GameWorld.cs` to access the map data.
+- [ ] Step C.105a - Ensure LocalMap is defined and accessible before checking placement isolation. (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.120a - Add `LocalMap` as a member variable to `GameWorld.cs`.
+- [x] Step C.150 - (obsolete, classe poubelle purgee) Add a private field `LocalMap` to the `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)
+- [x] Step C.165 - (obsolete, classe poubelle purgee) Ensure `LocalMap` is initialized in the constructor of `GameWorld.cs`.
+- [ ] Step C.180.1 - Add a private field `LocalMap` of type `GameMap` to `GameWorld.cs`. Ensure `LocalMap` is initialized in the constructor of `GameWorld.cs`.
+- [ ] Step C.195.1 - Add `colonySize` parameter to all calls of `SimulateResourceRegeneration` (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.15 - Implement a system to generate random resource distribution and placement to encourage exploration and strategic planning. (GameWorld.cs)
+- [ ] Step C.30 - Implement a system to track and display progress towards building additional rooms, providing players with clear goals and feedback on their colony's development (GameWorld.cs).
+- [ ] Step C.45 - Implement a system to track and display progress towards building additional rooms in the game world.
+- [ ] Step C.60 - Implement a system to track and display the progress towards building additional rooms.
+- [ ] Step C.75 - Implement a resource consumption system for building materials to encourage efficient use and planning. (GameWorld.cs)
+- [ ] Step T84 - (playtest) fix: ALL PAWNS IDLE with 1 pending tasks (3 polls) (src/RimWorldLab.Core/GameWorld.cs)
+- [ ] Step C.105 - Implement a resource consumption system for pawns to ensure they deplete resources over time and must be managed efficiently. (GameWorld.cs)

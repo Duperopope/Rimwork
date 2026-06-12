@@ -1,0 +1,44 @@
+[
+  {
+    "total": 5,
+    "speedPts": 5,
+    "key": "qwen25-14b",
+    "minutes": 0.4,
+    "details": [
+      "FAIL Add a public read-only property TotalBodies to the SolarSyst",
+      "FAIL In TaskBoard, add a public method PendingOfKind(TaskKind kin",
+      "FAIL Add a public static method Clamp01(float v) to the first pub",
+      "FAIL Add a public static method SlotExists(string path) to SaveLo"
+    ],
+    "score": 0,
+    "file": "Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf"
+  },
+  {
+    "total": 5,
+    "speedPts": 5,
+    "key": "devstral",
+    "minutes": 0.4,
+    "details": [
+      "FAIL Add a public read-only property TotalBodies to the SolarSyst",
+      "FAIL In TaskBoard, add a public method PendingOfKind(TaskKind kin",
+      "FAIL Add a public static method Clamp01(float v) to the first pub",
+      "FAIL Add a public static method SlotExists(string path) to SaveLo"
+    ],
+    "score": 0,
+    "file": "Devstral-Small-2505-Q4_K_M.gguf"
+  },
+  {
+    "total": 5,
+    "speedPts": 5,
+    "key": "qwen3-coder-30b",
+    "minutes": 0.4,
+    "details": [
+      "FAIL Add a public read-only property TotalBodies to the SolarSyst",
+      "FAIL In TaskBoard, add a public method PendingOfKind(TaskKind kin",
+      "FAIL Add a public static method Clamp01(float v) to the first pub",
+      "FAIL Add a public static method SlotExists(string path) to SaveLo"
+    ],
+    "score": 0,
+    "file": "Qwen3-Coder-30B-A3B-Instruct-Q3_K_M.gguf"
+  }
+]

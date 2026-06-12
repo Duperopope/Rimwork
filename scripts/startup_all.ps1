@@ -7,7 +7,11 @@
 $llmAlive = $false
 try { $llmAlive = (Invoke-WebRequest http://localhost:1234/health -UseBasicParsing -TimeoutSec 5).StatusCode -eq 200 } catch {}
 if (-not $llmAlive) {
-    wsl -d Ubuntu -u root -- bash -c "pgrep -f llama-server >/dev/null || nohup /root/llama.cpp/build/bin/llama-server -m /root/models/Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf -ngl 99 -c 16384 --host 0.0.0.0 --port 1234 > /var/log/llama-server.log 2>&1 &"
+    # The served model is whatever the model arena crowned champion
+    # (scripts/llm_champion.txt, fallback = Qwen2.5-Coder-14B baseline).
+    $champ = "Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf"
+    try { $c = (Get-Content "g:\Rimwork\scripts\llm_champion.txt" -Raw -ErrorAction Stop).Trim(); if ($c) { $champ = $c } } catch {}
+    wsl -d Ubuntu -u root -- bash -c "pgrep -f llama-server >/dev/null || nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$champ -ngl 99 -c 16384 --host 0.0.0.0 --port 1234 > /var/log/llama-server.log 2>&1 &"
     Start-Sleep -Seconds 30
     try { $llmAlive = (Invoke-WebRequest http://localhost:1234/health -UseBasicParsing -TimeoutSec 10).StatusCode -eq 200 } catch {}
     if (-not $llmAlive) {
