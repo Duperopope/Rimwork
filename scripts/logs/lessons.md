@@ -420,3 +420,13 @@
 - Ensure all variables used in method calls are defined within the current scope or passed as parameters.
 - Ensure code additions are within valid method blocks and not standalone statements outside methods.
 - Ensure all referenced properties and fields exist in the current context before adding new methods.
+- Check for method existence before adding a new one using it.
+- Ensure methods like CountFunctionalRooms() exist before using them in new code.
+- Ensure all referenced methods exist before adding new ones in GameWorld.cs.
+- Always ensure the method exists with the required parameters before calling it.
+- Always ensure all method calls match updated signatures, including new parameters.
+- Always check all call sites when modifying method signatures to ensure consistency and avoid compilation errors.
+- Ensure all used fields and collections are declared in the class before use.
+- Ensure all new methods and fields are properly placed within class definitions.
+- Ensure Enum.GetValues returns correct type by casting: `Enum.GetValues(typeof(ZoneKind)).Cast<ZoneKind>()`.
+- Ensure all new methods and fields are properly placed within existing types and adhere to access modifiers.

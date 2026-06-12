@@ -21,7 +21,7 @@ Chaque item doit etre RESSENTI en jouant. Le playtest automatique (toutes les
 - [ ] Step F.3a - In src/RimWorldLab.Core/GameWorld.cs, inside the existing `if (TotalTicks % 40 == 0)` block in the Tick() method, add: `foreach (var pw in _pawns.Where(q => q.HP > 0 && q.Fatigue > 80)) pw.Fatigue = Math.Max(0f, pw.Fatigue - 2f);`
 - [ ] Step F.4b - Audio procedural: dans src/RimWorldGodot/Game3D.cs, ajouter la méthode GenerateShortBipSound() sans appel pour générer un bip court via AudioStreamGenerator.
 - [ ] Step F.5a - In src/RimWorldLab.Core/GameWorld.cs, find the method where Hunger increases each tick for living pawns and add a check to see if the pawn's task is not null. Ensure the method signature matches the existing code.
-- [ ] Step F.6a - In src/RimWorldLab.Core/GameWorld.cs, add a new method to check if the colony is outillee: `public bool IsColonyOutillee() { return _functionalRoomCount >= 3 && Tools >= 10; }`.
+- [ ] Step F.6a - In src/RimWorldLab.Core/GameWorld.cs, add a private field to track the number of functional rooms: `private int _functionalRoomCount = 0;` and update it in an existing method where room counts are calculated.
 
 ## PRIORITE: la vie sur les cartes (Down Here! chantier faune)
 - [ ] Step D.1 - In src/RimWorldLab.Core/GameWorld.cs, immediately after the line `Macro.Tick(TotalTicks);`, insert the following line:
@@ -286,8 +286,8 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [x] Step C.165 - (obsolete, classe poubelle purgee) Ensure `LocalMap` is initialized in the constructor of `GameWorld.cs`.
 - [ ] Step C.180.1 - Add a private field `LocalMap` of type `GameMap` to `GameWorld.cs`. Ensure `LocalMap` is initialized in the constructor of `GameWorld.cs`.
 - [ ] Step C.195.1 - Add `colonySize` parameter to all calls of `SimulateResourceRegeneration` (src/RimWorldLab.Core/GameWorld.cs)
-- [ ] Step C.15 - Implement a system to generate random resource distribution and placement to encourage exploration and strategic planning. (GameWorld.cs)
-- [ ] Step C.30 - Implement a system to track and display progress towards building additional rooms, providing players with clear goals and feedback on their colony's development (GameWorld.cs).
+- [ ] Step C.15 - Add a private field `List<ResourceNode> Resources` to store resource nodes in `src/RimWorldLab.Core/GameWorld.cs`.
+- [ ] Step C.30 - Add a method to initialize room goals (GameWorld.cs).
 - [ ] Step C.45 - Implement a system to track and display progress towards building additional rooms in the game world.
 - [ ] Step C.60 - Implement a system to track and display the progress towards building additional rooms.
 - [ ] Step C.75 - Implement a resource consumption system for building materials to encourage efficient use and planning. (GameWorld.cs)
@@ -295,3 +295,6 @@ Les items S.x ci-dessous sont GELES (ne pas travailler dessus).
 - [ ] Step C.105 - Implement a resource consumption system for pawns to ensure they deplete resources over time and must be managed efficiently. (GameWorld.cs)
 - [ ] Step C.120 - Reduce the number of resources generated per tick to encourage sustainable resource management. (GameWorld.cs)
 - [ ] Step C.135 - Implement a resource management system to limit the rate of resource consumption and encourage sustainable use. (GameWorld.cs)
+- [ ] Step C.150 - Add a resource management system to limit the rate of furniture placement based on available resources. (GameWorld.cs)
+- [ ] Step C.165 - Implement a resource management system to limit the number of concurrent tasks based on available resources, ensuring players must prioritize and manage their colony's needs effectively. (GameWorld.cs)
+- [ ] Step C.180 - Implement a resource management system to track and limit resource consumption by pawns, ensuring they must ration their use of wood, stone, etc., to build more rooms. (GameWorld.cs)

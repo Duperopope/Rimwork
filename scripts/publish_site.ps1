@@ -4,6 +4,18 @@
 
 $html = Get-DownHereSiteHtml -Live $false
 $target = "g:\Rimwork\docs\index.html"
+
+# DEV_LOG rotation: keep the working log small (the loop appends forever);
+# overflow goes to docs/archive/ so the repo root stays readable.
+try {
+    $dl = "g:\Rimwork\DEV_LOG.md"
+    $lines = Get-Content $dl
+    if ($lines.Count -gt 1500) {
+        $arch = "g:\Rimwork\docsrchive\DEV_LOG_$(Get-Date -Format yyyy-MM).md"
+        $lines[0..($lines.Count - 301)] | Add-Content $arch
+        ,@($lines[0]) + @("") + $lines[($lines.Count - 300)..($lines.Count - 1)] | Set-Content $dl -Encoding utf8
+    }
+} catch {}
 $old = if (Test-Path $target) { Get-Content $target -Raw } else { "" }
 # Ignore the timestamp line when comparing so we don't commit every tick.
 $norm = { param($x) ($x -replace 'Mise &agrave; jour: [^<]+', '' -replace 'g&eacute;n&eacute;r&eacute; [^<]+', '') }

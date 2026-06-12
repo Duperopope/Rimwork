@@ -1,24 +1,24 @@
 {
-  "timestamp": "2026-06-12 12:44:51",
+  "timestamp": "2026-06-12 13:07:19",
   "steps": 8,
   "issued": [
-    "harvest 6 9",
-    "harvest 15 25",
-    "harvest 5 17",
-    "harvest 5 17",
-    "harvest 5 17",
-    "wall 5 17",
-    "harvest 5 17",
-    "harvest 5 17"
+    "harvest 12 24",
+    "harvest 31 22",
+    "harvest 32 18",
+    "harvest 17 24",
+    "harvest 29 48",
+    "harvest 17 24",
+    "harvest 17 24",
+    "harvest 17 24"
   ],
   "anomalies": [],
   "llmNotes": [],
   "final": {
+    "goalsDone": 0,
     "rooms": 0,
+    "ticks": 1469,
+    "stone": 20,
     "pawns": 8,
-    "wood": 9,
-    "stone": 21,
-    "ticks": 1359,
-    "goalsDone": 0
+    "wood": 7
   }
 }

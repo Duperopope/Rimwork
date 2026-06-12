@@ -9,7 +9,8 @@ stade **bactérie** (à la Spore) et se termine dans les étoiles (endgame faço
 simulation → commit, supervisée par une IA frontière pour la 3D, l'UI et
 l'architecture.
 
-- 🌍 **Suivi public** : https://duperopope.github.io/Rimwork/
+- 🌍 **Suivi public (miroir gratuit, toujours à jour)** : https://raw.githack.com/Duperopope/Rimwork/master/docs/index.html
+- 🌍 GitHub Pages : https://duperopope.github.io/Rimwork/ (en attente du déblocage du compte)
 - 📋 **Roadmap** : [ROADMAP.md](ROADMAP.md) (consommée par la boucle IA)
 - 📖 **Design** : [docs/DOWN_HERE_DESIGN.md](docs/DOWN_HERE_DESIGN.md)
 - 🧾 **Journal de dev** : [DEV_LOG.md](DEV_LOG.md)
