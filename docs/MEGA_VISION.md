@@ -6,6 +6,30 @@ Thrive devient la base, notre sim colonie se porte dedans, on ne réinvente
 pas la roue — on UNIFIE des projets open-source existants sous une seule
 direction artistique et une seule progression.
 
+## SEAM TECHNIQUE — le fil génome→colon (verrouillé 12/06/2026)
+Le créateur d'organisme, c'est l'ÉDITEUR de Thrive (déjà le meilleur de
+l'open-source: src/microbe_stage/editor/CellEditorComponent.cs). On ne le
+réécrit pas, on le branche sur notre vision. L'objet d'identité du joueur
+existe déjà et persiste à travers tous les stades de Thrive:
+
+  GameWorld.PlayerSpecies   (src/general/GameWorld.cs)
+    └─ MicrobeSpecies : Species   (l'ADN: organites, membrane, couleur,
+       Genus/Epithet=nom, comportement, stats dérivées des organites)
+       marqué par BecomePlayerSpecies().
+
+**Pont créature→peuple (point de greffe = stade Awakening):** notre sim
+colonie lit `GameWorld.PlayerSpecies` et fait naître chaque colon comme un
+INDIVIDU de cette espèce — il hérite du nom, de SpeciesColour, du plan
+corporel et des stats dérivées, avec variation individuelle. C'est ce qui
+rend tes colons = TON espèce évoluée (les anciens PNJ KayKit sont retirés).
+
+Étapes Phase 1 (sur ce seam, sans casser Thrive):
+1. Confirmer l'éditeur jouable sous DOWN HERE (le montrer à l'écran).
+2. Étendre Species avec les champs dont la colonie aura besoin plus tard
+   (traits de personnalité dérivés du comportement/morphologie).
+3. Phase 2 (greffe): au stade Awakening, instancier les colons depuis
+   PlayerSpecies via un pont qui réutilise RimWorldLab.Core (portable).
+
 ## 0. Le principe directeur : UNE colonne vertébrale, on RÉCOLTE le reste
 
 On ne fusionne PAS 18 projets Godot (moteurs, ECS, autoloads, styles
