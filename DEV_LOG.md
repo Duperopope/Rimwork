@@ -276,3 +276,4 @@
 - [iter 1] REVERTED (build failed): Add a new method `GenerateRandomNeed` to the `NeedsSystem` class. (src/RimWorldLab.Core/Needs.cs)
 - [12/06 SUPERVISEUR] GRAND NETTOYAGE par Claude: roadmap purgee (~120 items dupliques/fichiers fantomes), classe poubelle GameWorld+RegionMap supprimees, bug Splash corrige (9/9 tests verts), items F.1a/F.3a/F.5a implementes a la main, HUD contextuel par vue (Local/Planet/Solar), blocked_items.txt remis a zero, nouvelle file G.10-G.13 avec ancres verifiees.
 - [iter 2] KEPT: Step G.10 - Rain refills the water stores. (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 3] KEPT: Step G.10 - Rain refills the water stores. (src/RimWorldLab.Core/GameWorld.cs)

@@ -1377,6 +1377,10 @@ private void UpdateHeaderText()
 
         if (TotalTicks % 600 == 0 && Macro.ColonyWeather == WeatherKind.Rain)
             Water++;
+        if (TotalTicks % 600 == 0 && Macro.ColonyWeather == WeatherKind.Rain)
+        {
+            Water++;
+        }
         if (TotalTicks % 1500 == 0)
         {
             foreach (var p in _pawns.Where(p => p.HP > 0))

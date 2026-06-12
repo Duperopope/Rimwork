@@ -88,3 +88,4 @@
 - [ ] Step C.75 - Implement a basic room detection system by adding a private field to track the number of functional rooms in `GameWorld.cs`.
 - [ ] Step C.105 - Implement a system to generate resources over time, such as trees regrowing or rocks replenishing, to ensure players have a steady supply of materials.
 - [ ] Step G.10 - Rain refills the water stores. In
+- [ ] Step G.10 - Rain refills the water stores. In
