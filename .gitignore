@@ -28,3 +28,4 @@ scripts/logs/playtest_report.json
 scripts/logs/health_origines.json
 scripts/logs/playtest_origines.log
 scripts/logs/fork_*.png
+scripts/logs/current_item.json
