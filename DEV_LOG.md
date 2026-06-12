@@ -5844,3 +5844,5 @@ Open this file (or watch it) to see what the autonomous loop is building.
   rouge si l'état date de >30 s). Anti-blocage menu: Game3D.GameStarted →
   UiShell bascule sur le HUD quand l'agent lance newgame (vérifié:
   menuOpen true→false). Piège \a (cloche) corrigé dans site_gen.
+- [iter 2] SKIPPED (no SEARCH match): Add a method to check if it's nighttime (hour >= 22 or <= 5). (src/RimWorldLab.Core/GameWorld.cs)
+- [iter 3] SKIPPED (no SEARCH match): Add a method to check if it's nighttime (hour >= 22 or <= 5). (src/RimWorldLab.Core/GameWorld.cs)
