@@ -5,6 +5,7 @@
 # Source de verite unique (paths/port) - voir scripts/lib/Config.ps1.
 . "$PSScriptRoot\lib\Config.ps1"
 . "$PSScriptRoot\lib\Modes.ps1"
+. "$PSScriptRoot\lib\State.ps1"
 $cfg = Get-DownHereConfig
 $port = $cfg.Dashboard.Port
 $logDir = $cfg.Paths.Logs
@@ -97,6 +98,17 @@ while ($true) {
         Start-Stack
         $ctx.Response.Redirect("/")
         $ctx.Response.Close()
+        continue
+    }
+    if ($ctx.Request.Url.AbsolutePath -eq "/state.json") {
+        # Etat consolide, machine-readable (Phase 3) - voir lib/State.ps1.
+        try {
+            $json = Get-DownHereState -Config $cfg | ConvertTo-Json -Depth 6
+            $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
+            $ctx.Response.ContentType = "application/json; charset=utf-8"
+            $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
+        } catch { try { $ctx.Response.StatusCode = 500 } catch {} }
+        try { $ctx.Response.Close() } catch {}
         continue
     }
     try {
