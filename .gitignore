@@ -29,3 +29,19 @@ scripts/logs/health_origines.json
 scripts/logs/playtest_origines.log
 scripts/logs/fork_*.png
 scripts/logs/current_item.json
+
+# Process stdout/stderr dumps + transient flags/state (runtime-only noise)
+scripts/logs/*.err
+scripts/logs/*.out
+scripts/logs/stack_state.txt
+scripts/logs/arena_tried.txt
+scripts/*.flag
+
+# Downloaded third-party archives accidentally dropped in asset folders
+# (re-downloadable; do not version). KayKit source packs stay tracked.
+src/RimWorldGodot/assets/ThriveLauncher_*.7z
+src/RimWorldGodot/assets/0.3.0-*.zip
+
+# PRIVÉ — ne JAMAIS publier (dépôt à miroir public). Documents personnels.
+*.pdf
+CV-*

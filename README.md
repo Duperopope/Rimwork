@@ -1,50 +1,90 @@
 # DOWN HERE !
 
-Un jeu de gestion de colonie / stratégie temps réel / 4X / exploration spatiale,
-avec comportements émergents et histoires auto-générées. La partie commence au
-stade **bactérie** (à la Spore) et se termine dans les étoiles (endgame façon KSP).
+Un seul jeu, **du vivant aux étoiles**, par stades successifs : on commence au
+stade **cellule / microbe** et on progresse jusqu'à l'exploration spatiale.
+Comportements émergents, histoires auto-générées, et une **pertinence
+scientifique vulgarisée** (encyclopédie en jeu ; ex. « ATP » → « énergie vitale »).
 
-**Particularité : chaque ligne de gameplay est écrite par une IA locale autonome**
-(Qwen2.5-Coder-14B, ROCm) dans une boucle roadmap → patch → build → tests →
-simulation → commit, supervisée par une IA frontière pour la 3D, l'UI et
-l'architecture.
+**Particularité du projet** : le gameplay est écrit par un **développeur IA local
+autonome** (modèle servi en local, ROCm), piloté depuis un **dashboard web**, et
+supervisé par une IA frontière pour l'architecture, la 3D et l'UI.
 
-- 🌍 **Suivi public (miroir gratuit, toujours à jour)** : https://raw.githack.com/Duperopope/Rimwork/master/docs/index.html
-- 🌍 GitHub Pages : https://duperopope.github.io/Rimwork/ (en attente du déblocage du compte)
-- 📋 **Roadmap** : [ROADMAP.md](ROADMAP.md) (consommée par la boucle IA)
-- 📖 **Design** : [docs/DOWN_HERE_DESIGN.md](docs/DOWN_HERE_DESIGN.md)
-- 🧾 **Journal de dev** : [DEV_LOG.md](DEV_LOG.md)
+> 📖 **Si tu ne lis qu'un seul fichier, lis [docs/DOWN_HERE_DESIGN.md](docs/DOWN_HERE_DESIGN.md)** —
+> c'est la source de vérité unique (vision, état actif/parké, comment piloter
+> sans être développeur). Ce README n'est que la porte d'entrée.
 
-## Principes
+- 🌍 Suivi public (miroir, à jour) : https://raw.githack.com/Duperopope/Rimwork/master/docs/index.html
+- 📋 [ROADMAP.md](ROADMAP.md) — file de tâches consommée par le dev IA
+- 🧾 [DEV_LOG.md](DEV_LOG.md) — journal de dev (rotation auto ; archive dans `docs/archive/`)
+- ⚖️ [docs/THIRDPARTY.md](docs/THIRDPARTY.md) — licences (le jeu est **GPL-3.0**, base Thrive)
 
-- **100 % procédural** : zéro asset pour les stades organiques — membranes,
-  créatures, eau et lumière sont du code et des shaders.
-- **Déterministe** : même seed → même univers (tests reproductibles).
-- **Multi-échelles** : Micro → Organisme → Local → Région → Planète → Système.
-- **Sourcé, pas copié** : [Thrive](https://github.com/Revolutionary-Games/Thrive)
-  (GPL) sert de référence design pour le stade microbien — boucle de gameplay et
-  direction artistique réimplémentées sur notre moteur, aucun code/asset repris.
-  Voir [docs/THIRDPARTY.md](docs/THIRDPARTY.md).
+## La vision en stades
 
-## Architecture
+| # | Stade | Base technique | État |
+|---|-------|----------------|------|
+| 1 | Cellule / microbe | **Thrive** rebrandé DOWN HERE (`reference/thrive`) | ✅ **ACTIF** |
+| 2 | Animal / tribus | greffes open-source sur la base | 🔜 prochain |
+| 3 | Planétaire / 4X | l'ancien code colonie **RimWork** (`src/`) + tuiles-planètes hex | ⏸️ **PARKÉ** (réutilisé, pas mort) |
+| 4 | Spatial (type KSP) | à intégrer | 🌌 horizon |
+
+## Carte du dépôt (où est quoi)
 
 ```
-src/RimWorldLab.Core/   Simulation pure .NET (monde, pawns, jobs, météo, saves)
-src/RimWorldGodot/      Présentation Godot 4.6 .NET (3D, planètes hex, UI, MicroStage)
-src/RimWorldLab/        Harnais console headless (tests + simulation diagnostique)
-scripts/dev_loop.ps1    La boucle de développement IA autonome
-scripts/startup_all.ps1 Boot/heal de toute la pile (LLM, boucle, jeu, dashboard)
-scripts/dashboard_server.ps1  Dashboard live sur http://localhost:8765
-docs/                   Design, contrats (UI freeze), audit, tiers
+g:\Rimwork\
+├─ reference\thrive\   ← LE JEU ACTIF (Thrive rebrandé, Godot 4.6 mono, GPL-3.0).
+│                         Son PROPRE dépôt git, non versionné ici (gitignoré).
+├─ src\                ← RimWork colonie/4X — PARKÉ = futur stade planétaire.
+│   ├─ RimWorldLab.Core\   (sim déterministe : GameWorld, Needs, Jobs, HexGrid…)
+│   ├─ RimWorldGodot\      (couche Godot ; HexPlanet.cs = tuiles-planètes réutilisées)
+│   └─ RimWorldLab\        (harnais console de test de la sim)
+│                          → voir src\README.md
+├─ scripts\            ← LE SYSTÈME AUTONOME (PowerShell). → voir scripts\README.md
+│   └─ logs\              (télémétrie machine : santé, leçons, dataset…)
+├─ datasets\           ← exemples prompt→patch (futur fine-tuning)
+├─ docs\               ← design (DOWN_HERE_DESIGN.md = principal), licences, archives
+└─ DEV_LOG.md, ROADMAP.md, README.md
 ```
+
+> **`src\` n'est PAS du code mort.** C'est la base du futur stade 4X/planétaire
+> (les tuiles-planètes hexagonales `HexPlanet.cs` y vivent). On le parque
+> proprement, on ne le supprime pas. Il est juste déconnecté du jeu actif.
+
+## Le système autonome (4 briques + 2)
+
+Tout se pilote depuis le **dashboard**, sans toucher au code :
+
+1. **Cerveau LLM** — `llama-server` (llama.cpp ROCm) **dans WSL**, port `1234`.
+   C'est le chemin GPU rapide — **PAS LM Studio** (qui squatte ce port). Modèle
+   servi : voir `scripts/llm_champion.txt`.
+2. **Dev IA** — `scripts/dev_loop.ps1` : prend la 1ʳᵉ tâche non cochée du
+   `ROADMAP.md`, demande un patch au LLM, l'applique, **build + teste**, et ne
+   **garde que si ça compile/parse**. Cible le jeu actif (`reference/thrive`).
+3. **Watchdog du jeu** — `scripts/game_watchdog.ps1` : maintient le jeu lancé.
+4. **Dashboard** — `scripts/dashboard_server.ps1` sur **http://localhost:8765** :
+   la vue vivante + un bouton PAUSE/REPRENDRE.
+5. **Arène de LLM** — `scripts/model_arena.ps1` : télécharge des coders récents
+   depuis HuggingFace, les fait combattre sur de vraies tâches du jeu, couronne
+   le meilleur dans `llm_champion.txt`, supprime les perdants (sélection naturelle).
+6. **Agent joueur** — `scripts/play_agent.ps1` : une IA qui **joue** le stade
+   microbe (déterministe, but éducatif : stratégies / comportements émergents).
+
+> Ces systèmes et le jeu **ne sont pas censés tourner tous en même temps**
+> pendant le dev. Mets la pile en PAUSE (dashboard) avant une session superviseur.
 
 ## Lancer
 
 ```powershell
-# Toute la pile (LLM local + boucle + jeu + dashboard) :
+# Toute la pile autonome (idempotent, lancé auto au login) :
 powershell -File scripts/startup_all.ps1
 
-# Le jeu seul :
-dotnet build src/RimWorldGodot/RimWorldGodot.csproj -c ExportRelease
-# puis lancer via l'exe Godot 4.6 .NET complet avec --path src/RimWorldGodot
+# Le jeu actif seul (Godot 4.6 .NET) :
+godot --path reference/thrive
 ```
+
+## Cap long terme
+
+Aujourd'hui le dev IA fait fiable les **petites tâches étroites vérifiables**
+(données d'équilibrage, traductions, correctifs ciblés). La direction long terme
+est un **« world model »** qui prédit l'état du jeu et apprend de ses erreurs
+(vision LeCun/JEPA) — un vrai dev local en boucle active. C'est un cap, pas le
+présent : voir [docs/DOWN_HERE_DESIGN.md](docs/DOWN_HERE_DESIGN.md) §5.
