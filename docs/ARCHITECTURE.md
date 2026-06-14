@@ -242,7 +242,7 @@ Du moins risqué (additif) au plus structurant. Chaque phase est livrable seule.
 | **1. Config unique** | `scripts/lib/Config.ps1` (paths/ports/modèle calculés, zéro chemin absolu). | Additif puis migration | Faible | ✅ **Fait** (13 scripts migrés, testés) |
 | **2. Machine à modes** | `mode.json` + `orchestrator.ps1` qui garantit l'exclusivité DEV/PLAY/ARENA/IDLE. `startup_all` ne lance plus que l'orchestrateur ; boutons de mode au dashboard. | Oui (orchestration) | Moyen | ✅ **Fait** (logique testée en dry-run) |
 | **3. État consolidé** | `lib/State.ps1` : vue d'état unique (`Get-DownHereState`) + endpoint `/state.json` sur le dashboard. | Modéré | Faible | ✅ **Fait** |
-| **4. Jeu en submodule** | `reference/thrive` en **git submodule** → un clone donne un projet jouable et reproductible. | Repo seulement | Faible | ⬜ |
+| **4. Jeu reproductible** | `setup-game.ps1` clone le fork (branche down-here) dans `reference/thrive` s'il est absent → un clone de Rimwork redonne un projet jouable. (Submodule volontairement évité : pas de chirurgie git risquée sur le dossier jeu vivant de 3.9 Go.) | Repo seulement | Faible | ✅ **Fait** |
 | **5. Patch robuste** | Remplacer le SEARCH/REPLACE fragile (taux d'échec élevé) par des ancres/outil de patch plus fiables. | Dev Agent | Moyen | ⬜ |
 | **6. Tests d'orchestration** | Pester sur Config + machine à modes + parsing. | Additif | Faible | ⬜ |
 | **7. Cap world-model** | La Mémoire (lessons + dataset + feedback) alimente un modèle prédictif de l'état du jeu (vision JEPA). | R&D | Élevé | 🌌 horizon |

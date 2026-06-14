@@ -44,6 +44,13 @@ function Get-DownHereConfig {
 
         Dashboard = @{ Port = 8765; Url = 'http://localhost:8765' }
 
+        # Jeu actif (fork Thrive rebrande). Permet un clone reproductible
+        # (setup-game.ps1) sans versionner les 3.9 Go dans ce depot.
+        Game = @{
+            RepoUrl = 'https://github.com/duperopope/Thrive.git'
+            Branch  = 'down-here'
+        }
+
         # Modes MUTUELLEMENT EXCLUSIFS (le jeu et le dev ne tournent pas ensemble).
         Modes    = @('IDLE', 'DEV', 'PLAY', 'ARENA')
         ModeFile = Join-Path $root 'scripts\logs\mode.json'
