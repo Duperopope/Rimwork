@@ -1,16 +1,22 @@
 #!/usr/bin/env powershell
 # Script: llm_call.ps1
-# Quick way to call local LM Studio API from PowerShell
+# Quick way to call the LOCAL LLM API (llama-server WSL, port 1234) from PowerShell.
+# NB: PAS LM Studio - voir docs/DOWN_HERE_DESIGN.md.
 
 param(
     [string]$SystemPrompt = "You are a helpful C# coding assistant.",
     [string]$UserMessage = $(throw "UserMessage required"),
     [int]$MaxTokens = 4096,
-    [string]$ApiBase = "http://localhost:1234/v1",
+    [string]$ApiBase = "",
     [string]$Model = "local-model"
 )
 
-Write-Host "Calling LM Studio..."
+# Source de verite unique (URL) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+if (-not $ApiBase) { $ApiBase = "$($cfg.Llm.BaseUrl)/v1" }
+
+Write-Host "Calling local LLM..."
 Write-Host "  Endpoint: $ApiBase"
 Write-Host "  Model: $Model"
 Write-Host ""
@@ -38,13 +44,13 @@ try {
 
     # Extract and print response
     $content = $response.choices[0].message.content
-    
+
     Write-Host "Response:"
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     Write-Host $content
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     Write-Host ""
-    
+
     # Stats
     $usage = $response.usage
     Write-Host "Tokens used:"
@@ -57,10 +63,10 @@ try {
 catch {
     Write-Host "ERROR: $_" -ForegroundColor Red
     Write-Host ""
-    Write-Host "Make sure:"
-    Write-Host "  1. LM Studio is running"
-    Write-Host "  2. A model is loaded"
-    Write-Host "  3. 'Start Server' was clicked"
-    Write-Host "  4. http://localhost:1234 is accessible"
+    Write-Host "Make sure the local LLM server is up:"
+    Write-Host "  1. llama-server (WSL ROCm) is running"
+    Write-Host "  2. A model is loaded (scripts/llm_champion.txt)"
+    Write-Host "  3. $($cfg.Llm.BaseUrl) is accessible"
+    Write-Host "  -> sinon: powershell -File scripts/startup_all.ps1"
     exit 1
 }

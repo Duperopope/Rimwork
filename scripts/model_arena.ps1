@@ -30,12 +30,15 @@ $ErrorActionPreference = "Continue"
 # GPU EXCLUSIF: le champion 30B occupe ~14.7 Go sur 16 -> impossible de charger
 # un challenger A COTE. L'arene benche donc UN modele a la fois sur le port prod
 # (1234), puis rend la main au champion. La boucle de dev tolere ces swaps brefs.
+# Source de verite unique (paths/url) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
 $prodPort = 1234
-$llm = "http://localhost:$prodPort"
-$arenaLog = "g:\Rimwork\scripts\logs\model_arena.json"
-$championFile = "g:\Rimwork\scripts\llm_champion.txt"
-$triedFile = "g:\Rimwork\scripts\logs\arena_tried.txt"   # memoire des modeles deja juges
-$thrive = "g:\Rimwork\reference\thrive"
+$llm = $cfg.Llm.BaseUrl
+$arenaLog = Join-Path $cfg.Paths.Logs 'model_arena.json'
+$championFile = $cfg.Llm.ChampionFile
+$triedFile = Join-Path $cfg.Paths.Logs 'arena_tried.txt'   # memoire des modeles deja juges
+$thrive = $cfg.Paths.ActiveGame
 
 # ---- Candidats de depart (GGUF tenant sur RX 7800 XT 16 Go) ----
 $baseCandidates = @(

@@ -1,10 +1,14 @@
 #!/usr/bin/env powershell
 # Script: test_lm_api.ps1
-# Verify LM Studio is running and API works
+# Verify the LOCAL LLM server (llama-server WSL, port 1234) is running and the
+# API works. NB: PAS LM Studio - voir docs/DOWN_HERE_DESIGN.md.
 
-$ApiBase = "http://localhost:1234/v1"
+# Source de verite unique (URL) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+$ApiBase = "$($cfg.Llm.BaseUrl)/v1"
 
-Write-Host "Testing LM Studio Connection..." -ForegroundColor Cyan
+Write-Host "Testing local LLM connection..." -ForegroundColor Cyan
 Write-Host ""
 
 # Test 1: Check if API is reachable
@@ -16,7 +20,8 @@ try {
 }
 catch {
     Write-Host "  ✗ Failed to connect" -ForegroundColor Red
-    Write-Host "    Make sure LM Studio is running: http://localhost:1234" -ForegroundColor Yellow
+    Write-Host "    Make sure llama-server (WSL) is running: $($cfg.Llm.BaseUrl)" -ForegroundColor Yellow
+    Write-Host "    -> powershell -File scripts/startup_all.ps1" -ForegroundColor Yellow
     exit 1
 }
 
@@ -29,7 +34,7 @@ try {
         "model" = "local-model"
         "messages" = @(
             @{ "role" = "system"; "content" = "You are a helpful assistant." },
-            @{ "role" = "user"; "content" = "Say 'LM Studio is working!' in 5 words or less." }
+            @{ "role" = "user"; "content" = "Say 'the local LLM is working!' in 5 words or less." }
         )
         "max_tokens" = 50
         "temperature" = 0.7
@@ -57,7 +62,7 @@ Write-Host ""
 Write-Host "[3/3] Performance check..."
 try {
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    
+
     $body = @{
         "model" = "local-model"
         "messages" = @(
@@ -77,7 +82,7 @@ try {
     $tokens = $response.usage.completion_tokens
     $timeMs = $sw.ElapsedMilliseconds
     $tokensPerSec = [math]::Round($tokens / ($timeMs / 1000.0), 1)
-    
+
     Write-Host "  ✓ Generated $tokens tokens in ${timeMs}ms" -ForegroundColor Green
     Write-Host "    Speed: $tokensPerSec tokens/sec" -ForegroundColor Green
 }
@@ -88,7 +93,7 @@ catch {
 
 Write-Host ""
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Green
-Write-Host "✓ LM Studio is ready!" -ForegroundColor Green
+Write-Host "✓ Local LLM is ready!" -ForegroundColor Green
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next: Use 'llm_call.ps1' to query the model"

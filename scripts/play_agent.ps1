@@ -14,14 +14,18 @@ dans user://agent_action.json (lue par le menu / le stade / l'editeur). Une
 action de +2-4s est ignoree cote jeu (l'humain reprend la main a tout moment).
 #>
 param(
-    [string]$LlmUrl = "http://127.0.0.1:1234/v1/chat/completions",
+    [string]$LlmUrl = "",
     [int]$DecisionMs = 1000
 )
 
+# Source de verite unique (paths/url) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+if (-not $LlmUrl) { $LlmUrl = $cfg.Llm.BaseUrl + $cfg.Llm.ChatPath }
 $dir = "$env:APPDATA\DownHereOrigins"
 $stateFile = Join-Path $dir "agent_state.json"
 $actionFile = Join-Path $dir "agent_action.json"
-$logFile = "g:\Rimwork\scripts\logs\play_agent.log"
+$logFile = Join-Path $cfg.Paths.Logs 'play_agent.log'
 New-Item -ItemType Directory -Force -Path (Split-Path $logFile) | Out-Null
 
 $sys = @'

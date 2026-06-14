@@ -1,19 +1,25 @@
 # Publishes the public DOWN HERE! progress site to GitHub Pages (docs/).
 # Called by the self-heal scheduled task - only commits when content changed.
-. "g:\Rimwork\scripts\site_gen.ps1"
+
+# Source de verite unique (paths) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+. (Join-Path $cfg.Paths.Scripts 'site_gen.ps1')
 
 $html = Get-DownHereSiteHtml -Live $false
-$target = "g:\Rimwork\docs\index.html"
+$target = Join-Path $cfg.Paths.Docs 'index.html'
 
 # DEV_LOG rotation: keep the working log small (the loop appends forever);
 # overflow goes to docs/archive/ so the repo root stays readable.
 try {
-    $dl = "g:\Rimwork\DEV_LOG.md"
+    $dl = $cfg.Paths.DevLog
     $lines = Get-Content $dl
     if ($lines.Count -gt 1500) {
-        $arch = "g:\Rimwork\docsrchive\DEV_LOG_$(Get-Date -Format yyyy-MM).md"
+        $archDir = Join-Path $cfg.Paths.Docs 'archive'
+        New-Item -ItemType Directory -Force -Path $archDir | Out-Null
+        $arch = Join-Path $archDir "DEV_LOG_$(Get-Date -Format yyyy-MM).md"
         $lines[0..($lines.Count - 301)] | Add-Content $arch
-        ,@($lines[0]) + @("") + $lines[($lines.Count - 300)..($lines.Count - 1)] | Set-Content $dl -Encoding utf8
+        , @($lines[0]) + @("") + $lines[($lines.Count - 300)..($lines.Count - 1)] | Set-Content $dl -Encoding utf8
     }
 } catch {}
 $old = if (Test-Path $target) { Get-Content $target -Raw } else { "" }
@@ -22,7 +28,7 @@ $norm = { param($x) ($x -replace 'Mise &agrave; jour: [^<]+', '' -replace 'g&eac
 if ((& $norm $html) -eq (& $norm $old)) { exit 0 }
 
 Set-Content -Path $target -Value $html -Encoding utf8
-git -C g:\Rimwork add docs/index.html 2>$null | Out-Null
-git -C g:\Rimwork commit -q -m "site: progress update (auto)" 2>$null | Out-Null
-git -C g:\Rimwork push -q origin master 2>$null | Out-Null
+git -C $cfg.Root add docs/index.html 2>$null | Out-Null
+git -C $cfg.Root commit -q -m "site: progress update (auto)" 2>$null | Out-Null
+git -C $cfg.Root push -q origin master 2>$null | Out-Null
 Write-Host "site published"

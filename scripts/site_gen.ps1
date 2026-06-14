@@ -4,14 +4,19 @@
 # (in-dev tasks), DEV_LOG.md (activity), health.json (live health).
 # No fake future estimates - this dev doesn't need them.
 
+# Source de verite unique (paths) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+
 function Get-DownHereSiteHtml {
     param([bool]$Live = $false, [string]$StackState = "RUNNING")
 
     Add-Type -AssemblyName System.Web -ErrorAction SilentlyContinue
     function E([string]$s) { [System.Web.HttpUtility]::HtmlEncode($s) }
 
-    $roadmap = Get-Content "g:\Rimwork\ROADMAP.md" -ErrorAction SilentlyContinue
-    $devlog = Get-Content "g:\Rimwork\DEV_LOG.md" -ErrorAction SilentlyContinue
+    $cfg = Get-DownHereConfig
+    $Root = $cfg.Root
+    $roadmap = Get-Content "$Root\ROADMAP.md" -ErrorAction SilentlyContinue
+    $devlog = Get-Content "$Root\DEV_LOG.md" -ErrorAction SilentlyContinue
     $done = ($roadmap | Select-String '^\s*-\s*\[x\]').Count
     $todo = ($roadmap | Select-String '^\s*-\s*\[ \]').Count
     $total = [Math]::Max(1, $done + $todo)
@@ -21,7 +26,7 @@ function Get-DownHereSiteHtml {
     $predicted = ($devlog | Select-String 'PREDICTED-FAIL').Count
 
     # ---------- RELEASE VIEW: real dated deliverables from git ----------
-    $commits = git -C g:\Rimwork log --reverse --format="%h|%ad|%s" --date=format:"%d/%m/%Y %H:%M" 2>$null
+    $commits = git -C $Root log --reverse --format="%h|%ad|%s" --date=format:"%d/%m/%Y %H:%M" 2>$null
     $r01 = New-Object System.Collections.Generic.List[string]
     $r02 = New-Object System.Collections.Generic.List[string]
     $r03 = New-Object System.Collections.Generic.List[string]
@@ -108,12 +113,12 @@ function Get-DownHereSiteHtml {
     }
 
     # ---------- ACTIVITY: commits des DEUX depots, fusionnes par date ----------
-    # Le superviseur commit dans g:\Rimwork ; le dev IA commit dans le jeu
+    # Le superviseur commit dans $Root ; le dev IA commit dans le jeu
     # (reference/thrive, son propre depot). On lit les deux et on trie par
     # horodatage reel (%at) pour que le travail du dev soit VISIBLE.
     $actRows = ""
     $allCommits = @()
-    foreach ($repo in @("g:\Rimwork", "g:\Rimwork\reference\thrive")) {
+    foreach ($repo in @("$Root", "$Root\reference\thrive")) {
         $log = git -C $repo log -40 --format="%at|%ad|%s" --date=format:"%d/%m %H:%M" 2>$null
         foreach ($c in $log) {
             $p = $c -split '\|', 3
@@ -134,18 +139,18 @@ function Get-DownHereSiteHtml {
     $liveBlock = ""
     if ($Live) {
         $hj = $null
-        try { $hj = Get-Content "g:\Rimwork\scripts\logs\health.json" -Raw -ErrorAction Stop | ConvertFrom-Json } catch {}
+        try { $hj = Get-Content "$Root\scripts\logs\health.json" -Raw -ErrorAction Stop | ConvertFrom-Json } catch {}
         $h = if ($hj) {
             $summary = if ($hj.simSummary) { E([string]$hj.simSummary) } else { "" }
             "BUILD <b style='color:#3fb950'>$($hj.build)</b> &middot; $summary &middot; it&eacute;ration $($hj.iter) en $($hj.iterSeconds)s ($($hj.timestamp))"
         } else { "en attente d'itération..." }
         $lessons = ""
-        try { $lessons = (Get-Content "g:\Rimwork\scripts\logs\lessons.md" | Select-Object -Last 5 | ForEach-Object { "<li>$(E($_ -replace '^- ',''))</li>" }) -join "" } catch {}
+        try { $lessons = (Get-Content "$Root\scripts\logs\lessons.md" | Select-Object -Last 5 | ForEach-Object { "<li>$(E($_ -replace '^- ',''))</li>" }) -join "" } catch {}
 
         # Task timer: which roadmap item the AI works on and for how long.
         $taskLine = "<span class='muted'>aucune t&acirc;che en cours</span>"
         try {
-            $ci = Get-Content "g:\Rimwork\scripts\logs\current_item.json" -Raw -ErrorAction Stop | ConvertFrom-Json
+            $ci = Get-Content "$Root\scripts\logs\current_item.json" -Raw -ErrorAction Stop | ConvertFrom-Json
             $mins = [int]((Get-Date) - [datetime]::ParseExact($ci.since, "yyyy-MM-dd HH:mm:ss", $null)).TotalMinutes
             $itTxt = $ci.item; if ($itTxt.Length -gt 130) { $itTxt = $itTxt.Substring(0, 130) + "..." }
             $warn = if ($mins -ge 30) { " <b style='color:#f85149'>&#9888; bloqu&eacute; depuis $mins min</b>" } elseif ($mins -ge 10) { " <b style='color:#d29922'>$mins min</b>" } else { " <span class='muted'>depuis $mins min</span>" }
@@ -155,7 +160,7 @@ function Get-DownHereSiteHtml {
         # Etat du jeu Thrive: lance ou non (le watchdog le maintient en vie).
         $gameLine = "<span class='muted'>jeu non lanc&eacute;</span>"
         try {
-            $gpid = (Get-Content "g:\Rimwork\scripts\game.pid" -Raw -ErrorAction Stop).Trim()
+            $gpid = (Get-Content "$Root\scripts\game.pid" -Raw -ErrorAction Stop).Trim()
             if ($gpid -and (Get-Process -Id ([int]$gpid) -ErrorAction SilentlyContinue)) {
                 $gameLine = "<b style='color:#3fb950'>jeu lanc&eacute;</b> &middot; Thrive (pid $gpid)"
             }
@@ -179,7 +184,7 @@ function Get-DownHereSiteHtml {
     }
 
     # ---------- FEEDBACK: stored locally, mirrored as GitHub issues ----------
-    $fbFile = "g:/Rimwork/scripts/logs/feedback.jsonl"
+    $fbFile = "$Root/scripts/logs/feedback.jsonl"
     $fbRows = ""
     if (Test-Path $fbFile) {
         $entries = Get-Content $fbFile | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} } | Where-Object { $_ }

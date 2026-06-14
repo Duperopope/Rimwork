@@ -6,12 +6,16 @@
 param(
     [int]$Steps = 10,
     [int]$StepWaitSec = 8,
-    [string]$LlmUrl = "http://localhost:1234/v1/chat/completions"
+    [string]$LlmUrl = ""
 )
 
-$statePath = "g:\Rimwork\scripts\logs\agent_state.json"
-$cmdPath = "g:\Rimwork\scripts\agent_cmd.txt"
-$reportPath = "g:\Rimwork\scripts\logs\playtest_report.json"
+# Source de verite unique (paths/url) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+if (-not $LlmUrl) { $LlmUrl = $cfg.Llm.BaseUrl + $cfg.Llm.ChatPath }
+$statePath = Join-Path $cfg.Paths.Logs 'agent_state.json'
+$cmdPath = Join-Path $cfg.Paths.Scripts 'agent_cmd.txt'
+$reportPath = Join-Path $cfg.Paths.Logs 'playtest_report.json'
 
 function Read-State {
     try { Get-Content $statePath -Raw -ErrorAction Stop | ConvertFrom-Json } catch { $null }

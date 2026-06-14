@@ -12,9 +12,8 @@ with no manual restart needed:
 #>
 
 param(
-    # DOWN HERE: le vrai jeu = Thrive reworke (reference/thrive), plus l'ancien
-    # colony-sim RimWorld. On lance ce projet-la.
-    [string]$ProjectDir = "g:\Rimwork\reference\thrive",
+    # Vide => resolu depuis Config (le jeu actif = reference/thrive).
+    [string]$ProjectDir = "",
     [int]$PollSeconds = 10,
     # The dev loop can produce a new KEPT change every ~10s, which used to
     # restart the game (and lose all in-game progress/days) just as often.
@@ -26,10 +25,16 @@ param(
     [int]$MaxIntervalSeconds = 600
 )
 
-$logDir = "g:\Rimwork\scripts\logs"
+# Source de verite unique (paths) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+if (-not $ProjectDir) { $ProjectDir = $cfg.Paths.ActiveGame }
+
+$logDir = $cfg.Paths.Logs
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
-$pidFile = "g:\Rimwork\scripts\game.pid"
+$pidFile = Join-Path $cfg.Paths.Scripts 'game.pid'
 $watchLog = "$logDir\game_watchdog.log"
+$devLog = $cfg.Paths.DevLog
 
 # SELF-GUARD: only one game watchdog may run. Duplicate instances each kill
 # the other's game as "stale", restarting it every few seconds forever.
@@ -98,8 +103,8 @@ function Start-Game {
 }
 
 function Get-LastKeptCount {
-    if (-not (Test-Path "g:\Rimwork\DEV_LOG.md")) { return 0 }
-    return @(Get-Content "g:\Rimwork\DEV_LOG.md" | Select-String "KEPT:").Count
+    if (-not (Test-Path $devLog)) { return 0 }
+    return @(Get-Content $devLog | Select-String "KEPT:").Count
 }
 
 $lastKeptCount = Get-LastKeptCount

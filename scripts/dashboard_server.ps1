@@ -1,16 +1,23 @@
 # Rimwork AI-Dev Dashboard - serves a live, human-friendly view of what the
-# autonomous developer is doing at http://localhost:8765 (auto-refresh 5s).
-# Pure tooling: reads DEV_LOG.md / ROADMAP.md / lessons / loop log, writes nothing.
+# autonomous developer is doing (auto-refresh 5s).
+# Pure tooling: reads DEV_LOG.md / ROADMAP.md / lessons / loop log, writes state.
+
+# Source de verite unique (paths/port) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+$port = $cfg.Dashboard.Port
+$logDir = $cfg.Paths.Logs
+$stateFile = Join-Path $logDir 'stack_state.txt'
 
 $listener = [System.Net.HttpListener]::new()
 # http://+ = reachable from the LAN (phone on the same wifi). Needs a
 # one-time urlacl + firewall rule; falls back to localhost-only without them.
-$listener.Prefixes.Add("http://+:8765/")
+$listener.Prefixes.Add("http://+:$port/")
 try {
     $listener.Start()
 } catch {
     $listener = [System.Net.HttpListener]::new()
-    $listener.Prefixes.Add("http://localhost:8765/")
+    $listener.Prefixes.Add("http://localhost:$port/")
     try {
         $listener.Start()
     } catch {
@@ -18,8 +25,8 @@ try {
         exit 0
     }
 }
-Write-Host "Dashboard: http://localhost:8765"
-. "g:\Rimwork\scripts\site_gen.ps1"
+Write-Host "Dashboard: http://localhost:$port"
+. (Join-Path $cfg.Paths.Scripts 'site_gen.ps1')
 Add-Type -AssemblyName System.Web -ErrorAction SilentlyContinue
 
 function Esc([string]$s) { [System.Web.HttpUtility]::HtmlEncode($s) }
@@ -34,13 +41,13 @@ function Stop-Stack {
         ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
     wsl -d Ubuntu -u root -- bash -c "pkill -f llama-server" 2>$null
     Disable-ScheduledTask -TaskName RimworkAIDev -ErrorAction SilentlyContinue | Out-Null
-    Set-Content -Path "g:\Rimwork\scripts\logs\stack_state.txt" -Value "PAUSED"
+    Set-Content -Path $stateFile -Value "PAUSED"
 }
 
 function Start-Stack {
     Enable-ScheduledTask -TaskName RimworkAIDev -ErrorAction SilentlyContinue | Out-Null
-    Start-Process pwsh -ArgumentList '-NoProfile','-File','g:\Rimwork\scripts\startup_all.ps1' -WindowStyle Hidden
-    Set-Content -Path "g:\Rimwork\scripts\logs\stack_state.txt" -Value "RUNNING"
+    Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $cfg.Paths.Scripts 'startup_all.ps1') -WindowStyle Hidden
+    Set-Content -Path $stateFile -Value "RUNNING"
 }
 
 while ($true) {
@@ -49,7 +56,7 @@ while ($true) {
         # POST only: browsers (especially mobile) PREFETCH plain GET links,
         # which used to pause the whole stack just by opening the page.
         if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
-        Add-Content "g:\Rimwork\scripts\logs\watchdog.log" -Value "[$(Get-Date -Format HH:mm:ss)] /pause by $($ctx.Request.RemoteEndPoint)"
+        Add-Content (Join-Path $logDir 'watchdog.log') -Value "[$(Get-Date -Format HH:mm:ss)] /pause by $($ctx.Request.RemoteEndPoint)"
         Stop-Stack
         $ctx.Response.Redirect("/")
         $ctx.Response.Close()
@@ -65,7 +72,7 @@ while ($true) {
                 text = $text.Trim()
                 status = "propose"
             } | ConvertTo-Json -Compress
-            Add-Content -Path "g:/Rimwork/scripts/logs/feedback.jsonl" -Value $entry
+            Add-Content -Path (Join-Path $logDir 'feedback.jsonl') -Value $entry
         }
         $ctx.Response.Redirect("/")
         $ctx.Response.Close()
@@ -80,7 +87,7 @@ while ($true) {
     }
     try {
         $stackState = "RUNNING"
-        if (Test-Path "g:\Rimwork\scripts\logs\stack_state.txt") { $stackState = (Get-Content "g:\Rimwork\scripts\logs\stack_state.txt" -Raw).Trim() }
+        if (Test-Path $stateFile) { $stackState = (Get-Content $stateFile -Raw).Trim() }
         $html = Get-DownHereSiteHtml -Live $true -StackState $stackState
         $bytes = [System.Text.Encoding]::UTF8.GetBytes($html)
         $ctx.Response.ContentType = "text/html; charset=utf-8"

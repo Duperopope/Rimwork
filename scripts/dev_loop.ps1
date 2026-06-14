@@ -1,168 +1,206 @@
 <#
-Autonomous local dev loop: build -> test -> ask LM Studio -> apply patch -> verify -> repeat.
-Reverts the change if build fails after applying.
+DOWN HERE - boucle de dev autonome (edition THRIVE / stade cellulaire actif).
+
+Cible: reference/thrive (le jeu actif). Le superviseur ecrit ROADMAP.md ;
+ce script execute UNE tache etroite a la fois via le LLM local, valide, et
+ne garde que si ca passe. Scope assume (voir docs/DOWN_HERE_DESIGN.md):
+- donnees JSON (organites, composes, biomes, membranes...) -> validees par parse JSON
+- code C# nomme par la tache -> valide par `dotnet build Thrive.csproj`
+- traductions .po -> gardees si la tache l'autorise
+PAS de reecriture d'archi: un petit modele ne game-designe pas Thrive.
+
+Garde-fous conserves de l'ancienne boucle: anti-stub, prediction d'echec,
+verification de preuve, detection de no-op, lecons, revert sur echec.
 #>
 
 param(
-    [string]$LmStudioUrl = "http://127.0.0.1:1234/v1/chat/completions",
-    [string]$Model = "qwen2.5-coder-14b-instruct",
-    [string]$ProjectDir = "g:\Rimwork\src\RimWorldGodot",
-    [string]$LabDir = "g:\Rimwork\src\RimWorldLab",
+    [string]$LlmUrl = "",
+    [string]$Model = "downhere-coder",
+    [string]$ProjectDir = "",
     [int]$MaxIterations = 200,
     [int]$DelaySeconds = 5
 )
 
-$systemPrompt = [string](Get-Content "g:\Rimwork\LM_STUDIO_SYSTEM_PROMPT.md" -Raw) + "`n`n/no_think"
-$logDir = "g:\Rimwork\scripts\logs"
+# Source de verite unique (paths/url) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+$Root = $cfg.Root
+if (-not $LlmUrl) { $LlmUrl = $cfg.Llm.BaseUrl + $cfg.Llm.ChatPath }
+if (-not $ProjectDir) { $ProjectDir = $cfg.Paths.ActiveGame }
+
+$systemPrompt = [string](Get-Content "$Root\LM_STUDIO_SYSTEM_PROMPT.md" -Raw) + "`n`n/no_think"
+$logDir = "$Root\scripts\logs"
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 
+# ---------------------------------------------------------------------------
+# Build = dotnet build du projet Thrive. Les DLL natives sont deja compilees
+# (le jeu se lance), on ne valide donc QUE la couche C#.
 function Invoke-Build {
-    # Build via the Godot project, since it references RimWorldLab.Core -
-    # this validates BOTH Main.cs (Godot) and Core changes in one pass.
     Push-Location $ProjectDir
-    $out = dotnet build -c ExportRelease 2>&1 | Out-String
+    $out = dotnet build Thrive.csproj -c Debug --nologo 2>&1 | Out-String
     $ok = $out -match "\b0 Erreur\(s\)|\b0 Error\(s\)"
     Pop-Location
     return @{ Ok = $ok; Output = $out }
 }
 
-function Invoke-Run {
-    # The console lab project still hosts the deterministic-loop tests.
-    # No --no-build: Invoke-Build only builds the Godot project, not this one.
-    Push-Location $LabDir
-    $out = dotnet run -c Release 2>&1 | Out-String
-    Pop-Location
-    return $out
+# Validation des fichiers de donnees: un JSON malforme ne casse pas le build
+# (charge au runtime) mais plante le jeu. On verifie au moins qu'il parse.
+function Test-JsonValid {
+    param([string]$Text)
+    try { $null = $Text | ConvertFrom-Json; return $true } catch { return $false }
 }
 
-function Get-ApiMap {
-    # Deterministic "world map" of the codebase: every public type, method,
-    # property and enum member the model is ALLOWED to call. Injected into
-    # each prompt so the model stops inventing APIs that don't exist.
-    $files = @(
-        "g:\Rimwork\src\RimWorldLab.Core\GameWorld.cs",
-        "g:\Rimwork\src\RimWorldLab.Core\WorldModel.cs",
-        "g:\Rimwork\src\RimWorldLab.Core\Jobs.cs",
-        "g:\Rimwork\src\RimWorldLab.Core\Needs.cs",
-        "g:\Rimwork\src\RimWorldLab.Core\RoomDetection.cs",
-        "g:\Rimwork\src\RimWorldLab.Core\FurnitureCatalog.cs"
-    )
-    $map = New-Object System.Text.StringBuilder
-    foreach ($f in $files) {
-        if (-not (Test-Path $f)) { continue }
-        [void]$map.AppendLine("## $(Split-Path $f -Leaf)")
-        $content = Get-Content $f -Raw
-        # public class/enum/record declarations
-        foreach ($m in [regex]::Matches($content, '(?m)^\s*public\s+(?:class|enum|record|interface|struct)\s+\w+[^\r\n{]*')) {
-            [void]$map.AppendLine($m.Value.Trim())
-        }
-        # enum members (bodies of enums, compact)
-        foreach ($m in [regex]::Matches($content, '(?ms)public\s+enum\s+(\w+)\s*\{(.*?)\}')) {
-            $members = ($m.Groups[2].Value -split ',' | ForEach-Object { ($_ -replace '//.*','').Trim() } | Where-Object { $_ -match '^\w+$' }) -join ', '
-            [void]$map.AppendLine("  enum $($m.Groups[1].Value): $members")
-        }
-        # public methods & properties
-        foreach ($m in [regex]::Matches($content, '(?m)^\s*public\s+(?:static\s+|const\s+|readonly\s+)*[\w<>\[\]?,() ]+?\s+\w+\s*(?:\([^\r\n]*\)|\{ get|=>|=)')) {
-            $sig = ($m.Value.Trim() -replace '\s*\{ get.*$','' -replace '\s*=>.*$','' -replace '\s*=.*$','')
-            [void]$map.AppendLine("  $sig")
-        }
+function Invoke-Llm {
+    param([string]$UserMessage)
+    $body = @{
+        model       = $Model
+        messages    = @(
+            @{ role = "system"; content = $systemPrompt },
+            @{ role = "user"; content = $UserMessage }
+        )
+        max_tokens  = 1200
+        temperature = 0.4
+    } | ConvertTo-Json -Depth 6
+    try {
+        $r = Invoke-RestMethod -Uri $LlmUrl -Method Post -ContentType "application/json" -Body $body -TimeoutSec 900
+        return $r.choices[0].message.content
+    } catch {
+        Write-Host "Appel LLM echoue: $_" -ForegroundColor DarkRed
+        return $null
     }
-    $result = $map.ToString()
-    # Keep the map prompt-sized: with the 16k context there is room for
-    # ~2k tokens of API map, cap defensively anyway.
-    if ($result.Length -gt 4500) { $result = $result.Substring(0, 4500) + "`n(...truncated)" }
-    return $result
 }
 
 function Add-Lesson {
-    # Persistent experience store: distill each failure into a one-line
-    # lesson the model will see in every future prompt (continual learning
-    # without gradient training - Reflexion-style).
     param([string]$Context)
-    $lessonPrompt = @"
-You just failed a coding task. Failure details:
+    $p = @"
+You just failed a coding task on the Thrive (DOWN HERE) codebase. Details:
 $Context
 
-Distill ONE short reusable lesson (max 25 words) that would prevent this
-exact mistake next time, e.g. "GameWorld.cs has no ResourceKind.Stone -
-Stone is an int property on GameWorldManager." Reply with only the lesson.
+Distill ONE short reusable lesson (max 25 words) preventing this exact
+mistake next time. Reply with only the lesson.
 "@
-    $lesson = Invoke-LmStudio -UserMessage $lessonPrompt
+    $lesson = Invoke-Llm -UserMessage $p
     if ($lesson) {
         $line = ($lesson -split "`n" | Where-Object { $_.Trim() } | Select-Object -First 1).Trim()
         if ($line.Length -gt 5 -and $line.Length -lt 300) {
-            Add-Content -Path "g:\Rimwork\scripts\logs\lessons.md" -Value "- $line"
+            Add-Content -Path "$logDir\lessons.md" -Value "- $line"
         }
     }
 }
 
 function Get-Lessons {
-    $lp = "g:\Rimwork\scripts\logs\lessons.md"
-    if (Test-Path $lp) {
-        return (Get-Content $lp | Select-Object -Last 10) -join "`n"
-    }
+    $lp = "$logDir\lessons.md"
+    if (Test-Path $lp) { return (Get-Content $lp | Select-Object -Last 10) -join "`n" }
     return ""
 }
 
+function Invoke-Improve {
+    # Le dev REGARDE le jeu (ses donnees reelles) et propose UNE amelioration
+    # concrete, qu'il s'ajoute a lui-meme dans ROADMAP.md. Portee realiste d'un
+    # LLM local: raisonner sur le CONTENU (equilibrage, organites, biomes...) et
+    # proposer une petite addition verifiable - UNE a la fois. Le vrai "jouer au
+    # jeu 3D" (vision + controle) reste l'horizon world-model (agent bridge).
+    param([int]$Iter)
+    $dataFiles = @(
+        "simulation_parameters/microbe_stage/compounds.json",
+        "simulation_parameters/microbe_stage/organelles.json",
+        "simulation_parameters/microbe_stage/biomes.json",
+        "simulation_parameters/microbe_stage/membranes.json"
+    )
+    $rel = $dataFiles[(Get-Random -Maximum $dataFiles.Count)]
+    $abs = Join-Path $ProjectDir ($rel -replace '/', '\')
+    if (-not (Test-Path $abs)) { return }
+    $content = (Get-Content $abs -TotalCount 120) -join "`n"
+    $existing = (Get-Content "$Root\ROADMAP.md" -Raw)
+
+    # APPROCHE JOUEUR: si une partie microbe tourne, le jeu a ecrit l'etat REEL
+    # du joueur (vie, composes, position) dans user://agent_state.json. Le dev
+    # s'en sert pour proposer une amelioration ANCREE dans le vecu, pas devinee.
+    $playBlock = ""
+    $asPath = "$env:APPDATA\DownHereOrigins\agent_state.json"
+    try {
+        if ((Test-Path $asPath) -and (((Get-Date) - (Get-Item $asPath).LastWriteTime).TotalMinutes -lt 5)) {
+            $state = (Get-Content $asPath -Raw)
+            $playBlock = @"
+
+ETAT REEL OBSERVE EN JOUANT (capture pendant une vraie partie):
+$state
+Pense a ce qu'un JOUEUR passionne RESSENTIRAIT avec cet etat (affame ? trop
+facile ? composes introuvables ? ennuyeux ?) et vise une amelioration qui
+repond a CE vecu concret.
+"@
+        }
+    } catch {}
+
+    $prompt = @"
+Tu es game designer ET dev de Down Here Origins (stade cellulaire, base Thrive).
+Tu examines un fichier de DONNEES reel du jeu. Propose UNE seule petite
+amelioration CONCRETE et equilibree de CE fichier (une valeur, un champ, une
+entree) qui rend le jeu plus riche ou mieux equilibre. Reste minuscule et sur
+(donnee uniquement, JSON qui reste valide).
+$playBlock
+FICHIER $rel (extrait):
+``````json
+$content
+``````
+
+Reponds par EXACTEMENT une ligne, rien d'autre, au format:
+- [ ] <action concrete d'une phrase>, dans $rel.
+"@
+    $resp = Invoke-Llm -UserMessage $prompt
+    $line = ($resp -split "`n" | Where-Object { $_.Trim() -match '^- \[ \]' } | Select-Object -First 1)
+    if (-not $line) { return }
+    $desc = ($line -split ',', 2)[0]
+    if ($existing -match [regex]::Escape($desc.Trim())) { Write-Host "Proposition deja en file - ignoree." -ForegroundColor DarkYellow; return }
+    Add-Content -Path "$Root\ROADMAP.md" -Value $line.Trim()
+    Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $Iter] AMELIORATION PROPOSEE PAR LE DEV: $($line.Trim())"
+    Write-Host "Le dev propose: $($line.Trim())" -ForegroundColor Magenta
+}
+
+# Anti-stub + prediction d'echec (sans payer un build). Verifie que les
+# identifiants .Method() introduits par le REPLACE existent dans le fichier
+# cible (on n'a pas de carte d'API globale pour 200k lignes de Thrive, donc
+# on s'appuie sur le contenu du fichier montre + une liste noire apprise).
 function Test-PatchPrediction {
-    # Predictive world model of the dev process (JEPA spirit, engineering
-    # form): before paying a 30s build+test cycle, predict whether the patch
-    # will fail by checking every identifier the REPLACE introduces against
-    # (a) the real API map, (b) identifiers already present in the target
-    # file, and (c) a learned blocklist of identifiers that caused past
-    # compile failures. Returns $null if the patch looks viable, otherwise
-    # a human-readable reason for the predicted failure.
-    param([string]$Replace, [string]$TargetContent, [string]$ApiMap)
+    param([string]$Replace, [string]$TargetContent, [bool]$IsCSharp)
+
+    if ($Replace -match '(?i)placeholder|will be (expanded|implemented)|// TODO: implement|throw new NotImplementedException') {
+        return "REJETE anti-stub: le patch contient un placeholder au lieu d'une vraie implementation."
+    }
+    if (-not $IsCSharp) { return $null }
+
+    foreach ($m in [regex]::Matches($Replace, '(?ms)(public|private|protected)\s+[\w<>\[\]?, ]+\s+(\w+)\s*\([^)]*\)\s*\{(.*?)\}')) {
+        $bodyTxt = $m.Groups[3].Value.Trim() -replace '//.*', ''
+        if ($bodyTxt -match '^\s*(return\s+(null|false|0f?|"")\s*;)?\s*$') {
+            return "REJETE anti-stub: la methode '$($m.Groups[2].Value)' a un corps vide/trivial."
+        }
+    }
 
     $knownBad = @{}
-    $kbFile = "g:\Rimwork\scripts\logs\bad_identifiers.txt"
+    $kbFile = "$logDir\bad_identifiers.txt"
     if (Test-Path $kbFile) { Get-Content $kbFile | ForEach-Object { $knownBad[$_] = $true } }
-
-    # The model sometimes "completes" a task with an empty stub that
-    # compiles and passes tests (observed: a TryClaimBest placeholder
-    # returning null). Reject placeholder patches outright.
-    if ($Replace -match '(?i)placeholder|will be (expanded|implemented)|// TODO: implement|throw new NotImplementedException') {
-        return "REJECTED anti-stub: patch contains a placeholder/stub instead of a real implementation. Write the actual logic."
-    }
-    # Structural stub: a newly added method whose whole body is empty or a
-    # bare 'return null;'/'return;' (the TryClaimBest incident). Methods
-    # like that compile, pass tests, and do nothing.
-    foreach ($m in [regex]::Matches($Replace, '(?ms)(public|private|protected)\s+[\w<>\[\]?, ]+\s+(\w+)\s*\([^)]*\)\s*\{(.*?)\}')) {
-        $body = $m.Groups[3].Value.Trim() -replace '//.*', ''
-        if ($body -match '^\s*(return\s+(null|false|0f?|"")\s*;)?\s*$') {
-            return "REJECTED anti-stub: method '$($m.Groups[2].Value)' has an empty/trivial body (returns nothing useful). Implement the real behavior."
-        }
-    }
-
-    # Identifiers used as members/calls in the replace text: Foo.Bar / .Baz(
     $ids = [regex]::Matches($Replace, '\.([A-Z]\w{3,})\s*\(') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique
     foreach ($id in $ids) {
-        if ($knownBad.ContainsKey($id)) {
-            return "Identifier '$id' caused a compile failure before (learned blocklist)."
-        }
-        if ($TargetContent -notmatch [regex]::Escape($id) -and $ApiMap -notmatch [regex]::Escape($id) -and $id -notmatch '^(Draw|Get|Set|Add|New|To|Math|Abs|Max|Min|Count|Where|Select|Any|First)') {
-            return "Identifier '$id' does not exist in the target file or the game API - it would not compile."
+        if ($knownBad.ContainsKey($id)) { return "Identifiant '$id' a deja casse le build (liste noire apprise)." }
+        if ($TargetContent -notmatch [regex]::Escape($id) -and $id -notmatch '^(Draw|Get|Set|Add|New|To|Math|Abs|Max|Min|Count|Where|Select|Any|First|Contains|Remove|Clear)') {
+            return "Identifiant '$id' absent du fichier cible - ne compilera pas."
         }
     }
     return $null
 }
 
 function Add-BadIdentifiers {
-    # Learn from a real compile failure: extract the identifiers the compiler
-    # rejected (CS0117/CS1061/CS0103) and add them to the blocklist so the
-    # predictor refuses them instantly next time.
     param([string]$BuildErrors)
     foreach ($m in [regex]::Matches($BuildErrors, "'(\w{4,})'")) {
-        Add-Content -Path "g:\Rimwork\scripts\logs\bad_identifiers.txt" -Value $m.Groups[1].Value
+        Add-Content -Path "$logDir\bad_identifiers.txt" -Value $m.Groups[1].Value
     }
 }
 
+function Get-NormalizedLine { param([string]$Line) return ($Line.Trim() -replace '\s+', ' ') }
+
+# Une tache n'est cochee que si le code qu'elle CITE existe vraiment dans le
+# fichier cible (anti faux-succes). Vrai si aucun code cite (rien a verifier).
 function Test-ItemEvidence {
-    # ANTI-FALSE-SUCCESS: a roadmap item may only be checked off if the code
-    # it quotes actually exists in the target file. Two confirmed incidents
-    # of "marked done, code absent" (TryClaimBest stub, phantom Pawn.Mood)
-    # motivated this. Returns $true when evidence is sufficient OR the item
-    # quotes no code (nothing checkable). Whitespace-normalized comparison.
     param([string]$ItemText, [string]$TargetContent)
     $quoted = [regex]::Matches($ItemText, '(?m)^\s*`(.+)`\s*$') |
         ForEach-Object { Get-NormalizedLine $_.Groups[1].Value } |
@@ -171,135 +209,11 @@ function Test-ItemEvidence {
     $normContent = ($TargetContent -split "`n" | ForEach-Object { Get-NormalizedLine $_ })
     $found = 0
     foreach ($q in $quoted) { if ($normContent -contains $q) { $found++ } }
-    $ratio = $found / @($quoted).Count
-    if ($ratio -ge 0.6) { return $true }
-    Write-Host "EVIDENCE CHECK FAILED: only $found/$(@($quoted).Count) quoted code lines present in target file." -ForegroundColor Red
+    if (($found / @($quoted).Count) -ge 0.6) { return $true }
+    Write-Host "PREUVE INSUFFISANTE: $found/$(@($quoted).Count) lignes citees presentes." -ForegroundColor Red
     return $false
 }
 
-function Find-DuplicateBlocks {
-    # Deterministic janitor: detect the loop's known failure mode of pasting
-    # the same multi-line block several times (e.g. 4x "if Bed" overlays).
-    # Returns a short report of 2-line sequences repeated 3+ times in a file.
-    param([string]$Path)
-    $lines = Get-Content $Path | ForEach-Object { $_.Trim() }
-    $seen = @{}
-    for ($k = 0; $k -lt $lines.Count - 1; $k++) {
-        if ($lines[$k].Length -lt 15) { continue }
-        $pair = $lines[$k] + " / " + $lines[$k + 1]
-        if (-not $seen.ContainsKey($pair)) { $seen[$pair] = 0 }
-        $seen[$pair]++
-    }
-    $dups = $seen.GetEnumerator() | Where-Object { $_.Value -ge 3 } | Select-Object -First 5
-    if ($dups) {
-        return ($dups | ForEach-Object { "$($_.Value)x: $($_.Key)" }) -join "`n"
-    }
-    return ""
-}
-
-function Invoke-CriticPass {
-    # The "ruthless gamer" pass: actually play the build (headless sim),
-    # judge it, and write the next improvement tasks - the model managing
-    # its own project instead of waiting for a human roadmap.
-    param([int]$Iter)
-    Write-Host "CRITIC PASS: playing the build and judging it..." -ForegroundColor Magenta
-    $diag = Invoke-DiagSim
-    $dupReport = ""
-    foreach ($f in @("g:\Rimwork\src\RimWorldGodot\Main.cs", "g:\Rimwork\src\RimWorldLab.Core\GameWorld.cs")) {
-        $d = Find-DuplicateBlocks -Path $f
-        if ($d) { $dupReport += "Duplicated code in $(Split-Path $f -Leaf):`n$d`n" }
-    }
-    $doneTitles = (Get-Content "g:\Rimwork\ROADMAP.md" | Select-String '^\s*-\s*\[x\] Step' | Select-Object -Last 12 | ForEach-Object { ($_.Line.Trim() -split ' - ')[0] }) -join ", "
-    $criticPrompt = @"
-You are a ruthless, passionate game critic AND the game's lead developer.
-You just played the current build of your colony-sim (deterministic, RimWorld-like, planetary ambitions).
-
-PLAYTEST RESULT (5000-tick headless run):
-$($diag.Summary)
-
-$(if ($dupReport) { "CODE HYGIENE ISSUES:`n$dupReport" })
-RECENTLY SHIPPED: $doneTitles
-
-RULES: never propose cheating the objective (no auto-completing goals, no
-free resources, no skipping challenges) - propose gameplay that makes the
-player WORK for the win. No placeholder/dummy/stub tasks.
-
-As a critical gamer, what is the SINGLE biggest weakness a player would feel
-in this build right now? Then, as the developer, write ONE small, concretely
-implementable roadmap item to fix it (a few lines of code in GameWorld.cs,
-Needs.cs, Jobs.cs or Main.cs).
-Reply with EXACTLY one line, nothing else:
-- [ ] Step C.$Iter - <concrete one-sentence change, name the target file>
-"@
-    $critique = Invoke-LmStudio -UserMessage $criticPrompt
-    $critLine = ($critique -split "`n" | Where-Object { $_.Trim() -match '^- \[ \] Step C\.' } | Select-Object -First 1)
-    if ($critLine) {
-        # Drop near-duplicate proposals (same description, different number).
-        $desc = ($critLine -split ' - ', 2)[-1].Trim()
-        if ($desc -and ((Get-Content "g:\Rimwork\ROADMAP.md" -Raw) -match [regex]::Escape($desc))) {
-            Write-Host "Critic proposed a duplicate task - ignored." -ForegroundColor DarkYellow
-            return
-        }
-    }
-    if ($critLine) {
-        Add-Content -Path "g:\Rimwork\ROADMAP.md" -Value $critLine.Trim()
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $Iter] CRITIC TASK: $($critLine.Trim())"
-        Write-Host "Critic task appended: $($critLine.Trim())" -ForegroundColor Magenta
-    }
-}
-
-function Invoke-DiagSim {
-    # "Play" the actual game headless for 5000 ticks (same world setup as the
-    # Godot build) and report colony health - this is how the loop SEES the
-    # game it is making, instead of only knowing whether the code compiles.
-    Push-Location $LabDir
-    $out = dotnet run -c Release -- --diag 5000 2>&1 | Out-String
-    Pop-Location
-    $lastTick = (($out -split "`n") | Select-String '^\[tick' | Select-Object -Last 1) -join ""
-    $verdict = (($out -split "`n") | Select-String '^VERDICT' | Select-Object -First 1) -join ""
-    $crashed = $out -match 'Unhandled exception'
-    return @{
-        Ok      = -not $crashed
-        Summary = if ($crashed) { "GAME CRASHED during simulation!" } else { "$lastTick`n$verdict" }
-    }
-}
-
-function Invoke-LmStudio {
-    param([string]$UserMessage)
-    $body = @{
-        model    = $Model
-        messages = @(
-            @{ role = "system"; content = $systemPrompt },
-            @{ role = "user"; content = $UserMessage }
-        )
-        # Patches are small; 3000 tokens at degraded-GPU speed = 15 min per
-        # iteration. 1200 is enough for any reasonable SEARCH/REPLACE set.
-        max_tokens = 1200
-        temperature = 0.4
-    } | ConvertTo-Json -Depth 6
-
-    try {
-        $response = Invoke-RestMethod -Uri $LmStudioUrl -Method Post -ContentType "application/json" -Body $body -TimeoutSec 900
-        return $response.choices[0].message.content
-    } catch {
-        Write-Host "LM call exception: $_" -ForegroundColor DarkRed
-        if ($_.Exception.Response) {
-            $stream = $_.Exception.Response.GetResponseStream()
-            $reader = New-Object System.IO.StreamReader($stream)
-            Write-Host "LM error body: $($reader.ReadToEnd())" -ForegroundColor DarkRed
-        }
-        return $null
-    }
-}
-
-# Parses one or more SEARCH/REPLACE blocks from the model output.
-# Format:
-#   FILE: <path>
-#   <<<<<<< SEARCH
-#   <old lines>
-#   =======
-#   <new lines>
-#   >>>>>>> REPLACE
 function Parse-SearchReplaceBlocks {
     param([string]$Text)
     $results = @()
@@ -314,27 +228,14 @@ function Parse-SearchReplaceBlocks {
     return $results
 }
 
-# Small models reproduce the SEARCH text with different indentation/whitespace
-# than the real file, so a literal Contains() match almost always fails.
-# Indentation is cosmetic in C# (doesn't affect compilation), so match
-# line-by-line after collapsing whitespace, then splice in the REPLACE text
-# verbatim at the matched location.
-function Get-NormalizedLine {
-    param([string]$Line)
-    return ($Line.Trim() -replace '\s+', ' ')
-}
-
 function Try-ApplyEdit {
     param([string]$Content, [string]$Search, [string]$Replace)
-
     $contentLines = $Content -split "`n"
     $searchLines = @($Search -split "`n")
     while ($searchLines.Count -gt 0 -and (Get-NormalizedLine $searchLines[0]) -eq '') { $searchLines = @($searchLines[1..($searchLines.Count - 1)]) }
     while ($searchLines.Count -gt 0 -and (Get-NormalizedLine $searchLines[-1]) -eq '') { $searchLines = @($searchLines[0..($searchLines.Count - 2)]) }
     if ($searchLines.Count -eq 0) { return $null }
-
     $normSearch = @($searchLines | ForEach-Object { Get-NormalizedLine $_ })
-
     for ($start = 0; $start -le $contentLines.Count - $searchLines.Count; $start++) {
         $isMatch = $true
         for ($k = 0; $k -lt $searchLines.Count; $k++) {
@@ -350,271 +251,107 @@ function Try-ApplyEdit {
     return $null
 }
 
-# LM Studio is loaded with a small context window (8192 tokens). Large files
-# (Main.cs is ~1250 lines / ~16k tokens) blow that limit and every call fails
-# with "n_keep >= n_ctx". For big files, only show the parts of the file that
-# are relevant to the current roadmap item (plus the top of the file for
-# using/namespace/class context). The full $Content is still used for the
-# actual SEARCH/REPLACE application, so this only shrinks what's *shown*.
-# The local model has a strong, hard-to-suppress tendency to "fix" any
-# enum it sees in an excerpt by hallucinating a missing closing brace,
-# even when the enum is already complete and the build is fine. Collapse
-# every complete enum body to a single placeholder line so the model
-# never sees enum braces to "fix" in the first place.
 function Hide-CompleteEnums {
     param([string]$Content)
     return [regex]::Replace($Content, '(?ms)^(\s*(?:public |internal |private )?enum\s+\w+)\s*\{.*?\n\s*\}', '$1 { /* complete, do not modify */ }')
 }
 
+# Thrive a de gros fichiers: on ne montre au modele que les zones pertinentes
+# (mots-cles de la tache) + le haut du fichier, pour tenir dans le contexte.
 function Get-RelevantExcerpt {
-    param([string]$Content, [string]$RoadmapItem, [int]$ContextLines = 15, [int]$MaxLines = 140)
+    param([string]$Content, [string]$RoadmapItem, [int]$ContextLines = 16, [int]$MaxLines = 160)
     $Content = Hide-CompleteEnums -Content $Content
     $lines = $Content -split "`n"
     if ($lines.Count -le $MaxLines) { return $Content }
-
     $keywords = @(([regex]::Matches($RoadmapItem, '[A-Za-z_][A-Za-z0-9_]{4,}') | ForEach-Object { $_.Value }) | Select-Object -Unique)
-    $keywords += @('SubViewport', '_Draw', 'partial class', 'asset_manifest')
-
     $matched = New-Object System.Collections.Generic.HashSet[int]
     for ($idx = 0; $idx -lt $lines.Count; $idx++) {
         foreach ($kw in $keywords) {
             if ($lines[$idx] -match [regex]::Escape($kw)) {
-                for ($j = [Math]::Max(0, $idx - $ContextLines); $j -le [Math]::Min($lines.Count - 1, $idx + $ContextLines); $j++) {
-                    [void]$matched.Add($j)
-                }
+                for ($j = [Math]::Max(0, $idx - $ContextLines); $j -le [Math]::Min($lines.Count - 1, $idx + $ContextLines); $j++) { [void]$matched.Add($j) }
                 break
             }
         }
     }
-
-    # Always include the top of the file (usings/namespace/class declaration)
     for ($j = 0; $j -lt [Math]::Min(40, $lines.Count); $j++) { [void]$matched.Add($j) }
-
     $sorted = $matched | Sort-Object
     if ($sorted.Count -gt $MaxLines) { $sorted = $sorted | Select-Object -First $MaxLines }
-
     $sb = New-Object System.Text.StringBuilder
     $prev = -2
     foreach ($n in $sorted) {
-        if ($n -ne $prev + 1) { [void]$sb.AppendLine("// ... (lines omitted) ...") }
-        [void]$sb.AppendLine($lines[$n])
-        $prev = $n
+        if ($n -ne $prev + 1) { [void]$sb.AppendLine("// ... (lignes omises) ...") }
+        [void]$sb.AppendLine($lines[$n]); $prev = $n
     }
     return $sb.ToString()
 }
 
-# Self-cleaning: per-iteration model output logs and the stdout/stderr
-# transcripts grow without bound otherwise. Keep the most recent ones only.
 function Invoke-Cleanup {
     $iterLogs = Get-ChildItem "$logDir\iter_*.txt" -ErrorAction SilentlyContinue |
         Sort-Object { [int]([regex]::Match($_.BaseName, '\d+').Value) } -Descending
-    if ($iterLogs.Count -gt 30) {
-        $iterLogs | Select-Object -Skip 30 | Remove-Item -Force -ErrorAction SilentlyContinue
-    }
-
-    foreach ($f in @("g:\Rimwork\scripts\loop_stdout.log", "g:\Rimwork\scripts\loop_stderr.log")) {
-        if ((Test-Path $f) -and (Get-Item $f).Length -gt 5MB) {
-            $tail = Get-Content $f -Tail 1000
-            Set-Content -Path $f -Value $tail
-        }
-    }
+    if ($iterLogs.Count -gt 30) { $iterLogs | Select-Object -Skip 30 | Remove-Item -Force -ErrorAction SilentlyContinue }
 }
 
-Write-Host "=== Rimwork autonomous dev loop ===" -ForegroundColor Cyan
+# Resout le chemin cible nomme par la tache, sous reference/thrive uniquement.
+function Resolve-Target {
+    param([string]$ItemText)
+    $m = [regex]::Match($ItemText, '([\w./-]+\.(cs|json|po|tres|tscn))')
+    if (-not $m.Success) { return $null }
+    $rel = $m.Groups[1].Value
+    $abs = Join-Path $ProjectDir ($rel -replace '/', '\')
+    if (-not (Test-Path $abs)) { return $null }
+    return [pscustomobject]@{ Rel = $rel; Abs = $abs; Ext = $m.Groups[2].Value.ToLower() }
+}
 
-# Self-managed resources: benchmark the LLM at startup so a slow runtime or
-# a saturated GPU is detected immediately instead of silently crippling
-# every iteration (a stale Vulkan runtime once cost 10x throughput).
+Write-Host "=== DOWN HERE - boucle de dev (Thrive) ===" -ForegroundColor Cyan
+
+# Benchmark LLM au demarrage (detecte un GPU sature / runtime lent).
 try {
     $benchStart = Get-Date
     $benchBody = @{ model = $Model; messages = @(@{ role = "user"; content = "Count from 1 to 60 separated by spaces, nothing else." }); max_tokens = 120; temperature = 0 } | ConvertTo-Json -Depth 5
-    $benchResp = Invoke-RestMethod -Uri "http://localhost:1234/v1/chat/completions" -Method Post -ContentType "application/json" -Body $benchBody -TimeoutSec 120
+    $benchResp = Invoke-RestMethod -Uri $LlmUrl -Method Post -ContentType "application/json" -Body $benchBody -TimeoutSec 120
     $benchSecs = ((Get-Date) - $benchStart).TotalSeconds
     $tokS = [math]::Round($benchResp.usage.completion_tokens / [math]::Max($benchSecs, 0.1), 1)
-    Write-Host "LLM benchmark: $($benchResp.usage.completion_tokens) tokens in $([math]::Round($benchSecs,1))s (~$tokS tok/s)" -ForegroundColor Cyan
-    if ($benchSecs -gt 0 -and $tokS -lt 8) {
-        $gpuHogs = (Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'godot|game|obs|chrome|firefox' } | Select-Object -First 3 -ExpandProperty Name) -join ", "
-        $hint = if ($gpuHogs) { "GPU likely shared with: $gpuHogs (normal if the game is open - the loop just runs slower)." } else { "No obvious GPU consumer - check the llama.cpp runtime (lms runtime ls; vulkan@2.21 expected)." }
-        Write-Host "WARNING: throughput $tokS tok/s. $hint" -ForegroundColor Red
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [startup] PERF: LLM at $tokS tok/s. $hint"
-    }
+    Write-Host "Benchmark LLM: $($benchResp.usage.completion_tokens) tokens en $([math]::Round($benchSecs,1))s (~$tokS tok/s)" -ForegroundColor Cyan
 } catch {
-    Write-Host "LLM benchmark failed - is the model loaded in LM Studio?" -ForegroundColor Red
+    Write-Host "Benchmark LLM echoue - le serveur llama (port 1234) est-il lance ?" -ForegroundColor Red
 }
 
-# Items the local model fails on repeatedly (build keeps failing or no
-# patch ever matches) get parked here so the loop moves on to other
-# roadmap items instead of spinning forever on the same one. Persisted
-# across restarts.
 $blockedFile = "$logDir\blocked_items.txt"
 $blockedItems = if (Test-Path $blockedFile) { @(Get-Content $blockedFile) } else { @() }
 $prevItem = $null
 $failStreak = 0
 $StuckThreshold = 4
-# The local model can get fixated on hallucinated "fix a missing brace"
-# patches for a specific item and repeat the EXACT same bogus patch
-# forever (those don't count toward $failStreak since no build/test ran).
-# Track consecutive bogus-brace rejections separately and block fast.
-$braceStreak = 0
-$BraceStuckThreshold = 3
-
-# A roadmap item is never marked [x] by the model itself - the loop only
-# ever moves on via blocking (failure). That means an item that the model
-# CAN make small successful (KEPT) edits to forever (e.g. endlessly
-# tweaking a color value) never finishes and blocks real progress. After
-# several consecutive KEPT changes on the SAME item, consider it done
-# enough and check it off in ROADMAP.md so the loop advances.
 $keptStreak = 0
 $KeptDoneThreshold = 2
-
-# The model sometimes keeps proposing the EXACT SAME patch over and over
-# for the same item (it already applied successfully once, but since the
-# anchor line still exists it matches again, duplicating the inserted code
-# block 5x before keptStreak fires). Detect a byte-identical repeat patch
-# for the same item and mark the item done immediately instead of
-# re-applying it.
-$lastEditFingerprint = $null
-$lastEditItem = $null
-
-# Failure feedback: remember WHY the last attempt on an item failed (build
-# errors from its own patch, or a SEARCH that didn't match) and show that
-# to the model on its next attempt at the SAME item, so it can correct
-# itself instead of repeating the mistake blind.
 $lastFailNote = $null
 $lastFailItem = $null
-
-# How many times each stuck item has been self-rewritten by the model
-# (max 2 rewrites before it gets hard-blocked).
-$rewriteCounts = @{}
 
 for ($i = 1; $i -le $MaxIterations; $i++) {
     Write-Host "`n--- Iteration $i ---" -ForegroundColor Yellow
     $iterStart = Get-Date
 
-    # Every 15 iterations the model steps back, plays its own build and
-    # writes the next improvement task as a "ruthless gamer" - continuous
-    # self-directed project management.
-    if ($i -gt 0 -and $i % 15 -eq 0) {
-        Invoke-CriticPass -Iter $i
-    }
-
-    # Every 12 iterations the model PLAYS its own game end-to-end through
-    # the agent bridge (real session: orders, building, observation) and
-    # files anomalies - the AI tests like a human, not just compiles.
-    if ($i -gt 0 -and $i % 12 -eq 0) {
-        try {
-            & pwsh -NoProfile -File "g:\Rimwork\scripts\playtest_agent.ps1" -Steps 8 -StepWaitSec 6 | Out-Null
-            $ptr = Get-Content "g:\Rimwork\scripts\logs\playtest_report.json" -Raw -ErrorAction Stop | ConvertFrom-Json
-            Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] PLAYTEST: $($ptr.issued.Count) actions, $($ptr.anomalies.Count) anomalies, pieces=$($ptr.final.rooms)"
-            foreach ($an in $ptr.anomalies) {
-                $line = "- [ ] Step T$i - (playtest) fix: $an (src/RimWorldLab.Core/GameWorld.cs)"
-                if (-not ((Get-Content "g:\Rimwork\ROADMAP.md" -Raw) -match [regex]::Escape($an))) {
-                    Add-Content -Path "g:\Rimwork\ROADMAP.md" -Value $line
-                    Write-Host "Playtest anomaly filed: $an" -ForegroundColor Magenta
-                }
-            }
-        } catch { Write-Host "Playtest skipped: $_" -ForegroundColor DarkYellow }
-    }
-
-    # Community pipeline: GitHub issues labeled 'approved' become roadmap
-    # items (the player files requests without the supervisor in the loop).
-    if ($i -gt 0 -and $i % 25 -eq 0) {
-        try {
-            $issues = gh issue list -R Duperopope/Rimwork --label approved --state open --json number,title,body --limit 5 2>$null | ConvertFrom-Json
-            foreach ($iss in $issues) {
-                $desc = ($iss.title -replace '^\[(Feature|Bug)\]\s*', '').Trim()
-                $line = "- [ ] Step U$($iss.number) - (communaute) $desc"
-                if (-not ((Get-Content "g:\Rimwork\ROADMAP.md" -Raw) -match [regex]::Escape($desc))) {
-                    Add-Content -Path "g:\Rimwork\ROADMAP.md" -Value $line
-                    Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] COMMUNITY: issue #$($iss.number) acceptee dans le roadmap: $desc"
-                    gh issue comment $iss.number -R Duperopope/Rimwork -b "Acceptee dans le roadmap du developpeur IA (Step U$($iss.number)). Suivi: https://duperopope.github.io/Rimwork/" 2>$null | Out-Null
-                    gh issue close $iss.number -R Duperopope/Rimwork 2>$null | Out-Null
-                }
-            }
-        } catch {}
-    }
-
-    $roadmapLines = Get-Content "g:\Rimwork\ROADMAP.md"
+    $roadmapLines = Get-Content "$Root\ROADMAP.md"
     $firstMatch = $roadmapLines | Select-String -Pattern '^\s*-\s*\[ \]' |
-        Where-Object { $blockedItems -notcontains $_.Line.Trim() } |
-        Select-Object -First 1
+        Where-Object { $blockedItems -notcontains $_.Line.Trim() } | Select-Object -First 1
 
     if (-not $firstMatch) {
-        # Nothing actionable left: instead of idling, ask the model to PROPOSE
-        # its own next small task (emergent dev) and append it to the roadmap.
-        # The normal build/test/revert guardrails then judge the result like
-        # any other item.
-        # Roadmap exhausted: first let the critic play the build and write
-        # an improvement task; the emergent proposal below is the fallback.
-        Invoke-CriticPass -Iter $i
-        $recheckMatch = Get-Content "g:\Rimwork\ROADMAP.md" | Select-String -Pattern '^\s*-\s*\[ \]' |
+        # Plus de tache en file: au lieu d'idler, le dev REGARDE le jeu et
+        # propose UNE amelioration concrete (auto-direction). Le superviseur
+        # peut aussi ajouter des taches a tout moment.
+        Write-Host "ROADMAP vide - le dev examine le jeu et propose une amelioration." -ForegroundColor Cyan
+        Invoke-Improve -Iter $i
+        @{ iter = $i; timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); build = "IDLE"; simOk = $true; simSummary = "le dev examine le jeu et propose des ameliorations"; iterSeconds = 0 } |
+            ConvertTo-Json -Compress | Set-Content -Path "$logDir\health.json" -Encoding utf8
+        $recheck = Get-Content "$Root\ROADMAP.md" | Select-String -Pattern '^\s*-\s*\[ \]' |
             Where-Object { $blockedItems -notcontains $_.Line.Trim() } | Select-Object -First 1
-        if ($recheckMatch) { continue }
-        Write-Host "All items blocked/done - asking model to propose an emergent task." -ForegroundColor Cyan
-        $recentLog = (Get-Content "g:\Rimwork\DEV_LOG.md" -ErrorAction SilentlyContinue | Select-Object -Last 15) -join "`n"
-        $proposePrompt = @"
-You are the sole developer of a deterministic colony-sim game (C#, Godot).
-Recent dev log:
-$recentLog
-
-Propose ONE new, very small, concretely-implementable roadmap item that makes
-the game more fun, emergent or alive. It must be a single small code change to
-one of: src/RimWorldLab.Core/GameWorld.cs, src/RimWorldLab.Core/Needs.cs,
-src/RimWorldLab.Core/Jobs.cs, src/RimWorldGodot/Main.cs.
-Reply with EXACTLY one line in this format and nothing else:
-- [ ] Step E.$i - <one-sentence concrete change, mention the target file>
-"@
-        $proposal = Invoke-LmStudio -UserMessage $proposePrompt
-        $propLine = ($proposal -split "`n" | Where-Object { $_.Trim() -match '^- \[ \] Step E\.' } | Select-Object -First 1)
-        if ($propLine) {
-            $propDesc = ($propLine -split ' - ', 2)[-1].Trim()
-            if ($propDesc -and ((Get-Content "g:\Rimwork\ROADMAP.md" -Raw) -match [regex]::Escape($propDesc))) {
-                Write-Host "Emergent proposal is a duplicate - ignored." -ForegroundColor DarkYellow
-                $propLine = $null
-            }
-        }
-        if ($propLine) {
-            Add-Content -Path "g:\Rimwork\ROADMAP.md" -Value $propLine.Trim()
-            Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] EMERGENT TASK PROPOSED: $($propLine.Trim())"
-            Write-Host "Emergent task appended: $($propLine.Trim())" -ForegroundColor Cyan
-        } else {
-            Write-Host "Model proposal unusable - sleeping." -ForegroundColor DarkYellow
-            Start-Sleep -Seconds ([Math]::Max($DelaySeconds * 10, 300))
-        }
+        if ($recheck) { continue }
+        Start-Sleep -Seconds ([Math]::Max($DelaySeconds * 6, 60))
         continue
     }
 
     Invoke-Cleanup
 
-    $build = Invoke-Build
-    Write-Host $(if ($build.Ok) { "BUILD OK" } else { "BUILD FAILED" })
-
-    $testOutput = ""
-    if ($build.Ok) {
-        $testOutput = Invoke-Run
-        $testSummary = ($testOutput -split "`n" | Select-String "passed|failed|tests ran") -join "`n"
-        # Show the model the actual health of the game it is making - colony
-        # metrics from a 5000-tick headless playthrough, not just compile state.
-        $diag = Invoke-DiagSim
-        $testSummary += "`nGAME HEALTH (5000-tick simulation): " + $diag.Summary
-
-        # Publish structured health for the dashboard (real metrics, not vibes).
-        @{
-            iter        = $i
-            timestamp   = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
-            build       = if ($build.Ok) { "OK" } else { "FAIL" }
-            simOk       = $diag.Ok
-            simSummary  = $diag.Summary
-            iterSeconds = [math]::Round(((Get-Date) - $iterStart).TotalSeconds)
-        } | ConvertTo-Json -Compress | Set-Content -Path "g:\Rimwork\scripts\logs\health.json" -Encoding utf8
-    } else {
-        $testSummary = "(skipped, build failed)"
-    }
-
-    # A single Select-String match only captures the bullet's FIRST line,
-    # but most roadmap items wrap across several indented continuation
-    # lines that contain the actual concrete instructions. Pull those in
-    # too, so the model sees the full item instead of a truncated fragment.
+    # Item multi-lignes complet.
     $itemKey = $firstMatch.Line.Trim()
     $itemLines = New-Object System.Collections.Generic.List[string]
     $itemLines.Add($firstMatch.Line)
@@ -625,442 +362,159 @@ Reply with EXACTLY one line in this format and nothing else:
     }
     $firstUnchecked = $itemLines -join "`n"
 
-    # Task timer for the dashboard: which item the AI works on, since when.
-    $ciPath = "g:\Rimwork\scripts\logs\current_item.json"
+    # Cible nommee par la tache (doit exister sous reference/thrive).
+    $target = Resolve-Target -ItemText $firstUnchecked
+    if (-not $target) {
+        Write-Host "Tache sans fichier cible valide sous reference/thrive - bloquee." -ForegroundColor DarkYellow
+        Add-Content -Path $blockedFile -Value $itemKey
+        Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] BLOQUEE (aucun fichier cible valide nomme dans la tache): $itemKey"
+        $blockedItems += $itemKey
+        Start-Sleep -Seconds $DelaySeconds
+        continue
+    }
+    $isCSharp = ($target.Ext -eq 'cs')
+
+    # Timer dashboard.
+    $ciPath = "$logDir\current_item.json"
     $prevCi = $null
     try { $prevCi = Get-Content $ciPath -Raw -ErrorAction Stop | ConvertFrom-Json } catch {}
     $since = if ($prevCi -and $prevCi.item -eq $itemKey) { $prevCi.since } else { (Get-Date -Format "yyyy-MM-dd HH:mm:ss") }
     @{ item = $itemKey; since = $since; iter = $i } | ConvertTo-Json -Compress | Set-Content $ciPath -Encoding utf8
 
-    if ($itemKey -eq $prevItem) {
-        $failStreak++
-    } else {
-        $failStreak = 0
-        $braceStreak = 0
-        $keptStreak = 0
-        $prevItem = $itemKey
-    }
+    if ($itemKey -eq $prevItem) { $failStreak++ } else { $failStreak = 0; $keptStreak = 0; $prevItem = $itemKey }
 
     if ($failStreak -ge $StuckThreshold) {
-        # DONE-DETECTION: if this item already produced successful (KEPT)
-        # edits in any past run and now only yields unmatched/no-op patches,
-        # the work most likely already exists in the file (the model keeps
-        # "re-doing" it) - mark it done instead of burning more attempts.
-        # U.3.1 burned ~30 iterations exactly this way.
-        $keptHistoryFile = "g:\Rimwork\scripts\logs\kept_history.txt"
-        # Evidence gate: never trust KEPT history alone - the quoted code
-        # must actually be in the file named by the item.
-        $evidenceOk = $true
-        if ($firstUnchecked -match '(src/[\w./]+\.cs)') {
-            $evPath = "g:\Rimwork\" + ($Matches[1] -replace '/', '\')
-            if (Test-Path $evPath) {
-                $evidenceOk = Test-ItemEvidence -ItemText $firstUnchecked -TargetContent (Get-Content $evPath -Raw)
-            }
-        }
-        if ((Test-Path $keptHistoryFile) -and ((Get-Content $keptHistoryFile) -contains $itemKey) -and $evidenceOk) {
-            Write-Host "Item had KEPT edits in past runs and no longer matches - marking done." -ForegroundColor Green
-            $roadmapNow = Get-Content "g:\Rimwork\ROADMAP.md"
-            for ($r = 0; $r -lt $roadmapNow.Count; $r++) {
-                if ($roadmapNow[$r].Trim() -eq $itemKey) {
-                    $roadmapNow[$r] = $roadmapNow[$r] -replace '\[ \]', '[x]'
-                    break
-                }
-            }
-            Set-Content -Path "g:\Rimwork\ROADMAP.md" -Value $roadmapNow
-            Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] DONE (had past KEPT edits, change already in file): $itemKey"
-            $prevItem = $null
-            $failStreak = 0
-            Start-Sleep -Seconds $DelaySeconds
-            continue
-        }
-        # SELF-REPAIR: before giving up on an item, let the model act as its
-        # own lead dev - it gets the failure evidence (its bad SEARCH blocks,
-        # its compiler errors) and rewrites the item into something smaller
-        # and more precise. Only after a rewritten item ALSO fails is the
-        # item truly blocked.
-        # Lineage key: rewrites rename items (W.6.1 -> W.6.1.1 -> ...) which
-        # used to reset the counter and spin forever. Count per STEP ROOT.
-        $stepRoot = if ($itemKey -match 'Step ([A-Z]+\.?\d*)') { $Matches[1] } else { $itemKey.Substring(0, [Math]::Min(40, $itemKey.Length)) }
-        if (-not $rewriteCounts.ContainsKey($stepRoot)) { $rewriteCounts[$stepRoot] = 0 }
-        if ($rewriteCounts[$stepRoot] -lt 2) {
-            $rewriteCounts[$stepRoot]++
-            Write-Host "Item stuck - asking model to diagnose and rewrite it (rewrite $($rewriteCounts[$stepRoot])/2)." -ForegroundColor Cyan
-            $evidence = ""
-            foreach ($lf in @("failed_searches.log", "failed_builds.log")) {
-                $lp = "g:\Rimwork\scripts\logs\$lf"
-                if (Test-Path $lp) {
-                    $chunks = (Get-Content $lp -Raw) -split '(?m)^=== '
-                    $evidence += (($chunks | Select-Object -Last 2) -join "`n=== ") + "`n"
-                }
-            }
-            if ($evidence.Length -gt 3000) { $evidence = $evidence.Substring($evidence.Length - 3000) }
-            $rewritePrompt = @"
-You are the lead developer triaging a task your junior coder failed 4 times.
-Recent failure evidence (the junior's bad patches and the compiler errors):
-$evidence
-
-THE FAILED TASK:
-$firstUnchecked
-
-Rewrite this task so the next attempt succeeds. Requirements:
-- ONE much smaller step (a few lines of code at most)
-- name the exact target file
-- describe the change concretely; if part of the original task already
-  works, keep only the missing part
-- do NOT invent APIs - only reference code you saw in the evidence
-Reply with ONLY the rewritten item text, a single line starting exactly with:
-- [ ] Step
-"@
-            $rewritten = Invoke-LmStudio -UserMessage $rewritePrompt
-            $newItemLine = ($rewritten -split "`n" | Where-Object { $_.Trim() -match '^- \[ \] Step' } | Select-Object -First 1)
-            if ($newItemLine -and $newItemLine -match '(?i)dummy|placeholder|stub') {
-                Write-Host "Rewrite proposes a stub task - discarding lineage." -ForegroundColor Red
-                $newItemLine = $null
-                $rewriteCounts[$stepRoot] = 99
-            }
-            if ($newItemLine) {
-                # Replace the old multi-line item in ROADMAP.md with the new one-liner.
-                $rl = Get-Content "g:\Rimwork\ROADMAP.md"
-                $outLines = New-Object System.Collections.Generic.List[string]
-                $skipping = $false
-                foreach ($line in $rl) {
-                    if (-not $skipping -and $line.Trim() -eq $itemKey) {
-                        $outLines.Add($newItemLine.Trim())
-                        $skipping = $true
-                        continue
-                    }
-                    if ($skipping) {
-                        if ($line -match '^\s*-\s*\[' -or $line -match '^\s*#' -or $line.Trim() -eq '') { $skipping = $false }
-                        else { continue }
-                    }
-                    $outLines.Add($line)
-                }
-                Set-Content -Path "g:\Rimwork\ROADMAP.md" -Value $outLines
-                Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] SELF-REWRITE: item rewritten by model after $StuckThreshold failures: $($newItemLine.Trim())"
-                $prevItem = $null
-                $failStreak = 0
-                Start-Sleep -Seconds $DelaySeconds
-                continue
-            }
-            Write-Host "Rewrite unusable - blocking item." -ForegroundColor DarkYellow
-        }
-        Write-Host "Item stuck after $StuckThreshold attempts - blocking it for now." -ForegroundColor DarkYellow
+        Write-Host "Item bloque apres $StuckThreshold tentatives." -ForegroundColor DarkYellow
         Add-Content -Path $blockedFile -Value $itemKey
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] BLOCKED (stuck after $StuckThreshold attempts, needs manual fix): $itemKey"
+        Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] BLOQUEE (coincee apres $StuckThreshold essais, besoin d'un humain): $itemKey"
         $blockedItems += $itemKey
-        $prevItem = $null
-        $failStreak = 0
+        $prevItem = $null; $failStreak = 0
         Start-Sleep -Seconds $DelaySeconds
         continue
     }
 
-    # Route each roadmap item to the single file most likely to need the
-    # change, by keyword. The patch is always applied to THIS one file,
-    # regardless of what path the model echoes back - this avoids garbage
-    # files being written to the wrong project. Most gameplay/world/economy
-    # logic (GameMap, Pawn, SetupAutoColonyPlan, resources, weather,
-    # animals, rooms, ...) lives in GameWorld.cs, NOT Jobs.cs (which is
-    # just the TaskKind/TaskBoard/pathing plumbing) - routing everything
-    # non-UI to Jobs.cs caused the model to fixate on its enums.
-    # Highest priority: when the item NAMES its target file explicitly
-    # (all precise items do), believe it - keyword guessing below once sent
-    # a "Mood in GameWorld.cs" item to Needs.cs and it failed forever.
-    if ($firstUnchecked -match 'src/RimWorldGodot/MicroStage\.cs|MicroStage') {
-        $targetRelPath = "src/RimWorldGodot/MicroStage.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldGodot\MicroStage.cs"
-    } elseif ($firstUnchecked -match 'src/RimWorldLab\.Core/WorldModel\.cs') {
-        $targetRelPath = "src/RimWorldLab.Core/WorldModel.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\WorldModel.cs"
-    } elseif ($firstUnchecked -match 'src/RimWorldGodot/Game3D\.cs') {
-        $targetRelPath = "src/RimWorldGodot/Game3D.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldGodot\Game3D.cs"
-    } elseif ($firstUnchecked -match 'src/RimWorldLab\.Core/GameWorld\.cs') {
-        $targetRelPath = "src/RimWorldLab.Core/GameWorld.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\GameWorld.cs"
-    } elseif ($firstUnchecked -match 'src/RimWorldLab\.Core/Needs\.cs') {
-        $targetRelPath = "src/RimWorldLab.Core/Needs.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\Needs.cs"
-    } elseif ($firstUnchecked -match 'src/RimWorldLab\.Core/Jobs\.cs') {
-        $targetRelPath = "src/RimWorldLab.Core/Jobs.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\Jobs.cs"
-    } elseif ($firstUnchecked -match 'src/RimWorldGodot/Main\.cs') {
-        $targetRelPath = "src/RimWorldGodot/Main.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldGodot\Main.cs"
-    } elseif ($firstUnchecked -match 'Step U\.|Main\.cs|SubViewport|DrawColonyTab|DrawSidePanel|DrawBuildTab|AudioStreamPlayer|hexagon|DrawColoredPolygon') {
-        $targetRelPath = "src/RimWorldGodot/Main.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldGodot\Main.cs"
-    } elseif ($firstUnchecked -match 'Mood|PawnNeedState|Needs\.cs|Recreation|Hunger|Fatigue') {
-        $targetRelPath = "src/RimWorldLab.Core/Needs.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\Needs.cs"
-    } elseif ($firstUnchecked -match 'TaskKind|TaskBoard|TaskOrder|PawnTaskDriver|Pathfinder|Jobs\.cs') {
-        $targetRelPath = "src/RimWorldLab.Core/Jobs.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\Jobs.cs"
-    } else {
-        # Default: GameMap/Pawn/world simulation/economy (GridShape, rooms,
-        # weather, animals, food, hauling, raiders, organic growth, ...).
-        $targetRelPath = "src/RimWorldLab.Core/GameWorld.cs"
-        $targetAbsPath = "g:\Rimwork\src\RimWorldLab.Core\GameWorld.cs"
-    }
-    $targetContent = (Get-Content $targetAbsPath -Raw) -replace "`r", ""
-    $displayContent = Get-RelevantExcerpt -Content $targetContent -RoadmapItem $firstUnchecked
-    $apiMap = Get-ApiMap
-    # When patching the Godot layer, also hand the model the Godot C# API
-    # reference (correct Draw* signatures, .X/.Y casing rules, ...) so it
-    # acts like a Godot expert instead of guessing from training data.
-    if ($targetRelPath -match 'Main\.cs') {
-        $apiMap += "`n" + (Get-Content "g:\Rimwork\scripts\godot_api_reference.md" -Raw)
-    }
+    # Build de reference (uniquement pertinent pour le C#).
+    $build = if ($isCSharp) { Invoke-Build } else { @{ Ok = $true; Output = "(cible non-C#, build ignore)" } }
+    Write-Host $(if ($build.Ok) { "BUILD OK" } else { "BUILD FAILED" })
+
+    $targetContent = (Get-Content $target.Abs -Raw) -replace "`r", ""
+    $displayContent = if ($isCSharp) { Get-RelevantExcerpt -Content $targetContent -RoadmapItem $firstUnchecked } else { $targetContent }
+    if ($displayContent.Length -gt 12000) { $displayContent = $displayContent.Substring(0, 12000) + "`n// ... (tronque) ..." }
     $lessonsText = Get-Lessons
+    $lang = if ($isCSharp) { "csharp" } elseif ($target.Ext -eq 'json') { "json" } else { $target.Ext }
 
     $prompt = @"
+PROJET: DOWN HERE (base Thrive, Godot 4.6 mono, C#). Tu travailles sur le
+stade cellulaire ACTIF, dans reference/thrive.
 BUILD: $(if ($build.Ok) {"OK"} else {"FAILED"})
-$(if (-not $build.Ok) { "BUILD ERRORS:`n" + ($build.Output -split "`n" | Select-String "error" | Select-Object -First 10 | Out-String) })
-TEST SUMMARY: $testSummary
-$(if ($lastFailNote -and $lastFailItem -eq $itemKey) { "`nIMPORTANT - YOUR PREVIOUS ATTEMPT ON THIS ITEM FAILED:`n$lastFailNote`nDo NOT repeat the same approach.`n" })
-$(if ($lessonsText) { "LESSONS FROM YOUR PAST MISTAKES (respect them):`n$lessonsText`n" })
-$(try { $pt = Get-Content "g:\Rimwork\scripts\logs\playtest_report.json" -Raw -ErrorAction Stop | ConvertFrom-Json; if ($pt.anomalies.Count -gt 0) { "LATEST PLAYTEST (you PLAYED the game) FOUND THESE PROBLEMS:`n" + (($pt.anomalies | Select-Object -First 4) -join "`n") + "`n" } } catch { "" })
-AVAILABLE GAME API (these are the ONLY public types/methods/enums that exist
-in the Core - NEVER call anything not listed here or shown in the file below):
-$apiMap
+$(if (-not $build.Ok) { "BUILD ERRORS:`n" + ($build.Output -split "`n" | Select-String "error|erreur" | Select-Object -First 10 | Out-String) })
+$(if ($lastFailNote -and $lastFailItem -eq $itemKey) { "`nTON ESSAI PRECEDENT SUR CETTE TACHE A ECHOUE:`n$lastFailNote`nNe repete pas la meme approche.`n" })
+$(if ($lessonsText) { "LECONS DE TES ERREURS PASSEES (respecte-les):`n$lessonsText`n" })
 
-FIRST UNCHECKED ROADMAP ITEM (work ONLY on this):
+PREMIERE TACHE NON COCHEE (travaille UNIQUEMENT sur celle-ci):
 $firstUnchecked
 
-CURRENT CONTENT of $targetRelPath (edit THIS file if your change fits here -
-do not invent a different namespace/class layout, match what is below exactly.
-Some unrelated parts of the file may be omitted below for brevity, marked with
-"// ... (lines omitted) ..." - your SEARCH text must still match the real file,
-so only target lines actually shown here):
-``````csharp
+CONTENU ACTUEL de $($target.Rel) (edite CE fichier; certaines parties non
+liees peuvent etre remplacees par "// ... (lignes omises) ..." - ton SEARCH
+doit matcher EXACTEMENT des lignes reellement montrees):
+``````$lang
 $displayContent
 ``````
 
-Propose ONE small next change toward the first unchecked roadmap item above.
-If BUILD FAILED, fix that first. Output your change as one or more small
-SEARCH/REPLACE blocks against the content shown above (see system prompt
-for the exact format). Do NOT output the full file.
+Propose UN petit changement vers la tache ci-dessus, en un ou plusieurs
+blocs SEARCH/REPLACE (format du prompt systeme). N'affiche PAS le fichier
+entier. Pour du JSON, garde un JSON VALIDE.
 "@
 
-    $suggestion = Invoke-LmStudio -UserMessage $prompt
-    if (-not $suggestion) {
-        Write-Host "LM Studio call failed, retrying after delay." -ForegroundColor Red
-        Start-Sleep -Seconds $DelaySeconds
-        continue
-    }
-
+    $suggestion = Invoke-Llm -UserMessage $prompt
+    if (-not $suggestion) { Write-Host "Appel LLM echoue." -ForegroundColor Red; Start-Sleep -Seconds $DelaySeconds; continue }
     $suggestion | Out-File -FilePath "$logDir\iter_$i.txt" -Encoding utf8
     $edits = Parse-SearchReplaceBlocks -Text $suggestion
+    if ($edits.Count -eq 0) { Write-Host "Aucun bloc SEARCH/REPLACE." -ForegroundColor DarkYellow; Start-Sleep -Seconds $DelaySeconds; continue }
+    $changeDesc = (($suggestion -split "`n" | Select-String "^CHANGE:" | Select-Object -First 1) -replace '^CHANGE:\s*', '')
 
-    if ($edits.Count -eq 0) {
-        Write-Host "No SEARCH/REPLACE blocks parsed, skipping." -ForegroundColor DarkYellow
-        Start-Sleep -Seconds $DelaySeconds
-        continue
+    # Prediction d'echec (sans payer un build).
+    $prediction = $null
+    foreach ($edit in $edits) { $prediction = Test-PatchPrediction -Replace $edit.Replace -TargetContent $targetContent -IsCSharp $isCSharp; if ($prediction) { break } }
+    if ($prediction) {
+        Write-Host "ECHEC PREDIT (build economise): $prediction" -ForegroundColor DarkYellow
+        Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] ECHEC-PREDIT: $changeDesc - $prediction"
+        $lastFailNote = "Patch REJETE avant build: $prediction"; $lastFailItem = $itemKey
+        Start-Sleep -Seconds $DelaySeconds; continue
     }
-
-    $changeDesc = ($suggestion -split "`n" | Select-String "^CHANGE:" | Select-Object -First 1) -replace '^CHANGE:\s*',''
-
-    # The model repeatedly hallucinates "add a missing closing brace"
-    # changes (caused by the excerpted file looking unbalanced), which
-    # either no-op or break the build. The real file already builds fine
-    # before this patch, so any "fix a brace" change is bogus - reject it
-    # outright instead of burning a build/test cycle on it.
-    if ($build.Ok -and $changeDesc -match 'brace') {
-        Write-Host "Rejecting hallucinated brace-fix patch." -ForegroundColor DarkYellow
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] SKIPPED (bogus brace-fix, build was already OK): $changeDesc ($targetRelPath)"
-        # Don't let this count against the item's normal stuck-threshold -
-        # it's an instant, free retry (no build/test was run). But if the
-        # model fixates on this exact bogus pattern repeatedly, give up on
-        # the item fast instead of looping forever.
-        $failStreak = [Math]::Max(0, $failStreak - 1)
-        $braceStreak++
-        if ($braceStreak -ge $BraceStuckThreshold) {
-            Write-Host "Stuck on repeated brace-fix hallucinations - blocking item." -ForegroundColor DarkYellow
-            Add-Content -Path $blockedFile -Value $itemKey
-            Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] BLOCKED (stuck on brace-fix hallucination, needs manual fix): $itemKey"
-            $blockedItems += $itemKey
-            $prevItem = $null
-            $failStreak = 0
-            $braceStreak = 0
-        }
-        Start-Sleep -Seconds $DelaySeconds
-        continue
-    }
-    $braceStreak = 0
 
     $newContent = $targetContent
     $appliedCount = 0
-    # UI FREEZE CONTRACT (docs/UI_FREEZE_CONTRACT.md): the frozen
-    # presentation files may not be redesigned by the local model.
-    if ($targetRelPath -match 'UiShell\.cs|Boot3D\.tscn|RenderCatalog\.cs') {
-        Write-Host "REJECTED ui-freeze: $targetRelPath is frozen by the UI contract." -ForegroundColor Red
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] REJECTED (ui-freeze contract): $changeDesc ($targetRelPath)"
-        $lastFailNote = "File $targetRelPath is FROZEN by docs/UI_FREEZE_CONTRACT.md. Extend content through GameWorld.cs data or RenderCatalog rows via roadmap items instead."
-        $lastFailItem = $itemKey
-        Start-Sleep -Seconds $DelaySeconds
-        continue
-    }
-
-    # Predictive gate: refuse patches the world model predicts will fail,
-    # without paying a build cycle - and tell the model WHY immediately.
-    $prediction = $null
-    foreach ($edit in $edits) {
-        $prediction = Test-PatchPrediction -Replace $edit.Replace -TargetContent $targetContent -ApiMap $apiMap
-        if ($prediction) { break }
-    }
-    if ($prediction) {
-        Write-Host "PREDICTED FAILURE (no build wasted): $prediction" -ForegroundColor DarkYellow
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] PREDICTED-FAIL (skipped before build): $changeDesc - $prediction"
-        $lastFailNote = "Your patch was REJECTED before building: $prediction Use ONLY identifiers from the API map or the file content shown."
-        $lastFailItem = $itemKey
-        Start-Sleep -Seconds $DelaySeconds
-        continue
-    }
-
     foreach ($edit in $edits) {
         $applied = Try-ApplyEdit -Content $newContent -Search $edit.Search -Replace $edit.Replace
-        if ($null -ne $applied) {
-            $newContent = $applied
-            $appliedCount++
-        } else {
-            Write-Host "SEARCH text not found in $targetRelPath, skipping that block." -ForegroundColor DarkYellow
-            # Log the failing SEARCH text so mismatches can be diagnosed
-            # (the model often invents context lines that aren't in the file).
-            Add-Content -Path "g:\Rimwork\scripts\logs\failed_searches.log" -Value "=== [iter $i] $targetRelPath ===`n$($edit.Search)`n"
-        }
+        if ($null -ne $applied) { $newContent = $applied; $appliedCount++ }
+        else { Add-Content -Path "$logDir\failed_searches.log" -Value "=== [iter $i] $($target.Rel) ===`n$($edit.Search)`n" }
     }
-
     if ($appliedCount -eq 0) {
-        Write-Host "No SEARCH block matched current file content, skipping." -ForegroundColor DarkYellow
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] SKIPPED (no SEARCH match): $changeDesc ($targetRelPath)"
-        $lastFailNote = "Your SEARCH block did NOT match the file (you sent:`n$(($edits | Select-Object -First 1).Search)`n). SEARCH lines must be CONTIGUOUS lines copied EXACTLY from the file content shown - do not skip or merge lines."
-        $lastFailItem = $itemKey
-        Start-Sleep -Seconds $DelaySeconds
-        continue
+        Write-Host "Aucun bloc SEARCH ne matche le fichier." -ForegroundColor DarkYellow
+        Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] SAUTE (SEARCH sans match): $changeDesc ($($target.Rel))"
+        $lastFailNote = "Ton bloc SEARCH ne matchait PAS le fichier. Copie des lignes CONTIGUES exactement comme montrees."; $lastFailItem = $itemKey
+        Start-Sleep -Seconds $DelaySeconds; continue
     }
-
     if ($newContent -eq $targetContent) {
-        # The SEARCH matched but the REPLACE text is equivalent to what's
-        # already there (a no-op edit). Build/tests would trivially still
-        # pass, which would falsely count as progress on the roadmap item
-        # forever. Treat it like a non-match so the item's fail streak
-        # advances and the loop eventually moves on to a real change.
-        Write-Host "Patch is a no-op (file unchanged), skipping." -ForegroundColor DarkYellow
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] SKIPPED (no-op patch): $changeDesc ($targetRelPath)"
-        Start-Sleep -Seconds $DelaySeconds
-        continue
+        Write-Host "Patch no-op (fichier inchange)." -ForegroundColor DarkYellow
+        Start-Sleep -Seconds $DelaySeconds; continue
     }
 
-    $editFingerprint = (($edits | ForEach-Object { $_.Search + "|||" + $_.Replace }) -join "###")
-    if ($itemKey -eq $lastEditItem -and $editFingerprint -eq $lastEditFingerprint -and (Test-ItemEvidence -ItemText $firstUnchecked -TargetContent $targetContent)) {
-        # Same item, byte-identical patch as last time it was applied - the
-        # model thinks it's done and is repeating itself. Don't duplicate
-        # the code block again; mark the item done and move on.
-        Write-Host "Model repeated the same already-applied patch - marking item done." -ForegroundColor Green
-        $roadmapNow = Get-Content "g:\Rimwork\ROADMAP.md"
-        for ($r = 0; $r -lt $roadmapNow.Count; $r++) {
-            if ($roadmapNow[$r].Trim() -eq $itemKey) {
-                $roadmapNow[$r] = $roadmapNow[$r] -replace '\[ \]', '[x]'
-                break
-            }
-        }
-        Set-Content -Path "g:\Rimwork\ROADMAP.md" -Value $roadmapNow
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] DONE (repeated identical patch): $itemKey"
-        $keptStreak = 0
-        $failStreak = 0
-        $lastEditFingerprint = $null
-        $lastEditItem = $null
-        $prevItem = $null
-        Start-Sleep -Seconds $DelaySeconds
-        continue
+    # Validation pre-ecriture pour les donnees: JSON doit rester valide.
+    if ($target.Ext -eq 'json' -and -not (Test-JsonValid -Text $newContent)) {
+        Write-Host "Patch rejete: le JSON resultant est invalide." -ForegroundColor Red
+        Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] REJETE (JSON invalide): $changeDesc ($($target.Rel))"
+        $lastFailNote = "Ton patch rendait le JSON invalide (il n'a pas ete ecrit). Garde une syntaxe JSON correcte (virgules, accolades)."; $lastFailItem = $itemKey
+        Start-Sleep -Seconds $DelaySeconds; continue
     }
 
-    Set-Content -Path $targetAbsPath -Value $newContent -NoNewline
-    Write-Host "Wrote $targetAbsPath ($appliedCount/$($edits.Count) edits applied)"
+    Set-Content -Path $target.Abs -Value $newContent -NoNewline
+    Write-Host "Ecrit $($target.Rel) ($appliedCount/$($edits.Count) edits)"
 
-    $newBuild = Invoke-Build
-    if ($newBuild.Ok) {
-        # Compiling is not enough - run the regression test suite
-        # (GameWorldTests.RunAllTests) so a patch that builds but breaks
-        # existing behavior (a previously DONE roadmap item) is reverted too.
-        $newTestOutput = Invoke-Run
-        $failedCount = 0
-        $testLine = ($newTestOutput -split "`n" | Select-String 'tests ran' | Select-Object -Last 1)
-        if ($testLine -and $testLine.Line -match '(\d+)\s+failed') { $failedCount = [int]$Matches[1] }
-        $hasFailMarker = $newTestOutput -match '\[FAIL\]'
+    # Validation post-ecriture: C# -> build doit passer.
+    $ok = $true
+    $buildErrors = ""
+    if ($isCSharp) {
+        $newBuild = Invoke-Build
+        $ok = $newBuild.Ok
+        if (-not $ok) { $buildErrors = ($newBuild.Output -split "`n" | Select-String "error|erreur" | Select-Object -First 6) -join "`n" }
+    }
 
-        # A patch that compiles and passes unit tests can still crash the
-        # running game (e.g. index-out-of-range during a tick). Play 5000
-        # ticks headless and treat a crash as a test failure.
-        $newDiag = Invoke-DiagSim
-        if (-not $newDiag.Ok) { $hasFailMarker = $true }
+    if ($ok) {
+        Write-Host "GARDE (validation OK)." -ForegroundColor Green
+        Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] KEPT: $changeDesc ($($target.Rel))"
+        @{ iter = $i; timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); build = "OK"; simOk = $true; simSummary = "patch garde: $($target.Rel)"; iterSeconds = [math]::Round(((Get-Date) - $iterStart).TotalSeconds) } |
+            ConvertTo-Json -Compress | Set-Content -Path "$logDir\health.json" -Encoding utf8
+        $failStreak = 0; $keptStreak++; $lastFailNote = $null; $lastFailItem = $null
 
-        if ($failedCount -eq 0 -and -not $hasFailMarker) {
-            Write-Host "BUILD OK + tests pass after patch - keeping changes." -ForegroundColor Green
-            Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] KEPT: $changeDesc ($targetRelPath)"
-            $failStreak = 0
-            $keptStreak++
-            $lastEditFingerprint = $editFingerprint
-            $lastEditItem = $itemKey
-            $lastFailNote = $null
-            $lastFailItem = $null
-            # Persistent record of which items ever produced a successful
-            # edit - used by done-detection across loop restarts.
-            Add-Content -Path "g:\Rimwork\scripts\logs\kept_history.txt" -Value $itemKey
+        # Dataset d'entrainement (prompt -> patch verifie) pour un futur fine-tuning.
+        @{ messages = @(@{ role = "user"; content = $prompt }, @{ role = "assistant"; content = $suggestion }); meta = @{ item = $itemKey; file = $target.Rel; iter = $i } } |
+            ConvertTo-Json -Depth 6 -Compress | Add-Content -Path "$logDir\training_data.jsonl"
 
-            # TRAINING DATASET: every verified-successful (prompt -> patch)
-            # pair is a future fine-tuning example. Collected from day one so
-            # that when we LoRA-train a small model on THIS project, the
-            # dataset already exists. JSONL, chat format.
-            $trainingExample = @{
-                messages = @(
-                    @{ role = "user"; content = $prompt },
-                    @{ role = "assistant"; content = $suggestion }
-                )
-                meta = @{ item = $itemKey; file = $targetRelPath; iter = $i }
-            } | ConvertTo-Json -Depth 6 -Compress
-            Add-Content -Path "g:\Rimwork\scripts\logs\training_data.jsonl" -Value $trainingExample
+        # Versionne dans le depot Thrive (reference/thrive a son propre git).
+        git -C $ProjectDir add -A 2>$null | Out-Null
+        git -C $ProjectDir commit -q -m "[ai-loop iter $i] $changeDesc ($($target.Rel))" 2>$null | Out-Null
+        git -C $ProjectDir push -q 2>$null | Out-Null
 
-            # Version every verified patch: full history + instant rollback,
-            # mirrored to GitHub so progress is visible from anywhere.
-            git -C g:\Rimwork add -A 2>$null | Out-Null
-            git -C g:\Rimwork commit -q -m "[ai-loop iter $i] $changeDesc ($targetRelPath)" 2>$null | Out-Null
-            git -C g:\Rimwork push -q origin master 2>$null | Out-Null
-
-            if ($keptStreak -ge $KeptDoneThreshold -and (Test-ItemEvidence -ItemText $firstUnchecked -TargetContent $newContent)) {
-                Write-Host "$keptStreak consecutive KEPT changes on this item - marking it done." -ForegroundColor Green
-                $roadmapNow = Get-Content "g:\Rimwork\ROADMAP.md"
-                for ($r = 0; $r -lt $roadmapNow.Count; $r++) {
-                    if ($roadmapNow[$r].Trim() -eq $itemKey) {
-                        $roadmapNow[$r] = $roadmapNow[$r] -replace '\[ \]', '[x]'
-                        break
-                    }
-                }
-                Set-Content -Path "g:\Rimwork\ROADMAP.md" -Value $roadmapNow
-                Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] DONE (after $keptStreak consecutive KEPT changes): $itemKey"
-                $keptStreak = 0
-                $failStreak = 0
-                $prevItem = $null
+        if ($keptStreak -ge $KeptDoneThreshold -and (Test-ItemEvidence -ItemText $firstUnchecked -TargetContent $newContent)) {
+            Write-Host "$keptStreak changements KEPT consecutifs - tache cochee." -ForegroundColor Green
+            $roadmapNow = Get-Content "$Root\ROADMAP.md"
+            for ($r = 0; $r -lt $roadmapNow.Count; $r++) {
+                if ($roadmapNow[$r].Trim() -eq $itemKey) { $roadmapNow[$r] = $roadmapNow[$r] -replace '\[ \]', '[x]'; break }
             }
-        } else {
-            Write-Host "BUILD OK but tests FAILED after patch - reverting." -ForegroundColor Red
-            Set-Content -Path $targetAbsPath -Value $targetContent -NoNewline
-            Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] REVERTED (tests failed): $changeDesc ($targetRelPath)"
-            $lastFailNote = "Your previous patch compiled but made the game's unit tests FAIL (it was reverted). Make a smaller, more conservative change that preserves existing behavior."
-            $lastFailItem = $itemKey
+            Set-Content -Path "$Root\ROADMAP.md" -Value $roadmapNow
+            Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] DONE (apres $keptStreak KEPT): $itemKey"
+            $keptStreak = 0; $failStreak = 0; $prevItem = $null
         }
     } else {
-        Write-Host "BUILD FAILED after patch - reverting." -ForegroundColor Red
-        # Capture the patch + first build errors before reverting so failed
-        # attempts can be diagnosed (the revert otherwise erases all evidence).
-        $buildErrors = ($newBuild.Output -split "`n" | Select-String "error|erreur" | Select-Object -First 5) -join "`n"
-        $patchDump = ($edits | ForEach-Object { "<<< SEARCH`n$($_.Search)`n===`n$($_.Replace)`n>>> REPLACE" }) -join "`n"
-        Add-Content -Path "g:\Rimwork\scripts\logs\failed_builds.log" -Value "=== [iter $i] $changeDesc ($targetRelPath) ===`n$patchDump`n--- errors ---`n$buildErrors`n"
-        Set-Content -Path $targetAbsPath -Value $targetContent -NoNewline
-        Add-Content -Path "g:\Rimwork\DEV_LOG.md" -Value "- [iter $i] REVERTED (build failed): $changeDesc ($targetRelPath)"
-        $lastFailNote = "Your previous patch applied but BROKE THE BUILD (it was reverted). Compiler errors:`n$buildErrors`nYou invented methods/enum members that do not exist. Use ONLY types, methods and enum values that appear in the file content shown. If the roadmap item gives an exact REPLACE block, copy it VERBATIM."
-        $lastFailItem = $itemKey
+        Write-Host "BUILD CASSE apres patch - revert." -ForegroundColor Red
+        Add-Content -Path "$logDir\failed_builds.log" -Value "=== [iter $i] $changeDesc ($($target.Rel)) ===`n$buildErrors`n"
+        Set-Content -Path $target.Abs -Value $targetContent -NoNewline
+        Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] REVERTED (build casse): $changeDesc ($($target.Rel))"
+        $lastFailNote = "Ton patch a CASSE le build (reverti). Erreurs:`n$buildErrors`nN'utilise QUE des types/methodes presents dans le contenu montre."; $lastFailItem = $itemKey
         Add-BadIdentifiers -BuildErrors $buildErrors
-        Add-Lesson -Context "Task: $changeDesc`nYour patch:`n$patchDump`nCompiler errors:`n$buildErrors"
+        Add-Lesson -Context "Tache: $changeDesc`nErreurs:`n$buildErrors"
     }
 
     Start-Sleep -Seconds $DelaySeconds

@@ -6,12 +6,16 @@
 # and the dashboard can SEE the microbe stage running, not just compiling.
 param(
     [int]$DurationSec = 90,
-    [string]$ForkDir = "g:\Rimwork\reference\thrive",
+    [string]$ForkDir = "",
     [string]$GodotExe = "C:\Users\Smedj\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine.Mono_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.6.3-stable_mono_win64\Godot_v4.6.3-stable_mono_win64.exe"
 )
 
-$log = "g:\Rimwork\scripts\logs\playtest_origines.log"
-$out = "g:\Rimwork\scripts\logs\health_origines.json"
+# Source de verite unique (paths) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+if (-not $ForkDir) { $ForkDir = $cfg.Paths.ActiveGame }
+$log = Join-Path $cfg.Paths.Logs 'playtest_origines.log'
+$out = Join-Path $cfg.Paths.Logs 'health_origines.json'
 
 $p = Start-Process -FilePath $GodotExe -PassThru -RedirectStandardOutput $log `
     -ArgumentList @("--path", $ForkDir, "res://src/benchmark/microbe/MicrobeBenchmark.tscn")
