@@ -243,8 +243,8 @@ Du moins risqué (additif) au plus structurant. Chaque phase est livrable seule.
 | **2. Machine à modes** | `mode.json` + `orchestrator.ps1` qui garantit l'exclusivité DEV/PLAY/ARENA/IDLE. `startup_all` ne lance plus que l'orchestrateur ; boutons de mode au dashboard. | Oui (orchestration) | Moyen | ✅ **Fait** (logique testée en dry-run) |
 | **3. État consolidé** | `lib/State.ps1` : vue d'état unique (`Get-DownHereState`) + endpoint `/state.json` sur le dashboard. | Modéré | Faible | ✅ **Fait** |
 | **4. Jeu reproductible** | `setup-game.ps1` clone le fork (branche down-here) dans `reference/thrive` s'il est absent → un clone de Rimwork redonne un projet jouable. (Submodule volontairement évité : pas de chirurgie git risquée sur le dossier jeu vivant de 3.9 Go.) | Repo seulement | Faible | ✅ **Fait** |
-| **5. Patch robuste** | Remplacer le SEARCH/REPLACE fragile (taux d'échec élevé) par des ancres/outil de patch plus fiables. | Dev Agent | Moyen | ⬜ |
-| **6. Tests d'orchestration** | Pester sur Config + machine à modes + parsing. | Additif | Faible | ⬜ |
+| **5. Patch robuste** | `lib/Patch.ps1` : matcher SEARCH/REPLACE extrait + **passe tolérante** (ignore les lignes vides, *uniquement si match unique* → jamais de faux positif). `dev_loop` l'utilise. | Dev Agent | Moyen | ✅ **Fait** (testé) |
+| **6. Tests d'orchestration** | `scripts/tests/run-tests.ps1` : harnais autonome (sans Pester) — Config, Patch, Modes, State, parse de tous les scripts. **22/22 vert.** | Additif | Faible | ✅ **Fait** |
 | **7. Cap world-model** | La Mémoire (lessons + dataset + feedback) alimente un modèle prédictif de l'état du jeu (vision JEPA). | R&D | Élevé | 🌌 horizon |
 
 ---

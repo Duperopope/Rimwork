@@ -21,8 +21,9 @@ param(
     [int]$DelaySeconds = 5
 )
 
-# Source de verite unique (paths/url) - voir scripts/lib/Config.ps1.
+# Source de verite unique (paths/url) + matcher de patch - voir scripts/lib/.
 . "$PSScriptRoot\lib\Config.ps1"
+. "$PSScriptRoot\lib\Patch.ps1"
 $cfg = Get-DownHereConfig
 $Root = $cfg.Root
 if (-not $LlmUrl) { $LlmUrl = $cfg.Llm.BaseUrl + $cfg.Llm.ChatPath }
@@ -196,7 +197,8 @@ function Add-BadIdentifiers {
     }
 }
 
-function Get-NormalizedLine { param([string]$Line) return ($Line.Trim() -replace '\s+', ' ') }
+# Get-NormalizedLine / Parse-SearchReplaceBlocks / Try-ApplyEdit -> deplaces
+# dans scripts/lib/Patch.ps1 (testables + passe tolerante). Voir Phase 5.
 
 # Une tache n'est cochee que si le code qu'elle CITE existe vraiment dans le
 # fichier cible (anti faux-succes). Vrai si aucun code cite (rien a verifier).
@@ -214,42 +216,7 @@ function Test-ItemEvidence {
     return $false
 }
 
-function Parse-SearchReplaceBlocks {
-    param([string]$Text)
-    $results = @()
-    $pattern = '(?ms)FILE:\s*(?<path>\S+)\s*<{5,}\s*SEARCH\s*\r?\n(?<search>.*?)\r?\n={5,}\s*\r?\n(?<replace>.*?)\r?\n>{5,}\s*REPLACE'
-    foreach ($m in [regex]::Matches($Text, $pattern)) {
-        $results += [pscustomobject]@{
-            Path    = $m.Groups['path'].Value.Trim()
-            Search  = $m.Groups['search'].Value -replace "`r", ""
-            Replace = $m.Groups['replace'].Value -replace "`r", ""
-        }
-    }
-    return $results
-}
-
-function Try-ApplyEdit {
-    param([string]$Content, [string]$Search, [string]$Replace)
-    $contentLines = $Content -split "`n"
-    $searchLines = @($Search -split "`n")
-    while ($searchLines.Count -gt 0 -and (Get-NormalizedLine $searchLines[0]) -eq '') { $searchLines = @($searchLines[1..($searchLines.Count - 1)]) }
-    while ($searchLines.Count -gt 0 -and (Get-NormalizedLine $searchLines[-1]) -eq '') { $searchLines = @($searchLines[0..($searchLines.Count - 2)]) }
-    if ($searchLines.Count -eq 0) { return $null }
-    $normSearch = @($searchLines | ForEach-Object { Get-NormalizedLine $_ })
-    for ($start = 0; $start -le $contentLines.Count - $searchLines.Count; $start++) {
-        $isMatch = $true
-        for ($k = 0; $k -lt $searchLines.Count; $k++) {
-            if ((Get-NormalizedLine $contentLines[$start + $k]) -ne $normSearch[$k]) { $isMatch = $false; break }
-        }
-        if ($isMatch) {
-            $end = $start + $searchLines.Count - 1
-            $before = if ($start -gt 0) { (@($contentLines[0..($start - 1)]) -join "`n") + "`n" } else { "" }
-            $after = if ($end -lt $contentLines.Count - 1) { "`n" + (@($contentLines[($end + 1)..($contentLines.Count - 1)]) -join "`n") } else { "" }
-            return $before + $Replace.Trim("`n") + $after
-        }
-    }
-    return $null
-}
+# (Parse-SearchReplaceBlocks + Try-ApplyEdit : voir scripts/lib/Patch.ps1)
 
 function Hide-CompleteEnums {
     param([string]$Content)
