@@ -21,6 +21,7 @@ supervisé par une IA frontière pour l'architecture, la 3D et l'UI.
 - 🏗️ [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — carte mentale + schémas du système
 - 🤖 [docs/RECURSIVE_SELF_IMPROVEMENT.md](docs/RECURSIVE_SELF_IMPROVEMENT.md) — l'auto-amélioration récursive (world model)
 - 🔬 [docs/RSI_EVIDENCE.md](docs/RSI_EVIDENCE.md) — **preuve mesurée** que ça s'améliore
+- 🧬 [docs/EMERGENCE_EVIDENCE.md](docs/EMERGENCE_EVIDENCE.md) — **preuve** : world model auto-supervisé → comportement **émergent**
 
 ## La vision en stades
 

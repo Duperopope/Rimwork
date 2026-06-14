@@ -40,6 +40,8 @@ Un seul **MODE** autonome actif à la fois (DEV / PLAY / ARENA / IDLE) — voir
 | `wm/train.py` | Entraîne le world model (sklearn, choix LogReg/Forest par AUC). |
 | `wm/predict.py` | Prédit P(succès) d'un patch (appelé par le dev_loop). |
 | `wm/evaluate.py` | **Preuve** scientifique : courbe d'apprentissage + gain de la politique (`docs/RSI_EVIDENCE.md`). |
+| `wm/microbe_env.py` | Sandbox déterministe (cellule + énergie + nourriture) pour l'émergence. |
+| `wm/emergence.py` | **Preuve** : world model **auto-supervisé** → **survie émergente** (`docs/EMERGENCE_EVIDENCE.md`). |
 | `lib/WorldModel.ps1` | Pont PowerShell + log d'expérience vécue. |
 | `lib/Policy.ps1` | Bandit ε-greedy qui auto-règle le seuil de gate par récompense. |
 | `recurse.ps1` | Boucle méta : ingère l'expérience → ré-entraîne → journalise (`-Loop`). |
