@@ -30,7 +30,11 @@ if (-not $llmAlive) {
     # background (&/nohup/setsid) children die when their wsl session ends.
     $up = wsl -d Ubuntu -u root -- bash -c "pgrep -x llama-server >/dev/null && echo UP"
     if ($up -notmatch "UP") {
-        Start-Process wsl -ArgumentList "-d","Ubuntu","-u","root","--","/root/llama.cpp/build/bin/llama-server","-m","/root/models/$champ","-ngl","99","-c","16384","--host","0.0.0.0","--port","1234" -WindowStyle Hidden
+        # AUTO-FIT (pas de -ngl 99 force): llama.cpp met autant de couches sur le
+        # GPU que la VRAM LIBRE le permet, le reste sur CPU. Indispensable car le
+        # JEU partage les 16 Go: forcer -ngl 99 fait planter le chargement quand
+        # le jeu est ouvert. Un MoE 3B-actifs reste rapide meme avec un peu de CPU.
+        Start-Process wsl -ArgumentList "-d","Ubuntu","-u","root","--","/root/llama.cpp/build/bin/llama-server","-m","/root/models/$champ","-c","8192","--host","0.0.0.0","--port","1234" -WindowStyle Hidden
     }
     # Big models (MoE 14GB) can take ~2 min to load into VRAM.
     foreach ($w in 1..8) { Start-Sleep -Seconds 20; $llmAlive = Test-WslLlm; if ($llmAlive) { break } }
@@ -65,6 +69,23 @@ $gameWd = Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" |
     Where-Object { $_.CommandLine -match 'game_watchdog' }
 if (-not $gameWd) {
     Start-Process pwsh -ArgumentList '-NoProfile','-File','g:\Rimwork\scripts\game_watchdog.ps1' -WindowStyle Hidden
+}
+
+# 6b. Model arena (selection naturelle continue): cherche en permanence un
+# meilleur cerveau dans l'ocean HF, remplace le champion quand un challenger
+# gagne. Exactement un instance.
+$arena = Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" |
+    Where-Object { $_.CommandLine -match 'model_arena' }
+if (-not $arena) {
+    Start-Process pwsh -ArgumentList '-NoProfile','-File','g:\Rimwork\scripts\model_arena.ps1','-Forever' -WindowStyle Hidden
+}
+
+# 6c. Agent joueur: le dev JOUE le stade microbe (lit l'etat, decide, pilote la
+# cellule). Idle hors partie. Exactement une instance.
+$player = Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" |
+    Where-Object { $_.CommandLine -match 'play_agent' }
+if (-not $player) {
+    Start-Process pwsh -ArgumentList '-NoProfile','-File','g:\Rimwork\scripts\play_agent.ps1' -WindowStyle Hidden
 }
 
 # 6. Publish the public progress site if it changed

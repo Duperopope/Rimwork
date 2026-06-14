@@ -72,7 +72,7 @@ function Get-DownHereSiteHtml {
     $pendingBlocks = @()
     $cur = $null
     foreach ($line in $roadmap) {
-        if ($line -match '^\s*-\s*\[ \] (Step .*)$') {
+        if ($line -match '^\s*-\s*\[ \]\s*(.+)$') {
             if ($cur) { $pendingBlocks += ,$cur }
             $cur = @($Matches[1])
         } elseif ($cur -and $line -match '^\s{4,}(\S.*)$' -and $line -notmatch '^\s*-\s*\[') {
@@ -84,21 +84,21 @@ function Get-DownHereSiteHtml {
     if ($cur) { $pendingBlocks += ,$cur }
 
     $teams = [ordered]@{
-        "CŒUR DE SIMULATION" = @()
-        "PLANÈTES & ÉCHELLES" = @()
-        "PRÉSENTATION 3D" = @()
-        "IDÉES DU CRITIQUE IA" = @()
+        "DONNÉES (équilibrage cellule)" = @()
+        "TRADUCTIONS" = @()
+        "CODE (C#)" = @()
+        "AUTRE" = @()
     }
     foreach ($b in $pendingBlocks) {
         $head = $b[0]
         $body = if ($b.Count -gt 1) { ($b[1..([Math]::Min($b.Count - 1, 6))] -join " ") } else { "" }
         if ($body.Length -gt 320) { $body = $body.Substring(0, 320) + "..." }
         $card = "<details class='trk-item'><summary><span class='trk-dot'></span>$(E($head))</summary>" +
-                "<div class='trk-desc'>$(E($body))<br><span class='muted'>Statut: en file pour le développeur IA local &middot; pas d'estimation (dev autonome 24/7)</span></div></details>"
-        if ($head -match '^Step C\.') { $teams["IDÉES DU CRITIQUE IA"] += $card }
-        elseif ($head -match 'Game3D|planet|orbit|Planet') { $teams["PRÉSENTATION 3D"] += $card }
-        elseif ($head -match 'WorldModel|Micro|Region|tile|M\.\d') { $teams["PLANÈTES & ÉCHELLES"] += $card }
-        else { $teams["CŒUR DE SIMULATION"] += $card }
+                "<div class='trk-desc'>$(E($body))<br><span class='muted'>Statut: en file pour le développeur IA local &middot; pas d'estimation (dev autonome)</span></div></details>"
+        if ($head -match '\.json') { $teams["DONNÉES (équilibrage cellule)"] += $card }
+        elseif ($head -match '\.po') { $teams["TRADUCTIONS"] += $card }
+        elseif ($head -match '\.cs') { $teams["CODE (C#)"] += $card }
+        else { $teams["AUTRE"] += $card }
     }
     $trkHtml = ""
     foreach ($tm in $teams.Keys) {
@@ -107,17 +107,27 @@ function Get-DownHereSiteHtml {
         $trkHtml += "<div class='trk-team'><div class='trk-name'>$tm <span class='pill'>$($items.Count)</span></div>$inner</div>"
     }
 
-    # ---------- ACTIVITY: dated via commits interleaved with devlog tail ----------
+    # ---------- ACTIVITY: commits des DEUX depots, fusionnes par date ----------
+    # Le superviseur commit dans g:\Rimwork ; le dev IA commit dans le jeu
+    # (reference/thrive, son propre depot). On lit les deux et on trie par
+    # horodatage reel (%at) pour que le travail du dev soit VISIBLE.
     $actRows = ""
-    $recent = git -C g:\Rimwork log -25 --format="%ad|%s" --date=format:"%d/%m %H:%M" 2>$null
-    foreach ($c in $recent) {
-        $p2 = $c -split '\|', 2
-        $isAi = $p2[1] -match '^\[ai-loop'
+    $allCommits = @()
+    foreach ($repo in @("g:\Rimwork", "g:\Rimwork\reference\thrive")) {
+        $log = git -C $repo log -40 --format="%at|%ad|%s" --date=format:"%d/%m %H:%M" 2>$null
+        foreach ($c in $log) {
+            $p = $c -split '\|', 3
+            if ($p.Count -lt 3) { continue }
+            $allCommits += [pscustomobject]@{ At = [long]$p[0]; Date = $p[1]; Msg = $p[2] }
+        }
+    }
+    foreach ($c in ($allCommits | Sort-Object At -Descending | Select-Object -First 25)) {
+        $isAi = $c.Msg -match '^\[ai-loop'
         $cls = if ($isAi) { "ok" } else { "done" }
         $who = if ($isAi) { "IA locale" } else { "superviseur" }
-        $t2 = $p2[1] -replace '^\[ai-loop iter \d+\]\s*', ''
+        $t2 = $c.Msg -replace '^\[ai-loop iter \d+\]\s*', ''
         if ($t2.Length -gt 110) { $t2 = $t2.Substring(0, 110) + "..." }
-        $actRows += "<div class='ev $cls'><span class='tag'>$($p2[0])</span><span class='tag2'>$who</span><span class='txt'>$(E($t2))</span></div>"
+        $actRows += "<div class='ev $cls'><span class='tag'>$($c.Date)</span><span class='tag2'>$who</span><span class='txt'>$(E($t2))</span></div>"
     }
 
     # ---------- Live health (dashboard only) ----------
@@ -126,8 +136,8 @@ function Get-DownHereSiteHtml {
         $hj = $null
         try { $hj = Get-Content "g:\Rimwork\scripts\logs\health.json" -Raw -ErrorAction Stop | ConvertFrom-Json } catch {}
         $h = if ($hj) {
-            $rooms = if ($hj.simSummary -match 'VERDICT: (\d+)') { $Matches[1] } else { "?" }
-            "BUILD <b style='color:#3fb950'>$($hj.build)</b> &middot; SIM <b style='color:#3fb950'>$(if ($hj.simOk) {'OK'} else {'CRASH'})</b> &middot; $rooms pièces &middot; itération $($hj.iter) en $($hj.iterSeconds)s ($($hj.timestamp))"
+            $summary = if ($hj.simSummary) { E([string]$hj.simSummary) } else { "" }
+            "BUILD <b style='color:#3fb950'>$($hj.build)</b> &middot; $summary &middot; it&eacute;ration $($hj.iter) en $($hj.iterSeconds)s ($($hj.timestamp))"
         } else { "en attente d'itération..." }
         $lessons = ""
         try { $lessons = (Get-Content "g:\Rimwork\scripts\logs\lessons.md" | Select-Object -Last 5 | ForEach-Object { "<li>$(E($_ -replace '^- ',''))</li>" }) -join "" } catch {}
@@ -142,26 +152,28 @@ function Get-DownHereSiteHtml {
             $taskLine = "$(E($itTxt))$warn"
         } catch {}
 
-        # Game state from the agent bridge: never silently stuck at the menu.
-        $gameLine = "<span class='muted'>&eacute;tat du jeu inconnu (bridge muet)</span>"
+        # Etat du jeu Thrive: lance ou non (le watchdog le maintient en vie).
+        $gameLine = "<span class='muted'>jeu non lanc&eacute;</span>"
         try {
-            $ast = Get-Item "g:\Rimwork\scripts\logs/agent_state.json" -ErrorAction Stop
-            $ageS = [int]((Get-Date) - $ast.LastWriteTime).TotalSeconds
-            $as = Get-Content $ast.FullName -Raw | ConvertFrom-Json
-            if ($ageS -gt 30) { $gameLine = "<b style='color:#f85149'>jeu arr&ecirc;t&eacute; ou gel&eacute; (dernier &eacute;tat il y a ${ageS}s)</b>" }
-            elseif ($as.menuOpen) { $gameLine = "<b style='color:#d29922'>AU MENU PRINCIPAL</b> &middot; l'agent peut le sortir (newgame)" }
-            else { $gameLine = "EN JEU &middot; jour $($as.day), $($as.hour)h &middot; vue $($as.view) &middot; $(@($as.pawns).Count) pawns &middot; $($as.rooms) pi&egrave;ces$(if ($as.paused) { " &middot; <b style='color:#d29922'>PAUSE</b>" })" }
+            $gpid = (Get-Content "g:\Rimwork\scripts\game.pid" -Raw -ErrorAction Stop).Trim()
+            if ($gpid -and (Get-Process -Id ([int]$gpid) -ErrorAction SilentlyContinue)) {
+                $gameLine = "<b style='color:#3fb950'>jeu lanc&eacute;</b> &middot; Thrive (pid $gpid)"
+            }
         } catch {}
         $pt = ""
-        try {
-            $ptr = Get-Content "g:\Rimwork\scripts\logs\playtest_report.json" -Raw -ErrorAction Stop | ConvertFrom-Json
-            $pt = " &middot; dernier playtest IA: $($ptr.issued.Count) actions, $($ptr.anomalies.Count) anomalies ($($ptr.timestamp))"
-        } catch {}
+        # Bouton UNIQUE qui reflete l'etat: PAUSED -> proposer REPRENDRE (vert),
+        # RUNNING -> proposer PAUSE (rouge). Le libelle dit l'action a venir,
+        # la pastille dit l'etat actuel.
+        if ($StackState -eq "PAUSED") {
+            $toggleBtn = "<button class='btnr' onclick=`"fetch('/resume',{method:'POST'}).then(()=>location.reload())`">&#9654; REPRENDRE LE DEV</button> <span class='muted'>&#9209;&#65039; en pause</span>"
+        } else {
+            $toggleBtn = "<button class='btnp' onclick=`"if(confirm('Mettre toute la machine en pause ?')){fetch('/pause',{method:'POST'}).then(()=>location.reload())}`">&#9208; METTRE EN PAUSE</button> <span class='muted' style='color:#3fb950'>&#9679; dev actif</span>"
+        }
         $liveBlock = @"
 <div class='card'><h2>&#127918; Sant&eacute; en direct</h2><div>$h</div>
 <div style='margin-top:8px'><b>T&Acirc;CHE EN COURS:</b> $taskLine</div>
 <div style='margin-top:4px'><b>JEU:</b> $gameLine$pt</div>
-<div style='margin-top:8px'><button class='btnp' onclick="if(confirm('Mettre toute la machine en pause ?')){fetch('/pause',{method:'POST'}).then(()=>location.reload())}">&#9208; PAUSE MACHINE</button> <button class='btnr' onclick="fetch('/resume',{method:'POST'}).then(()=>location.reload())">&#9654; REPRENDRE</button> <span class='muted'>&eacute;tat: $StackState</span></div></div>
+<div style='margin-top:8px'>$toggleBtn</div></div>
 <div class='card'><h2>&#129504; Le&ccedil;ons r&eacute;centes de l'IA</h2><ul>$lessons</ul></div>
 "@
     }
@@ -259,7 +271,7 @@ footer { text-align:center; color:#566374; padding:18px; font-size:12px; }
 </style></head><body>
 <header>
 <h1>DOWN HERE <b>!</b></h1>
-<p class='sub'>Colonie &middot; 4X &middot; exploration spatiale &mdash; d&eacute;velopp&eacute; 24/7 par une IA locale autonome supervis&eacute;e. Mise &agrave; jour: $genAt.</p>
+<p class='sub'>Down Here Origins &middot; du vivant aux &eacute;toiles &middot; stade cellulaire actif &mdash; d&eacute;velopp&eacute; par une IA locale supervis&eacute;e. Mise &agrave; jour: $genAt.</p>
 $publicNote
 <nav>
 <a onclick="show('overview',this)" class='on'>Vue d'ensemble</a>
@@ -340,7 +352,7 @@ $feedbackBody</div></section>
 </div>
 $liveBlock
 <div class='card'><h2>&#127757; Le projet</h2>
-<p>DOWN HERE ! commence au niveau bact&eacute;rie (ouverture fa&ccedil;on Spore), grandit en colonie profonde fa&ccedil;on RimWorld/Dwarf Fortress sur des plan&egrave;tes hexagonales compl&egrave;tes (poly&egrave;dre de Goldberg), et s'&eacute;tend en 4X spatial jusqu'&agrave; un endgame fa&ccedil;on Kerbal. Particularit&eacute; unique: le gameplay est &eacute;crit par un LLM local autonome (boucle build&rarr;test&rarr;simulation&rarr;commit), supervis&eacute; et outill&eacute; par une IA frontier. Chaque livraison ci-dessus est un commit r&eacute;el, dat&eacute;, v&eacute;rifi&eacute; par compilation, tests et simulation jou&eacute;e.</p></div>
+<p>Down Here Origins commence au stade cellulaire (base Thrive r&eacute;ecrite, jouable), puis greffe d'autres stades&nbsp;: animal/tribus, planificateur 4X plan&eacute;taire, et un endgame spatial fa&ccedil;on Kerbal &mdash; un seul jeu, du vivant aux &eacute;toiles. Le contenu &eacute;troit (donn&eacute;es, traductions, petits correctifs) est &eacute;crit par un LLM local autonome (boucle &eacute;dite&rarr;build&rarr;commit), supervis&eacute; par une IA frontier qui fait le structurel. Chaque livraison ci-dessus est un commit r&eacute;el, dat&eacute;, v&eacute;rifi&eacute; par compilation.</p></div>
 </section>
 </main>
 <footer>DOWN HERE ! &mdash; d&eacute;p&ocirc;t: github.com/Duperopope/Rimwork &middot; g&eacute;n&eacute;r&eacute; $genAt</footer>

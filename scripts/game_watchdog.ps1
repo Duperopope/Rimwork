@@ -12,7 +12,9 @@ with no manual restart needed:
 #>
 
 param(
-    [string]$ProjectDir = "g:\Rimwork\src\RimWorldGodot",
+    # DOWN HERE: le vrai jeu = Thrive reworke (reference/thrive), plus l'ancien
+    # colony-sim RimWorld. On lance ce projet-la.
+    [string]$ProjectDir = "g:\Rimwork\reference\thrive",
     [int]$PollSeconds = 10,
     # The dev loop can produce a new KEPT change every ~10s, which used to
     # restart the game (and lose all in-game progress/days) just as often.
@@ -52,12 +54,16 @@ function Write-Log {
 # Copy the up-to-date ExportRelease assemblies over the Debug ones so the
 # game launch always reflects the latest KEPT code.
 function Sync-DebugAssemblies {
+    # Thrive: `godot --path` recompile le projet en Debug a chaque lancement
+    # (build incremental de l'editeur Godot), donc on n'a pas a copier des
+    # assemblages ExportRelease comme pour l'ancien RimWorld. On copie quand
+    # meme Thrive.dll si une build ExportRelease plus recente existe.
     $src = "$ProjectDir\.godot\mono\temp\bin\ExportRelease"
     $dst = "$ProjectDir\.godot\mono\temp\bin\Debug"
-    foreach ($name in @('RimWorldGodot.dll', 'RimWorldGodot.pdb', 'RimWorldLab.Core.dll', 'RimWorldLab.Core.pdb')) {
+    foreach ($name in @('Thrive.dll', 'Thrive.pdb')) {
         $from = Join-Path $src $name
-        if (Test-Path $from) {
-            Copy-Item -Path $from -Destination (Join-Path $dst $name) -Force
+        if ((Test-Path $from) -and (Test-Path $dst)) {
+            Copy-Item -Path $from -Destination (Join-Path $dst $name) -Force -ErrorAction SilentlyContinue
         }
     }
 }
@@ -67,7 +73,7 @@ function Sync-DebugAssemblies {
 function Clear-StaleGameProcesses {
     param([int]$KeepPid = -1)
     Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
-        Where-Object { ($_.Name -match '^(godot|Rimwork)') -and $_.ProcessId -ne $KeepPid } |
+        Where-Object { ($_.Name -match '^(godot|Thrive|Rimwork)') -and $_.ProcessId -ne $KeepPid } |
         ForEach-Object {
             Write-Log "Cleaning up stale process $($_.Name) (pid $($_.ProcessId))"
             Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue

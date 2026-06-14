@@ -1,100 +1,108 @@
-# DOWN HERE! - MODEL ARENA: downloads recent local code LLMs, benchmarks
-# them on OUR REAL TASK (write a SEARCH/REPLACE patch against this repo's
-# actual code that applies cleanly and still builds), crowns a champion in
-# scripts/llm_champion.txt (read by startup_all.ps1), and deletes losers to
-# reclaim disk. Raw tok/s is only a tiebreaker - relevance beats speed.
-#
-# Usage:
-#   pwsh -File model_arena.ps1                  # bench every candidate
-#   pwsh -File model_arena.ps1 -Only devstral   # bench one candidate
+<#
+DOWN HERE! - ARENE DE SELECTION NATURELLE DES LLM.
+
+Idee (directeur): on fait un jeu sur la selection naturelle, alors on
+l'applique a notre propre dev. Il y a des MILLIERS de LLM dans l'ocean
+HuggingFace - peut-etre LE bon est dedans. L'arene:
+  1. CRAWLE l'ocean HF (plusieurs requetes) pour decouvrir des coders recents
+  2. telecharge les challengers qui TIENNENT sur 16 Go (auto-fit possible)
+  3. les fait COMBATTRE sur NOTRE vraie tache (patch SEARCH/REPLACE sur des
+     fichiers de donnees Thrive reels, valide instantanement par parse JSON
+     + application verbatim - rapide, pas de build lent)
+  4. COURONNE le champion -> scripts/llm_champion.txt (lu par startup_all)
+  5. SUPPRIME les perdants pour liberer de la place et tenter d'autres
+  6. en mode -Forever: recommence sans fin = selection naturelle perpetuelle
+
+Usage:
+  pwsh -File model_arena.ps1                 # un cycle
+  pwsh -File model_arena.ps1 -Forever        # selection naturelle continue
+  pwsh -File model_arena.ps1 -Only qwen3     # un seul candidat
+#>
 param(
     [string]$Only = "",
-    [int]$KeepTop = 2
+    [int]$KeepTop = 2,            # combien de modeles on garde sur le disque
+    [int]$NewPerCycle = 2,        # nouveaux challengers crawles par cycle
+    [switch]$Forever,             # selection naturelle continue
+    [int]$CycleRestSec = 1800     # repos entre cycles (mode Forever)
 )
 
 $ErrorActionPreference = "Continue"
-$llm = "http://localhost:1235"  # arena-private port: nothing else may answer here
+# GPU EXCLUSIF: le champion 30B occupe ~14.7 Go sur 16 -> impossible de charger
+# un challenger A COTE. L'arene benche donc UN modele a la fois sur le port prod
+# (1234), puis rend la main au champion. La boucle de dev tolere ces swaps brefs.
+$prodPort = 1234
+$llm = "http://localhost:$prodPort"
 $arenaLog = "g:\Rimwork\scripts\logs\model_arena.json"
 $championFile = "g:\Rimwork\scripts\llm_champion.txt"
+$triedFile = "g:\Rimwork\scripts\logs\arena_tried.txt"   # memoire des modeles deja juges
+$thrive = "g:\Rimwork\reference\thrive"
 
-# ---- Candidates (GGUF fitting a 16GB RX 7800 XT; MoE may spill to CPU) ----
-$candidates = @(
-    @{ key = "qwen25-14b";  file = "Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf"; repo = "bartowski/Qwen2.5-Coder-14B-Instruct-GGUF" }  # baseline
-    @{ key = "devstral";    file = "Devstral-Small-2505-Q4_K_M.gguf";        repo = "mistralai/Devstral-Small-2505_gguf" }
+# ---- Candidats de depart (GGUF tenant sur RX 7800 XT 16 Go) ----
+$baseCandidates = @(
     @{ key = "qwen3-coder-30b"; file = "Qwen3-Coder-30B-A3B-Instruct-Q3_K_M.gguf"; repo = "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF" }
+    @{ key = "qwen25-14b";      file = "Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf";   repo = "bartowski/Qwen2.5-Coder-14B-Instruct-GGUF" }
+    @{ key = "yi-coder-9b";     file = "Yi-Coder-9B-Chat-Q4_K_M.gguf";             repo = "" }
 )
-# ---- CRAWLER: discover recent code-capable GGUF models (the same catalog
-# LM Studio pulls from - the HF hub), keep only files fitting 16GB VRAM,
-# max 2 new downloads per run (bandwidth sanity).
+
+# ---- CRAWLER: decouvre des coders recents dans l'ocean HF ----
+# Plus de requetes = on ratisse plus large. On ne garde que les GGUF Q4_K_M /
+# Q3_K_M tenant en VRAM (4-15.5 Go), tries par popularite.
 function Get-CrawledCandidates {
-    $found = @()
-    foreach ($q in "coder gguf", "code instruct gguf") {
+    $found = @{}
+    $queries = @("coder gguf", "code instruct gguf", "qwen coder gguf",
+                 "deepseek coder gguf", "codestral gguf", "starcoder gguf",
+                 "code llama gguf", "granite code gguf")
+    foreach ($q in $queries) {
         try {
-            $hits = Invoke-RestMethod "https://huggingface.co/api/models?search=$([uri]::EscapeDataString($q))&sort=downloads&direction=-1&limit=12" -TimeoutSec 60
+            $hits = Invoke-RestMethod "https://huggingface.co/api/models?search=$([uri]::EscapeDataString($q))&sort=downloads&direction=-1&limit=15" -TimeoutSec 60
         } catch { continue }
         foreach ($m in $hits) {
-            if ($m.id -match "embed|rerank|vision|VL|abliterat") { continue }
+            if ($m.id -match "embed|rerank|vision|VL|abliterat|base-gguf") { continue }
+            if ($found.ContainsKey($m.id)) { continue }
             try { $tree = Invoke-RestMethod "https://huggingface.co/api/models/$($m.id)/tree/main" -TimeoutSec 60 } catch { continue }
-            $gg = $tree | Where-Object { $_.path -match "Q4_K_M\.gguf$|Q3_K_M\.gguf$" -and $_.path -notmatch "of-000" } |
+            $gg = $tree | Where-Object { $_.path -match "Q4_K_M\.gguf$|Q3_K_M\.gguf$" -and $_.path -notmatch "of-000|00001-of" } |
                   Where-Object { ($_.lfs.size ?? $_.size) -gt 4e9 -and ($_.lfs.size ?? $_.size) -lt 15.5e9 } |
                   Sort-Object { $_.lfs.size ?? $_.size } -Descending | Select-Object -First 1
             if ($gg) {
-                $found += @{ key = ($m.id -replace '.*/', '') ; file = [System.IO.Path]::GetFileName($gg.path); repo = $m.id }
+                $found[$m.id] = @{ key = ($m.id -replace '.*/', ''); file = [System.IO.Path]::GetFileName($gg.path); repo = $m.id }
             }
         }
     }
-    return $found
+    return @($found.Values)
 }
-$known = @($candidates | ForEach-Object { $_.file })
-$newOnes = @(Get-CrawledCandidates | Where-Object { $known -notcontains $_.file } | Select-Object -First 2)
-if ($newOnes.Count -gt 0) {
-    Write-Host "crawler found $($newOnes.Count) new candidate(s): $($newOnes.key -join ', ')" -ForegroundColor Cyan
-    $candidates = @($candidates) + $newOnes
-}
-if ($Only) { $candidates = @($candidates | Where-Object { $_.key -match $Only }) }
 
-# ---- Bench tasks: REAL repo code, deterministic scoring ----
-# Each: a real file, an instruction, and a check that the produced patch
-# applies (SEARCH verbatim) and the project still builds.
+# ---- Taches de combat: fichiers Thrive REELS, scoring deterministe INSTANTANE.
+# On teste la competence cle du dev: produire un SEARCH/REPLACE qui (a) matche
+# le fichier VERBATIM, (b) donne un resultat VALIDE (JSON qui parse), (c) fait
+# le changement demande. Pas de build lent: l'arene doit juger vite des dizaines
+# de modeles. Le champion est ensuite confirme en prod par la vraie boucle.
 $tasks = @(
-    @{ file = "src/RimWorldLab.Core/WorldModel.cs"; lines = 240
-       ask = "Add a public read-only property `TotalBodies` to the SolarSystem class returning Bodies.Count." }
-    @{ file = "src/RimWorldLab.Core/Jobs.cs"; lines = 200
-       ask = "In TaskBoard, add a public method `PendingOfKind(TaskKind kind)` returning the count of pending orders of that kind." }
-    @{ file = "src/RimWorldLab.Core/Needs.cs"; lines = 160
-       ask = "Add a public static method `Clamp01(float v)` to the first public static class you see (or create class NeedsMath) returning Math.Clamp(v, 0f, 1f)." }
-    @{ file = "src/RimWorldLab.Core/SaveLoad.cs"; lines = 160
-       ask = "Add a public static method `SlotExists(string path)` to SaveLoad returning System.IO.File.Exists(path)." }
+    @{ file = "simulation_parameters/microbe_stage/compounds.json"; lines = 60; kind = "json"
+       ask = 'Add a new field `"ArenaTag": 1` to the VERY FIRST compound object in this JSON, keeping the JSON valid.'; expect = 'ArenaTag' }
+    @{ file = "simulation_parameters/microbe_stage/membranes.json"; lines = 60; kind = "json"
+       ask = 'Add a new field `"ArenaTag": 1` to the VERY FIRST membrane object in this JSON, keeping the JSON valid.'; expect = 'ArenaTag' }
+    @{ file = "simulation_parameters/microbe_stage/biomes.json"; lines = 70; kind = "json"
+       ask = 'Add a new field `"ArenaTag": 1` to the VERY FIRST top-level object in this JSON, keeping the JSON valid.'; expect = 'ArenaTag' }
 )
 
 function Wait-Llm([int]$timeoutSec = 240) {
     $t0 = Get-Date
     while (((Get-Date) - $t0).TotalSeconds -lt $timeoutSec) {
-        try { if ((Invoke-WebRequest "$llm/health" -UseBasicParsing -TimeoutSec 5).StatusCode -eq 200) { return $true } } catch {}
+        try { if ((Invoke-RestMethod "$llm/health" -TimeoutSec 5).status -eq "ok") { return $true } } catch {}
         Start-Sleep 5
     }
     return $false
 }
 
-function Start-Model([string]$file) {
-    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*1235'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$file -ngl 99 -c 16384 --host 0.0.0.0 --port 1235 > /var/log/llama-arena.log 2>&1 &" | Out-Null
-    if (-not (Wait-Llm)) { return $false }
-    # Identity check: refuse to bench if the served model is not the candidate.
-    try {
-        $served = (Invoke-RestMethod "$llm/v1/models" -TimeoutSec 15).data[0].id
-        $stem = [System.IO.Path]::GetFileNameWithoutExtension($file)
-        if ($served -notmatch [regex]::Escape($stem.Substring(0, [Math]::Min(12, $stem.Length)))) {
-            Write-Host "  IDENTITY MISMATCH: port serves '$served', wanted '$stem' - aborting candidate"
-            return $false
-        }
-    } catch { return $false }
-    return $true
+function Start-Model([string]$file, [int]$port = 1234) {
+    # AUTO-FIT (pas de -ngl force): tient compte de la VRAM libre reelle.
+    $cmd = "pkill -f 'llama-server.*$port'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$file -c 8192 --host 0.0.0.0 --port $port > /var/log/llama-arena.log 2>&1 &"
+    wsl -d Ubuntu -u root -- bash -c $cmd | Out-Null
+    return (Wait-Llm)
 }
 
 function Get-HfFile([string]$repo, [string]$file) {
-    # Resolve the exact file name via the HF API (quant names drift), then
-    # download into WSL /root/models with wget (resumable).
-    $tree = Invoke-RestMethod "https://huggingface.co/api/models/$repo/tree/main" -TimeoutSec 60
+    try { $tree = Invoke-RestMethod "https://huggingface.co/api/models/$repo/tree/main" -TimeoutSec 60 } catch { return $null }
     $entry = $tree | Where-Object { $_.path -ieq $file } | Select-Object -First 1
     if (-not $entry) {
         $pat = ($file -replace '.*(Q\d_K_[MS]).*', '$1')
@@ -103,94 +111,124 @@ function Get-HfFile([string]$repo, [string]$file) {
     if (-not $entry) { return $null }
     $name = [System.IO.Path]::GetFileName($entry.path)
     $want = [long]($entry.lfs.size ?? $entry.size)
-    Write-Host "downloading $repo / $($entry.path) ($([math]::Round($want/1GB,1)) GB)..."
-    wsl -d Ubuntu -u root -- bash -c "cd /root/models && wget -q -c --tries=3 'https://huggingface.co/$repo/resolve/main/$($entry.path)' -O '$name'"
+    Write-Host "  telechargement $repo / $($entry.path) ($([math]::Round($want/1GB,1)) Go)..."
+    wsl -d Ubuntu -u root -- bash -c "cd /root/models && wget -q -c --tries=3 'https://huggingface.co/$repo/resolve/main/$($entry.path)' -O '$name'" | Out-Null
     $size = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name 2>/dev/null || echo 0")
-    if ($size -eq $want -and $want -gt 3000000000) { return $name }
-    Write-Host "  download incomplete ($size / $want bytes) - removed"
-    wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$name"
+    if ($size -eq $want -and $want -gt 3e9) { return $name }
+    wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$name" | Out-Null
     return $null
 }
 
-function Invoke-Bench([string]$key, [double]$temp = 0.2) {
-    $score = 0; $details = @(); $t0 = Get-Date
+function Invoke-Bench([string]$key, [double]$temp = 0.3, [int]$reps = 3) {
+    # ROBUSTESSE STATISTIQUE: chaque epreuve est tentee $reps fois; le score =
+    # TAUX de reussite x10 (pas un coup de chance unique). Un modele qui ne
+    # passe que 1 fois sur 3 marque 3.3/10, pas 10. La selection devient
+    # statistique - un gagnant doit etre REGULIEREMENT bon, pas chanceux.
+    $score = 0.0; $details = @(); $t0 = Get-Date
+    $sys = "You write minimal SEARCH/REPLACE patches. Format STRICTLY:`nFILE: <path>`n<<<<<<< SEARCH`n(exact verbatim lines from the file)`n=======`n(replacement)`n>>>>>>> REPLACE`nNEVER write '...' or 'omitted' inside SEARCH. SEARCH must be copied character-for-character from the provided file."
     foreach ($t in $tasks) {
-        $src = (Get-Content "g:\Rimwork\$($t.file)" -TotalCount $t.lines) -join "`n"
-        $sys = "You write minimal SEARCH/REPLACE patches. Format STRICTLY:`nFILE: <path>`n<<<<<<< SEARCH`n(exact verbatim lines from the file)`n=======`n(replacement)`n>>>>>>> REPLACE`nNEVER write '...' or '(lines omitted)' inside SEARCH. SEARCH must be copied character-for-character from the provided file."
-        $body = @{ model = "arena"; max_tokens = 700; temperature = $temp; messages = @(
-            @{ role = "system"; content = $sys },
-            @{ role = "user"; content = "FILE $($t.file) (first $($t.lines) lines):`n$src`n`nTASK: $($t.ask)`nProduce ONE patch." }
-        ) } | ConvertTo-Json -Depth 6
-        $ok = $false
-        try {
-            $r = Invoke-RestMethod "$llm/v1/chat/completions" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 300
-            $out = $r.choices[0].message.content
-            if ($out -match '(?s)<<<<<<< SEARCH\r?\n(.*?)\r?\n=======\r?\n(.*?)\r?\n>>>>>>> REPLACE') {
-                $search = $Matches[1]; $replace = $Matches[2]
-                $full = Get-Content "g:\Rimwork\$($t.file)" -Raw
-                $norm = ($full -replace "`r`n", "`n"); $snorm = ($search -replace "`r`n", "`n")
-                if ($norm.Contains($snorm) -and $snorm.Trim().Length -gt 10 -and $search -notmatch '\.\.\.|omitted') {
-                    # Apply in a throwaway copy and build
-                    $bak = "$env:TEMP\arena_bak.cs"
-                    Copy-Item "g:\Rimwork\$($t.file)" $bak -Force
-                    [System.IO.File]::WriteAllText("g:\Rimwork\$($t.file)", $norm.Replace($snorm, ($replace -replace "`r`n", "`n")))
-                    Push-Location g:\Rimwork\src\RimWorldLab.Core
-                    $b = dotnet build -c Release 2>&1 | Out-String
-                    Pop-Location
-                    Copy-Item $bak "g:\Rimwork\$($t.file)" -Force
-                    if ($b -match "0 Erreur|0 Error") { $ok = $true }
+        $abs = Join-Path $thrive ($t.file -replace '/', '\')
+        if (-not (Test-Path $abs)) { continue }
+        $src = (Get-Content $abs -TotalCount $t.lines) -join "`n"
+        $full = (Get-Content $abs -Raw) -replace "`r", ""
+        $passes = 0
+        for ($rep = 1; $rep -le $reps; $rep++) {
+            $body = @{ model = "arena"; max_tokens = 600; temperature = $temp; messages = @(
+                @{ role = "system"; content = $sys },
+                @{ role = "user"; content = "FILE $($t.file) (first $($t.lines) lines):`n$src`n`nTASK: $($t.ask)`nProduce ONE patch." }
+            ) } | ConvertTo-Json -Depth 6
+            $ok = $false
+            try {
+                $r = Invoke-RestMethod "$llm/v1/chat/completions" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 180
+                $out = $r.choices[0].message.content
+                if ($out -match '(?s)<<<<<<< SEARCH\r?\n(.*?)\r?\n=======\r?\n(.*?)\r?\n>>>>>>> REPLACE') {
+                    $search = $Matches[1] -replace "`r", ""; $replace = $Matches[2] -replace "`r", ""
+                    # (a) SEARCH verbatim, (b) pas de '...', (c) vrai changement,
+                    # (d) resultat valide + contient le changement attendu
+                    if ($full.Contains($search) -and $search.Trim().Length -gt 10 -and $search -notmatch '\.\.\.|omitted' -and $replace -ne $search) {
+                        $patched = $full.Replace($search, $replace)
+                        if ($t.kind -eq "json") {
+                            try { $null = $patched | ConvertFrom-Json; if ($patched -match [regex]::Escape($t.expect)) { $ok = $true } } catch {}
+                        } else {
+                            if ($patched -match [regex]::Escape($t.expect)) { $ok = $true }
+                        }
+                    }
                 }
-            }
-        } catch {}
-        if ($ok) { $score += 10 }
-        $details += "$(if ($ok) {'PASS'} else {'FAIL'}) $($t.ask.Substring(0, [Math]::Min(60, $t.ask.Length)))"
+            } catch {}
+            if ($ok) { $passes++ }
+        }
+        $frac = $passes / $reps
+        $score += 10 * $frac
+        $details += "$([int]($frac*100))% ($passes/$reps) $($t.file)"
         Write-Host "  [$key] $($details[-1])"
     }
-    $mins = [math]::Round(((Get-Date) - $t0).TotalMinutes, 1)
-    # Speed tiebreaker: max 5 points, only matters between equal scores
-    $speedPts = [Math]::Max(0, 5 - [int]$mins)
-    return @{ key = $key; score = $score; speedPts = $speedPts; total = $score + $speedPts; minutes = $mins; details = $details }
+    $secs = [math]::Round(((Get-Date) - $t0).TotalSeconds, 1)
+    $speedPts = [Math]::Max(0, 5 - [int]($secs / 60))   # tiebreaker vitesse
+    return @{ key = $key; score = [math]::Round($score, 1); speedPts = $speedPts; total = [math]::Round($score + $speedPts, 1); secs = $secs; details = $details }
 }
 
-# ---- Run the arena ----
-$results = @()
-foreach ($c in $candidates) {
-    $file = $c.file
-    $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$file && echo OK"
-    if ($have -notmatch "OK") {
-        if (-not $c.repo) { Write-Host "skip $($c.key): no local file, no repo"; continue }
-        $file = Get-HfFile $c.repo $c.file
-        if (-not $file) { Write-Host "skip $($c.key): download failed"; continue }
+function Invoke-ArenaCycle {
+    # 1. Construire la liste des candidats: base + nouveaux crawles (jamais juges)
+    $tried = if (Test-Path $triedFile) { @(Get-Content $triedFile) } else { @() }
+    $candidates = @($baseCandidates)
+    if (-not $Only) {
+        $crawled = @(Get-CrawledCandidates | Where-Object { $tried -notcontains $_.file -and ($baseCandidates.file -notcontains $_.file) })
+        $newOnes = @($crawled | Select-Object -First $NewPerCycle)
+        if ($newOnes.Count) {
+            Write-Host "OCEAN: $($newOnes.Count) nouveau(x) challenger(s): $($newOnes.key -join ', ')" -ForegroundColor Cyan
+            $candidates += $newOnes
+        }
+    } else {
+        $candidates = @($candidates | Where-Object { $_.key -match $Only })
     }
-    Write-Host "=== ARENA: $($c.key) ($file) ===" -ForegroundColor Cyan
-    if (-not (Start-Model $file)) { Write-Host "  model failed to come up"; continue }
-    # Tune: same bench at two temperatures, keep the better setting.
-    $best = $null
-    foreach ($tp in 0.2, 0.6) {
-        $res = Invoke-Bench $c.key $tp
-        $res.temp = $tp
-        if (-not $best -or $res.total -gt $best.total) { $best = $res }
-        if ($res.score -eq (10 * $tasks.Count)) { break } # perfect, stop tuning
-    }
-    $best.file = $file
-    $results += [pscustomobject]$best
-}
 
-# ---- Crown the champion, purge the losers ----
-$ranked = $results | Sort-Object -Property total -Descending
-$ranked | ConvertTo-Json -Depth 5 | Set-Content $arenaLog -Encoding utf8
-if ($ranked.Count -gt 0) {
+    # 2. Combats
+    $results = @()
+    foreach ($c in $candidates) {
+        $file = $c.file
+        $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$file && echo OK"
+        if ($have -notmatch "OK") {
+            if (-not $c.repo) { Write-Host "skip $($c.key): pas de fichier local, pas de repo"; continue }
+            $file = Get-HfFile $c.repo $c.file
+            if (-not $file) { Write-Host "skip $($c.key): telechargement echoue"; continue }
+        }
+        Write-Host "=== ARENE: $($c.key) ($file) ===" -ForegroundColor Cyan
+        if (-not (Start-Model $file)) { Write-Host "  modele n'a pas demarre (trop gros ?)"; continue }
+        $best = Invoke-Bench $c.key   # reps internes = robustesse statistique
+        $best.file = $file
+        $results += [pscustomobject]$best
+        # memoriser qu'on a juge ce fichier (pour ne pas le re-crawler sans fin)
+        if ($file -notmatch '^(Qwen3-Coder-30B|Qwen2.5-Coder-14B|Yi-Coder-9B)') { Add-Content $triedFile $file }
+    }
+    if ($results.Count -eq 0) { Write-Host "aucun resultat ce cycle."; return }
+
+    # 3. Couronner + purger les perdants pour liberer de la place
+    $ranked = $results | Sort-Object -Property total -Descending
+    $ranked | ConvertTo-Json -Depth 5 | Set-Content $arenaLog -Encoding utf8
     $champ = $ranked[0]
     Set-Content $championFile $champ.file -Encoding ascii
-    Write-Host "CHAMPION: $($champ.key) ($($champ.score)/40 patches + $($champ.speedPts) speed) -> $championFile" -ForegroundColor Green
-    $keep = @($ranked | Select-Object -First $KeepTop | ForEach-Object { $_.file })
-    foreach ($r in $ranked | Select-Object -Skip $KeepTop) {
-        Write-Host "deleting loser model: $($r.file)"
-        wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$($r.file)"
+    Write-Host "CHAMPION: $($champ.key) ($($champ.score)/$(10*$tasks.Count) + $($champ.speedPts) vitesse) -> $championFile" -ForegroundColor Green
+
+    # ne jamais supprimer les modeles de base (filet de securite)
+    $protect = @($baseCandidates.file)
+    foreach ($r in ($ranked | Select-Object -Skip $KeepTop)) {
+        if ($protect -contains $r.file) { continue }
+        Write-Host "  selection naturelle: suppression du perdant $($r.file)" -ForegroundColor DarkYellow
+        wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$($r.file)" | Out-Null
     }
-    # Relaunch the champion for the dev loop on the PRODUCTION port 1234.
-    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*1234'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$($champ.file) -ngl 99 -c 16384 --host 0.0.0.0 --port 1234 > /var/log/llama-server.log 2>&1 &" | Out-Null
-    # Stop the arena server (port 1235).
-    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*1235'" | Out-Null
+
+    # 4. Relancer le champion en PROD (port 1234, auto-fit) pour la boucle de dev
+    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*$prodPort'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$($champ.file) -c 8192 --host 0.0.0.0 --port $prodPort > /var/log/llama-server.log 2>&1 &" | Out-Null
+    $ranked | Format-Table key, score, speedPts, secs
 }
-$ranked | Format-Table key, score, speedPts, minutes
+
+Write-Host "=== ARENE DE SELECTION NATURELLE DES LLM ===" -ForegroundColor Magenta
+if ($Forever) {
+    while ($true) {
+        Invoke-ArenaCycle
+        Write-Host "--- cycle termine, repos $CycleRestSec s avant la prochaine generation ---" -ForegroundColor DarkGray
+        Start-Sleep -Seconds $CycleRestSec
+    }
+} else {
+    Invoke-ArenaCycle
+}
