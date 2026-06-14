@@ -3,13 +3,22 @@
 Carte des scripts. Tout se pilote depuis le **dashboard** (http://localhost:8765).
 Détails et philosophie : [../docs/DOWN_HERE_DESIGN.md](../docs/DOWN_HERE_DESIGN.md) §5.
 
-## Orchestration
+## Orchestration & machine à modes
+
+Un seul **MODE** autonome actif à la fois (DEV / PLAY / ARENA / IDLE) — voir
+[../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) §4.
 
 | Fichier | Rôle |
 |---------|------|
-| `startup_all.ps1` | **Boot/heal de toute la pile** après reboot (idempotent, tâche au login) : LLM WSL, dev loop, dashboard, watchdog jeu, arène, agent joueur, publication du site. |
-| `dev_loop_watchdog.ps1` | Relance `dev_loop.ps1` s'il meurt (exactement une instance). |
+| `startup_all.ps1` | **Boot/heal de l'infra** après reboot (idempotent, tâche au login) : LLM WSL, dashboard, **orchestrateur**, publication du site. Ne lance plus les agents en direct. |
+| `orchestrator.ps1` | **Autorité unique** : lit le mode courant (`logs/mode.json`) et démarre/arrête les agents pour garantir qu'un seul mode tourne. |
+| `lib/Modes.ps1` | Logique des modes : état, plan par mode, réconciliation des processus (`Invoke-ModeReconcile -DryRun`). |
+| `set-mode.ps1` | CLI : `pwsh -File set-mode.ps1 DEV\|PLAY\|ARENA\|IDLE`. |
+| `lib/Config.ps1` | **Source de vérité unique** (paths/ports/modèle). Tout script commence par `. "$PSScriptRoot/lib/Config.ps1"; $cfg = Get-DownHereConfig`. |
+| `dev_loop_watchdog.ps1` | Relance `dev_loop.ps1` s'il meurt (lancé par l'orchestrateur en mode DEV). |
 | `run_hidden.vbs`, `run_arena_hidden.vbs` | Lancent un script PowerShell en fenêtre cachée. |
+
+**Modes** : `IDLE` = rien d'autonome (session superviseur) · `DEV` = le dev IA code (jeu fermé) · `PLAY` = l'agent joue (jeu ouvert) · `ARENA` = sélection de modèle.
 
 ## Dev IA
 

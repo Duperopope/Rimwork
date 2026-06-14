@@ -4,8 +4,9 @@
 # (in-dev tasks), DEV_LOG.md (activity), health.json (live health).
 # No fake future estimates - this dev doesn't need them.
 
-# Source de verite unique (paths) - voir scripts/lib/Config.ps1.
+# Source de verite unique (paths) + machine a modes - voir scripts/lib/.
 . "$PSScriptRoot\lib\Config.ps1"
+. "$PSScriptRoot\lib\Modes.ps1"
 
 function Get-DownHereSiteHtml {
     param([bool]$Live = $false, [string]$StackState = "RUNNING")
@@ -174,10 +175,19 @@ function Get-DownHereSiteHtml {
         } else {
             $toggleBtn = "<button class='btnp' onclick=`"if(confirm('Mettre toute la machine en pause ?')){fetch('/pause',{method:'POST'}).then(()=>location.reload())}`">&#9208; METTRE EN PAUSE</button> <span class='muted' style='color:#3fb950'>&#9679; dev actif</span>"
         }
+        # Boutons de MODE (Phase 2): un seul mode autonome actif a la fois.
+        $curMode = Get-DownHereMode
+        $modeBtns = ""
+        foreach ($mm in 'DEV', 'PLAY', 'ARENA', 'IDLE') {
+            $sty = if ($mm -eq $curMode) { "background:#1f6f35;color:#fff" } else { "background:#0d1420;color:#8b949e" }
+            $modeBtns += "<button onclick=`"fetch('/mode?set=$mm',{method:'POST'}).then(()=>location.reload())`" style='$sty;border:1px solid #1f2a3a;border-radius:8px;padding:6px 12px;margin-right:6px;cursor:pointer;font-weight:700'>$mm</button>"
+        }
+        $modeRow = "<div style='margin-top:10px'><b>MODE:</b> $modeBtns <span class='muted'>(un seul actif &agrave; la fois)</span></div>"
         $liveBlock = @"
 <div class='card'><h2>&#127918; Sant&eacute; en direct</h2><div>$h</div>
 <div style='margin-top:8px'><b>T&Acirc;CHE EN COURS:</b> $taskLine</div>
 <div style='margin-top:4px'><b>JEU:</b> $gameLine$pt</div>
+$modeRow
 <div style='margin-top:8px'>$toggleBtn</div></div>
 <div class='card'><h2>&#129504; Le&ccedil;ons r&eacute;centes de l'IA</h2><ul>$lessons</ul></div>
 "@

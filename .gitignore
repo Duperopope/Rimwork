@@ -35,6 +35,8 @@ scripts/logs/*.err
 scripts/logs/*.out
 scripts/logs/stack_state.txt
 scripts/logs/arena_tried.txt
+scripts/logs/mode.json
+scripts/logs/orchestrator.log
 scripts/*.flag
 
 # Downloaded third-party archives accidentally dropped in asset folders

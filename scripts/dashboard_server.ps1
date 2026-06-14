@@ -4,6 +4,7 @@
 
 # Source de verite unique (paths/port) - voir scripts/lib/Config.ps1.
 . "$PSScriptRoot\lib\Config.ps1"
+. "$PSScriptRoot\lib\Modes.ps1"
 $cfg = Get-DownHereConfig
 $port = $cfg.Dashboard.Port
 $logDir = $cfg.Paths.Logs
@@ -52,6 +53,19 @@ function Start-Stack {
 
 while ($true) {
     try { $ctx = $listener.GetContext() } catch { Start-Sleep -Seconds 1; continue }
+    if ($ctx.Request.Url.AbsolutePath -eq "/mode") {
+        if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
+        $set = $ctx.Request.QueryString["set"]
+        if ($set -and ($cfg.Modes -contains $set.ToUpper())) {
+            try {
+                Set-DownHereMode -Mode $set -Config $cfg | Out-Null
+                Add-Content -Path $cfg.Paths.DevLog -Value "- [mode] -> $($set.ToUpper()) (dashboard $(Get-Date -Format 'HH:mm'))"
+            } catch {}
+        }
+        $ctx.Response.Redirect("/")
+        $ctx.Response.Close()
+        continue
+    }
     if ($ctx.Request.Url.AbsolutePath -eq "/pause") {
         # POST only: browsers (especially mobile) PREFETCH plain GET links,
         # which used to pause the whole stack just by opening the page.

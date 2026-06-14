@@ -51,11 +51,13 @@ if (-not $llmAlive) {
     }
 }
 
-# 3. Dev-loop watchdog (exactly one instance)
-$loopRunning = Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" |
-    Where-Object { $_.CommandLine -match 'dev_loop' }
-if (-not $loopRunning) {
-    Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $scripts 'dev_loop_watchdog.ps1') -WindowStyle Hidden
+# 3. Orchestrateur (machine a modes) - AUTORITE UNIQUE. Il lance les agents
+# du MODE courant (DEV/PLAY/ARENA/IDLE) et garantit qu'UN SEUL tourne a la
+# fois (fini "tout en meme temps"). Voir orchestrator.ps1 + lib/Modes.ps1.
+$orch = Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" |
+    Where-Object { $_.CommandLine -match 'orchestrator' }
+if (-not $orch) {
+    Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $scripts 'orchestrator.ps1') -WindowStyle Hidden
 }
 
 # 4. Dashboard - probe the actual HTTP endpoint, not just the process
@@ -69,29 +71,9 @@ if (-not $dashAlive) {
     Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $scripts 'dashboard_server.ps1') -WindowStyle Hidden
 }
 
-# 5. Game watchdog (keeps the game itself running and on the latest build)
-$gameWd = Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" |
-    Where-Object { $_.CommandLine -match 'game_watchdog' }
-if (-not $gameWd) {
-    Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $scripts 'game_watchdog.ps1') -WindowStyle Hidden
-}
-
-# 6b. Model arena (selection naturelle continue): cherche en permanence un
-# meilleur cerveau dans l'ocean HF, remplace le champion quand un challenger
-# gagne. Exactement un instance.
-$arena = Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" |
-    Where-Object { $_.CommandLine -match 'model_arena' }
-if (-not $arena) {
-    Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $scripts 'model_arena.ps1'), '-Forever' -WindowStyle Hidden
-}
-
-# 6c. Agent joueur: le dev JOUE le stade microbe (lit l'etat, decide, pilote la
-# cellule). Idle hors partie. Exactement une instance.
-$player = Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" |
-    Where-Object { $_.CommandLine -match 'play_agent' }
-if (-not $player) {
-    Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $scripts 'play_agent.ps1') -WindowStyle Hidden
-}
+# NB: game_watchdog, model_arena et play_agent ne sont PLUS lances ici.
+# L'orchestrateur (etape 3) les demarre/arrete selon le MODE courant, pour
+# garantir qu'ils ne tournent jamais tous en meme temps.
 
 # 6. Publish the public progress site if it changed
 pwsh -NoProfile -File (Join-Path $scripts 'publish_site.ps1') 2>$null
