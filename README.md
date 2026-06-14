@@ -17,6 +17,10 @@ supervisé par une IA frontière pour l'architecture, la 3D et l'UI.
 - 📋 [ROADMAP.md](ROADMAP.md) — file de tâches consommée par le dev IA
 - 🧾 [DEV_LOG.md](DEV_LOG.md) — journal de dev (rotation auto ; archive dans `docs/archive/`)
 - ⚖️ [docs/THIRDPARTY.md](docs/THIRDPARTY.md) — licences (le jeu est **GPL-3.0**, base Thrive)
+- 🛠️ [docs/GUIDE.md](docs/GUIDE.md) — **mode d'emploi A→Z** (piloter sans être dev)
+- 🏗️ [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — carte mentale + schémas du système
+- 🤖 [docs/RECURSIVE_SELF_IMPROVEMENT.md](docs/RECURSIVE_SELF_IMPROVEMENT.md) — l'auto-amélioration récursive (world model)
+- 🔬 [docs/RSI_EVIDENCE.md](docs/RSI_EVIDENCE.md) — **preuve mesurée** que ça s'améliore
 
 ## La vision en stades
 
