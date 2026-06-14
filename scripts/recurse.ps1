@@ -25,10 +25,25 @@ $hist = Join-Path $cfg.Paths.Logs 'wm_history.jsonl'
 function Invoke-RecurseCycle {
     Write-Host "[recurse] ingestion de l'experience..." -ForegroundColor Cyan
     & python (Join-Path $wm 'bootstrap.py')
+
+    # DETECTION DE CHANGEMENT : inutile (et trompeur) de reconcevoir un successeur
+    # si l'experience n'a PAS change. Sans nouvelles donnees, le champion a deja
+    # converge -> on saute, on n'use pas le CPU et on n'affiche pas un faux progres.
+    $exp = Join-Path $cfg.Paths.Logs 'experience.jsonl'
+    $champ = Join-Path $cfg.Paths.Logs 'wm_champion_spec.json'
+    $hf = Join-Path $cfg.Paths.Logs 'wm_last_data.hash'
+    $hash = if (Test-Path $exp) { (Get-FileHash $exp -Algorithm MD5).Hash } else { '' }
+    $last = if (Test-Path $hf) { (Get-Content $hf -Raw).Trim() } else { '' }
+    if ($hash -and $hash -eq $last -and (Test-Path $champ)) {
+        Write-Host "[recurse] pas de nouvelle experience -> re-conception ignoree (champion stable). Le brain attend des donnees neuves (mode DEV + LLM)." -ForegroundColor DarkYellow
+        return
+    }
+
     Write-Host "[recurse] conception d'un successeur (champion-challenger garde)..." -ForegroundColor Cyan
     & python (Join-Path $wm 'successor.py') '--gens' '8'
     Write-Host "[recurse] deploiement du champion (world model)..." -ForegroundColor Cyan
     & python (Join-Path $wm 'train.py')
+    Set-Content -Path $hf -Value $hash -Encoding ascii
 
     # Journalise un point d'historique (metriques + policy) pour voir progresser.
     try {
