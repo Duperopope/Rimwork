@@ -65,7 +65,9 @@ if (-not $llmAlive) {
         # GPU que la VRAM LIBRE le permet, le reste sur CPU. Indispensable car le
         # JEU partage les 16 Go: forcer -ngl 99 fait planter le chargement quand
         # le jeu est ouvert. Un MoE 3B-actifs reste rapide meme avec un peu de CPU.
-        Start-Process wsl -ArgumentList "-d","Ubuntu","-u","root","--","/root/llama.cpp/build/bin/llama-server","-m","/root/models/$champ","-c","8192","--host","0.0.0.0","--port","1234" -WindowStyle Hidden
+        # Lance via bash -lc pour CAPTURER la sortie (diagnostic : un build
+        # "router mode" casse se voit dans /tmp/llama-server.log).
+        Start-Process wsl -ArgumentList "-d","Ubuntu","-u","root","--","bash","-lc","/root/llama.cpp/build/bin/llama-server -m /root/models/$champ -c 8192 --host 0.0.0.0 --port 1234 > /tmp/llama-server.log 2>&1" -WindowStyle Hidden
     }
     # Big models (MoE 14GB) can take ~2 min to load into VRAM.
     foreach ($w in 1..8) { Start-Sleep -Seconds 20; $llmAlive = Test-WslLlm; if ($llmAlive) { break } }
@@ -73,7 +75,7 @@ if (-not $llmAlive) {
         # NO LM Studio fallback: it squats port 1234 + VRAM and silently
         # starves the WSL server (root cause of the 12/06 outage). If WSL
         # cannot come up, log it loudly and let the loop wait.
-        Add-Content "$logDir\watchdog.log" -Value "[$(Get-Date -Format HH:mm:ss)] LLM WSL DOWN apres attente - PAS de fallback LM Studio (voir /var/log/llama-server.log)"
+        Add-Content "$logDir\watchdog.log" -Value "[$(Get-Date -Format HH:mm:ss)] LLM WSL DOWN apres attente. Si le binaire part en 'router mode' (wsl: cat /tmp/llama-server.log), REPARE-le une fois: pwsh -File scripts/setup-llm.ps1"
     }
 }
 

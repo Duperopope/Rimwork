@@ -107,7 +107,7 @@ Et l'état machine en JSON : **http://localhost:8765/state.json**.
 |---|---|
 | `localhost:8765` inaccessible | Relance `pwsh -File scripts/startup_all.ps1` (le dashboard démarre en premier). |
 | Le dev IA ne fait rien | Vérifie qu'une case `- [ ]` existe dans `ROADMAP.md` et que le mode = DEV. |
-| LLM injoignable | Le serveur WSL met ~1-2 min à charger ; sinon vérifie WSL/llama-server. **Jamais LM Studio** (il squatte le port). |
+| LLM injoignable | Le serveur WSL met ~1-2 min à charger. Si ça reste « hors ligne » : le binaire llama-server peut être un build cassé « router mode ». **Répare-le UNE fois** : `pwsh -File scripts/setup-llm.ps1` (recompile, ~10-20 min, dans ton terminal). Ensuite DÉMARRER suffit. **Jamais LM Studio** (il squatte le port). |
 | Le jeu et le dev tournent ensemble | Ne devrait plus arriver (machine à modes). Sinon PAUSE puis REPRENDRE. |
 | Tests rouges | Lance `run-tests.ps1` et lis quelle ligne FAIL. |
 
