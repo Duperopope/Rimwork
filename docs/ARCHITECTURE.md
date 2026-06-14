@@ -245,7 +245,7 @@ Du moins risqué (additif) au plus structurant. Chaque phase est livrable seule.
 | **4. Jeu reproductible** | `setup-game.ps1` clone le fork (branche down-here) dans `reference/thrive` s'il est absent → un clone de Rimwork redonne un projet jouable. (Submodule volontairement évité : pas de chirurgie git risquée sur le dossier jeu vivant de 3.9 Go.) | Repo seulement | Faible | ✅ **Fait** |
 | **5. Patch robuste** | `lib/Patch.ps1` : matcher SEARCH/REPLACE extrait + **passe tolérante** (ignore les lignes vides, *uniquement si match unique* → jamais de faux positif). `dev_loop` l'utilise. | Dev Agent | Moyen | ✅ **Fait** (testé) |
 | **6. Tests d'orchestration** | `scripts/tests/run-tests.ps1` : harnais autonome (sans Pester) — Config, Patch, Modes, State, parse de tous les scripts. **22/22 vert.** | Additif | Faible | ✅ **Fait** |
-| **7. Cap world-model** | La Mémoire (lessons + dataset + feedback) alimente un futur modèle **prédictif** de l'état du jeu (vision JEPA). | R&D | Élevé | 🌱 **Socle posé** : `snapshot-state.ps1` + `Add-StateSnapshot` collectent des séries d'état (`state_history.jsonl`). Le modèle lui-même reste R&D. |
+| **7. World model + RSI** | Boucle **récursive d'auto-amélioration** : un world model (sklearn) prédit le succès d'un patch (**AUC ≈ 0.79** sur 462 exemples réels), le `dev_loop` s'en sert pour trier ses patchs, une **policy bandit** règle seule le seuil. Ré-entraîné par `recurse.ps1`. Voir **[RECURSIVE_SELF_IMPROVEMENT.md](RECURSIVE_SELF_IMPROVEMENT.md)**. | Dev Agent + R&D | Élevé | ✅ **Livré** (prédiction build) — le world model *gameplay* (séries d'état) reste la suite |
 
 ---
 

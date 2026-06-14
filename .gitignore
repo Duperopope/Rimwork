@@ -38,6 +38,15 @@ scripts/logs/arena_tried.txt
 scripts/logs/mode.json
 scripts/logs/orchestrator.log
 scripts/logs/state_history.jsonl
+
+# World model / RSI : artefacts generes (le CODE wm/*.py est versionne).
+scripts/wm/model.pkl
+scripts/wm/__pycache__/
+scripts/logs/experience.jsonl
+scripts/logs/experience_raw.jsonl
+scripts/logs/wm_model.json
+scripts/logs/wm_history.jsonl
+scripts/logs/policy.json
 scripts/*.flag
 
 # Downloaded third-party archives accidentally dropped in asset folders

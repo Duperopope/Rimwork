@@ -21,6 +21,8 @@ $lib = Join-Path $PSScriptRoot '..\lib'
 . (Join-Path $lib 'Patch.ps1')
 . (Join-Path $lib 'Modes.ps1')
 . (Join-Path $lib 'State.ps1')
+. (Join-Path $lib 'WorldModel.ps1')
+. (Join-Path $lib 'Policy.ps1')
 $cfg = Get-DownHereConfig
 
 Write-Host "== Config ==" -ForegroundColor Cyan
@@ -60,6 +62,27 @@ $st = Get-DownHereState -Config $cfg
 Assert ($null -ne $st.mode) "State.mode present"
 Assert ($null -ne $st.roadmap) "State.roadmap present"
 Assert ($st.agents.Keys -contains 'dev') "State.agents.dev present"
+
+Write-Host "== World model + Policy (RSI) ==" -ForegroundColor Cyan
+$pol = Get-Policy -Config $cfg
+Assert ($pol.arms.Count -ge 2) "policy: au moins 2 bras"
+$sel = Select-PolicyArm -Policy $pol -Config $cfg
+Assert ($sel.Index -ge 0 -and $sel.Index -lt $pol.arms.Count) "policy: bras valide selectionne"
+$before = [int]$pol.n[$sel.Index]
+$pol = Update-PolicyReward -Index $sel.Index -Reward 1.0 -Policy $pol -Config $cfg
+AssertEq ([int]$pol.n[$sel.Index]) ($before + 1) "policy: compteur incremente"
+if (Test-WorldModelReady -Config $cfg) {
+    $pSafe = Get-PatchSuccessProbability -Search '"v": 1.0' -Replace '"v": 1.5' -Ext json -Config $cfg
+    $pRisk = Get-PatchSuccessProbability -Search 'void F(){}' -Replace 'void F(){ _x.NewCall(); if(a){' -Ext cs -Config $cfg
+    if ($null -ne $pSafe -and $null -ne $pRisk) {
+        Assert ($pSafe -ge 0 -and $pSafe -le 1) "WM: proba dans [0,1]"
+        Assert ($pSafe -gt $pRisk) "WM: patch sur > patch risque (ranking)"
+    } else {
+        Write-Host "  (predict.py a renvoye NA, tolere comme le fait le systeme)" -ForegroundColor DarkYellow
+    }
+} else {
+    Write-Host "  (world model non entraine -> tests WM ignores, OK sur clone frais)" -ForegroundColor DarkYellow
+}
 
 Write-Host "== Parse de tous les scripts ==" -ForegroundColor Cyan
 $bad = 0

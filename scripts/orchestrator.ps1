@@ -57,5 +57,10 @@ while ($true) {
     $tick++
     if ($tick % 12 -eq 0) { try { Add-StateSnapshot -Config $cfg | Out-Null } catch {} }
 
+    # RSI : re-entrainement recursif du world model ~toutes les 30 min, en DEV.
+    if ($tick % 360 -eq 0 -and $mode -eq 'DEV') {
+        try { Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $cfg.Paths.Scripts 'recurse.ps1') -WindowStyle Hidden } catch {}
+    }
+
     Start-Sleep -Seconds $PollSeconds
 }

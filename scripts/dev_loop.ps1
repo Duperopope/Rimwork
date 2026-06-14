@@ -21,9 +21,10 @@ param(
     [int]$DelaySeconds = 5
 )
 
-# Source de verite unique (paths/url) + matcher de patch - voir scripts/lib/.
+# Socle (paths/url, matcher de patch, world model + policy) - voir scripts/lib/.
 . "$PSScriptRoot\lib\Config.ps1"
 . "$PSScriptRoot\lib\Patch.ps1"
+. "$PSScriptRoot\lib\Policy.ps1"
 $cfg = Get-DownHereConfig
 $Root = $cfg.Root
 if (-not $LlmUrl) { $LlmUrl = $cfg.Llm.BaseUrl + $cfg.Llm.ChatPath }
@@ -436,6 +437,32 @@ entier. Pour du JSON, garde un JSON VALIDE.
         Start-Sleep -Seconds $DelaySeconds; continue
     }
 
+    # --- WORLD MODEL gate (RSI) : economise un build sur un patch surement
+    # casse. Seuil choisi par la POLICY bandit (auto-reglee). Tolerant : si
+    # modele/python absent -> aucun effet. ---
+    $wmArm = $null; $wmPolicy = $null
+    try {
+        if (Test-WorldModelReady) {
+            $wmPolicy = Get-Policy
+            $sel = Select-PolicyArm -Policy $wmPolicy
+            $wmArm = $sel.Index
+            if ($sel.Threshold -gt 0) {
+                $minP = 1.0
+                foreach ($edit in $edits) {
+                    $pp = Get-PatchSuccessProbability -Search $edit.Search -Replace $edit.Replace -Ext $target.Ext
+                    if ($null -ne $pp -and $pp -lt $minP) { $minP = $pp }
+                }
+                if ($minP -lt $sel.Threshold) {
+                    Write-Host "WM-SKIP (P=$([math]::Round($minP,3)) < $($sel.Threshold))" -ForegroundColor DarkYellow
+                    Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] WM-SKIP (P=$([math]::Round($minP,3)) < seuil $($sel.Threshold)): $changeDesc ($($target.Rel))"
+                    $wmPolicy = Update-PolicyReward -Index $wmArm -Reward 0.5 -Policy $wmPolicy
+                    $lastFailNote = "Le world model juge ce patch tres risque (P=$([math]::Round($minP,3))). Change d'approche."; $lastFailItem = $itemKey
+                    Start-Sleep -Seconds $DelaySeconds; continue
+                }
+            }
+        }
+    } catch {}
+
     Set-Content -Path $target.Abs -Value $newContent -NoNewline
     Write-Host "Ecrit $($target.Rel) ($appliedCount/$($edits.Count) edits)"
 
@@ -454,6 +481,12 @@ entier. Pour du JSON, garde un JSON VALIDE.
         @{ iter = $i; timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); build = "OK"; simOk = $true; simSummary = "patch garde: $($target.Rel)"; iterSeconds = [math]::Round(((Get-Date) - $iterStart).TotalSeconds) } |
             ConvertTo-Json -Compress | Set-Content -Path "$logDir\health.json" -Encoding utf8
         $failStreak = 0; $keptStreak++; $lastFailNote = $null; $lastFailItem = $null
+
+        # World model : experience POSITIVE + recompense max au bras de policy.
+        try {
+            foreach ($edit in $edits) { Add-PatchExperience -Search $edit.Search -Replace $edit.Replace -Ext $target.Ext -Label 1 }
+            if ($null -ne $wmArm) { $wmPolicy = Update-PolicyReward -Index $wmArm -Reward 1.0 -Policy $wmPolicy }
+        } catch {}
 
         # Dataset d'entrainement (prompt -> patch verifie) pour un futur fine-tuning.
         @{ messages = @(@{ role = "user"; content = $prompt }, @{ role = "assistant"; content = $suggestion }); meta = @{ item = $itemKey; file = $target.Rel; iter = $i } } |
@@ -482,6 +515,12 @@ entier. Pour du JSON, garde un JSON VALIDE.
         $lastFailNote = "Ton patch a CASSE le build (reverti). Erreurs:`n$buildErrors`nN'utilise QUE des types/methodes presents dans le contenu montre."; $lastFailItem = $itemKey
         Add-BadIdentifiers -BuildErrors $buildErrors
         Add-Lesson -Context "Tache: $changeDesc`nErreurs:`n$buildErrors"
+
+        # World model : experience NEGATIVE + recompense nulle au bras de policy.
+        try {
+            foreach ($edit in $edits) { Add-PatchExperience -Search $edit.Search -Replace $edit.Replace -Ext $target.Ext -Label 0 }
+            if ($null -ne $wmArm) { $wmPolicy = Update-PolicyReward -Index $wmArm -Reward 0.0 -Policy $wmPolicy }
+        } catch {}
     }
 
     Start-Sleep -Seconds $DelaySeconds

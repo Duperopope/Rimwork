@@ -31,6 +31,18 @@ Un seul **MODE** autonome actif à la fois (DEV / PLAY / ARENA / IDLE) — voir
 | `tests/run-tests.ps1` | Harnais de tests autonome (Config/Patch/Modes/State + parse). `pwsh -File scripts/tests/run-tests.ps1`. |
 | Dashboard `/state.json` | L'état consolidé en JSON (observabilité machine). |
 
+### Auto-amélioration récursive (world model) — voir [../docs/RECURSIVE_SELF_IMPROVEMENT.md](../docs/RECURSIVE_SELF_IMPROVEMENT.md)
+
+| Fichier | Rôle |
+|---------|------|
+| `wm/features.py` | Source unique des features d'un patch (déterministe). |
+| `wm/bootstrap.py` | Construit le dataset d'expérience depuis les logs réels (gardés/cassés/vécu). |
+| `wm/train.py` | Entraîne le world model (sklearn, choix LogReg/Forest par AUC). |
+| `wm/predict.py` | Prédit P(succès) d'un patch (appelé par le dev_loop). |
+| `lib/WorldModel.ps1` | Pont PowerShell + log d'expérience vécue. |
+| `lib/Policy.ps1` | Bandit ε-greedy qui auto-règle le seuil de gate par récompense. |
+| `recurse.ps1` | Boucle méta : ingère l'expérience → ré-entraîne → journalise (`-Loop`). |
+
 ## Dev IA
 
 | Fichier | Rôle |
