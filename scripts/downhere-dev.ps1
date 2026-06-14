@@ -8,7 +8,11 @@
 #     powershell -File scripts/startup_all.ps1
 
 $ErrorActionPreference = 'Stop'
-$api = 'http://localhost:1234'
+
+# Source de verite unique (paths/ports/modele) - voir scripts/lib/Config.ps1.
+. "$PSScriptRoot\lib\Config.ps1"
+$cfg = Get-DownHereConfig
+$api = $cfg.Llm.BaseUrl
 
 $Host.UI.RawUI.WindowTitle = 'DOWN HERE — Dev'
 Write-Host ''
