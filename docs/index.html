@@ -1,456 +1,151 @@
-<!DOCTYPE html><html lang='fr'><head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'>
-<title>DOWN HERE ! — Roadmap &amp; Progress</title>
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DOWN HERE — Console</title>
 <style>
-:root { color-scheme: dark; }
-* { box-sizing:border-box; margin:0; }
-body { background:#0a0e14; color:#e6edf3; font:15px/1.5 'Segoe UI',system-ui,sans-serif; }
-header { background:linear-gradient(180deg,#101a2b,#0a0e14); border-bottom:1px solid #1f2a3a; padding:26px 28px 0 28px; }
-h1 { font-size:30px; letter-spacing:1px; } h1 b { color:#5cc26e; }
-.sub { color:#8b949e; margin:6px 0 14px 0; }
-nav { display:flex; gap:4px; }
-nav a { padding:10px 18px; color:#9fb0c3; text-decoration:none; font-weight:600; border-radius:8px 8px 0 0; }
-nav a.on { background:#141d2b; color:#fff; border:1px solid #1f2a3a; border-bottom:none; }
-main { padding:22px 28px; max-width:1500px; margin:0 auto; }
-section { display:none; } section.on { display:block; }
-.kpis { display:flex; gap:26px; flex-wrap:wrap; margin-bottom:18px; }
-.kpi { background:#121a26; border:1px solid #1f2a3a; border-radius:12px; padding:14px 22px; }
-.kpi b { font-size:26px; display:block; } .g { color:#3fb950; } .r { color:#f85149; } .y { color:#d29922; }
-.bar { height:10px; background:#1c2533; border-radius:5px; overflow:hidden; margin-top:8px; width:240px; }
-.bar i { display:block; height:100%; width:40%; background:linear-gradient(90deg,#2ea043,#3fb950); }
-.card { background:#121a26; border:1px solid #1f2a3a; border-radius:12px; padding:16px 18px; margin-bottom:16px; }
-h2 { font-size:14px; color:#9fb0c3; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
-.rel-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:14px; }
-.rel-col { background:#0d1420; border:1px solid #1f2a3a; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
-.rel-head { padding:12px; font-weight:800; text-align:center; border-bottom:3px solid #2ea043; background:#101a2b; }
-.rel-head.tent { border-bottom-color:#d29922; } .rel-head.future { border-bottom-color:#8b949e; }
-.rel-tag { font-size:10.5px; color:#8b949e; letter-spacing:1px; font-weight:600; }
-.rel-body { padding:8px; overflow-y:auto; max-height:560px; }
-.deliv { background:#121a26; border:1px solid #1f2a3a; border-radius:8px; padding:8px 10px; margin-bottom:6px; }
-.deliv-date { font-size:11px; color:#8b949e; margin-bottom:3px; }
-.deliv-title { font-size:13px; }
-.who { font-size:10px; padding:1px 7px; border-radius:10px; font-weight:700; }
-.who.ai { background:#143a23; color:#3fb950; } .who.claude { background:#1a2c4a; color:#58a6ff; }
-.more { cursor:pointer; color:#58a6ff; font-size:12px; padding:4px; }
-details.day > summary { cursor:pointer; padding:6px 8px; font-size:12.5px; font-weight:700; color:#9fb0c3; list-style:none; }
-details.day { border-bottom:1px solid #1f2a3a; margin-bottom:4px; }
-.trk-team { margin-bottom:14px; }
-.trk-name { font-weight:800; color:#5cc26e; margin-bottom:6px; letter-spacing:.5px; }
-.pill { background:#1c2533; border-radius:10px; padding:1px 9px; font-size:12px; color:#9fb0c3; }
-.trk-item { background:#0d1420; border:1px solid #1f2a3a; border-radius:8px; margin-bottom:5px; }
-.trk-item summary { padding:8px 10px; cursor:pointer; font-size:13.5px; display:flex; gap:8px; align-items:center; list-style:none; }
-.trk-dot { width:8px; height:8px; border-radius:50%; background:#d29922; flex:none; }
-.trk-desc { padding:0 12px 10px 26px; font-size:12.5px; color:#9fb0c3; }
-.ev { display:flex; gap:10px; padding:7px 10px; border-radius:8px; margin-bottom:5px; background:#0d1420; border:1px solid #1f2a3a; align-items:baseline; }
-.ev .tag { flex:none; font-size:11px; font-weight:700; color:#8b949e; min-width:84px; }
-.ev .tag2 { flex:none; font-size:10px; font-weight:700; padding:1px 8px; border-radius:10px; background:#1c2533; color:#9fb0c3; }
-.ev.ok .tag2 { background:#143a23; color:#3fb950; } .ev.done .tag2 { background:#1a2c4a; color:#58a6ff; }
-.ev .txt { font-size:13px; }
-.btnp { background:#7d2c2c; color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:700; }
-.btnr { background:#1f6f35; color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:700; }
-.muted { color:#8b949e; } ul { padding-left:20px; } li { font-size:13px; margin-bottom:4px; }
-footer { text-align:center; color:#566374; padding:18px; font-size:12px; }
+:root{--bg:#0a0e16;--panel:#111824;--panel2:#0d1420;--line:#1e2a3a;--ink:#e6edf3;--mut:#8b98a9;--acc:#3fb950;--blue:#4493f8;--red:#f85149;--amb:#d29922}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--ink);font:14px/1.55 "Segoe UI",system-ui,sans-serif}
+a{color:var(--blue);text-decoration:none}
+.top{position:sticky;top:0;z-index:5;background:rgba(13,20,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 22px}
+.top .wrap{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-size:20px;font-weight:800;letter-spacing:.5px}.brand b{color:var(--acc)}
+.pills{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--mut)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mut)}.dot.on{background:var(--acc);box-shadow:0 0 8px var(--acc)}.dot.off{background:var(--red)}.dot.warn{background:var(--amb)}
+main{max-width:1280px;margin:0 auto;padding:20px 22px 60px}
+.ctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.btn{border:none;border-radius:10px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;color:#fff;transition:.15s}
+.btn:hover{filter:brightness(1.1)}.btn.start{background:var(--acc)}.btn.stop{background:#b3322b}.btn.ghost{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+.seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{background:none;border:none;color:var(--mut);padding:10px 14px;font-weight:700;font-size:12.5px;cursor:pointer}
+.seg button.on{background:var(--acc);color:#fff}.seg button:hover:not(.on){color:var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.kpi .v{font-size:28px;font-weight:800;line-height:1}.kpi .l{color:var(--mut);font-size:12px;margin-top:6px}
+.kpi .bar{height:6px;background:#1c2533;border-radius:3px;margin-top:10px;overflow:hidden}.kpi .bar i{display:block;height:100%;background:linear-gradient(90deg,#2ea043,#3fb950)}
+.g{color:var(--acc)}.r{color:var(--red)}.y{color:var(--amb)}.b{color:var(--blue)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap}
+.tabs button{background:none;border:none;color:var(--mut);padding:11px 16px;font-weight:700;font-size:13.5px;cursor:pointer;border-bottom:2px solid transparent}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);align-items:flex-start}.row:last-child{border:0}
+.time{flex:none;color:var(--mut);font-size:12px;min-width:74px;font-variant-numeric:tabular-nums}
+.badge{flex:none;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:#1c2533;color:var(--mut);text-transform:uppercase}
+.badge.feat{background:#143a23;color:var(--acc)}.badge.fix{background:#3a2417;color:#e0883a}.badge.ai{background:#0f2f4a;color:var(--blue)}.badge.refactor,.badge.docs,.badge.test,.badge.chore{background:#22283a;color:#9db1c9}
+.txt{font-size:13.5px}.mut{color:var(--mut)}
+.task{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
+.cat{display:inline-block;font-size:10px;font-weight:800;color:var(--blue);background:#0f2f4a;border-radius:6px;padding:1px 7px;margin-right:8px}
+.spark{font-size:12px;color:var(--acc);word-spacing:2px;margin-top:6px}
+.empty{color:var(--mut);padding:18px;text-align:center}
+.warnbox{background:#2a1f10;border:1px solid #5a4420;color:#e8c37a;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px}
+input,select,textarea{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px;font:inherit}
 </style></head><body>
-<header>
-<h1>DOWN HERE <b>!</b></h1>
-<p class='sub'>Down Here Origins &middot; du vivant aux &eacute;toiles &middot; stade cellulaire actif &mdash; d&eacute;velopp&eacute; par une IA locale supervis&eacute;e. Mise &agrave; jour: 14/06/2026 23:27.</p>
-<p class='sub'>Site g&eacute;n&eacute;r&eacute; automatiquement depuis les donn&eacute;es r&eacute;elles du d&eacute;p&ocirc;t &mdash; <a href='https://github.com/Duperopope/Rimwork'>code source</a>.</p>
-<nav>
-<a onclick="show('overview',this)" class='on'>Vue d'ensemble</a>
-<a onclick="show('releases',this)">Release View</a>
-<a onclick="show('tracker',this)">Progress Tracker</a>
-<a onclick="show('activity',this)">Activit&eacute;</a>
-<a onclick="show('feedback',this)">&#128172; Feedback</a>
-</nav>
-<script>
-function show(id, el) {
-  document.querySelectorAll('section').forEach(s => s.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-  document.querySelectorAll('nav a').forEach(a => a.classList.remove('on'));
-  el.classList.add('on');
-  try { sessionStorage.setItem('tab', id); } catch (e) {}
-}
-// The live dashboard reloads itself to refresh data: restore the active
-// tab and the scroll position so a refresh never throws the user back
-// to the overview tab.
-window.addEventListener('DOMContentLoaded', () => {
-  let tab = 'overview';
-  try { tab = sessionStorage.getItem('tab') || 'overview'; } catch (e) {}
-  const link = Array.from(document.querySelectorAll('nav a'))
-    .find(a => (a.getAttribute('onclick') || '').indexOf("'" + tab + "'") >= 0);
-  if (link && document.getElementById(tab)) { show(tab, link); }
-  else { document.getElementById('overview').classList.add('on'); }
-  try {
-    const y = sessionStorage.getItem('scrollY');
-    if (y !== null) window.scrollTo(0, parseFloat(y));
-  } catch (e) {}
-});
-window.addEventListener('beforeunload', () => {
-  try { sessionStorage.setItem('scrollY', String(window.scrollY)); } catch (e) {}
-  // Inner scrollable panes (Release View columns, etc.) reset on every
-  // 10s reload too: save each pane's scrollTop keyed by its index.
-  try {
-    const tops = Array.from(document.querySelectorAll('.rel-body')).map(el => el.scrollTop);
-    sessionStorage.setItem('relScroll', JSON.stringify(tops));
-  } catch (e) {}
-});
-window.addEventListener('DOMContentLoaded', () => {
-  try {
-    const tops = JSON.parse(sessionStorage.getItem('relScroll') || '[]');
-    document.querySelectorAll('.rel-body').forEach((el, i) => {
-      if (typeof tops[i] === 'number') el.scrollTop = tops[i];
-    });
-  } catch (e) {}
-});
-// Collapsible groups: remember which ones the user opened/closed so the
-// 10s data refresh never undoes a manual fold.
-window.addEventListener('DOMContentLoaded', () => {
-  const all = document.querySelectorAll('details');
-  let saved = {};
-  try { saved = JSON.parse(sessionStorage.getItem('folds') || '{}'); } catch (e) {}
-  all.forEach((d, i) => {
-    const key = 'd' + i + ':' + (d.querySelector('summary') ? d.querySelector('summary').textContent.trim().slice(0, 40) : '');
-    if (key in saved) { d.open = saved[key]; }
-    d.addEventListener('toggle', () => {
-      saved[key] = d.open;
-      try { sessionStorage.setItem('folds', JSON.stringify(saved)); } catch (e) {}
-    });
-  });
-});
-</script>
-</header>
+<div class="top"><div class="wrap">
+  <div class="brand">DOWN HERE <b>!</b></div>
+  <div class="pills" id="pills"></div>
+</div></div>
 <main>
-<section id='releases'><div class='card'><h2>&#128640; Release View &mdash; livraisons dat&eacute;es (donn&eacute;es git r&eacute;elles)</h2><div class='rel-grid'><div class='rel-col'><div class='rel-head done'>0.1 — FONDATIONS (JAM)<br><span class='rel-tag'>LIVR&Eacute; 11/06/2026 &middot; 11 livraisons</span></div><div class='rel-body'><details class='day'><summary>&#128197; 11/06/2026 <span class='pill'>11 patchs</span></summary><div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 13:14 &middot; <code>1c7baad</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Initial snapshot: Rimwork autonomous AI-dev stack</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 13:58 &middot; <code>55dfc9e</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Remove unused AudioStreamPlayer creation in HandleSubViewportPattern (src/RimWorldGodot/Main.cs...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 14:22 &middot; <code>747004a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Anti-spaghetti stabilization pass: audit, anti-false-success guards, behavioral tests, real das...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 14:33 &middot; <code>2bcb55f</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add Mood property to Pawn class (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 14:34 &middot; <code>172c2f5</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Implement Mood dynamics by adding the necessary logic to adjust the pawn&#39;s mood based on hunger...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 14:35 &middot; <code>e0686e7</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Ensure `Math.Clamp` is available by adding the necessary `using` directive. (src/RimWorldLab.Co...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 14:36 &middot; <code>5fc1a39</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add mood display to pawn list in Colony tab. (src/RimWorldGodot/Main.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 14:51 &middot; <code>23c3e3b</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add the new `if (item.Kind == FurnitureKind.Door)` block after the existing `if (item.Kind == F...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 14:52 &middot; <code>20f0229</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add Door furniture kind check and draw line for door. (src/RimWorldGodot/Main.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 14:58 &middot; <code>5422a44</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a `GridShape` property to `GameMap` with a default value of &quot;Square&quot;. (src/RimWorldLab.Core...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 15:22 &middot; <code>ad5bb57</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>GAMEJAM SUPERPASS: 3D isometric engine, multi-scale world model, frozen UI shell, KayKit assets</div></div></details></div></div><div class='rel-col'><div class='rel-head done'>0.2 — DOWN HERE<br><span class='rel-tag'>LIVR&Eacute; 11-12/06/2026 &middot; 64 livraisons</span></div><div class='rel-body'><details class='day'><summary>&#128197; 11/06/2026 <span class='pill'>64 patchs</span></summary><div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 15:27 &middot; <code>6411888</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add HexToPixel method for converting hex coordinates to pixel coordinates. (src/RimWorldGodot/M...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 15:29 &middot; <code>a8cf6e2</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Implement HexToPixel method for converting hex coordinates to pixel coordinates. (src/RimWorldG...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 15:36 &middot; <code>35845bf</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a new class `RegionMap` with a private field `List&lt;(int X, int Y, string Biome)&gt; _regions`....</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 15:38 &middot; <code>6a4ece5</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>PLAYABLE RESCUE PASS: start flow, survival balance, wall orientation, planet view</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 15:47 &middot; <code>1d74409</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>PASS 3/3 (part 1): animations, player orders, hex planet, room floors</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 15:49 &middot; <code>cfcdc95</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>PASS 3/3 (part 2): day/night cycle, pause-on-threat wiring</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 15:50 &middot; <code>3bd13b5</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>PASS 3/3 (part 3): pawn name+job labels in 3D (readability)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 15:51 &middot; <code>be90d47</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>PASS 3/3 (part 4): defense orders - click a skeleton to rally colonists</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 16:12 &middot; <code>bad3ad9</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>PASS 3/3 (part 5): planetary ocean+globe in world view, self-screenshot verification</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 16:17 &middot; <code>9c8aaa2</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to check if a pawn is at the edge of the current region&#39;s hex map. (src/RimWorldLa...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 16:22 &middot; <code>9b5de93</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a placeholder for the ambient sound node. (src/RimWorldGodot/Main.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 16:27 &middot; <code>b892472</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>PASS 3/3 (part 6): camera framing fix, autostart flag, visual self-verification</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 16:33 &middot; <code>1edf592</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>PASS 3/3 (part 7): no auto-pause on threat in unattended demo mode</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 16:46 &middot; <code>dc01724</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Loop fix: rewrite spiral capped per step lineage, stub rewrites discarded, garbage items purged</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 16:46 &middot; <code>9378135</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Critic rules: no objective-cheating or stub proposals</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 17:48 &middot; <code>7d3c3a1</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a simple weather system to affect resource availability. (src/RimWorldLab.Core/GameWorld.cs...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 17:48 &middot; <code>4e44ee1</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a simple weather system that toggles rain on the map. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:03 &middot; <code>5d486b6</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to check if a given tile is part of a room in GameWorld.cs. (src/RimWorldLab.Core/...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:07 &middot; <code>a7b0fbf</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add properties X and Y to the Cell class. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:12 &middot; <code>658ac45</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Ensure the Cell class in GameWorld.cs has properties X and Y defined only once. (src/RimWorldLa...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:13 &middot; <code>f863bbe</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Ensure the Cell class in GameWorld.cs has properties X and Y defined only once. (src/RimWorldLa...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:20 &middot; <code>bd95236</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Ensure the Cell class has properties X and Y defined only once. (src/RimWorldLab.Core/GameWorld...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:21 &middot; <code>b9a112f</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Ensure the Cell class has properties X and Y defined only once in GameWorld.cs (src/RimWorldLab...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:26 &middot; <code>0536950</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>GOLDBERG PLANETS: full hex-tiled spheres, per-planet biomes, RimWorld navigation</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:27 &middot; <code>e221be4</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Planet polish: contiguous seas (smooth sphere noise), richer palettes, Planet:N remote visit</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:36 &middot; <code>bd08186</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Planet render pass: 642 tiles, tile props (trees/rocks), atmosphere halo, real moons, one-shot ...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:40 &middot; <code>20e625e</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Start implementing a basic room detection system by adding a method to detect rooms. (src/RimWo...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:43 &middot; <code>83634b0</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Per-tile biomes, emissive tile highlight, clouds, natural-resource sheets</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 18:49 &middot; <code>afaf4e9</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to detect if a tile is part of a room. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 19:20 &middot; <code>465eb09</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add WildlifePressure field to WorldRegion (src/RimWorldLab.Core/WorldModel.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 19:33 &middot; <code>0d3af56</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to generate a basic room layout. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 19:38 &middot; <code>94b65bf</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to check if a zone is functional (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 19:39 &middot; <code>39372b9</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to identify furniture types that contribute to room functionality. (src/RimWorldLa...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 19:41 &middot; <code>5aa5161</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to generate resources over time. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 19:42 &middot; <code>563c3e6</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to simulate resource growth over time. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 20:35 &middot; <code>37d3eb6</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to count functional rooms in the colony. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 20:35 &middot; <code>2325820</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to display the number of functional rooms in the colony. (src/RimWorldLab.Core/Gam...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 20:52 &middot; <code>f4fdf7b</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a private field _regions to the GameMap class. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 21:05 &middot; <code>9c34c5b</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to track and manage resource consumption for building rooms. (src/RimWorldLab.Core...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 21:39 &middot; <code>2b0a144</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a basic structure for resource consumption in GameWorld. (src/RimWorldLab.Core/GameWorld.cs...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 21:42 &middot; <code>d8ce5cd</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to track food consumption. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 21:49 &middot; <code>98d7c7a</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Increment functionalRoomCount when a zone is functional (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 21:51 &middot; <code>512dc3e</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to track resource consumption for pawns. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 21:51 &middot; <code>b2d7ee1</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to track resource consumption for pawns. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 21:52 &middot; <code>5919bac</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a new method to handle water consumption for pawns. (src/RimWorldLab.Core/Needs.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 22:01 &middot; <code>64a098b</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to calculate total resource consumption for a specific resource kind. (src/RimWorl...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 22:03 &middot; <code>7f43aa3</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a new method to track recycled resources in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 22:03 &middot; <code>5d3925c</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to track recycled resources in GameWorld.cs (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 22:16 &middot; <code>3511285</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add `ResourceKind` enum values for &#39;Water&#39; and &#39;Energy&#39;. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 22:19 &middot; <code>f66d836</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to determine if a pawn is skilled enough for a task. (src/RimWorldLab.Core/GameWor...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 22:39 &middot; <code>e0426ff</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a private dictionary `_recycledResources` to `GameWorld.cs` to track recycled resources. (s...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 22:46 &middot; <code>814e7bc</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a private dictionary `_recycledResources` to `GameWorld.cs` (src/RimWorldLab.Core/GameWorld...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 22:51 &middot; <code>c1328a9</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Implement the method `GetTotalResourceConsumption` in `GameWorld.cs`. (src/RimWorldLab.Core/Gam...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:00 &middot; <code>911daed</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to simulate resource regeneration for a single resource type in the `GameWorld` cl...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:01 &middot; <code>f7e50a2</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to simulate resource regeneration for a single resource type in the `GameWorld` cl...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:06 &middot; <code>e298b36</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Fix the incorrect increment in CountFunctionalRooms method. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:06 &middot; <code>4c0222a</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Implement the `IsZoneFunctional` method to check for functional furniture in the zone. (src/Rim...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:12 &middot; <code>bd9ce5b</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Implement a method to detect and count functional rooms in the game world. (src/RimWorldLab.Cor...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:21 &middot; <code>cf8667d</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to track functional rooms and update the GameWorld class to use it. (src/RimWorldL...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:24 &middot; <code>ff11232</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to count functional rooms (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:26 &middot; <code>d070744</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to generate resources over time. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:26 &middot; <code>fc11c5a</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to update the resource regeneration rates. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:31 &middot; <code>5cd56b1</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Implement a method to check if a zone is functional. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:49 &middot; <code>b0eed5b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>DOWN HERE ! - visit flow, machine pause, BWL clouds, design charter</div></div></details></div></div><div class='rel-col'><div class='rel-head tent'>0.3 — MONDE VIVANT<br><span class='rel-tag'>EN D&Eacute;VELOPPEMENT &middot; 243 livraisons</span></div><div class='rel-body'><details class='day'><summary>&#128197; 11/06/2026 <span class='pill'>1 patchs</span></summary><div class='deliv'><div class='deliv-date'>&#128197; 11/06/2026 23:54 &middot; <code>fc73b03</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Multi-slot save system (Down Here! chantier 1): 3 slots, save/load UI, round-trip test 9/9</div></div></details><details class='day'><summary>&#128197; 12/06/2026 <span class='pill'>164 patchs</span></summary><div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:00 &middot; <code>34ae2a5</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Down Here! world creation: seed-driven procedural universe + creation screen + realigned roadma...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:02 &middot; <code>8cd4198</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add hunting logic before the existing resource regeneration check. (src/RimWorldLab.Core/GameWo...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:02 &middot; <code>a413146</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Orbital day/night per tile + deterministic weather (Down Here! chantier 4)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:03 &middot; <code>778ce83</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add animal wandering logic after resource regeneration update. (src/RimWorldLab.Core/GameWorld....</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:04 &middot; <code>496471e</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add mood influence to task scoring in TryClaimBest (src/RimWorldLab.Core/Jobs.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:04 &middot; <code>083597b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Expedition maps sized and seeded by world-creation settings</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:07 &middot; <code>6b3dbcc</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add private fields for Tools and Food in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:08 &middot; <code>f50bf3a</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add private fields for Tools and Food in GameWorld.cs. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:10 &middot; <code>b78eacc</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a private field `int TotalTicks` to `GameWorld.cs`. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:11 &middot; <code>4d1627a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>RSI-style dashboard (Release View + Progress Tracker) + Spore scales groundwork</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:14 &middot; <code>ed03429</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add microbial biomass tracking and logging to GameWorld. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:15 &middot; <code>9d8c438</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to simulate microbial biomass regeneration. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:15 &middot; <code>97ab5b2</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add the `Macro` class with the `Regions` property to the `GameWorld` class. (src/RimWorldLab.Co...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:16 &middot; <code>79ab144</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add `MicrobialBiomass` property to `Macro` class (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:18 &middot; <code>3ec4d13</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add private field `cookBonus` in `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:19 &middot; <code>46e7bec</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add private field `cookBonus` in `GameWorld` class. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:20 &middot; <code>02d06c2</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:21 &middot; <code>3fa0173</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Public communication: shared site generator, RSI-grade dashboard v2, GitHub Pages live</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:21 &middot; <code>43ed3be</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a private field `functionalRoomsCount` to the `GameWorld` class. (src/RimWorldLab.Core/Game...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:22 &middot; <code>6b69b5a</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a private field `functionalRoomsCount` to the `GameWorld` class. (src/RimWorldLab.Core/Game...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:24 &middot; <code>fa65812</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:25 &middot; <code>226629a</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a private field to track the number of functional rooms in `GameWorld.cs`. (src/RimWorldLab...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:26 &middot; <code>f0805fe</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a private field to track the number of functional rooms in `GameWorld.cs`. (src/RimWorldLab...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:26 &middot; <code>62f2d84</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add a method to simulate resource regeneration over time. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:28 &middot; <code>c95d564</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Biome+seed map generator with real water logic (chantier cartes vivantes)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:34 &middot; <code>54714ed</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:44 &middot; <code>abcc491</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:46 &middot; <code>225c387</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Pages fix: .nojekyll (raw HTML serving, Jekyll was failing on docs/*.md)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:49 &middot; <code>2c35f5b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:49 &middot; <code>252015c</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Dashboard v2.1 + community feedback pipeline + Pages fix</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:53 &middot; <code>989f054</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:53 &middot; <code>39f7cc2</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Feedback system E2E verified (form -&gt; jsonl -&gt; rendered) + path fixes</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:54 &middot; <code>aa89202</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 00:56 &middot; <code>7401057</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>ORIGINES: the Spore-like micro stage is playable (100% procedural, zero assets)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:00 &middot; <code>d16f030</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>ORIGINES verified on screen: playable primordial pool (CallDeferred fix)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:00 &middot; <code>e7eee44</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:01 &middot; <code>85bd051</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Spore-first program: charter, S-series roadmap, MicroStage open to local LLM</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:04 &middot; <code>c4a0f07</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:14 &middot; <code>9892fec</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:23 &middot; <code>0072446</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>THRIVE INTEGRATION (alpha) + bridge architecture + micro stage fixes</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:24 &middot; <code>52c505a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:26 &middot; <code>fb1588c</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Thrive 1.1.0 installed and verified launching (alpha integration complete)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:26 &middot; <code>7520729</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:36 &middot; <code>796f837</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:44 &middot; <code>8f4f3b5</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 01:54 &middot; <code>6af81db</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 02:04 &middot; <code>b3dc1d1</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 02:14 &middot; <code>74df8f7</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 02:24 &middot; <code>d357780</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 02:34 &middot; <code>fb0ca4a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 02:44 &middot; <code>31f73cf</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 02:54 &middot; <code>f39f597</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 03:04 &middot; <code>ea6d0b1</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 03:14 &middot; <code>83fd9ad</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 03:24 &middot; <code>cd0b550</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 03:34 &middot; <code>c1a0b72</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 03:44 &middot; <code>03eb874</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 03:54 &middot; <code>01cde2d</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 04:04 &middot; <code>b1cac1b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 04:14 &middot; <code>5e8a28d</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 04:24 &middot; <code>4516713</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 04:34 &middot; <code>8db5fe5</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 04:44 &middot; <code>e9a6579</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 04:54 &middot; <code>5d710f0</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 05:04 &middot; <code>d53db5f</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 05:14 &middot; <code>046c9f4</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 05:24 &middot; <code>30bda79</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 05:34 &middot; <code>ebb9515</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 05:44 &middot; <code>53cf20b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 05:54 &middot; <code>5058809</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:04 &middot; <code>49a07b8</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:14 &middot; <code>972d3ce</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:14 &middot; <code>52db7c8</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>DOWN HERE! - Origines = Thrive fork (rebrand), hub menu redesign, dashboard tab fix, cleanup</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:16 &middot; <code>452efde</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:24 &middot; <code>89beb60</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:25 &middot; <code>1bd6308</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Hub launches Origines with quickstart (no upstream menu); watchdog relaunches minimized</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:34 &middot; <code>fd93019</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:44 &middot; <code>aea2a37</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:54 &middot; <code>bb0590b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:54 &middot; <code>4afd724</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>AI plays the game: agent bridge (full control + state JSON), LLM playtester wired into dev loop...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:55 &middot; <code>1d5de51</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>untrack volatile iter logs (gitignored)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 06:55 &middot; <code>6a86b18</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>ignore agent/playtest volatile artifacts</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:03 &middot; <code>f276a61</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Create jekyll-gh-pages.yml</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:04 &middot; <code>8a96858</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:04 &middot; <code>9a01c33</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Dashboard task timer + live game state; agent newgame dismisses the menu</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:05 &middot; <code>8a96000</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>post-rebase: loop artifacts</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:05 &middot; <code>dae7be9</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>ignore current_item.json (volatile task timer)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:14 &middot; <code>aecdbce</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:24 &middot; <code>196a2a7</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:34 &middot; <code>f7d4e0c</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:44 &middot; <code>4101f31</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 07:54 &middot; <code>8ba0bad</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 08:04 &middot; <code>ea91a8e</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 08:14 &middot; <code>a9fdfa4</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 08:24 &middot; <code>b8aabe1</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 08:34 &middot; <code>840a8b6</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 08:44 &middot; <code>e8677a1</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 08:54 &middot; <code>d428a8a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 09:04 &middot; <code>fa92232</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 09:14 &middot; <code>721fd6a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 09:24 &middot; <code>82b3447</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 09:34 &middot; <code>4298d9c</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 09:44 &middot; <code>d1887fb</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 09:54 &middot; <code>bbc2bd2</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 10:04 &middot; <code>2a4273b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 10:14 &middot; <code>817d5e2</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 10:24 &middot; <code>a50d99c</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 10:34 &middot; <code>969d115</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 10:44 &middot; <code>b3816e9</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 10:54 &middot; <code>22cfab0</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 11:04 &middot; <code>f0a742b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 11:14 &middot; <code>74169ac</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 11:24 &middot; <code>48f049f</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 11:34 &middot; <code>2d6bec8</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 11:44 &middot; <code>b2962ee</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 11:54 &middot; <code>5f9fc14</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 12:04 &middot; <code>6d75308</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 12:14 &middot; <code>956921a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 12:18 &middot; <code>dddd001</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Pages: deploy docs/ via Actions workflow (legacy Jekyll builder kept erroring)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 12:24 &middot; <code>20be418</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 12:34 &middot; <code>7c8b3fd</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 12:34 &middot; <code>69b0872</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Model arena (crawl/bench/crown/purge, nightly), LAN dashboard, invisible scheduled task, persis...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 12:44 &middot; <code>29d0bcf</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 12:46 &middot; <code>e3e9586</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Arena hardening: private port 1235 + identity check + exact-size downloads (run 2 was invalid: ...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 12:54 &middot; <code>49663d8</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 13:04 &middot; <code>20dab4a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 13:07 &middot; <code>4638757</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Cleanup: archive DEV_LOG (auto-rotation), purge orphan files, free public mirror via githack, p...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 13:14 &middot; <code>13e3485</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 13:24 &middot; <code>e3ed37a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 13:36 &middot; <code>5ec5a21</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Crown Qwen3-Coder-30B (arena verdict 2/4 vs 1/4 baseline); startup evicts LM Studio squatter, p...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 13:37 &middot; <code>c58c042</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 13:47 &middot; <code>0bb93fc</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 13:57 &middot; <code>bee864e</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 14:44 &middot; <code>bfef198</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 14:47 &middot; <code>5acd793</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Remove ALL workflows: every push spammed failure emails while the GitHub account is billing-loc...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 14:54 &middot; <code>d138b3b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 15:04 &middot; <code>0947e99</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 15:14 &middot; <code>fb74aaa</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 15:24 &middot; <code>d4c20bc</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 15:34 &middot; <code>a12aa50</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 15:44 &middot; <code>a28d272</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 15:54 &middot; <code>d79b30b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:04 &middot; <code>ea99056</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:05 &middot; <code>48b242a</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Step G.10 - Rain refills the water stores. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:05 &middot; <code>80aab56</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Step G.10 - Rain refills the water stores. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:06 &middot; <code>efaaad9</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Step G.11 - Wildlife respawns when hunted out. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:07 &middot; <code>b0773c8</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Make Pawn&#39;s Fatigue decrease faster during night. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:09 &middot; <code>05418de</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Supervisor cleanup: roadmap purged &amp; rebuilt, G.12 checked off (done at iter 6)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:11 &middot; <code>2bf50cc</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add collective morale warning. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:11 &middot; <code>b202c94</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Add collective morale warning. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:14 &middot; <code>591eb78</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:24 &middot; <code>4e4b55a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:34 &middot; <code>5c880aa</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:37 &middot; <code>40e6e93</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Direction reprise en main: design doc unique (M0-M5), roadmap = file M1 seulement, fix scroll R...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:38 &middot; <code>8731f0c</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>M1.1 - Trade caravan event. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:44 &middot; <code>3c3b11f</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:47 &middot; <code>c0af761</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>M0: Origines redevient INTERNE &#212;&#199;&#246; plus jamais de lancement de Thrive</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:51 &middot; <code>d7cbdf0</code> <span class='who ai'>IA locale</span></div><div class='deliv-title'>Step M1.2 - Colony festival lifts spirits. (src/RimWorldLab.Core/GameWorld.cs)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 16:54 &middot; <code>14a8854</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 17:01 &middot; <code>6cfdac6</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Origines reboot T1: fondation simulation cellulaire profonde (piliers Thrive, code neuf)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 17:04 &middot; <code>9bde99a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 17:14 &middot; <code>1d93813</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 22:17 &middot; <code>b90dea7</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Vision directeur: de la cellule aux etoiles (Thrive = epine, on recolte le reste)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 12/06/2026 22:22 &middot; <code>b276a22</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Phase 1: verrouille le seam genome-&gt;colon (GameWorld.PlayerSpecies)</div></div></details><details class='day'><summary>&#128197; 13/06/2026 <span class='pill'>54 patchs</span></summary><div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 09:20 &middot; <code>333fd80</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Boucle de traduction FR autonome (Python, sure): remplit les msgstr vides via le modele local, ...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 09:27 &middot; <code>a8cdffe</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Fine-tuning: curation du dataset junior Godot (85 exemples build-OK -&gt; datasets/godot_sft.jsonl...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 09:28 &middot; <code>1f60dec</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Plan de fine-tuning junior Godot (QLoRA/ROCm sur Linux): pile, etapes, honnetete sur la taille ...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 10:06 &middot; <code>f24ff94</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Plan: speciation scientifique (cladogenese, ancetre PNJ qui evolue) + clarification migration (...</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 11:47 &middot; <code>9702c78</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>Script: reactivation des traductions FR fuzzy (diagnostic + fix Godot ignore fuzzy)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 15:01 &middot; <code>73286bb</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 15:04 &middot; <code>86f3371</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 15:14 &middot; <code>5efbe43</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 15:27 &middot; <code>984c1b6</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 15:34 &middot; <code>8940b92</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 15:47 &middot; <code>7be2265</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 15:57 &middot; <code>76e3efb</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 16:05 &middot; <code>a9dca4d</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 16:17 &middot; <code>97f820a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 16:27 &middot; <code>e2d0161</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 16:37 &middot; <code>caf5d6c</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 16:47 &middot; <code>8f25e5c</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 16:57 &middot; <code>b3338a8</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 17:07 &middot; <code>223d97d</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 17:17 &middot; <code>a3dd7fd</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 17:27 &middot; <code>cff2ef9</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 17:37 &middot; <code>1fb5cda</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 17:47 &middot; <code>f86d99b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 17:57 &middot; <code>5d54f69</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 18:07 &middot; <code>a9378a0</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 18:17 &middot; <code>a2bd587</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 18:27 &middot; <code>ced0edc</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 18:37 &middot; <code>5f898d0</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 18:47 &middot; <code>0dfa5ab</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 18:57 &middot; <code>464f008</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 19:07 &middot; <code>969596d</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 19:17 &middot; <code>fb37f98</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 19:27 &middot; <code>7b8b0d8</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 19:37 &middot; <code>a4af0d7</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 19:47 &middot; <code>100e340</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 19:57 &middot; <code>2b51506</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 20:07 &middot; <code>dd41a90</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 20:17 &middot; <code>6a6ace1</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 20:27 &middot; <code>e5613a0</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 20:37 &middot; <code>8a46d75</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 20:47 &middot; <code>d82d4f3</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 20:57 &middot; <code>4fa996b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 21:07 &middot; <code>aba7608</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 21:17 &middot; <code>d2ef266</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 21:27 &middot; <code>b9ff151</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 21:37 &middot; <code>7205598</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 21:47 &middot; <code>21f5698</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 21:57 &middot; <code>e054935</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 22:07 &middot; <code>29d361e</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 22:17 &middot; <code>e62e2aa</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 22:27 &middot; <code>c9d725e</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 22:37 &middot; <code>12992aa</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 22:47 &middot; <code>ba4c684</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 13/06/2026 22:57 &middot; <code>10850be</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div></details><details class='day'><summary>&#128197; 14/06/2026 <span class='pill'>24 patchs</span></summary><div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 17:44 &middot; <code>626e4a5</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>chore: archive dead code, fix gitignore, align docs &amp; dev chat</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 17:52 &middot; <code>c67c05a</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>docs+arch: ARCHITECTURE.md (mindmap + diagrams) and Config kernel (Phase 1)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 17:57 &middot; <code>4250f8b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>checkpoint: save uncommitted live-script edits (Thrive pivot)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 18:07 &middot; <code>160f940</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>refactor(scripts): Phase 1 - all scripts read paths/URLs from Config kernel</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 18:17 &middot; <code>b2c0723</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(orchestration): Phase 2 - mode state machine (single active mode)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 18:25 &middot; <code>5e22ae8</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>fix(startup): launch dashboard + orchestrator BEFORE the slow LLM bring-up</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 18:27 &middot; <code>77e3c30</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(observability): Phase 3 - consolidated state (lib/State.ps1 + /state.json)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 18:29 &middot; <code>e53486b</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(repro): Phase 4 - setup-game.ps1 (reproducible game clone)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 18:33 &middot; <code>9c08d27</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(dev-loop+tests): Phase 5 robust patch matcher + Phase 6 test harness</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 18:36 &middot; <code>2565263</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(world-model substrate): Phase 7 - state trajectory collection</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 18:57 &middot; <code>e517291</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(RSI): recursive self-improvement loop + learned world model</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 19:14 &middot; <code>ed13b83</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>docs+proof: scientific evidence of self-improvement + A-to-Z guide</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 19:31 &middot; <code>3aef6bd</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(emergence): self-supervised world model -&gt; emergent survival behavior</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 19:44 &middot; <code>a6966d6</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(chat): conversation tab with persistent memory (localhost:8765/chat)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 20:47 &middot; <code>b21a0dc</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(self-evolve): guarded self-modification of own code + EVOLVE mode</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 21:02 &middot; <code>6e28fce</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(successor): the system designs &amp; deploys its own (decision) successor</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 22:42 &middot; <code>5f68900</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>feat(successor+): richer feature space, continuous EVOLVE, genealogy dashboard</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 22:46 &middot; <code>9438cdd</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 22:47 &middot; <code>294d50d</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 22:57 &middot; <code>8572d62</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 23:07 &middot; <code>2888de6</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 23:17 &middot; <code>95e2f89</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>site: progress update (auto)</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 23:23 &middot; <code>0500ff0</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>fix(recurse): change-detection - don&#39;t re-design a successor on stale data</div></div>
-<div class='deliv'><div class='deliv-date'>&#128197; 14/06/2026 23:24 &middot; <code>3720cc5</code> <span class='who claude'>superviseur</span></div><div class='deliv-title'>test: make EVOLVE-mode assertion deterministic (mapping, not live state)</div></div></details></div></div><div class='rel-col'><div class='rel-head future'>0.4+ — HORIZON<br><span class='rel-tag'>SANS DATE (dev autonome)</span></div><div class='rel-body'><div class='deliv'><div class='deliv-title'>D&#233;part Spore: stade bact&#233;rie jouable</div></div> <div class='deliv'><div class='deliv-title'>Stade organisme (cr&#233;ature)</div></div> <div class='deliv'><div class='deliv-title'>Cartes x10 + eau logique (rivi&#232;res/lacs)</div></div> <div class='deliv'><div class='deliv-title'>Vue 4X des unit&#233;s r&#233;elles</div></div> <div class='deliv'><div class='deliv-title'>Gravit&#233;/atmosph&#232;re par plan&#232;te</div></div> <div class='deliv'><div class='deliv-title'>Multi-syst&#232;mes stellaires</div></div> <div class='deliv'><div class='deliv-title'>Endgame spatial KSP</div></div></div></section>
-<section id='tracker'><div class='card'><h2>&#128202; Progress Tracker &mdash; en d&eacute;veloppement par &eacute;quipe</h2><div class='trk-team'><div class='trk-name'>DONNÉES (équilibrage cellule) <span class='pill'>1</span></div><details class='trk-item'><summary><span class='trk-dot'></span>Increase the &quot;CompoundCloudBrightness&quot; to &quot;1.5&quot;, in simulation_parameters/microbe_stage/biomes.json.</summary><div class='trk-desc'><br><span class='muted'>Statut: en file pour le développeur IA local &middot; pas d'estimation (dev autonome)</span></div></details></div><div class='trk-team'><div class='trk-name'>TRADUCTIONS <span class='pill'>0</span></div><div class='muted' style='padding:6px'>aucune tâche en file</div></div><div class='trk-team'><div class='trk-name'>CODE (C#) <span class='pill'>2</span></div><details class='trk-item'><summary><span class='trk-dot'></span>Dans les commentaires (// ou ///) de src/auto-evo/Miche.cs, remplace le mot &#171; Thrive &#187; par &#171; Down Here Origins &#187;. Ne touche AUCUNE ligne de code, seulement le texte des commentaires.</summary><div class='trk-desc'><br><span class='muted'>Statut: en file pour le développeur IA local &middot; pas d'estimation (dev autonome)</span></div></details><details class='trk-item'><summary><span class='trk-dot'></span>Dans le commentaire de src/auto-evo/simulation/MichePopulation.cs qui contient &#171; Thrive &#187;, remplace &#171; Thrive &#187; par &#171; Down Here Origins &#187;. Ne touche AUCUN code.</summary><div class='trk-desc'><br><span class='muted'>Statut: en file pour le développeur IA local &middot; pas d'estimation (dev autonome)</span></div></details></div><div class='trk-team'><div class='trk-name'>AUTRE <span class='pill'>0</span></div><div class='muted' style='padding:6px'>aucune tâche en file</div></div></div></section>
-<section id='feedback'><div class='card'><h2>&#128172; Feedback &mdash; demandes de features &amp; bugs</h2>
-<p>Proposez des features ou signalez des bugs directement sur GitHub &mdash; les demandes valid&eacute;es deviennent des t&acirc;ches du d&eacute;veloppeur IA:</p>
-<p><a class='btnr' href='https://github.com/Duperopope/Rimwork/issues/new?labels=feature&title=%5BFeature%5D%20'>&#10024; Proposer une feature</a>
-&nbsp;<a class='btnp' href='https://github.com/Duperopope/Rimwork/issues/new?labels=bug&title=%5BBug%5D%20'>&#128027; Signaler un bug</a></p>
-<div class='ev warn'><span class='tag'>12/06 00:52</span><span class='tag2'>&#10024; feature &middot; propose</span><span class='txt'>test feedback final</span></div></div></section>
-<section id='activity'><div class='card'><h2>&#9889; Activit&eacute; dat&eacute;e (25 derniers commits)</h2><div class='ev done'><span class='tag'>14/06 23:24</span><span class='tag2'>superviseur</span><span class='txt'>test: make EVOLVE-mode assertion deterministic (mapping, not live state)</span></div><div class='ev done'><span class='tag'>14/06 23:23</span><span class='tag2'>superviseur</span><span class='txt'>fix(recurse): change-detection - don&#39;t re-design a successor on stale data</span></div><div class='ev done'><span class='tag'>14/06 23:17</span><span class='tag2'>superviseur</span><span class='txt'>site: progress update (auto)</span></div><div class='ev done'><span class='tag'>14/06 23:07</span><span class='tag2'>superviseur</span><span class='txt'>site: progress update (auto)</span></div><div class='ev done'><span class='tag'>14/06 22:57</span><span class='tag2'>superviseur</span><span class='txt'>site: progress update (auto)</span></div><div class='ev done'><span class='tag'>14/06 22:47</span><span class='tag2'>superviseur</span><span class='txt'>site: progress update (auto)</span></div><div class='ev done'><span class='tag'>14/06 22:46</span><span class='tag2'>superviseur</span><span class='txt'>site: progress update (auto)</span></div><div class='ev done'><span class='tag'>14/06 22:42</span><span class='tag2'>superviseur</span><span class='txt'>feat(successor+): richer feature space, continuous EVOLVE, genealogy dashboard</span></div><div class='ev done'><span class='tag'>14/06 21:02</span><span class='tag2'>superviseur</span><span class='txt'>feat(successor): the system designs &amp; deploys its own (decision) successor</span></div><div class='ev done'><span class='tag'>14/06 20:47</span><span class='tag2'>superviseur</span><span class='txt'>feat(self-evolve): guarded self-modification of own code + EVOLVE mode</span></div><div class='ev done'><span class='tag'>14/06 19:44</span><span class='tag2'>superviseur</span><span class='txt'>feat(chat): conversation tab with persistent memory (localhost:8765/chat)</span></div><div class='ev done'><span class='tag'>14/06 19:31</span><span class='tag2'>superviseur</span><span class='txt'>feat(emergence): self-supervised world model -&gt; emergent survival behavior</span></div><div class='ev done'><span class='tag'>14/06 19:14</span><span class='tag2'>superviseur</span><span class='txt'>docs+proof: scientific evidence of self-improvement + A-to-Z guide</span></div><div class='ev done'><span class='tag'>14/06 18:57</span><span class='tag2'>superviseur</span><span class='txt'>feat(RSI): recursive self-improvement loop + learned world model</span></div><div class='ev done'><span class='tag'>14/06 18:36</span><span class='tag2'>superviseur</span><span class='txt'>feat(world-model substrate): Phase 7 - state trajectory collection</span></div><div class='ev done'><span class='tag'>14/06 18:33</span><span class='tag2'>superviseur</span><span class='txt'>feat(dev-loop+tests): Phase 5 robust patch matcher + Phase 6 test harness</span></div><div class='ev done'><span class='tag'>14/06 18:29</span><span class='tag2'>superviseur</span><span class='txt'>feat(repro): Phase 4 - setup-game.ps1 (reproducible game clone)</span></div><div class='ev done'><span class='tag'>14/06 18:27</span><span class='tag2'>superviseur</span><span class='txt'>feat(observability): Phase 3 - consolidated state (lib/State.ps1 + /state.json)</span></div><div class='ev done'><span class='tag'>14/06 18:25</span><span class='tag2'>superviseur</span><span class='txt'>fix(startup): launch dashboard + orchestrator BEFORE the slow LLM bring-up</span></div><div class='ev done'><span class='tag'>14/06 18:17</span><span class='tag2'>superviseur</span><span class='txt'>feat(orchestration): Phase 2 - mode state machine (single active mode)</span></div><div class='ev done'><span class='tag'>14/06 18:07</span><span class='tag2'>superviseur</span><span class='txt'>refactor(scripts): Phase 1 - all scripts read paths/URLs from Config kernel</span></div><div class='ev done'><span class='tag'>14/06 17:57</span><span class='tag2'>superviseur</span><span class='txt'>checkpoint: save uncommitted live-script edits (Thrive pivot)</span></div><div class='ev done'><span class='tag'>14/06 17:52</span><span class='tag2'>superviseur</span><span class='txt'>docs+arch: ARCHITECTURE.md (mindmap + diagrams) and Config kernel (Phase 1)</span></div><div class='ev done'><span class='tag'>14/06 17:44</span><span class='tag2'>superviseur</span><span class='txt'>chore: archive dead code, fix gitignore, align docs &amp; dev chat</span></div><div class='ev done'><span class='tag'>13/06 22:57</span><span class='tag2'>superviseur</span><span class='txt'>site: progress update (auto)</span></div></div></section>
-<section id='overview'>
-<div class='kpis'>
-<div class='kpi'><b>40%</b>avancement<div class='bar'><i></i></div><span class='muted'>2 / 5 t&acirc;ches</span></div>
-<div class='kpi'><b class='g'>20</b>patches accept&eacute;s</div>
-<div class='kpi'><b class='r'>52</b>annul&eacute;s</div>
-<div class='kpi'><b class='y'>40</b>refus&eacute;s avant build (pr&eacute;diction)</div>
-</div>
-
-<div class='card'><h2>&#127757; Le projet</h2>
-<p>Down Here Origins commence au stade cellulaire (base Thrive r&eacute;ecrite, jouable), puis greffe d'autres stades&nbsp;: animal/tribus, planificateur 4X plan&eacute;taire, et un endgame spatial fa&ccedil;on Kerbal &mdash; un seul jeu, du vivant aux &eacute;toiles. Le contenu &eacute;troit (donn&eacute;es, traductions, petits correctifs) est &eacute;crit par un LLM local autonome (boucle &eacute;dite&rarr;build&rarr;commit), supervis&eacute; par une IA frontier qui fait le structurel. Chaque livraison ci-dessus est un commit r&eacute;el, dat&eacute;, v&eacute;rifi&eacute; par compilation.</p></div>
-</section>
+  <div id="banner"></div>
+  <div class="ctrl" id="ctrl"></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="view"></div>
 </main>
-<footer>DOWN HERE ! &mdash; d&eacute;p&ocirc;t: github.com/Duperopope/Rimwork &middot; g&eacute;n&eacute;r&eacute; 14/06/2026 23:27</footer>
-</body></html>
+<script>
+window.__DATA__={"tracker":[{"text":"Dans les commentaires (// ou ///) de src/auto-evo/Miche.cs, remplace le mot « Thrive » par « Down Here Origins ». Ne touche AUCUNE ligne de code, seulement le texte des commentaires.","cat":"Code"},{"text":"Dans le commentaire de src/auto-evo/simulation/MichePopulation.cs qui contient « Thrive », remplace « Thrive » par « Down Here Origins ». Ne touche AUCUN code.","cat":"Code"},{"text":"Increase the \"CompoundCloudBrightness\" to \"1.5\", in simulation_parameters/microbe_stage/biomes.json.","cat":"Donnees"}],"devAgeMin":1471,"generatedAt":"2026-06-14 23:37:44","progress":{"reverted":52,"predicted":40,"pct":40.0,"kept":20,"todo":3,"done":2},"state":{"timestamp":"2026-06-14 23:37:44","mode":"EVOLVE","stackState":"RUNNING","llmAlive":false,"game":{"pid":null,"running":false},"agents":{"dev":false,"game":false,"play":false,"arena":false,"evolve":true,"brain":true},"roadmap":{"todo":3,"done":2,"pct":40.0},"devlog":{"reverted":52,"kept":20},"health":{"iter":116,"simOk":true,"build":"IDLE","timestamp":"2026-06-13 23:06:41","iterSeconds":0,"simSummary":"le dev examine le jeu et propose des ameliorations"},"currentTask":{"iter":122,"since":"2026-06-13 18:10:56","item":"- [ ] Increase the \"CompoundCloudBrightness\" to \"1.5\", in simulation_parameters/microbe_stage/biomes.json."},"lastCommits":["d69e3d3 feat(dashboard): modern SPA rework (JSON API, real activity, START, honest status)","0c72025 site: progress update (auto)","3720cc5 test: make EVOLVE-mode assertion deterministic (mapping, not live state)","0500ff0 fix(recurse): change-detection - don't re-design a successor on stale data","95e2f89 site: progress update (auto)"],"brain":{"gain":0.0,"features":13,"model":"logreg","utility":0.3928,"gens":8}},"feedback":[{"type":"feature","status":"propose","text":"test feedback final","date":"12/06 00:52"}],"lessons":["The lesson is: Be sure to check the existing code thoroughly and understand its structure and components before adding new features or methods.","The lesson is to always double-check the existing file and method signatures before adding a new one, and to make sure that the types and properties used in the new method exist in the file.","The lesson is to always double-check that the method signatures, types, and properties match exactly with the existing file content, and to avoid inventing new types or properties that do not exist in the shown code.","The lesson is to carefully read and understand the existing code before making changes. The error messages are revealing - they suggest that there are missing or improperly placed brackets or comparison operators in the code. Always double-check your syntax to avoid such issues.","The C# compiler is strict about syntax. Make sure all braces, semicolons, and other symbols are used correctly. Also, ensure that all types are defined and the correct method of accessing properties and methods is used.","The lesson is: Be sure that the variable you're trying to use is defined in the current context. In this case, 'pw' should be defined before its usage."],"activity":[{"type":"feat","text":"modern SPA rework (JSON API, real activity, START, honest status)","date":"14/06 23:37","who":"superviseur"},{"type":"test","text":"make EVOLVE-mode assertion deterministic (mapping, not live state)","date":"14/06 23:24","who":"superviseur"},{"type":"fix","text":"change-detection - don't re-design a successor on stale data","date":"14/06 23:23","who":"superviseur"},{"type":"feat","text":"richer feature space, continuous EVOLVE, genealogy dashboard","date":"14/06 22:42","who":"superviseur"},{"type":"feat","text":"the system designs & deploys its own (decision) successor","date":"14/06 21:02","who":"superviseur"},{"type":"feat","text":"guarded self-modification of own code + EVOLVE mode","date":"14/06 20:47","who":"superviseur"},{"type":"feat","text":"conversation tab with persistent memory (localhost:8765/chat)","date":"14/06 19:44","who":"superviseur"},{"type":"feat","text":"self-supervised world model -> emergent survival behavior","date":"14/06 19:31","who":"superviseur"},{"type":"docs","text":"docs+proof: scientific evidence of self-improvement + A-to-Z guide","date":"14/06 19:14","who":"superviseur"},{"type":"feat","text":"recursive self-improvement loop + learned world model","date":"14/06 18:57","who":"superviseur"},{"type":"feat","text":"Phase 7 - state trajectory collection","date":"14/06 18:36","who":"superviseur"},{"type":"feat","text":"Phase 5 robust patch matcher + Phase 6 test harness","date":"14/06 18:33","who":"superviseur"},{"type":"feat","text":"Phase 4 - setup-game.ps1 (reproducible game clone)","date":"14/06 18:29","who":"superviseur"},{"type":"feat","text":"Phase 3 - consolidated state (lib/State.ps1 + /state.json)","date":"14/06 18:27","who":"superviseur"},{"type":"fix","text":"launch dashboard + orchestrator BEFORE the slow LLM bring-up","date":"14/06 18:25","who":"superviseur"},{"type":"feat","text":"Phase 2 - mode state machine (single active mode)","date":"14/06 18:17","who":"superviseur"},{"type":"refactor","text":"Phase 1 - all scripts read paths/URLs from Config kernel","date":"14/06 18:07","who":"superviseur"},{"type":"commit","text":"checkpoint: save uncommitted live-script edits (Thrive pivot)","date":"14/06 17:57","who":"superviseur"},{"type":"docs","text":"docs+arch: ARCHITECTURE.md (mindmap + diagrams) and Config kernel (Phase 1)","date":"14/06 17:52","who":"superviseur"},{"type":"chore","text":"archive dead code, fix gitignore, align docs & dev chat","date":"14/06 17:44","who":"superviseur"},{"type":"commit","text":"Agent: restart depuis le stade sur extinction (le game-over n'a pas de menu) + commandes traitees meme joueur mort","date":"13/06 20:24","who":"superviseur"},{"type":"commit","text":"Agent: desactive les tutoriels (ils pausent le jeu derriere un pop-up et bloquent le pilotage auto)","date":"13/06 19:42","who":"superviseur"},{"type":"commit","text":"Cycle de vie agent: newgame (menu), evolve (editeur auto-confirme), ready/dead/gameOver exportes","date":"13/06 18:06","who":"superviseur"},{"type":"commit","text":"Pont agent brique 2 (CONTROLE): le dev PILOTE la cellule (mouvement + engloutir) via agent_action.json, + perception du glucose proche","date":"13/06 15:59","who":"superviseur"},{"type":"commit","text":"Pont d'observation joueur: MicrobeStage exporte l'etat reel (vie, position, composes) -> user://agent_state.json a 1Hz","date":"13/06 15:51","who":"superviseur"},{"type":"ai","text":"Remplacer \"Thrive\" par \"Down Here Origins\" dans les commentaires (src/auto-evo/Miche.cs)","date":"13/06 15:29","who":"IA locale"},{"type":"ai","text":"Corriger l'orthographe de la cl├® `\"ATP_BALANCE_TOOLTIP_MULTICELLULAR\"`. (locale/fr.po)","date":"13/06 15:21","who":"IA locale"},{"type":"ai","text":"Corriger l'├®criture d'un mot dans la traduction d'une ligne du fichier locale/fr.po (locale/fr.po)","date":"13/06 15:18","who":"IA locale"},{"type":"commit","text":"Rebrand: Thrive -> Down Here Origins (titre fenetre, textes en jeu, ScienceOpedia)","date":"13/06 15:17","who":"superviseur"},{"type":"ai","text":"Add `BarColour` field to the compound `atp` in simulation_parameters/microbe_stage/compounds.json with the same r/g/b values as its existing `Colour` field, so that the ATP bar has a defined color like the other compounds. (simulation_parameters/microbe_stage/compounds.json)","date":"13/06 15:01","who":"IA locale"}]};
+const $=(h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
+const esc=(s)=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+let DATA=window.__DATA__||null, TAB=sessionStorage.getItem('tab')||'overview', BUSY=false;
+const TABS=[['overview','Vue d\'ensemble'],['activity','Activité'],['tasks','Tâches'],['feedback','Feedback']];
+
+async function api(path,opts){ try{return await fetch(path,opts);}catch(e){return null;} }
+async function load(){ if(!window.__DATA__){ const r=await api('/api.json'); if(r){try{DATA=await r.json();}catch(e){}} } render(); }
+async function act(path){ if(BUSY)return; BUSY=true; await api(path,{method:'POST'}); setTimeout(()=>{BUSY=false;load();},1200); }
+function setMode(m){ act('/mode?set='+m); }
+
+function pill(label,cls){ return `<span class="pill"><span class="dot ${cls}"></span>${label}</span>`; }
+function renderPills(){
+  const s=DATA?DATA.state:null; const llm=s&&s.llmAlive; const age=DATA?DATA.devAgeMin:null;
+  let fresh='warn',freshL='dev: inconnu';
+  if(age!=null){ if(age<5){fresh='on';freshL='dev actif'} else if(age<120){fresh='warn';freshL='dev: '+age+' min'} else {fresh='off';freshL='dev inactif ('+Math.round(age/60)+'h)'} }
+  document.getElementById('pills').innerHTML=
+    pill(llm?'LLM en ligne':'LLM hors ligne', llm?'on':'off')+
+    pill('Mode: '+(s?s.mode:'?'), s&&s.mode!=='IDLE'?'on':'')+
+    pill(s&&s.stackState==='PAUSED'?'En pause':'En marche', s&&s.stackState==='PAUSED'?'off':'on')+
+    pill(freshL,fresh);
+}
+function renderBanner(){
+  const s=DATA?DATA.state:null; let h='';
+  if(s&&!s.llmAlive){ h+='<div class="warnbox">⚠ Le LLM local est <b>hors ligne</b> — clique <b>DÉMARRER</b> (lance llama-server + la pile). Sans lui, le dev IA ne progresse pas.</div>'; }
+  document.getElementById('banner').innerHTML=h;
+}
+function renderCtrl(){
+  const s=DATA?DATA.state:null; const paused=s&&s.stackState==='PAUSED';
+  const modes=['DEV','PLAY','ARENA','EVOLVE','IDLE'];
+  const seg=modes.map(m=>`<button class="${s&&s.mode===m?'on':''}" onclick="setMode('${m}')">${m}</button>`).join('');
+  document.getElementById('ctrl').innerHTML=
+    (paused?`<button class="btn start" onclick="act('/resume')">▶ DÉMARRER</button>`
+           :`<button class="btn stop" onclick="if(confirm('Arrêter toute la pile ?'))act('/pause')">■ ARRÊTER</button>`)+
+    `<div class="seg">${seg}</div>`+
+    `<a class="btn ghost" href="/chat">💬 Parler à l'IA</a>`;
+}
+function renderKpis(){
+  const p=DATA?DATA.progress:{}, b=DATA&&DATA.state?DATA.state.brain:null;
+  const k=[['v',(p.pct||0)+'%','avancement','<div class="bar"><i style="width:'+(p.pct||0)+'%"></i></div>'],
+    ['g',p.kept||0,'patchs acceptés',''],['r',p.reverted||0,'annulés',''],
+    ['y',p.predicted||0,'refusés avant build',''],
+    ['b',b?b.utility:'—','cerveau (utilité)','']];
+  document.getElementById('kpis').innerHTML=k.map(x=>`<div class="kpi"><div class="v ${x[0]}">${x[1]}</div><div class="l">${x[2]}</div>${x[3]}</div>`).join('');
+}
+function renderTabs(){
+  document.getElementById('tabs').innerHTML=TABS.map(t=>`<button class="${TAB===t[0]?'on':''}" onclick="go('${t[0]}')">${t[1]}</button>`).join('');
+}
+function go(t){ TAB=t; sessionStorage.setItem('tab',t); renderTabs(); renderView(); }
+
+function card(title,body){ return `<div class="card"><h3>${title}</h3>${body}</div>`; }
+function viewOverview(){
+  const s=DATA?DATA.state:{}, b=s.brain, ct=s.currentTask;
+  let task='<span class="mut">aucune tâche en cours</span>';
+  if(ct&&ct.item){ task=esc(ct.item.length>140?ct.item.slice(0,140)+'…':ct.item); }
+  const game=s.game&&s.game.running?`<b class="g">lancé</b> (pid ${s.game.pid})`:'<span class="mut">non lancé</span>';
+  const health=card('🩺 Santé en direct',
+    `<div class="txt"><b>Tâche:</b> ${task}</div>
+     <div class="txt" style="margin-top:8px"><b>Jeu:</b> ${game}</div>
+     <div class="txt" style="margin-top:8px"><b>Agents:</b> ${s.agents?Object.keys(s.agents).filter(a=>s.agents[a]).join(', ')||'<span class=mut>aucun</span>':'—'}</div>`);
+  let brain='<span class="mut">pas encore de cerveau conçu</span>';
+  if(b){ brain=`<div class="txt">Champion <b>${esc(b.model)}</b> · ${b.features} features · utilité <b class="g">${b.utility}</b></div>
+    <div class="mut" style="margin-top:6px">gain +${b.gain} sur ${b.gens} générations</div>`; }
+  const brainC=card('🧠 Cerveau auto-conçu (successeur)',brain);
+  const lessons=(DATA.lessons&&DATA.lessons.length)?DATA.lessons.map(l=>`<div class="row"><div class="txt">${esc(l)}</div></div>`).join(''):'<div class="empty">—</div>';
+  const lessonsC=card('🎓 Leçons récentes de l\'IA',lessons);
+  document.getElementById('view').innerHTML=`<div class="grid">${health}${brainC}${lessonsC}</div>`;
+}
+function viewActivity(){
+  const a=DATA?DATA.activity:[];
+  if(!a||!a.length){ document.getElementById('view').innerHTML=card('⚡ Activité',`<div class="empty">aucune activité</div>`); return; }
+  const rows=a.map(e=>`<div class="row"><span class="time">${esc(e.date)}</span><span class="badge ${esc(e.type)}">${esc(e.who==='IA locale'?'IA':e.type)}</span><span class="txt">${esc(e.text)}</span></div>`).join('');
+  document.getElementById('view').innerHTML=card('⚡ Activité réelle (commits, hors bruit auto)',rows);
+}
+function viewTasks(){
+  const t=DATA?DATA.tracker:[];
+  if(!t||!t.length){ document.getElementById('view').innerHTML=card('🗂️ Tâches en file',`<div class="empty">aucune tâche en file</div>`); return; }
+  const rows=t.map(x=>`<div class="task"><span class="cat">${esc(x.cat)}</span>${esc(x.text)}</div>`).join('');
+  document.getElementById('view').innerHTML=card('🗂️ Tâches en file (roadmap)',rows);
+}
+function viewFeedback(){
+  const f=DATA?DATA.feedback:[];
+  const form=`<form onsubmit="sendFb(event)" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+    <select id="fbtype"><option value="feature">✨ Feature</option><option value="bug">🐛 Bug</option></select>
+    <input id="fbtext" placeholder="Décris ta demande ou un bug…" style="flex:1;min-width:240px">
+    <button class="btn start" type="submit">Envoyer</button></form>`;
+  const rows=(f&&f.length)?f.map(x=>`<div class="row"><span class="time">${esc(x.date)}</span><span class="badge">${esc(x.type)} · ${esc(x.status)}</span><span class="txt">${esc(x.text)}</span></div>`).join(''):'<div class="empty">aucune demande</div>';
+  document.getElementById('view').innerHTML=card('💬 Feedback',form+rows);
+}
+function sendFb(e){ e.preventDefault(); const t=document.getElementById('fbtext').value.trim(); if(!t)return;
+  const ty=document.getElementById('fbtype').value;
+  api('/feedback?type='+ty+'&text='+encodeURIComponent(t),{method:'GET'}).then(()=>{document.getElementById('fbtext').value='';setTimeout(load,400);}); }
+function renderView(){ ({overview:viewOverview,activity:viewActivity,tasks:viewTasks,feedback:viewFeedback}[TAB]||viewOverview)(); }
+function render(){ if(!DATA){return;} renderPills();renderBanner();renderCtrl();renderKpis();renderTabs();renderView(); }
+load(); if(!window.__DATA__){ setInterval(load,4000); }
+</script></body></html>
