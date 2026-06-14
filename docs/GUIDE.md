@@ -45,6 +45,9 @@ Ouvre **http://localhost:8765**. Tu y trouves :
   - **IDLE** — tout au repos (pour une session avec un superviseur).
 - **PAUSE / REPRENDRE** — coupe ou relance toute la machine.
 - **Feedback** — propose une feature/bug ; ça devient une tâche.
+- **💬 Parler à l'IA** (`/chat`) — un onglet conversation : l'IA locale te répond
+  librement et **se souvient** de vos échanges (mémoire persistante). Détails :
+  [CONVERSATION.md](CONVERSATION.md). (Il faut le LLM démarré pour des réponses.)
 
 En ligne de commande si besoin :
 ```powershell

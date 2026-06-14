@@ -6,6 +6,7 @@
 . "$PSScriptRoot\lib\Config.ps1"
 . "$PSScriptRoot\lib\Modes.ps1"
 . "$PSScriptRoot\lib\State.ps1"
+. "$PSScriptRoot\lib\Chat.ps1"
 $cfg = Get-DownHereConfig
 $port = $cfg.Dashboard.Port
 $logDir = $cfg.Paths.Logs
@@ -108,6 +109,29 @@ while ($true) {
             $ctx.Response.ContentType = "application/json; charset=utf-8"
             $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
         } catch { try { $ctx.Response.StatusCode = 500 } catch {} }
+        try { $ctx.Response.Close() } catch {}
+        continue
+    }
+    if ($ctx.Request.Url.AbsolutePath -eq "/chat") {
+        # Onglet conversation (page autonome).
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes((Get-ChatPageHtml))
+        $ctx.Response.ContentType = "text/html; charset=utf-8"
+        $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
+        try { $ctx.Response.Close() } catch {}
+        continue
+    }
+    if ($ctx.Request.Url.AbsolutePath -eq "/chat/send") {
+        if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
+        $reply = "(erreur)"
+        try {
+            $reader = New-Object System.IO.StreamReader($ctx.Request.InputStream, $ctx.Request.ContentEncoding)
+            $raw = $reader.ReadToEnd(); $reader.Close()
+            $msg = ($raw | ConvertFrom-Json).message
+            if ($msg) { $reply = Invoke-ChatTurn -Message ([string]$msg) -Config $cfg }
+        } catch { $reply = "erreur: $_" }
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes((@{ reply = $reply } | ConvertTo-Json -Compress))
+        $ctx.Response.ContentType = "application/json; charset=utf-8"
+        $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
         try { $ctx.Response.Close() } catch {}
         continue
     }

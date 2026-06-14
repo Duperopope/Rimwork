@@ -124,6 +124,19 @@ et le dashboard `/state.json`.
   (ne saute que les patchs les plus sûrement cassés) et la policy peut revenir
   à « pas de gate » si ça marche mieux.
 
+## 7bis. Où on se situe vs Anthropic (cadre honnête)
+
+Anthropic ([page RSI](https://www.anthropic.com/institute/recursive-self-improvement))
+définit la RSI comme « une IA capable de concevoir/développer **son propre
+successeur** de façon autonome » et dit explicitement *« on n'y est pas, ce n'est
+pas inévitable »*. Leur progression : (1) l'IA exécute, l'humain dirige →
+(2) l'IA gagne du **jugement** sur des domaines étroits → (3) RSI.
+
+**Nous sommes au stade (1) avec des amorces de (2)** : l'IA exécute (dev_loop),
+**apprend de ses résultats** (world model + policy, prouvé), choisit un peu quoi
+faire (auto-proposition de tâches), et dialogue avec mémoire. Pas de réécriture
+de poids ni de successeur autonome — et on ne le prétend pas.
+
 ## 8. Inspirations
 
 - Agents qui écrivent/améliorent du code de façon autonome et supervisée

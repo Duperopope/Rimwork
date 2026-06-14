@@ -49,6 +49,8 @@ scripts/logs/wm_history.jsonl
 scripts/logs/wm_evidence.json
 scripts/logs/emergence_evidence.json
 scripts/logs/policy.json
+scripts/logs/chat_history.jsonl
+scripts/logs/chat_memory.jsonl
 scripts/*.flag
 
 # Downloaded third-party archives accidentally dropped in asset folders

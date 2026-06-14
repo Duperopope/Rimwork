@@ -30,6 +30,7 @@ Un seul **MODE** autonome actif à la fois (DEV / PLAY / ARENA / IDLE) — voir
 | `setup-game.ps1` | Clone reproductible du jeu actif (fork Thrive) dans `reference/thrive` s'il est absent. |
 | `tests/run-tests.ps1` | Harnais de tests autonome (Config/Patch/Modes/State + parse). `pwsh -File scripts/tests/run-tests.ps1`. |
 | Dashboard `/state.json` | L'état consolidé en JSON (observabilité machine). |
+| `lib/Chat.ps1` + Dashboard `/chat` | **Onglet conversation** : l'IA locale parle + **mémoire persistante** (voir [../docs/CONVERSATION.md](../docs/CONVERSATION.md)). |
 
 ### Auto-amélioration récursive (world model) — voir [../docs/RECURSIVE_SELF_IMPROVEMENT.md](../docs/RECURSIVE_SELF_IMPROVEMENT.md)
 

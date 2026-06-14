@@ -23,6 +23,8 @@ $lib = Join-Path $PSScriptRoot '..\lib'
 . (Join-Path $lib 'State.ps1')
 . (Join-Path $lib 'WorldModel.ps1')
 . (Join-Path $lib 'Policy.ps1')
+. (Join-Path $lib 'Chat.ps1')
+. (Join-Path $PSScriptRoot '..\site_gen.ps1')   # pour Get-ChatPageHtml
 $cfg = Get-DownHereConfig
 
 Write-Host "== Config ==" -ForegroundColor Cyan
@@ -83,6 +85,19 @@ if (Test-WorldModelReady -Config $cfg) {
 } else {
     Write-Host "  (world model non entraine -> tests WM ignores, OK sur clone frais)" -ForegroundColor DarkYellow
 }
+
+Write-Host "== Conversation (memoire persistante) ==" -ForegroundColor Cyan
+Assert ((Get-ChatPageHtml) -match 'Conversation' -and (Get-ChatPageHtml) -match '/chat/send') "chat: page rendue"
+# Config temporaire -> ne pollue pas la vraie memoire de l'agent.
+$tmp = Join-Path $env:TEMP "dh_chat_test_$PID"
+New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+$tcfg = Get-DownHereConfig; $tcfg.Paths.Logs = $tmp
+Add-ChatMemory -Fact "fait-test-unitaire" -Config $tcfg
+Assert ((Get-ChatMemories -Config $tcfg) -contains "fait-test-unitaire") "chat: memoire persistee + relue"
+Add-ChatTurn -Role 'user' -Content 'ping-test' -Config $tcfg
+Assert (@(Get-ChatHistory -Last 5 -Config $tcfg | Where-Object { $_.content -eq 'ping-test' }).Count -ge 1) "chat: historique persiste + relu"
+Assert ((Build-ChatSystemPrompt -Config $tcfg) -match 'fait-test-unitaire') "chat: la memoire est injectee dans le prompt (se souvient)"
+Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host "== Parse de tous les scripts ==" -ForegroundColor Cyan
 $bad = 0

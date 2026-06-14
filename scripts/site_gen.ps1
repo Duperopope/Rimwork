@@ -8,6 +8,45 @@
 . "$PSScriptRoot\lib\Config.ps1"
 . "$PSScriptRoot\lib\Modes.ps1"
 
+# Onglet CONVERSATION : page autonome (pas d'auto-refresh, pour ne pas couper la
+# frappe). Le JS poste sur /chat/send et affiche la reponse de l'IA locale.
+function Get-ChatPageHtml {
+    return @'
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOWN HERE - Conversation</title>
+<style>
+ body{margin:0;background:#0a0e14;color:#e6edf3;font:15px/1.5 system-ui,sans-serif}
+ header{padding:12px 16px;background:#0d1420;border-bottom:1px solid #1f2a3a;display:flex;gap:12px;align-items:center}
+ header a{color:#58a6ff;text-decoration:none} header b{color:#3fb950}
+ #log{max-width:820px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+ .msg{padding:10px 14px;border-radius:12px;max-width:80%;white-space:pre-wrap;word-wrap:break-word}
+ .me{align-self:flex-end;background:#1f6feb;color:#fff;border-bottom-right-radius:3px}
+ .ai{align-self:flex-start;background:#161b22;border:1px solid #1f2a3a;border-bottom-left-radius:3px}
+ .sys{align-self:center;color:#8b949e;font-size:13px}
+ form{position:sticky;bottom:0;max-width:820px;margin:0 auto;display:flex;gap:8px;padding:12px 16px;background:#0a0e14;border-top:1px solid #1f2a3a}
+ #t{flex:1;background:#0d1420;color:#e6edf3;border:1px solid #1f2a3a;border-radius:10px;padding:10px;resize:none;font:inherit}
+ button{background:#1f6f35;color:#fff;border:none;border-radius:10px;padding:0 18px;font-weight:700;cursor:pointer}
+</style></head><body>
+<header><a href="/">&#8592; Dashboard</a><b>&#128172; Conversation</b>
+<span style="color:#8b949e">l'IA locale, avec memoire</span></header>
+<div id="log"><div class="msg sys">Dis bonjour. L'IA se souvient de vos echanges (memoire persistante).</div></div>
+<form id="f"><textarea id="t" rows="2" placeholder="Ecris ton message... (Entree = envoyer)"></textarea>
+<button>Envoyer</button></form>
+<script>
+const log=document.getElementById('log'),t=document.getElementById('t'),f=document.getElementById('f');
+function add(cls,txt){const d=document.createElement('div');d.className='msg '+cls;d.textContent=txt;log.appendChild(d);d.scrollIntoView();return d;}
+async function send(){const m=t.value.trim();if(!m)return;t.value='';add('me',m);
+ const w=add('sys','l\'IA reflechit...');
+ try{const r=await fetch('/chat/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m})});
+ const j=await r.json();w.remove();add('ai',j.reply||'(pas de reponse)');}
+ catch(e){w.remove();add('sys','erreur: '+e);}}
+f.addEventListener('submit',e=>{e.preventDefault();send();});
+t.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+</script></body></html>
+'@
+}
+
 function Get-DownHereSiteHtml {
     param([bool]$Live = $false, [string]$StackState = "RUNNING")
 
@@ -188,6 +227,7 @@ function Get-DownHereSiteHtml {
 <div style='margin-top:8px'><b>T&Acirc;CHE EN COURS:</b> $taskLine</div>
 <div style='margin-top:4px'><b>JEU:</b> $gameLine$pt</div>
 $modeRow
+<div style='margin-top:10px'><a href='/chat' style='display:inline-block;background:#1f6feb;color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:700'>&#128172; Parler &agrave; l'IA</a></div>
 <div style='margin-top:8px'>$toggleBtn</div></div>
 <div class='card'><h2>&#129504; Le&ccedil;ons r&eacute;centes de l'IA</h2><ul>$lessons</ul></div>
 "@
