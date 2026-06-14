@@ -25,7 +25,9 @@ $hist = Join-Path $cfg.Paths.Logs 'wm_history.jsonl'
 function Invoke-RecurseCycle {
     Write-Host "[recurse] ingestion de l'experience..." -ForegroundColor Cyan
     & python (Join-Path $wm 'bootstrap.py')
-    Write-Host "[recurse] re-entrainement du world model..." -ForegroundColor Cyan
+    Write-Host "[recurse] conception d'un successeur (champion-challenger garde)..." -ForegroundColor Cyan
+    & python (Join-Path $wm 'successor.py') '--gens' '8'
+    Write-Host "[recurse] deploiement du champion (world model)..." -ForegroundColor Cyan
     & python (Join-Path $wm 'train.py')
 
     # Journalise un point d'historique (metriques + policy) pour voir progresser.

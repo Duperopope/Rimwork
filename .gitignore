@@ -47,6 +47,8 @@ scripts/logs/experience_raw.jsonl
 scripts/logs/wm_model.json
 scripts/logs/wm_history.jsonl
 scripts/logs/wm_evidence.json
+scripts/logs/wm_champion_spec.json
+scripts/logs/wm_lineage.jsonl
 scripts/logs/emergence_evidence.json
 scripts/logs/policy.json
 scripts/logs/chat_history.jsonl

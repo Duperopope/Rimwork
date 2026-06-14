@@ -134,8 +134,15 @@ pas inévitable »*. Leur progression : (1) l'IA exécute, l'humain dirige →
 
 **Nous sommes au stade (1) avec des amorces de (2)** : l'IA exécute (dev_loop),
 **apprend de ses résultats** (world model + policy, prouvé), choisit un peu quoi
-faire (auto-proposition de tâches), et dialogue avec mémoire. Pas de réécriture
-de poids ni de successeur autonome — et on ne le prétend pas.
+faire (auto-proposition de tâches), et dialogue avec mémoire.
+
+**De plus, le système conçoit son propre successeur AU NIVEAU DE SON CERVEAU
+DÉCISIONNEL** : `scripts/wm/successor.py` génère des versions améliorées du modèle
+(spec : modèle + features + seuil), les évalue et **promeut seulement les
+meilleures** (champion-challenger), gain mesuré **+0.170** sur 14 générations
+(voir [SUCCESSOR.md](SUCCESSOR.md)). Le champion est **réellement déployé**. Ce
+n'est pas une réécriture de poids ni un successeur d'architecture autonome — c'est
+la forme réelle, gardée et productionnable, à notre échelle.
 
 ## 8. Inspirations
 
