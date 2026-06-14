@@ -1,16 +1,12 @@
-# Publishes the public DOWN HERE! progress site to GitHub Pages (docs/).
-# Called by the self-heal scheduled task - only commits when content changed.
+# Publie le site public DOWN HERE! (docs/index.html) = la MEME SPA, en statique
+# (donnees injectees inline). Ne commit QUE si le contenu reel a change -> fini
+# le spam "site: progress update (auto)" a chaque tick.
 
-# Source de verite unique (paths) - voir scripts/lib/Config.ps1.
 . "$PSScriptRoot\lib\Config.ps1"
+. "$PSScriptRoot\lib\Dashboard.ps1"
 $cfg = Get-DownHereConfig
-. (Join-Path $cfg.Paths.Scripts 'site_gen.ps1')
 
-$html = Get-DownHereSiteHtml -Live $false
-$target = Join-Path $cfg.Paths.Docs 'index.html'
-
-# DEV_LOG rotation: keep the working log small (the loop appends forever);
-# overflow goes to docs/archive/ so the repo root stays readable.
+# Rotation DEV_LOG (garde le log de travail petit ; surplus -> docs/archive/).
 try {
     $dl = $cfg.Paths.DevLog
     $lines = Get-Content $dl
@@ -22,13 +18,25 @@ try {
         , @($lines[0]) + @("") + $lines[($lines.Count - 300)..($lines.Count - 1)] | Set-Content $dl -Encoding utf8
     }
 } catch {}
-$old = if (Test-Path $target) { Get-Content $target -Raw } else { "" }
-# Ignore the timestamp line when comparing so we don't commit every tick.
-$norm = { param($x) ($x -replace 'Mise &agrave; jour: [^<]+', '' -replace 'g&eacute;n&eacute;r&eacute; [^<]+', '') }
-if ((& $norm $html) -eq (& $norm $old)) { exit 0 }
 
+$data = Get-DashboardData -Config $cfg
+
+# Signature de contenu REEL (progression + derniere activite significative).
+# Les commits "site auto" sont filtres de l'activite -> publier ne se
+# re-declenche pas lui-meme. On ne commit que si ca change vraiment.
+$lastAct = if ($data.activity -and $data.activity.Count) { $data.activity[0].text } else { "" }
+$sig = "$($data.progress.pct)|$($data.progress.done)|$($data.progress.todo)|$($data.progress.kept)|$lastAct"
+$sigFile = Join-Path $cfg.Paths.Logs 'site.sig'
+$last = if (Test-Path $sigFile) { (Get-Content $sigFile -Raw).Trim() } else { "" }
+if ($sig -eq $last) { exit 0 }
+
+$json = $data | ConvertTo-Json -Depth 8 -Compress
+$html = Get-DashboardHtml -DataJson $json
+$target = Join-Path $cfg.Paths.Docs 'index.html'
 Set-Content -Path $target -Value $html -Encoding utf8
+Set-Content -Path $sigFile -Value $sig -Encoding ascii
+
 git -C $cfg.Root add docs/index.html 2>$null | Out-Null
 git -C $cfg.Root commit -q -m "site: progress update (auto)" 2>$null | Out-Null
 git -C $cfg.Root push -q origin master 2>$null | Out-Null
-Write-Host "site published"
+Write-Host "site published (contenu change)"

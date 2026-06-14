@@ -26,6 +26,7 @@ $lib = Join-Path $PSScriptRoot '..\lib'
 . (Join-Path $lib 'Chat.ps1')
 . (Join-Path $PSScriptRoot '..\site_gen.ps1')     # pour Get-ChatPageHtml
 . (Join-Path $PSScriptRoot '..\self_evolve.ps1')  # moteur d'auto-modification
+. (Join-Path $lib 'Dashboard.ps1')                # API + SPA du dashboard
 $cfg = Get-DownHereConfig
 
 Write-Host "== Config ==" -ForegroundColor Cyan
@@ -116,6 +117,16 @@ Assert (-not $b.ok) "self: edition CASSEE rejetee (revert auto)"
 $evAgents = Get-ModeAgents -Config $cfg
 Assert ($evAgents['evolve'].Modes -contains 'EVOLVE') "self: mode EVOLVE mappe l'auto-modif (code)"
 Assert ($evAgents['brain'].Modes -contains 'EVOLVE') "self: mode EVOLVE mappe la conception de successeur"
+
+Write-Host "== Dashboard (API + SPA moderne) ==" -ForegroundColor Cyan
+$dd = Get-DashboardData -Config $cfg
+Assert ($null -ne $dd.state) "dash: l'API expose l'etat"
+Assert ($null -ne $dd.activity) "dash: l'API expose l'activite"
+Assert ($null -ne $dd.progress -and $dd.progress.todo -ge 0) "dash: l'API expose la progression"
+$dh = Get-DashboardHtml
+Assert ($dh -match 'DOWN HERE' -and $dh -match 'api\.json') "dash: SPA live (fetch /api.json)"
+Assert ((Get-DashboardHtml -DataJson '{}') -match 'window\.__DATA__=') "dash: SPA statique (donnees inline)"
+Assert (-not ($dd.activity | Where-Object { "$($_.text)" -match 'progress update' })) "dash: activite filtree du spam auto"
 
 Write-Host "== Parse de tous les scripts ==" -ForegroundColor Cyan
 $bad = 0

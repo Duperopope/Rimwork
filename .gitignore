@@ -54,6 +54,7 @@ scripts/logs/emergence_evidence.json
 scripts/logs/policy.json
 scripts/logs/chat_history.jsonl
 scripts/logs/chat_memory.jsonl
+scripts/logs/site.sig
 scripts/logs/self_evolve.log
 scripts/logs/self_evolve/
 scripts/INDEX.md

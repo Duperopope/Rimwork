@@ -7,6 +7,7 @@
 . "$PSScriptRoot\lib\Modes.ps1"
 . "$PSScriptRoot\lib\State.ps1"
 . "$PSScriptRoot\lib\Chat.ps1"
+. "$PSScriptRoot\lib\Dashboard.ps1"
 $cfg = Get-DownHereConfig
 $port = $cfg.Dashboard.Port
 $logDir = $cfg.Paths.Logs
@@ -112,6 +113,17 @@ while ($true) {
         try { $ctx.Response.Close() } catch {}
         continue
     }
+    if ($ctx.Request.Url.AbsolutePath -eq "/api.json") {
+        # API unique de la SPA (etat + activite + taches + feedback + cerveau).
+        try {
+            $json = Get-DashboardData -Config $cfg | ConvertTo-Json -Depth 8
+            $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
+            $ctx.Response.ContentType = "application/json; charset=utf-8"
+            $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
+        } catch { try { $ctx.Response.StatusCode = 500 } catch {} }
+        try { $ctx.Response.Close() } catch {}
+        continue
+    }
     if ($ctx.Request.Url.AbsolutePath -eq "/chat") {
         # Onglet conversation (page autonome).
         $bytes = [System.Text.Encoding]::UTF8.GetBytes((Get-ChatPageHtml))
@@ -136,9 +148,7 @@ while ($true) {
         continue
     }
     try {
-        $stackState = "RUNNING"
-        if (Test-Path $stateFile) { $stackState = (Get-Content $stateFile -Raw).Trim() }
-        $html = Get-DownHereSiteHtml -Live $true -StackState $stackState
+        $html = Get-DashboardHtml
         $bytes = [System.Text.Encoding]::UTF8.GetBytes($html)
         $ctx.Response.ContentType = "text/html; charset=utf-8"
         $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
