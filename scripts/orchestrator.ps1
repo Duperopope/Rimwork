@@ -18,6 +18,7 @@ param(
 )
 
 . "$PSScriptRoot\lib\Modes.ps1"
+. "$PSScriptRoot\lib\State.ps1"
 $cfg = Get-DownHereConfig
 $log = Join-Path $cfg.Paths.Logs 'orchestrator.log'
 New-Item -ItemType Directory -Force -Path $cfg.Paths.Logs | Out-Null
@@ -40,6 +41,7 @@ if ($twins -and -not $Once -and -not $DryRun) {
 
 Write-OrchLog "Orchestrateur demarre (DryRun=$DryRun, Once=$Once)."
 $lastMode = $null
+$tick = 0
 
 while ($true) {
     $mode = Get-DownHereMode -Config $cfg
@@ -49,5 +51,11 @@ while ($true) {
     foreach ($a in $actions) { Write-OrchLog "  $(if($DryRun){'[dry] '})$a" }
 
     if ($Once -or $DryRun) { break }
+
+    # Phase 7 (substrat world-model): un snapshot d'etat ~chaque minute
+    # (PollSeconds=5 -> 12 ticks) dans logs/state_history.jsonl.
+    $tick++
+    if ($tick % 12 -eq 0) { try { Add-StateSnapshot -Config $cfg | Out-Null } catch {} }
+
     Start-Sleep -Seconds $PollSeconds
 }

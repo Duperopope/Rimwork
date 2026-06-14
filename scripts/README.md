@@ -20,6 +20,17 @@ Un seul **MODE** autonome actif à la fois (DEV / PLAY / ARENA / IDLE) — voir
 
 **Modes** : `IDLE` = rien d'autonome (session superviseur) · `DEV` = le dev IA code (jeu fermé) · `PLAY` = l'agent joue (jeu ouvert) · `ARENA` = sélection de modèle.
 
+## Socle, état & tests
+
+| Fichier | Rôle |
+|---------|------|
+| `lib/State.ps1` | **État consolidé** (`Get-DownHereState`) : une vue unique (mode, stack, LLM/jeu/agents, roadmap, rendement dev, santé, tâche, commits). `Add-StateSnapshot` logue des séries dans `logs/state_history.jsonl`. |
+| `lib/Patch.ps1` | Matcher SEARCH/REPLACE (utilisé par `dev_loop`) : passe stricte + passe tolérante aux lignes vides (si match unique). |
+| `snapshot-state.ps1` | Force un snapshot d'état (substrat futur world-model). L'orchestrateur en logue un ~/minute. |
+| `setup-game.ps1` | Clone reproductible du jeu actif (fork Thrive) dans `reference/thrive` s'il est absent. |
+| `tests/run-tests.ps1` | Harnais de tests autonome (Config/Patch/Modes/State + parse). `pwsh -File scripts/tests/run-tests.ps1`. |
+| Dashboard `/state.json` | L'état consolidé en JSON (observabilité machine). |
+
 ## Dev IA
 
 | Fichier | Rôle |

@@ -89,3 +89,15 @@ function Get-DownHereState {
         lastCommits = $commits
     }
 }
+
+# Phase 7 (substrat world-model) : enregistre un snapshot d'etat en JSONL.
+# Une serie temporelle de snapshots = la matiere premiere pour, plus tard,
+# entrainer un modele PREDICTIF de l'etat du jeu (vision JEPA). Ce n'est PAS
+# le modele : c'est la collecte de donnees honnete qui le rendra possible.
+function Add-StateSnapshot {
+    param($Config = (Get-DownHereConfig))
+    $file = Join-Path $Config.Paths.Logs 'state_history.jsonl'
+    (Get-DownHereState -Config $Config) | ConvertTo-Json -Depth 6 -Compress |
+        Add-Content -Path $file -Encoding utf8
+    return $file
+}

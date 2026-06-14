@@ -245,7 +245,7 @@ Du moins risqué (additif) au plus structurant. Chaque phase est livrable seule.
 | **4. Jeu reproductible** | `setup-game.ps1` clone le fork (branche down-here) dans `reference/thrive` s'il est absent → un clone de Rimwork redonne un projet jouable. (Submodule volontairement évité : pas de chirurgie git risquée sur le dossier jeu vivant de 3.9 Go.) | Repo seulement | Faible | ✅ **Fait** |
 | **5. Patch robuste** | `lib/Patch.ps1` : matcher SEARCH/REPLACE extrait + **passe tolérante** (ignore les lignes vides, *uniquement si match unique* → jamais de faux positif). `dev_loop` l'utilise. | Dev Agent | Moyen | ✅ **Fait** (testé) |
 | **6. Tests d'orchestration** | `scripts/tests/run-tests.ps1` : harnais autonome (sans Pester) — Config, Patch, Modes, State, parse de tous les scripts. **22/22 vert.** | Additif | Faible | ✅ **Fait** |
-| **7. Cap world-model** | La Mémoire (lessons + dataset + feedback) alimente un modèle prédictif de l'état du jeu (vision JEPA). | R&D | Élevé | 🌌 horizon |
+| **7. Cap world-model** | La Mémoire (lessons + dataset + feedback) alimente un futur modèle **prédictif** de l'état du jeu (vision JEPA). | R&D | Élevé | 🌱 **Socle posé** : `snapshot-state.ps1` + `Add-StateSnapshot` collectent des séries d'état (`state_history.jsonl`). Le modèle lui-même reste R&D. |
 
 ---
 
@@ -274,6 +274,11 @@ Du moins risqué (additif) au plus structurant. Chaque phase est livrable seule.
 Pilotage : tout passe par le dashboard (ou `set-mode.ps1`). Le mode est persisté
 dans `scripts/logs/mode.json` (défaut **DEV** : le dev IA continue, jeu fermé).
 
-### Prochaine étape proposée
-**Phase 4 — Jeu en submodule** (faible risque, gros gain de reproductibilité) ou
-**Phase 5 — Patch dev-IA robuste** (améliore le rendement du dev IA). À ton choix.
+### État des phases
+Phases **1 → 6 FAITES et testées** (22/22 au harnais `scripts/tests/run-tests.ps1`).
+Phase **7** : socle de données posé (collecte d'états) ; le modèle prédictif
+lui-même reste de la R&D — c'est le cap, pas une tâche d'un soir.
+
+Nouveaux outils livrés : `lib/Config.ps1`, `lib/Modes.ps1`, `lib/State.ps1`,
+`lib/Patch.ps1`, `orchestrator.ps1`, `set-mode.ps1`, `setup-game.ps1`,
+`snapshot-state.ps1`, `tests/run-tests.ps1`.
