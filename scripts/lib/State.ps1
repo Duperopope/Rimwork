@@ -87,6 +87,10 @@ function Get-DownHereState {
         health      = (& $readJson (Join-Path $logs 'health.json'))
         currentTask = (& $readJson (Join-Path $logs 'current_item.json'))
         lastCommits = $commits
+        brain       = $(
+            $cs = & $readJson (Join-Path $logs 'wm_champion_spec.json')
+            if ($cs) { @{ model = $cs.spec.model; features = @($cs.spec.features).Count; utility = $cs.utility; gain = $cs.gain; gens = $cs.gens } } else { $null }
+        )
     }
 }
 

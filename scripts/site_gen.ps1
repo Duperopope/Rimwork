@@ -222,6 +222,16 @@ function Get-DownHereSiteHtml {
             $modeBtns += "<button onclick=`"fetch('/mode?set=$mm',{method:'POST'}).then(()=>location.reload())`" style='$sty;border:1px solid #1f2a3a;border-radius:8px;padding:6px 12px;margin-right:6px;cursor:pointer;font-weight:700'>$mm</button>"
         }
         $modeRow = "<div style='margin-top:10px'><b>MODE:</b> $modeBtns <span class='muted'>(un seul actif &agrave; la fois)</span></div>"
+        # Carte GENEALOGIE : le cerveau auto-concu (successeur) et sa progression.
+        $brainCard = ""
+        try {
+            $cs = Get-Content "$Root\scripts\logs\wm_champion_spec.json" -Raw -ErrorAction Stop | ConvertFrom-Json
+            $hist = ($cs.history | ForEach-Object { "$_" }) -join ' &rarr; '
+            $brainCard = "<div class='card'><h2>&#129504; Cerveau auto-con&ccedil;u (successeur)</h2>" +
+            "<div>Champion: <b>$($cs.spec.model)</b> &middot; $(@($cs.spec.features).Count) features &middot; utilit&eacute; <b>$($cs.utility)</b></div>" +
+            "<div style='margin-top:6px;color:#8b949e'>Progression: $($cs.start_utility) &rarr; $($cs.utility) (gain $($cs.gain)) sur $($cs.gens) g&eacute;n&eacute;rations</div>" +
+            "<div style='margin-top:6px;font-size:13px;color:#3fb950'>$hist</div></div>"
+        } catch {}
         $liveBlock = @"
 <div class='card'><h2>&#127918; Sant&eacute; en direct</h2><div>$h</div>
 <div style='margin-top:8px'><b>T&Acirc;CHE EN COURS:</b> $taskLine</div>
@@ -229,6 +239,7 @@ function Get-DownHereSiteHtml {
 $modeRow
 <div style='margin-top:10px'><a href='/chat' style='display:inline-block;background:#1f6feb;color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:700'>&#128172; Parler &agrave; l'IA</a></div>
 <div style='margin-top:8px'>$toggleBtn</div></div>
+$brainCard
 <div class='card'><h2>&#129504; Le&ccedil;ons r&eacute;centes de l'IA</h2><ul>$lessons</ul></div>
 "@
     }

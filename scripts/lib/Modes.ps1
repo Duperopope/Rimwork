@@ -27,6 +27,7 @@ function Get-ModeAgents {
         play  = @{ Match = 'play_agent';    Script = 'play_agent.ps1';        Args = @();          Modes = @('PLAY') }
         arena = @{ Match = 'model_arena';   Script = 'model_arena.ps1';       Args = @('-Forever'); Modes = @('ARENA') }
         evolve = @{ Match = 'self_evolve';  Script = 'self_evolve.ps1';       Args = @('-Loop');    Modes = @('EVOLVE') }
+        brain  = @{ Match = 'recurse.*Loop'; Script = 'recurse.ps1';          Args = @('-Loop', '-IntervalMin', '5'); Modes = @('EVOLVE') }
     }
 }
 

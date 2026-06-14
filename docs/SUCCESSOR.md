@@ -59,12 +59,28 @@ donc le successeur auto-conçu devient le cerveau réel.
 Génélogie complète : `scripts/logs/wm_lineage.jsonl` ; champion :
 `scripts/logs/wm_champion_spec.json`.
 
-## Intégré à la boucle récursive
+## Espace de conception élargi (ingénierie de features automatique)
 
-`recurse.ps1` (lancé par l'orchestrateur en mode DEV, ou EVOLVE) fait à chaque
-cycle : **ingère l'expérience → conçoit/évalue/promeut un successeur →
-déploie le champion**. Plus le système tourne, plus il a d'expérience, plus le
-successeur peut être meilleur. C'est la récursion au niveau du cerveau.
+Le pool de features est passé de 13 (base) à **21** en ajoutant des features
+**dérivées** (ratios, densités, indicateurs de structure : `ratio_lines`,
+`new_idents_per_line`, `net_brace`, `has_control`…). La recherche de successeur
+les sélectionne ou les ignore. Résultat mesuré : le champion grimpe à
+**utilité 0.393** (AUC déployée 0.740, vs 0.699) — la feature-engineering
+automatique apporte un gain réel. Progression **0.217 → 0.393 (+0.176)**.
+
+## Intégré à la boucle récursive (continu en mode EVOLVE)
+
+`recurse.ps1` fait à chaque cycle : **ingère l'expérience → conçoit/évalue/promeut
+un successeur → déploie le champion**. 
+- En mode **DEV**, l'orchestrateur le lance périodiquement (re-entraînement).
+- En mode **EVOLVE**, il tourne **en continu** (`recurse.ps1 -Loop`) en parallèle
+  de l'auto-modification du code (`self_evolve.ps1`) — le système s'améliore
+  lui-même sur les deux plans (cerveau + code).
+
+**Génélogie visible** : le dashboard affiche une carte « Cerveau auto-conçu »
+(champion, features, utilité, progression) ; l'état machine `/state.json` expose
+le champ `brain`. Plus le système tourne, plus le successeur peut être meilleur :
+c'est la récursion au niveau du cerveau, observable en direct.
 
 ## Honnêteté & portée
 

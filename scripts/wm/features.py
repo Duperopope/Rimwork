@@ -12,16 +12,23 @@ passee reelle du systeme.
 import re
 
 # Ordre des features = contrat (doit rester stable entre train et predict).
+# Base (13) + features DERIVEES (ingenierie auto) que la recherche de successeur
+# peut selectionner ou ignorer. Pool elargi = espace de conception plus riche.
 FEATURE_NAMES = [
+    # --- base ---
     "s_lines", "r_lines", "line_delta", "r_chars",
     "new_calls", "brace_bal", "paren_bal", "has_method_def",
     "has_placeholder", "is_csharp", "is_json", "semicolons", "new_idents",
+    # --- derivees (feature engineering) ---
+    "ratio_lines", "chars_per_rline", "new_idents_per_line", "net_brace",
+    "new_calls_per_line", "has_control", "has_return", "comment_lines",
 ]
 
 _CALL_RE = re.compile(r"\.[A-Z]\w{3,}\s*\(")
 _METHOD_RE = re.compile(r"(public|private|protected|internal)\s+[\w<>\[\],\s]+\s+\w+\s*\([^)]*\)\s*\{?")
 _PLACEHOLDER_RE = re.compile(r"(?i)TODO|NotImplemented|placeholder|will be (expanded|implemented)")
 _IDENT_RE = re.compile(r"[A-Za-z_]\w{2,}")
+_CONTROL_RE = re.compile(r"\b(if|for|foreach|while|switch)\b")
 
 
 def _nonempty_lines(text):
@@ -40,12 +47,15 @@ def extract_features(search, replace, ext):
     r_idents = set(_IDENT_RE.findall(replace))
     new_idents = len(r_idents - s_idents)
 
+    r_lines_nz = max(r_lines, 1)
+    new_calls = len(_CALL_RE.findall(replace))
+    comment_lines = sum(1 for ln in replace.split("\n") if ln.strip().startswith(("//", "#")))
     feats = {
         "s_lines": s_lines,
         "r_lines": r_lines,
         "line_delta": r_lines - s_lines,
         "r_chars": len(replace),
-        "new_calls": len(_CALL_RE.findall(replace)),
+        "new_calls": new_calls,
         "brace_bal": abs(replace.count("{") - replace.count("}")),
         "paren_bal": abs(replace.count("(") - replace.count(")")),
         "has_method_def": 1 if _METHOD_RE.search(replace) else 0,
@@ -54,6 +64,15 @@ def extract_features(search, replace, ext):
         "is_json": 1 if ext == "json" else 0,
         "semicolons": replace.count(";"),
         "new_idents": new_idents,
+        # --- derivees ---
+        "ratio_lines": r_lines / max(s_lines, 1),
+        "chars_per_rline": len(replace) / r_lines_nz,
+        "new_idents_per_line": new_idents / r_lines_nz,
+        "net_brace": replace.count("{") - replace.count("}"),
+        "new_calls_per_line": new_calls / r_lines_nz,
+        "has_control": 1 if _CONTROL_RE.search(replace) else 0,
+        "has_return": 1 if re.search(r"\breturn\b", replace) else 0,
+        "comment_lines": comment_lines,
     }
     return [float(feats[n]) for n in FEATURE_NAMES]
 
