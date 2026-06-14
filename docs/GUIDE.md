@@ -42,6 +42,8 @@ Ouvre **http://localhost:8765**. Tu y trouves :
   - **DEV** — le dev IA code le jeu (jeu fermé). *Mode par défaut.*
   - **PLAY** — l'agent JOUE le jeu (jeu ouvert).
   - **ARENA** — le système cherche/teste un meilleur LLM.
+  - **EVOLVE** — le système améliore son **propre code** (auto-modification gardée :
+    patchs validés à revoir, master jamais cassé). Voir [SELF_EVOLVE.md](SELF_EVOLVE.md).
   - **IDLE** — tout au repos (pour une session avec un superviseur).
 - **PAUSE / REPRENDRE** — coupe ou relance toute la machine.
 - **Feedback** — propose une feature/bug ; ça devient une tâche.

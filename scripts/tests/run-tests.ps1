@@ -24,14 +24,15 @@ $lib = Join-Path $PSScriptRoot '..\lib'
 . (Join-Path $lib 'WorldModel.ps1')
 . (Join-Path $lib 'Policy.ps1')
 . (Join-Path $lib 'Chat.ps1')
-. (Join-Path $PSScriptRoot '..\site_gen.ps1')   # pour Get-ChatPageHtml
+. (Join-Path $PSScriptRoot '..\site_gen.ps1')     # pour Get-ChatPageHtml
+. (Join-Path $PSScriptRoot '..\self_evolve.ps1')  # moteur d'auto-modification
 $cfg = Get-DownHereConfig
 
 Write-Host "== Config ==" -ForegroundColor Cyan
 Assert (Test-Path $cfg.Root) "Root existe"
 Assert (Test-Path $cfg.Paths.ActiveGame) "ActiveGame existe"
 Assert ($cfg.Llm.BaseUrl -like 'http*1234') "Llm.BaseUrl = port 1234"
-AssertEq $cfg.Modes.Count 4 "4 modes"
+AssertEq $cfg.Modes.Count 5 "5 modes (IDLE/DEV/PLAY/ARENA/EVOLVE)"
 
 Write-Host "== Patch (matcher SEARCH/REPLACE) ==" -ForegroundColor Cyan
 $c = "line A`nline B`nline C"
@@ -98,6 +99,21 @@ Add-ChatTurn -Role 'user' -Content 'ping-test' -Config $tcfg
 Assert (@(Get-ChatHistory -Last 5 -Config $tcfg | Where-Object { $_.content -eq 'ping-test' }).Count -ge 1) "chat: historique persiste + relu"
 Assert ((Build-ChatSystemPrompt -Config $tcfg) -match 'fait-test-unitaire') "chat: la memoire est injectee dans le prompt (se souvient)"
 Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
+
+Write-Host "== Auto-modification (self_evolve, garde-fous) ==" -ForegroundColor Cyan
+Assert (Test-SelfEditAllowed -FileName 'site_gen.ps1') "self: site_gen editable (allowlist)"
+Assert (-not (Test-SelfEditAllowed -FileName 'Config.ps1')) "self: Config PROTEGE (frein)"
+Assert (-not (Test-SelfEditAllowed -FileName 'run-tests.ps1')) "self: harnais PROTEGE (frein)"
+Assert (-not (Test-SelfEditAllowed -FileName 'self_evolve.ps1')) "self: le moteur ne s'edite pas lui-meme"
+Assert (Test-Path (Update-SelfIndex -Config $cfg)) "self: INDEX.md auto-genere"
+$sgPath = Join-Path $cfg.Paths.Scripts 'site_gen.ps1'
+$preEdit = Get-Content $sgPath -Raw
+$g = Invoke-SelfEdit -Target 'site_gen.ps1' -Search 'function Get-ChatPageHtml {' -Replace 'function Get-ChatPageHtml {  # (auto-test)' -Why 'test-harnais' -SkipHarness -Config $cfg
+Assert ($g.ok) "self: edition SAINE acceptee (patch produit)"
+Assert ((Get-Content $sgPath -Raw) -eq $preEdit) "self: fichier restaure a l'identique apres edition"
+$b = Invoke-SelfEdit -Target 'site_gen.ps1' -Search 'function Get-ChatPageHtml {' -Replace 'function Get-ChatPageHtml ({{ casse' -Why 'test-harnais' -SkipHarness -Config $cfg
+Assert (-not $b.ok) "self: edition CASSEE rejetee (revert auto)"
+Assert ((Invoke-ModeReconcile -Mode EVOLVE -DryRun -Config $cfg) -contains 'START evolve') "self: mode EVOLVE lance l'auto-modif"
 
 Write-Host "== Parse de tous les scripts ==" -ForegroundColor Cyan
 $bad = 0

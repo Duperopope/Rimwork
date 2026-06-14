@@ -13,7 +13,8 @@ Un seul **MODE** autonome actif à la fois (DEV / PLAY / ARENA / IDLE) — voir
 | `startup_all.ps1` | **Boot/heal de l'infra** après reboot (idempotent, tâche au login) : LLM WSL, dashboard, **orchestrateur**, publication du site. Ne lance plus les agents en direct. |
 | `orchestrator.ps1` | **Autorité unique** : lit le mode courant (`logs/mode.json`) et démarre/arrête les agents pour garantir qu'un seul mode tourne. |
 | `lib/Modes.ps1` | Logique des modes : état, plan par mode, réconciliation des processus (`Invoke-ModeReconcile -DryRun`). |
-| `set-mode.ps1` | CLI : `pwsh -File set-mode.ps1 DEV\|PLAY\|ARENA\|IDLE`. |
+| `set-mode.ps1` | CLI : `pwsh -File set-mode.ps1 DEV\|PLAY\|ARENA\|EVOLVE\|IDLE`. |
+| `self_evolve.ps1` | **Auto-modification** : le système réécrit son propre code (gardée : allowlist + validation + revert + patch à revoir). Voir [../docs/SELF_EVOLVE.md](../docs/SELF_EVOLVE.md). |
 | `lib/Config.ps1` | **Source de vérité unique** (paths/ports/modèle). Tout script commence par `. "$PSScriptRoot/lib/Config.ps1"; $cfg = Get-DownHereConfig`. |
 | `dev_loop_watchdog.ps1` | Relance `dev_loop.ps1` s'il meurt (lancé par l'orchestrateur en mode DEV). |
 | `run_hidden.vbs`, `run_arena_hidden.vbs` | Lancent un script PowerShell en fenêtre cachée. |

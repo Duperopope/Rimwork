@@ -217,7 +217,7 @@ function Get-DownHereSiteHtml {
         # Boutons de MODE (Phase 2): un seul mode autonome actif a la fois.
         $curMode = Get-DownHereMode
         $modeBtns = ""
-        foreach ($mm in 'DEV', 'PLAY', 'ARENA', 'IDLE') {
+        foreach ($mm in 'DEV', 'PLAY', 'ARENA', 'EVOLVE', 'IDLE') {
             $sty = if ($mm -eq $curMode) { "background:#1f6f35;color:#fff" } else { "background:#0d1420;color:#8b949e" }
             $modeBtns += "<button onclick=`"fetch('/mode?set=$mm',{method:'POST'}).then(()=>location.reload())`" style='$sty;border:1px solid #1f2a3a;border-radius:8px;padding:6px 12px;margin-right:6px;cursor:pointer;font-weight:700'>$mm</button>"
         }

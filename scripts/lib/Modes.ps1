@@ -26,6 +26,7 @@ function Get-ModeAgents {
         game  = @{ Match = 'game_watchdog'; Script = 'game_watchdog.ps1';     Args = @();          Modes = @('PLAY'); KillGame = $true }
         play  = @{ Match = 'play_agent';    Script = 'play_agent.ps1';        Args = @();          Modes = @('PLAY') }
         arena = @{ Match = 'model_arena';   Script = 'model_arena.ps1';       Args = @('-Forever'); Modes = @('ARENA') }
+        evolve = @{ Match = 'self_evolve';  Script = 'self_evolve.ps1';       Args = @('-Loop');    Modes = @('EVOLVE') }
     }
 }
 

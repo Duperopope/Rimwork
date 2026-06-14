@@ -186,7 +186,9 @@ stateDiagram-v2
     IDLE --> DEV   : le dev IA code (jeu fermé)
     IDLE --> PLAY  : l'agent joue (jeu ouvert)
     IDLE --> ARENA : sélection de modèle
+    IDLE --> EVOLVE : le système réécrit son propre code
     DEV --> IDLE   : pause / fini
+    EVOLVE --> IDLE : fini
     PLAY --> IDLE  : pause / fini
     ARENA --> IDLE : champion couronné
     DEV --> PLAY   : vérifier en jouant

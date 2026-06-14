@@ -52,7 +52,8 @@ function Get-DownHereConfig {
         }
 
         # Modes MUTUELLEMENT EXCLUSIFS (le jeu et le dev ne tournent pas ensemble).
-        Modes    = @('IDLE', 'DEV', 'PLAY', 'ARENA')
+        # EVOLVE = le systeme ameliore son PROPRE code (auto-modification gardee).
+        Modes    = @('IDLE', 'DEV', 'PLAY', 'ARENA', 'EVOLVE')
         ModeFile = Join-Path $root 'scripts\logs\mode.json'
     }
 }
