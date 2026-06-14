@@ -11,7 +11,7 @@ Un seul **MODE** autonome actif à la fois (DEV / PLAY / ARENA / IDLE) — voir
 | Fichier | Rôle |
 |---------|------|
 | `startup_all.ps1` | **Boot/heal de l'infra** après reboot (idempotent, tâche au login) : LLM WSL, dashboard, **orchestrateur**, publication du site. Ne lance plus les agents en direct. |
-| `setup-llm.ps1` | **Répare le serveur LLM** (recompile llama-server ROCm si le build part en « router mode » et ne sert pas sur 1234). À lancer une fois si le LLM reste hors ligne. |
+| `setup-llm.ps1` | **Démarre/diagnostique le serveur LLM** (relance llama-server avec `--model` et vérifie `/health`). À lancer si le LLM reste hors ligne. Pas de recompilation : le « router mode » venait du raccourci `-m` cassé, corrigé en `--model`. |
 | `orchestrator.ps1` | **Autorité unique** : lit le mode courant (`logs/mode.json`) et démarre/arrête les agents pour garantir qu'un seul mode tourne. |
 | `lib/Modes.ps1` | Logique des modes : état, plan par mode, réconciliation des processus (`Invoke-ModeReconcile -DryRun`). |
 | `set-mode.ps1` | CLI : `pwsh -File set-mode.ps1 DEV\|PLAY\|ARENA\|EVOLVE\|IDLE`. |

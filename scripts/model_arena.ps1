@@ -99,7 +99,9 @@ function Wait-Llm([int]$timeoutSec = 240) {
 
 function Start-Model([string]$file, [int]$port = 1234) {
     # AUTO-FIT (pas de -ngl force): tient compte de la VRAM libre reelle.
-    $cmd = "pkill -f 'llama-server.*$port'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$file -c 8192 --host 0.0.0.0 --port $port > /var/log/llama-arena.log 2>&1 &"
+    # --model/--ctx-size en formes LONGUES: le raccourci -m est casse dans ce build
+    # (model.path reste vide -> router mode, ne sert pas). Voir startup_all.ps1.
+    $cmd = "pkill -f 'llama-server.*$port'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server --model /root/models/$file --ctx-size 8192 --host 0.0.0.0 --port $port > /var/log/llama-arena.log 2>&1 &"
     wsl -d Ubuntu -u root -- bash -c $cmd | Out-Null
     return (Wait-Llm)
 }
@@ -221,7 +223,8 @@ function Invoke-ArenaCycle {
     }
 
     # 4. Relancer le champion en PROD (port 1234, auto-fit) pour la boucle de dev
-    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*$prodPort'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server -m /root/models/$($champ.file) -c 8192 --host 0.0.0.0 --port $prodPort > /var/log/llama-server.log 2>&1 &" | Out-Null
+    # --model/--ctx-size (formes longues): -m casse dans ce build (router mode).
+    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*$prodPort'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server --model /root/models/$($champ.file) --ctx-size 8192 --host 0.0.0.0 --port $prodPort > /var/log/llama-server.log 2>&1 &" | Out-Null
     $ranked | Format-Table key, score, speedPts, secs
 }
 
