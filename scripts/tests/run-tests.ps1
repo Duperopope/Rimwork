@@ -113,7 +113,9 @@ Assert ($g.ok) "self: edition SAINE acceptee (patch produit)"
 Assert ((Get-Content $sgPath -Raw) -eq $preEdit) "self: fichier restaure a l'identique apres edition"
 $b = Invoke-SelfEdit -Target 'site_gen.ps1' -Search 'function Get-ChatPageHtml {' -Replace 'function Get-ChatPageHtml ({{ casse' -Why 'test-harnais' -SkipHarness -Config $cfg
 Assert (-not $b.ok) "self: edition CASSEE rejetee (revert auto)"
-Assert ((Invoke-ModeReconcile -Mode EVOLVE -DryRun -Config $cfg) -contains 'START evolve') "self: mode EVOLVE lance l'auto-modif"
+$evAgents = Get-ModeAgents -Config $cfg
+Assert ($evAgents['evolve'].Modes -contains 'EVOLVE') "self: mode EVOLVE mappe l'auto-modif (code)"
+Assert ($evAgents['brain'].Modes -contains 'EVOLVE') "self: mode EVOLVE mappe la conception de successeur"
 
 Write-Host "== Parse de tous les scripts ==" -ForegroundColor Cyan
 $bad = 0
