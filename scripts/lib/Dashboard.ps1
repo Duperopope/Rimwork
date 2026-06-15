@@ -455,16 +455,14 @@ function viewArena(){
   if(tested.length){
     const max=Math.max.apply(null,tested.map(t=>t.total||0).concat([1]));
     board=tested.map((t,i)=>{
-      const w=Math.round((t.total||0)/max*100), name=t.file||t.key, isBest=a.best&&t.key===a.best.key, isPin=pin&&t.file===pin;
-      return `<div class="task" style="${isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':''}">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <span class="cat">#${i+1}</span>
-          <b style="flex:1;min-width:200px;word-break:break-all">${esc(name)} ${isBest?ic('trophy',15):''}${isPin?ic('pin',15):''}</b>
-          <span class="hl" style="font-variant-numeric:tabular-nums">${t.total} pts</span>
-          <button class="btn ghost sm" title="Copier le benchmark" onclick="copyBench('${esc(t.key)}')">${ic('copy')}</button>
-          <button class="btn ghost sm" onclick="act('/llm/use?key='+encodeURIComponent('${esc(t.key)}'))">${ic('play')} Utiliser</button></div>
-        <div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:${w}%;background:var(--grad)"></i></div>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${arr(t.cats).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return `<span class="catbadge"><b>${esc(c.cat)}</b> <span style="color:${cc}">${c.pct}%</span></span>`;}).join('')||esc(arr(t.details).join(' · '))}${t.secs?`<span class="catbadge">${t.secs}s</span>`:''}</div></div>`;
+      const failed=t.status==='echec';
+      const w=Math.round((t.total||0)/max*100), name=t.file||t.key, isBest=!failed&&a.best&&t.key===a.best.key, isPin=pin&&t.file===pin;
+      const right=failed?'<span class="badge" style="background:rgba(255,107,107,.16);color:var(--red)">échec</span>':('<span class="hl" style="font-variant-numeric:tabular-nums">'+t.total+' pts</span>');
+      const cats=arr(t.cats).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return '<span class="catbadge"><b>'+esc(c.cat)+'</b> <span style="color:'+cc+'">'+c.pct+'%</span></span>';}).join('')||esc(arr(t.details).join(' · '));
+      const detail=failed
+        ?'<div class="mut" style="margin-top:6px;font-size:12px">'+esc(t.note||'n\'a pas chargé')+'</div>'
+        :'<div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:'+w+'%;background:var(--grad)"></i></div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+cats+(t.secs?('<span class="catbadge">'+t.secs+'s</span>'):'')+'</div>';
+      return '<div class="task" style="'+(isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':'')+(failed?';opacity:.62':'')+'"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="cat">#'+(i+1)+'</span><b style="flex:1;min-width:200px;word-break:break-all">'+esc(name)+' '+(isBest?ic('trophy',15):'')+(isPin?ic('pin',15):'')+'</b>'+right+'<button class="btn ghost sm" title="Copier le benchmark" onclick="copyBench(\''+esc(t.key)+'\')">'+ic('copy')+'</button><button class="btn ghost sm" onclick="act(\'/llm/use?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('play')+' '+(failed?'Réessayer':'Utiliser')+'</button></div>'+detail+'</div>';
     }).join('');
   }
   document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card(ic('chart')+' Classement persistant — vrais noms · « Utiliser » pour activer, copier pour exporter le benchmark',board,true);
@@ -491,7 +489,9 @@ function copyBench(key){
   const m=arr(DATA&&DATA.arena&&DATA.arena.tested).find(x=>x.key===key);
   if(!m){ toast('benchmark introuvable'); return; }
   const cats=arr(m.cats).map(c=>'  '+c.cat+': '+c.pct+'%').join('\n');
-  const txt='Benchmark — '+(m.file||m.key)+'\nScore total: '+m.total+' pts (vitesse '+(m.speedPts||0)+' · '+(m.secs||0)+'s)\n'+cats;
+  const txt=(m.status==='echec')
+    ? 'Benchmark — '+(m.file||m.key)+'\nÉCHEC: '+(m.note||'n\'a pas chargé')
+    : 'Benchmark — '+(m.file||m.key)+'\nScore total: '+m.total+' pts (vitesse '+(m.speedPts||0)+' · '+(m.secs||0)+'s)\n'+cats;
   navigator.clipboard.writeText(txt).then(()=>toast('Benchmark copié: '+key),()=>toast('copie refusée'));
 }
 function toast(msg){ let t=document.getElementById('toast'); if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);} t.textContent=msg; t.className='show'; clearTimeout(window._tt); window._tt=setTimeout(()=>{t.className='';},2200); }

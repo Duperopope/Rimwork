@@ -62,7 +62,12 @@ function Save-Leaderboard($cycle, $models) {
 }
 function Get-Rank($models) {
     @($models | Sort-Object -Property total -Descending | ForEach-Object {
-        @{ key = $_.key; total = $_.total; score = $_.score; speedPts = $_.speedPts; secs = $_.secs; details = $_.details; cats = $_.cats; file = $_.file; lastCycle = $_.lastCycle } })
+        @{ key = $_.key; total = $_.total; score = $_.score; speedPts = $_.speedPts; secs = $_.secs; details = $_.details; cats = $_.cats; file = $_.file; lastCycle = $_.lastCycle; status = $_.status; note = $_.note } })
+}
+# Entree "echec" pour le classement: un modele tente qui n'a pas charge/telecharge
+# apparait quand meme dans la liste (en bas, marque echec + raison) -> on voit TOUT.
+function New-FailEntry($c, $cycle, $note) {
+    [pscustomobject]@{ key = $c.key; file = $c.file; total = 0; score = 0; speedPts = 0; secs = 0; status = 'echec'; note = $note; cats = @(); lastCycle = $cycle; repo = $c.repo }
 }
 
 # ---- Candidats de depart (GGUF tenant sur RX 7800 XT 16 Go) ----
@@ -332,11 +337,19 @@ function Invoke-ArenaCycle {
         $file = $c.file
         $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$file && echo OK"
         if ($have -notmatch "OK") {
-            if (-not $c.repo) { Write-Host "skip $($c.key): pas de repo"; Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text 'pas de repo / fichier introuvable -> marque juge, suivant'; continue }
+            if (-not $c.repo) {
+                Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text 'pas de repo / fichier introuvable'
+                $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle 'pas de repo / introuvable'); Save-Leaderboard $cycle $models
+                Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }; continue
+            }
             Write-ArenaStatus @{ phase = 'download'; cycle = $cycle; current = @{ key = $c.key; file = $c.file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
             Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'test' -Text "telechargement de $($c.file) depuis $($c.repo)..."
             $file = Get-HfFile $c.repo $c.file
-            if (-not $file) { Write-Host "skip $($c.key): telechargement echoue"; Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "telechargement echoue ($($c.file)) -> marque juge, suivant"; continue }
+            if (-not $file) {
+                Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "telechargement echoue ($($c.file))"
+                $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle 'telechargement echoue'); Save-Leaderboard $cycle $models
+                Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }; continue
+            }
         }
         Write-Host "=== ARENE: $($c.key) ($file) ===" -ForegroundColor Cyan
         Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = @{ key = $c.key; file = $file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
@@ -344,9 +357,10 @@ function Invoke-ArenaCycle {
             # Capture la VRAIE erreur de llama.cpp (archi non supportee, OOM, gguf casse...)
             $errlog = (wsl -d Ubuntu -u root -- bash -lc "grep -iE 'error|unsupported|unknown|not supported|failed|out of memory|cannot' /tmp/llama-server.log 2>/dev/null | tail -2" 2>$null | Out-String).Trim()
             if (-not $errlog) { $errlog = (wsl -d Ubuntu -u root -- bash -lc 'tail -2 /tmp/llama-server.log 2>/dev/null' 2>$null | Out-String).Trim() }
-            Write-Host "  modele n'a pas demarre"
             Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "serveur KO ($file) -> $errlog"
-            continue
+            $note = if ($errlog) { (($errlog -split "`n")[-1]).Trim() } else { "n'a pas charge/servi" }
+            $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle $note); Save-Leaderboard $cycle $models
+            Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }; continue
         }
         $r = Invoke-Bench $c.key
         $r.file = $file; $r.lastCycle = $cycle; $r.repo = $c.repo
