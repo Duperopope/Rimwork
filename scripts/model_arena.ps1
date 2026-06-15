@@ -176,6 +176,24 @@ $tasks = @(
        ask = 'Weng earns $12 an hour for babysitting. Yesterday she did 50 minutes of babysitting. How many dollars did she earn? Reply with ONLY the final number.'; expect = '\b10\b' }
     @{ cat = 'GSM8K'; kind = 'exact'
        ask = 'Betty needs $100 for a wallet and currently has only half of that. Her parents give her $15, and her grandparents give twice as much as her parents. How many more dollars does Betty need? Reply with ONLY the final number.'; expect = '\b5\b' }
+
+    # --- Knowledge & raisonnement (esprit MMLU-Pro: QCM dur, reponse = lettre) ---
+    @{ cat = 'Knowledge'; kind = 'exact'
+       ask = 'A process holds resource A and waits for B, while another holds B and waits for A. What is this called? A) starvation B) deadlock C) livelock D) cache miss. Reply with ONLY the letter.'; expect = '(?i)\bB\b' }
+    @{ cat = 'Knowledge'; kind = 'exact'
+       ask = 'Worst-case time complexity of quicksort? A) O(n) B) O(n log n) C) O(n^2) D) O(log n). Reply with ONLY the letter.'; expect = '(?i)\bC\b' }
+
+    # --- Science niveau expert (esprit GPQA: Google-proof, reponse exacte) ---
+    @{ cat = 'Science'; kind = 'exact'
+       ask = 'For an ideal gas undergoing a reversible adiabatic process, which quantity stays constant? A) temperature B) pressure C) entropy D) volume. Reply with ONLY the letter.'; expect = '(?i)\bC\b' }
+    @{ cat = 'Science'; kind = 'exact'
+       ask = 'What is the oxidation state of chromium in the dichromate ion Cr2O7^2-? Reply with ONLY the number (e.g. 6).'; expect = '\+?\s*6\b' }
+
+    # --- IFEval (suivi d'instruction VERIFIABLE programmatiquement, sans juge) ---
+    @{ cat = 'IFEval'; kind = 'exact'
+       ask = 'Reply with EXACTLY these three uppercase words separated by single spaces and nothing else: ALPHA BETA GAMMA'; expect = '^\s*ALPHA BETA GAMMA\s*$' }
+    @{ cat = 'IFEval'; kind = 'exact'
+       ask = 'Is 91 a prime number? Reply with ONLY YES or NO, in uppercase, nothing else.'; expect = '^\s*NO\s*$' }
 )
 
 function Wait-Llm([int]$timeoutSec = 240) {
@@ -346,6 +364,21 @@ function Invoke-ArenaCycle {
         }
     } else {
         $candidates = @($candidates | Where-Object { $_.key -match $Only })
+    }
+
+    # RE-BENCH MANUEL (bouton du dashboard -> logs/arena_rebench.jsonl): on force
+    # ces modeles dans le cycle et on retire leur entree (pour qu'ils soient
+    # RE-juges, pas sautes par la regle des 5 cycles).
+    $rebenchFile = Join-Path $cfg.Paths.Logs 'arena_rebench.jsonl'
+    if (Test-Path $rebenchFile) {
+        $forced = @(); foreach ($l in (Get-Content $rebenchFile -ErrorAction SilentlyContinue)) { try { $forced += ($l | ConvertFrom-Json) } catch {} }
+        Remove-Item $rebenchFile -Force -ErrorAction SilentlyContinue
+        foreach ($f in $forced) {
+            if ($candidates.key -notcontains $f.key) { $candidates += @{ key = $f.key; file = $f.file; repo = $f.repo } }
+            $models = @($models | Where-Object { $_.key -ne $f.key })
+            Write-ArenaEvent 'cycle' "re-bench manuel demande : $($f.key)"
+        }
+        $bestEver = if ($models.Count) { @($models | Sort-Object total -Descending)[0] } else { $null }
     }
 
     # 2. Combats. On SAUTE ce qui a ete juge recemment (historique garde), et on

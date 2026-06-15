@@ -131,6 +131,19 @@ while ($true) {
         try { Remove-Item (Join-Path $logDir 'llm_console.jsonl') -Force -ErrorAction SilentlyContinue } catch {}
         $ctx.Response.Redirect("/"); $ctx.Response.Close(); continue
     }
+    if ($ctx.Request.Url.AbsolutePath -eq "/arena/rebench") {
+        # Renvoyer un modele au bench manuellement (bouton de l'Arene).
+        if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
+        $key = $ctx.Request.QueryString["key"]
+        if ($key) {
+            try {
+                $lb = Get-Content (Join-Path $logDir 'arena_leaderboard.json') -Raw | ConvertFrom-Json
+                $m = $lb.models | Where-Object { $_.key -eq $key } | Select-Object -First 1
+                if ($m) { @{ key = $m.key; file = $m.file; repo = $m.repo } | ConvertTo-Json -Compress | Add-Content (Join-Path $logDir 'arena_rebench.jsonl') }
+            } catch {}
+        }
+        $ctx.Response.Redirect("/"); $ctx.Response.Close(); continue
+    }
     if ($ctx.Request.Url.AbsolutePath -eq "/state.json") {
         # Etat consolide, machine-readable (Phase 3) - voir lib/State.ps1.
         try {
