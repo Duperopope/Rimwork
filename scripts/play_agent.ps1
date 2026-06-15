@@ -15,7 +15,8 @@ action de +2-4s est ignoree cote jeu (l'humain reprend la main a tout moment).
 #>
 param(
     [string]$LlmUrl = "",
-    [int]$DecisionMs = 1000
+    [int]$DecisionMs = 1000,
+    [ValidateSet("wm", "reflex")][string]$Brain = "wm"   # wm = pilote par le WORLD MODEL (MPC), repli reflexe tant qu'il manque de donnees
 )
 
 # Source de verite unique (paths/url) - voir scripts/lib/Config.ps1.
@@ -27,6 +28,37 @@ $stateFile = Join-Path $dir "agent_state.json"
 $actionFile = Join-Path $dir "agent_action.json"
 $logFile = Join-Path $cfg.Paths.Logs 'play_agent.log'
 New-Item -ItemType Directory -Force -Path (Split-Path $logFile) | Out-Null
+
+# --- WORLD MODEL (pilotage par modele appris sur le VRAI jeu) ---
+# On LOGue chaque transition reelle (etat, action) -> etat suivant, et le cerveau
+# (scripts/wm/play_brain.py) apprend la dynamique du jeu puis PLANIFIE (MPC). Tant
+# qu'il manque de donnees, decide() retombe sur le reflexe -> ca marche tout de suite.
+$transFile = Join-Path $cfg.Paths.Logs 'real_transitions.jsonl'
+$brainPy = Join-Path $cfg.Paths.Scripts 'wm\play_brain.py'
+$FOODSCALE = 50.0          # echelle de normalisation de la distance a la nourriture
+$ACT = @{ '0' = @(0.0, 0.0); '1' = @(1.0, 0.0); '2' = @(-1.0, 0.0); '3' = @(0.0, 1.0); '4' = @(0.0, -1.0) }
+$prevState = $null; $prevAction = $null; $lastTrain = Get-Date
+
+# Etat normalise [energie, foodDx_unit, foodDz_unit, foodDistNorm] depuis l'etat brut du jeu.
+function Get-WmState($s) {
+    $e = 0.5
+    try { if ($s.PSObject.Properties.Name -contains 'health' -and [double]$s.maxHealth -gt 0) { $e = [double]$s.health / [double]$s.maxHealth } } catch {}
+    $fx = 0.0; $fz = 0.0; $fd = 1.0
+    try {
+        if ($s.PSObject.Properties.Name -contains 'foodDx') {
+            $rx = [double]$s.foodDx; $rz = [double]$s.foodDz; $len = [math]::Sqrt($rx * $rx + $rz * $rz)
+            if ($len -gt 1e-6) { $fx = $rx / $len; $fz = $rz / $len }
+            $fd = [math]::Min(1.0, [double]$s.foodDist / $FOODSCALE)
+        }
+    } catch {}
+    return @([math]::Round($e, 4), [math]::Round($fx, 4), [math]::Round($fz, 4), [math]::Round($fd, 4))
+}
+# (moveX,moveZ) -> indice d'action discret le plus proche (pour journaliser la transition).
+function Get-ActionIndex($mx, $mz) {
+    if ([math]::Abs($mx) -lt 0.2 -and [math]::Abs($mz) -lt 0.2) { return 0 }
+    if ([math]::Abs($mx) -ge [math]::Abs($mz)) { return $(if ($mx -ge 0) { 1 } else { 2 }) }
+    return $(if ($mz -ge 0) { 3 } else { 4 })
+}
 
 $sys = @'
 You ARE a single-celled microbe and you control the cell. SURVIVE and GROW.
@@ -125,34 +157,62 @@ while ($true) {
         continue
     }
 
-    # 5) En vie, en jeu: SURVIE. Mouvement DETERMINISTE (reflexe fiable, instantane):
-    #    on fonce vers la nourriture percue, on engloutit quand elle est proche,
-    #    on explore sinon. (Un LLM 9B en temps reel est trop lent/bavard pour le
-    #    pilotage twitch; il reviendra comme couche STRATEGIE, pas reflexe.)
-    $mx = 0.0; $mz = 0.0; $engulf = $false; $why = "explore"
-    $hasFood = $false
-    try {
-        if ($sObj.PSObject.Properties.Name -contains 'foodDx') {
-            $fx = [double]$sObj.foodDx; $fz = [double]$sObj.foodDz
-            $len = [math]::Sqrt($fx * $fx + $fz * $fz)
-            if ($len -gt 0.0001) {
-                $hasFood = $true
-                $mx = [math]::Round($fx / $len, 3); $mz = [math]::Round($fz / $len, 3)
-                $fd = [double]$sObj.foodDist
-                if ($fd -lt 8) { $engulf = $true; $why = "engulf (dist=$([math]::Round($fd,1)))" }
-                else { $why = "seek food (dist=$([math]::Round($fd,1)))" }
-            }
-        }
-    } catch {}
+    # 5) En vie, en jeu: SURVIE.
+    #    Brain=wm  -> le WORLD MODEL appris sur le VRAI jeu PLANIFIE le mouvement
+    #                 (MPC, scripts/wm/play_brain.py). Repli reflexe tant qu'il manque
+    #                 de donnees -> ca marche tout de suite et s'ameliore en jouant.
+    #    Brain=reflex -> ancien reflexe deterministe (fonce vers la nourriture).
+    $wmState = Get-WmState $sObj
 
-    if (-not $hasFood) {
-        # Pas de nourriture percue: exploration douce (direction qui tourne lentement).
-        $ang = ([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() % 16) / 16.0 * 6.283
-        $mx = [math]::Round([math]::Cos($ang), 3); $mz = [math]::Round([math]::Sin($ang), 3)
+    # JOURNALISE la transition reelle (etat precedent + action precedente -> etat actuel).
+    # C'est ce que le world model APPREND : la vraie dynamique du jeu, pas une maquette.
+    if ($null -ne $prevState -and $null -ne $prevAction) {
+        try { (@{ s = $prevState; a = $prevAction; ns = $wmState } | ConvertTo-Json -Compress) | Add-Content -Path $transFile -Encoding utf8 } catch {}
+    }
+
+    $mx = 0.0; $mz = 0.0; $engulf = $false; $why = "explore"; $src = "reflex"
+    $decided = $false
+    if ($Brain -eq "wm" -and (Test-Path $brainPy)) {
+        try {
+            $resp = ($wmState | ConvertTo-Json -Compress) | & python $brainPy 2>$null | Out-String
+            $m = $resp.Trim() | ConvertFrom-Json
+            if ($null -ne $m -and $m.PSObject.Properties.Name -contains 'moveX') {
+                $mx = [math]::Round([double]$m.moveX, 3); $mz = [math]::Round([double]$m.moveZ, 3)
+                $engulf = [bool]$m.engulf; $src = "$($m.src)"; $why = "wm"; $decided = $true
+            }
+        } catch {}
+    }
+    if (-not $decided) {
+        # Repli REFLEXE: fonce vers la nourriture percue, engloutit quand proche, explore sinon.
+        $hasFood = $false
+        try {
+            if ($sObj.PSObject.Properties.Name -contains 'foodDx') {
+                $fx = [double]$sObj.foodDx; $fz = [double]$sObj.foodDz
+                $len = [math]::Sqrt($fx * $fx + $fz * $fz)
+                if ($len -gt 0.0001) {
+                    $hasFood = $true
+                    $mx = [math]::Round($fx / $len, 3); $mz = [math]::Round($fz / $len, 3)
+                    $fd = [double]$sObj.foodDist
+                    if ($fd -lt 8) { $engulf = $true; $why = "engulf (dist=$([math]::Round($fd,1)))" }
+                    else { $why = "seek food (dist=$([math]::Round($fd,1)))" }
+                }
+            }
+        } catch {}
+        if (-not $hasFood) {
+            $ang = ([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() % 16) / 16.0 * 6.283
+            $mx = [math]::Round([math]::Cos($ang), 3); $mz = [math]::Round([math]::Sin($ang), 3)
+        }
     }
 
     Write-Action @{ moveX = $mx; moveZ = $mz; engulf = $engulf }
-    Log "move=($mx,$mz) engulf=$engulf $why"
-    Write-Host "survie: move=($mx,$mz) engulf=$engulf | $why" -ForegroundColor Green
-    Start-Sleep -Milliseconds 400
+    $prevState = $wmState; $prevAction = (Get-ActionIndex $mx $mz)
+    Log "[$src] move=($mx,$mz) engulf=$engulf $why"
+    Write-Host "survie [$src]: move=($mx,$mz) engulf=$engulf | $why" -ForegroundColor Green
+
+    # RE-ENTRAINE le world model du jeu periodiquement, en arriere-plan (non bloquant).
+    if ($Brain -eq "wm" -and ((Get-Date) - $lastTrain).TotalSeconds -ge 45) {
+        $lastTrain = Get-Date
+        try { Start-Process python -ArgumentList $brainPy, '--train' -WindowStyle Hidden } catch {}
+    }
+    Start-Sleep -Milliseconds 600
 }

@@ -69,3 +69,6 @@ src/RimWorldGodot/assets/0.3.0-*.zip
 # PRIVÉ — ne JAMAIS publier (dépôt à miroir public). Documents personnels.
 *.pdf
 CV-*
+scripts/logs/real_transitions.jsonl
+scripts/wm/game_wm.pkl
+scripts/logs/game_wm.json
