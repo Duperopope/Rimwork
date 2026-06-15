@@ -93,7 +93,9 @@ function Get-CrawledCandidates([int]$Want = 4) {
         } catch { continue }
         foreach ($m in $hits) {
             if ($found.Count -ge $Want) { break }
-            if ($m.id -match "embed|rerank|vision|VL|abliterat|base-gguf|-1\.5B|-3B") { continue }
+            # exclut les archis exotiques / non chargeables par ce llama.cpp:
+            # MTP (multi-token-prediction), vision, abliterated, tout petits, etc.
+            if ($m.id -match "embed|rerank|vision|VL|abliterat|base-gguf|MTP|draft|bnb|awq|gptq|-1\.5B|-0\.5B|-3B") { continue }
             if ($found.ContainsKey($m.id)) { continue }
             try { $tree = Invoke-RestMethod "https://huggingface.co/api/models/$($m.id)/tree/main" -TimeoutSec 15 } catch { continue }
             $gg = $tree | Where-Object { $_.path -match "Q4_K_M\.gguf$|Q3_K_M\.gguf$" -and $_.path -notmatch "of-000|00001-of" } |
@@ -335,7 +337,14 @@ function Invoke-ArenaCycle {
         }
         Write-Host "=== ARENE: $($c.key) ($file) ===" -ForegroundColor Cyan
         Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = @{ key = $c.key; file = $file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
-        if (-not (Start-Model $file)) { Write-Host "  modele n'a pas demarre"; Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "le serveur n'a pas demarre/servi ($file) -> marque juge, suivant"; continue }
+        if (-not (Start-Model $file)) {
+            # Capture la VRAIE erreur de llama.cpp (archi non supportee, OOM, gguf casse...)
+            $errlog = (wsl -d Ubuntu -u root -- bash -lc "grep -iE 'error|unsupported|unknown|not supported|failed|out of memory|cannot' /tmp/llama-server.log 2>/dev/null | tail -2" 2>$null | Out-String).Trim()
+            if (-not $errlog) { $errlog = (wsl -d Ubuntu -u root -- bash -lc 'tail -2 /tmp/llama-server.log 2>/dev/null' 2>$null | Out-String).Trim() }
+            Write-Host "  modele n'a pas demarre"
+            Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "serveur KO ($file) -> $errlog"
+            continue
+        }
         $r = Invoke-Bench $c.key
         $r.file = $file; $r.lastCycle = $cycle; $r.repo = $c.repo
         # UPSERT dans l'historique persistant + champion = meilleur de tous les temps
