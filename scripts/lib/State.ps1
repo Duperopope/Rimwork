@@ -72,7 +72,11 @@ function Get-DownHereState {
     # --- derniers commits ---
     $commits = @()
     try {
+        # Forcer UTF-8: sinon les accents des commits FR sont casses (CP850).
+        $prevEnc = [Console]::OutputEncoding
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $commits = @(git -C $Config.Root log -5 --format="%h %s" 2>$null)
+        [Console]::OutputEncoding = $prevEnc
     } catch {}
 
     return [pscustomobject]@{

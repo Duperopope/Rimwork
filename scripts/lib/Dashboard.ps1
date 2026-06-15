@@ -18,15 +18,22 @@ REELLE (commits filtres du spam "site: progress update"), bouton START clair.
 function Get-DashboardActivity {
     param($Config = (Get-DownHereConfig), [int]$Max = 30)
     $rows = @()
-    foreach ($repo in @($Config.Root, (Join-Path $Config.Root 'reference\thrive'))) {
-        $log = git -C $repo log -80 --format="%at|%ad|%s" --date=format:"%d/%m %H:%M" 2>$null
-        foreach ($l in $log) {
-            $p = $l -split '\|', 3
-            if ($p.Count -lt 3) { continue }
-            if ($p[2] -match 'site: progress update|progress update \(auto\)') { continue }
-            $rows += [pscustomobject]@{ at = [long]$p[0]; date = $p[1]; msg = $p[2] }
+    # git emet de l'UTF-8; sans forcer l'encodage, PowerShell decode la sortie en
+    # CP850 (accents casses: "co├╗t" au lieu de "cout", "R®duire" au lieu de
+    # "Reduire"). On force UTF-8 le temps de lire le log, puis on restaure.
+    $prevEnc = [Console]::OutputEncoding
+    try {
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        foreach ($repo in @($Config.Root, (Join-Path $Config.Root 'reference\thrive'))) {
+            $log = git -C $repo log -80 --format="%at|%ad|%s" --date=format:"%d/%m %H:%M" 2>$null
+            foreach ($l in $log) {
+                $p = $l -split '\|', 3
+                if ($p.Count -lt 3) { continue }
+                if ($p[2] -match 'site: progress update|progress update \(auto\)') { continue }
+                $rows += [pscustomobject]@{ at = [long]$p[0]; date = $p[1]; msg = $p[2] }
+            }
         }
-    }
+    } finally { [Console]::OutputEncoding = $prevEnc }
     $out = @()
     foreach ($c in ($rows | Sort-Object at -Descending | Select-Object -First $Max)) {
         $isAi = $c.msg -match '^\[ai-loop'
