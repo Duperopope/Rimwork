@@ -36,7 +36,7 @@ New-Item -ItemType Directory -Force -Path (Split-Path $logFile) | Out-Null
 $transFile = Join-Path $cfg.Paths.Logs 'real_transitions.jsonl'
 $brainPy = Join-Path $cfg.Paths.Scripts 'wm\play_brain.py'
 $FOODSCALE = 50.0          # echelle de normalisation de la distance a la nourriture/toxine
-$prevState = $null; $prevAction = $null; $lastTrain = Get-Date
+$prevState = $null; $prevAction = $null; $lastTrain = Get-Date; $lastReport = Get-Date
 
 # Etat normalise (7D, FIXE) depuis l'etat brut du jeu :
 #   [energie, foodDx_unit, foodDz_unit, foodDistNorm, toxinDx_unit, toxinDz_unit, toxinDistNorm]
@@ -224,6 +224,12 @@ while ($true) {
     if ($Brain -eq "wm" -and ((Get-Date) - $lastTrain).TotalSeconds -ge 45) {
         $lastTrain = Get-Date
         try { Start-Process python -ArgumentList $brainPy, '--train' -WindowStyle Hidden } catch {}
+    }
+    # FERME LA BOUCLE jeu -> dev : toutes les 5 min, agrege friction + bugs reels du
+    # log et les remonte au dev (feedback.jsonl). Voir scripts/play_report.ps1.
+    if (((Get-Date) - $lastReport).TotalSeconds -ge 300) {
+        $lastReport = Get-Date
+        try { Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $cfg.Paths.Scripts 'play_report.ps1'), '-Emit' -WindowStyle Hidden } catch {}
     }
     Start-Sleep -Milliseconds 600
 }

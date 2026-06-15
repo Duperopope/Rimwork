@@ -72,3 +72,5 @@ CV-*
 scripts/logs/real_transitions.jsonl
 scripts/wm/game_wm.pkl
 scripts/logs/game_wm.json
+scripts/logs/play_findings.md
+scripts/logs/play_sessions.jsonl
