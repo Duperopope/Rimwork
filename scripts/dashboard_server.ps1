@@ -9,6 +9,7 @@
 . "$PSScriptRoot\lib\Chat.ps1"
 . "$PSScriptRoot\lib\Dashboard.ps1"
 . "$PSScriptRoot\lib\Llm.ps1"
+. "$PSScriptRoot\lib\Models.ps1"   # gestionnaire des modeles telecharges (lister/supprimer/archiver/proteger)
 $cfg = Get-DownHereConfig
 $port = $cfg.Dashboard.Port
 $logDir = $cfg.Paths.Logs
@@ -143,6 +144,34 @@ while ($true) {
             } catch {}
         }
         $ctx.Response.Redirect("/"); $ctx.Response.Close(); continue
+    }
+    if ($ctx.Request.Url.AbsolutePath -eq "/models.json") {
+        # Inventaire des modeles sur le disque (gestionnaire). Fetch a la demande
+        # (onglet Arene), PAS dans /api.json -> pas d'appel WSL toutes les 4 s.
+        try {
+            $json = Get-DiskModels -Config $cfg | ConvertTo-Json -Depth 6
+            $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
+            $ctx.Response.ContentType = "application/json; charset=utf-8"
+            $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
+        } catch { try { $ctx.Response.StatusCode = 500 } catch {} }
+        try { $ctx.Response.Close() } catch {}
+        continue
+    }
+    if ($ctx.Request.Url.AbsolutePath -like "/models/*") {
+        # Actions du gestionnaire de modeles (POST). Le travail disque (rm/mv) peut
+        # etre lent -> on le fait quand meme synchrone (operations rapides en pratique).
+        if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
+        $file = $ctx.Request.QueryString["file"]
+        $on = ($ctx.Request.QueryString["on"] -eq "1")
+        $act = $ctx.Request.Url.AbsolutePath
+        try {
+            switch ($act) {
+                "/models/delete"  { Remove-DiskModel -File $file -Config $cfg | Out-Null }
+                "/models/archive" { Set-ModelArchived -File $file -On $on -Config $cfg | Out-Null }
+                "/models/protect" { Set-ModelProtected -File $file -On $on -Config $cfg | Out-Null }
+            }
+        } catch {}
+        $ctx.Response.StatusCode = 204; $ctx.Response.Close(); continue
     }
     if ($ctx.Request.Url.AbsolutePath -eq "/state.json") {
         # Etat consolide, machine-readable (Phase 3) - voir lib/State.ps1.

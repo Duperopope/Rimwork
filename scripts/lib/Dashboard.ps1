@@ -256,6 +256,14 @@ h3 .ic{vertical-align:-2px;opacity:.85}
 .cx{color:var(--ink);margin-top:3px;white-space:pre-wrap;word-break:break-word;opacity:.9;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .catbadge{display:inline-flex;align-items:center;gap:5px;background:var(--glass2);border:1px solid var(--line2);border-radius:8px;padding:3px 9px;font-size:11.5px;color:var(--mut)}
 .catbadge b{color:var(--ink);font-weight:600}
+.htip{position:relative;display:inline-flex;cursor:help;color:var(--mut);align-self:center}
+.htip:hover{color:var(--cyan)}
+.htip .tipbox{position:absolute;z-index:60;right:0;top:150%;width:312px;background:#0b1722;border:1px solid var(--line);border-radius:13px;padding:13px 15px;box-shadow:0 16px 48px rgba(0,0,0,.6);font-size:12px;line-height:1.5;color:var(--ink);display:none;white-space:normal;text-align:left;font-weight:400}
+.htip:hover .tipbox{display:block}
+.tipbox h5{font-size:12px;color:var(--cyan);margin:0 0 8px;word-break:break-all}
+.tipbox .tr{display:flex;justify-content:space-between;gap:14px;margin:4px 0}
+.tipbox .tk{color:var(--mut)}
+.tipbox .sub{color:var(--mut);font-size:11px;margin-top:9px;border-top:1px solid var(--line2);padding-top:8px;line-height:1.45}
 @keyframes beat{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:1}50%{transform:translate(-50%,-50%) scale(1.5);opacity:.55}}
 @keyframes ring{0%{transform:scale(.6);opacity:.7}100%{transform:scale(1.7);opacity:0}}
 </style></head><body>
@@ -313,7 +321,11 @@ const ICONS={
  moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
  swords:'<polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/>',
  robot:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>',
- alert:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+ alert:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+ info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+ archive:'<polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/>',
+ shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+ hdd:'<line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/>'
 };
 function ic(n,sz){sz=sz||16;return '<svg class="ic" width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[n]||'')+'</svg>';}
 let DATA=window.__DATA__||null, TAB=sessionStorage.getItem('tab')||'overview', BUSY=false;
@@ -460,6 +472,76 @@ function trendsCard(){
      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px"><span class="mut">annulés (garde-fou)</span><b style="color:var(--red)">${last.reverted}</b></div>${spark(h.map(x=>x.reverted),'#ff6b6b')}
      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px"><span class="mut">avancement jeu</span><b style="color:var(--blue)">${last.pct}%</b></div>${spark(h.map(x=>x.pct),'#4aa6ff')}`);
 }
+// --- Indicateurs ingenieur deduits du nom de fichier GGUF ---
+function quantInfo(f){
+  const m=/Q(\d)_K_([MSL])/i.exec(f)||/Q(\d)_(\d)/i.exec(f)||/Q(\d)/i.exec(f);
+  if(!m) return null;
+  const bits=+m[1];
+  const lbl={2:'2-bit · extrême, qualité dégradée',3:'3-bit · très compact, qualité un peu rognée',4:'4-bit · meilleur compromis taille/qualité',5:'5-bit · haute qualité',6:'6-bit · quasi sans perte',8:'8-bit · quasi fp16'}[bits]||(bits+'-bit');
+  return {bits:bits,label:lbl};
+}
+function paramInfo(f){
+  const moe=/(\d+(?:\.\d+)?)B[-_]?A(\d+(?:\.\d+)?)B/i.exec(f);   // 30B-A3B = 30B total / 3B actifs (MoE)
+  if(moe) return {total:moe[1]+'B',active:moe[2]+'B',moe:true};
+  const m=/(\d+(?:\.\d+)?)B/i.exec(f);
+  return m?{total:m[1]+'B',active:m[1]+'B',moe:false}:null;
+}
+// Tooltip riche au survol d'un modele : tout ce qu'un ingenieur regarde et qu'un
+// neophyte oublie (qualite, debit tok/s, empreinte VRAM + marge pour le jeu,
+// quantization, parametres MoE, contexte, formule du score, barème).
+function tipFor(t){
+  const name=t.file||t.key;
+  const q=quantInfo(name), pr=paramInfo(name);
+  const row=(k,v)=>'<div class="tr"><span class="tk">'+k+'</span><span>'+v+'</span></div>';
+  if(t.status==='echec'){
+    return '<div class="tipbox"><h5>'+esc(name)+'</h5>'+row('État','<span style="color:var(--red)">échec</span>')+row('Raison',esc(t.note||'n\'a pas chargé'))+(q?row('Quantization',q.label):'')+(pr?row('Paramètres',pr.moe?(pr.total+' · ≈'+pr.active+' actifs'):pr.total):'')+'<div class="sub">tenté sur barème v'+esc(t.benchVer||'?')+' · cycle '+(t.lastCycle||'?')+'</div></div>';
+  }
+  const cats=arr(t.cats);
+  const qual=(t.qualityPct!=null)?t.qualityPct:(cats.length?Math.round(cats.reduce((a,c)=>a+(c.pct||0),0)/cats.length):null);
+  const gb=t.gb||0, head=gb?Math.round((16-gb)*10)/10:null;
+  let h='<div class="tipbox"><h5>'+esc(name)+'</h5>';
+  if(qual!=null) h+=row('Qualité (moy. épreuves)','<b>'+qual+'</b> / 100');
+  h+=row('Débit',t.tokPerSec?('<b>'+t.tokPerSec+'</b> tok/s'):'<span class="mut">non mesuré</span>');
+  if(t.secs) h+=row('Durée du test',t.secs+' s');
+  if(gb) h+=row('Empreinte VRAM','<b>'+gb+'</b> Go'+(head!=null?(' · ~'+head+' Go libres pour le jeu'):''));
+  if(t.ctx) h+=row('Fenêtre de contexte',(+t.ctx).toLocaleString('fr')+' tokens');
+  if(q) h+=row('Quantization',q.label);
+  if(pr) h+=row('Paramètres',pr.moe?(pr.total+' total · ≈'+pr.active+' actifs (MoE)'):pr.total);
+  h+=row('Score composite',(t.total!=null?'<b>'+t.total+'</b> / 100':'—'));
+  h+='<div class="sub">score = qualité − VRAM×0,6 + bonus débit. À qualité proche, le modèle le plus léger et le plus rapide gagne.<br>barème v'+esc(t.benchVer||'?')+' · testé au cycle '+(t.lastCycle||'?')+'</div></div>';
+  return h;
+}
+// --- Gestionnaire des modeles sur le disque (fetch a la demande, pas toutes les 4s) ---
+async function loadDisk(force){
+  if(window._diskLoading) return;
+  if(window._disk!==undefined && !force) return;
+  window._diskLoading=true;
+  const r=await api('/models.json');
+  try{ window._disk=r?await r.json():null; }catch(e){ window._disk=null; }
+  window._diskLoading=false;
+  if(TAB==='arena') renderView();
+}
+async function actModel(path){ await api(path,{method:'POST'}); setTimeout(()=>loadDisk(true),500); }
+function viewArenaDisk(){
+  const d=window._disk;
+  if(d===undefined){ loadDisk(); return '<div class="empty">inventaire du disque…</div>'; }
+  if(!d){ return '<div class="empty">inventaire indisponible (WSL hors ligne ?)</div>'; }
+  const ms=arr(d.models);
+  if(!ms.length) return '<div class="empty">aucun modèle sur le disque</div>';
+  const head='<div class="mut" style="font-size:11.5px;margin-bottom:11px">'+ms.length+' fichier(s) · <b>'+d.totalGb+' Go</b> occupés · maj '+esc(d.updatedAt)+'</div>';
+  const col={champion:'var(--green)',base:'var(--blue)',challenger:'var(--cyan)',orphelin:'var(--mut)'};
+  const rows=ms.slice().sort((a,b)=>(b.gb||0)-(a.gb||0)).map(m=>{
+    const q=quantInfo(m.file);
+    const tags=(m.champion?'<span class="badge" style="background:rgba(73,226,159,.16);color:var(--green)">champion</span>':'')+(m.archived?'<span class="badge" style="background:rgba(255,200,97,.14);color:var(--amb)">archivé</span>':'')+((m.protected&&!m.champion)?'<span class="badge" style="background:rgba(74,166,255,.14);color:var(--blue)">protégé</span>':'')+(m.role==='orphelin'?'<span class="badge" title="présent sur le disque mais absent du classement">orphelin</span>':'');
+    const meta='<span class="mut" style="font-size:11.5px">'+m.gb+' Go'+(q?(' · '+q.bits+'-bit'):'')+(m.total!=null?(' · '+m.total+' pts'):'')+'</span>';
+    const f="'"+esc(m.file)+"'";
+    const arc='<button class="btn ghost sm" onclick="actModel(\'/models/archive?on='+(m.archived?'0':'1')+'&file=\'+encodeURIComponent('+f+'))">'+ic('archive')+(m.archived?' Restaurer':' Archiver')+'</button>';
+    const prot=m.champion?'':'<button class="btn ghost sm" title="'+(m.protected?'autoriser la purge auto':'ne jamais purger automatiquement')+'" onclick="actModel(\'/models/protect?on='+(m.protected?'0':'1')+'&file=\'+encodeURIComponent('+f+'))">'+ic('shield')+(m.protected?' Libérer':' Protéger')+'</button>';
+    const del=m.champion?'':'<button class="btn ghost sm" title="supprimer du disque" onclick="if(confirm(\'Supprimer définitivement \'+'+f+'+\' du disque ?\'))actModel(\'/models/delete?file=\'+encodeURIComponent('+f+'))">'+ic('trash')+'</button>';
+    return '<div class="task"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="cat" style="color:'+(col[m.role]||'var(--mut)')+';background:transparent;border:1px solid var(--line2)">'+esc(m.role)+'</span><b style="flex:1;min-width:150px;word-break:break-all">'+esc(m.file)+'</b>'+tags+meta+arc+prot+del+'</div></div>';
+  }).join('');
+  return head+rows;
+}
 function viewArena(){
   const a=DATA?DATA.arena:null;
   const pin=(DATA&&DATA.llm)?DATA.llm.pinned:null, useMsg=(DATA&&DATA.llm)?DATA.llm.useMsg:null;
@@ -485,21 +567,25 @@ function viewArena(){
       const stale=!failed&&t.benchVer&&a.benchVer&&t.benchVer!==a.benchVer;
       const w=Math.round((t.total||0)/max*100), name=t.file||t.key, isBest=!failed&&!stale&&a.best&&t.key===a.best.key, isPin=pin&&t.file===pin;
       const open=window._aOpen.has(t.key);
-      const right=failed?'<span class="badge" style="background:rgba(255,107,107,.16);color:var(--red)">échec</span>':('<span class="hl" style="font-variant-numeric:tabular-nums">'+t.total+' pts</span>'+(stale?'<span class="badge" style="background:rgba(255,200,97,.16);color:var(--amb)" title="noté sur un ancien barème, re-test auto en cours">ancien barème</span>':''));
+      const right=failed?'<span class="badge" style="background:rgba(255,107,107,.16);color:var(--red)">échec</span>':('<span class="hl" style="font-variant-numeric:tabular-nums">'+t.total+'</span><span class="mut" style="font-size:10px">/100</span>'+(stale?'<span class="badge" style="background:rgba(255,200,97,.16);color:var(--amb)" title="noté sur un ancien barème, re-test auto en cours">ancien barème</span>':''));
+      const tip='<span class="htip">'+ic('info',15)+tipFor(t)+'</span>';
       const cats=arr(t.cats).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return '<span class="catbadge"><b>'+esc(c.cat)+'</b> <span style="color:'+cc+'">'+c.pct+'%</span></span>';}).join('')||esc(arr(t.details).join(' · '));
       // Replie par defaut : le detail (barre + categories) n'apparait qu'a l'ouverture.
       const detail=!open?'':(failed
         ?'<div class="mut" style="margin-top:6px;font-size:12px">'+esc(t.note||'n\'a pas chargé')+'</div>'
-        :'<div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:'+w+'%;background:var(--grad)"></i></div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+cats+(t.secs?('<span class="catbadge">'+t.secs+'s</span>'):'')+(t.gb?('<span class="catbadge" title="taille ~ VRAM occupee">'+t.gb+' Go</span>'):'')+'</div>');
-      const compact=(!open&&!failed&&t.gb)?'<span class="mut" style="font-size:11.5px">'+t.gb+' Go</span>':'';
+        :'<div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:'+w+'%;background:var(--grad)"></i></div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+cats+(t.tokPerSec?('<span class="catbadge" title="débit de génération réel">'+t.tokPerSec+' tok/s</span>'):'')+(t.secs?('<span class="catbadge" title="durée totale du test">'+t.secs+'s</span>'):'')+(t.gb?('<span class="catbadge" title="taille du modèle ~ VRAM occupée (sur 16 Go partagés avec le jeu)">'+t.gb+' Go</span>'):'')+'</div>');
+      const compact=(!open&&!failed)?'<span class="mut" style="font-size:11.5px">'+(t.gb?(t.gb+' Go'):'')+(t.tokPerSec?(' · '+t.tokPerSec+' tok/s'):'')+'</span>':'';
       const chev='<button class="btn ghost sm" title="'+(open?'Replier':'Déplier')+'" onclick="togArena(\''+esc(t.key)+'\')"><span style="display:inline-flex;transition:transform .2s;transform:rotate('+(open?90:0)+'deg)">'+ic('chevron',15)+'</span></button>';
-      return '<div class="task" style="'+(isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':'')+(failed?';opacity:.62':'')+'"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+chev+'<span class="cat">#'+(i+1)+'</span><b style="flex:1;min-width:160px;word-break:break-all;cursor:pointer" onclick="togArena(\''+esc(t.key)+'\')">'+esc(name)+' '+(isBest?ic('trophy',15):'')+(isPin?ic('pin',15):'')+'</b>'+compact+right+'<button class="btn ghost sm" title="Copier le benchmark" onclick="copyBench(\''+esc(t.key)+'\')">'+ic('copy')+'</button><button class="btn ghost sm" title="Renvoyer au bench" onclick="act(\'/arena/rebench?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('repeat')+' Re-bench</button>'+(failed?'':'<button class="btn ghost sm" onclick="act(\'/llm/use?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('play')+' Utiliser</button>')+'</div>'+detail+'</div>';
+      return '<div class="task" style="'+(isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':'')+(failed?';opacity:.62':'')+'"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+chev+'<span class="cat">#'+(i+1)+'</span><b style="flex:1;min-width:160px;word-break:break-all;cursor:pointer" onclick="togArena(\''+esc(t.key)+'\')">'+esc(name)+' '+(isBest?ic('trophy',15):'')+(isPin?ic('pin',15):'')+'</b>'+compact+right+tip+'<button class="btn ghost sm" title="Copier le benchmark" onclick="copyBench(\''+esc(t.key)+'\')">'+ic('copy')+'</button><button class="btn ghost sm" title="Renvoyer au bench" onclick="act(\'/arena/rebench?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('repeat')+' Re-bench</button>'+(failed?'':'<button class="btn ghost sm" onclick="act(\'/llm/use?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('play')+' Utiliser</button>')+'</div>'+detail+'</div>';
     }).join('');
     const allOpen=tested.every(t=>window._aOpen.has(t.key));
     const toolbar='<div class="toolbar"><button class="btn ghost sm" onclick="copyBenchAll()">'+ic('copy')+' Copier tout le tableau</button><button class="btn ghost sm" onclick="arenaToggleAll('+(allOpen?'false':'true')+')">'+ic('chevron')+' '+(allOpen?'Tout replier':'Tout déplier')+'</button><span class="mut" style="font-size:11.5px;align-self:center">'+tested.length+' modèles · clique une ligne pour le détail</span></div>';
     board=toolbar+rows;
   }
-  document.getElementById('view').innerHTML=progBar(DATA&&DATA.arenaProgress)+head+'<div style="height:14px"></div>'+card(ic('chart')+' Classement persistant — vrais noms · « Utiliser » pour activer, copier pour exporter le benchmark',board,true);
+  document.getElementById('view').innerHTML=progBar(DATA&&DATA.arenaProgress)+head+'<div style="height:14px"></div>'
+    +card(ic('chart')+' Classement persistant — survole '+ic('info',13)+' pour les détails ingénieur · « Utiliser » pour activer',board,true)
+    +'<div style="height:14px"></div>'
+    +card(ic('hdd')+' Modèles sur le disque — supprimer · archiver · protéger de la purge',viewArenaDisk(),true);
 }
 function togArena(key){ window._aOpen=window._aOpen||new Set(); if(window._aOpen.has(key))window._aOpen.delete(key); else window._aOpen.add(key); renderView(); }
 function arenaToggleAll(open){ window._aOpen=window._aOpen||new Set(); const t=arr(DATA&&DATA.arena&&DATA.arena.tested); if(open)t.forEach(x=>window._aOpen.add(x.key)); else window._aOpen.clear(); renderView(); }
