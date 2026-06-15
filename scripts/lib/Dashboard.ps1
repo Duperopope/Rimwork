@@ -472,7 +472,7 @@ function viewArena(){
   const pinBox=pin?`<div class="warnbox ok" style="margin-top:10px">${ic('pin',15)} Épinglé manuellement : <b>${esc(pin)}</b> — l'arène ne le remplacera pas. <button class="btn ghost sm" style="margin-left:8px" onclick="act('/llm/auto')">${ic('rotate')} Revenir à l'auto</button></div>`:'';
   const msgBox=useMsg?`<div class="mut" style="margin-top:8px">${esc(useMsg)}</div>`:'';
   const head=card(ic('flask')+' Arène — sélection naturelle des LLM (continue)',
-    `<div class="txt"><b>Cycle ${a.cycle||1}</b> · ${phaseL}</div>${cur}
+    `<div class="txt"><b>Cycle ${a.cycle||1}</b> · ${phaseL} · barème v${esc(a.benchVer||'?')}</div>${cur}
      <div class="txt" style="margin-top:10px">${best}</div>${pinBox}${msgBox}
      <div class="mut" style="margin-top:6px">mise à jour ${esc(a.updatedAt||'')}</div>`,true);
   let board='<div class="empty">aucun combat encore</div>';
@@ -481,8 +481,9 @@ function viewArena(){
     const max=Math.max.apply(null,tested.map(t=>t.total||0).concat([1]));
     board=tested.map((t,i)=>{
       const failed=t.status==='echec';
-      const w=Math.round((t.total||0)/max*100), name=t.file||t.key, isBest=!failed&&a.best&&t.key===a.best.key, isPin=pin&&t.file===pin;
-      const right=failed?'<span class="badge" style="background:rgba(255,107,107,.16);color:var(--red)">échec</span>':('<span class="hl" style="font-variant-numeric:tabular-nums">'+t.total+' pts</span>');
+      const stale=!failed&&t.benchVer&&a.benchVer&&t.benchVer!==a.benchVer;
+      const w=Math.round((t.total||0)/max*100), name=t.file||t.key, isBest=!failed&&!stale&&a.best&&t.key===a.best.key, isPin=pin&&t.file===pin;
+      const right=failed?'<span class="badge" style="background:rgba(255,107,107,.16);color:var(--red)">échec</span>':('<span class="hl" style="font-variant-numeric:tabular-nums">'+t.total+' pts</span>'+(stale?'<span class="badge" style="background:rgba(255,200,97,.16);color:var(--amb)" title="noté sur un ancien barème, re-test auto en cours">ancien barème</span>':''));
       const cats=arr(t.cats).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return '<span class="catbadge"><b>'+esc(c.cat)+'</b> <span style="color:'+cc+'">'+c.pct+'%</span></span>';}).join('')||esc(arr(t.details).join(' · '));
       const detail=failed
         ?'<div class="mut" style="margin-top:6px;font-size:12px">'+esc(t.note||'n\'a pas chargé')+'</div>'
