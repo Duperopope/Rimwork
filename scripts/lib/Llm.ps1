@@ -79,7 +79,7 @@ function Get-ModelFile {
     if (-not $entry) { return $null }
     $name = [System.IO.Path]::GetFileName($entry.path)
     $want = [long]($entry.lfs.size ?? $entry.size)
-    wsl -d Ubuntu -u root -- bash -c "cd /root/models && wget -q -c --tries=3 'https://huggingface.co/$Repo/resolve/main/$($entry.path)' -O '$name'" | Out-Null
+    wsl -d Ubuntu -u root -- bash -c "cd /root/models && timeout 1200 wget -q -c --tries=2 --timeout=30 'https://huggingface.co/$Repo/resolve/main/$($entry.path)' -O '$name'" | Out-Null
     $size = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name 2>/dev/null || echo 0")
     if ($size -eq $want -and $want -gt 3e9) { return $name }
     return $null

@@ -200,7 +200,7 @@ function Get-HfFile([string]$repo, [string]$file) {
     $name = [System.IO.Path]::GetFileName($entry.path)
     $want = [long]($entry.lfs.size ?? $entry.size)
     Write-Host "  telechargement $repo / $($entry.path) ($([math]::Round($want/1GB,1)) Go)..."
-    wsl -d Ubuntu -u root -- bash -c "cd /root/models && wget -q -c --tries=3 'https://huggingface.co/$repo/resolve/main/$($entry.path)' -O '$name'" | Out-Null
+    wsl -d Ubuntu -u root -- bash -c "cd /root/models && timeout 1200 wget -q -c --tries=2 --timeout=30 'https://huggingface.co/$repo/resolve/main/$($entry.path)' -O '$name'" | Out-Null
     $size = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name 2>/dev/null || echo 0")
     if ($size -eq $want -and $want -gt 3e9) { return $name }
     wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$name" | Out-Null
@@ -318,22 +318,26 @@ function Invoke-ArenaCycle {
             Write-Host "  $($c.key): deja juge (cycle $($prev.lastCycle), $($prev.total) pts) - garde l'historique, skip" -ForegroundColor DarkGray
             continue
         }
+        # ANTI-BOUCLE: tout candidat NON-base est marque "juge" DES QU'ON LE TENTE
+        # (succes OU echec). Sinon un modele qui rate son telechargement/chargement
+        # n'est jamais enregistre -> re-crawle a chaque cycle -> boucle infinie sur
+        # les memes ratages (le bug des 34 cycles a 0 ajout).
+        $isBase = $baseCandidates.file -contains $c.file
+        if (-not $isBase -and (@(Get-Content $triedFile -ErrorAction SilentlyContinue) -notcontains $c.file)) { Add-Content $triedFile $c.file }
         $file = $c.file
         $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$file && echo OK"
         if ($have -notmatch "OK") {
-            if (-not $c.repo) { Write-Host "skip $($c.key): pas de repo"; continue }
+            if (-not $c.repo) { Write-Host "skip $($c.key): pas de repo"; Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text 'pas de repo / fichier introuvable -> marque juge, suivant'; continue }
             Write-ArenaStatus @{ phase = 'download'; cycle = $cycle; current = @{ key = $c.key; file = $c.file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
+            Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'test' -Text "telechargement de $($c.file) depuis $($c.repo)..."
             $file = Get-HfFile $c.repo $c.file
-            if (-not $file) { Write-Host "skip $($c.key): telechargement echoue"; continue }
+            if (-not $file) { Write-Host "skip $($c.key): telechargement echoue"; Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "telechargement echoue ($($c.file)) -> marque juge, suivant"; continue }
         }
         Write-Host "=== ARENE: $($c.key) ($file) ===" -ForegroundColor Cyan
         Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = @{ key = $c.key; file = $file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
-        if (-not (Start-Model $file)) { Write-Host "  modele n'a pas demarre"; continue }
+        if (-not (Start-Model $file)) { Write-Host "  modele n'a pas demarre"; Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "le serveur n'a pas demarre/servi ($file) -> marque juge, suivant"; continue }
         $r = Invoke-Bench $c.key
         $r.file = $file; $r.lastCycle = $cycle; $r.repo = $c.repo
-        if ($file -notmatch '^(Qwen3-Coder-30B|Qwen2.5-Coder-14B|Yi-Coder-9B)') {
-            if (@(Get-Content $triedFile -ErrorAction SilentlyContinue) -notcontains $file) { Add-Content $triedFile $file }
-        }
         # UPSERT dans l'historique persistant + champion = meilleur de tous les temps
         $models = @($models | Where-Object { $_.key -ne $r.key }) + ([pscustomobject]$r)
         $bestEver = @($models | Sort-Object total -Descending)[0]
