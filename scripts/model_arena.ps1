@@ -48,6 +48,22 @@ function Write-ArenaStatus($o) {
     try { $o['updatedAt'] = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); ($o | ConvertTo-Json -Depth 6) | Set-Content $arenaStatus -Encoding utf8 } catch {}
 }
 
+# HISTORIQUE PERSISTANT : classement de TOUS les modeles jamais juges (le systeme
+# n'oublie plus a chaque redemarrage). Le cycle est persistant aussi.
+$leaderFile = Join-Path $cfg.Paths.Logs 'arena_leaderboard.json'
+function Get-Leaderboard {
+    if (Test-Path $leaderFile) { try { return (Get-Content $leaderFile -Raw | ConvertFrom-Json) } catch {} }
+    return [pscustomobject]@{ cycle = 0; models = @() }
+}
+function Save-Leaderboard($cycle, $models) {
+    try { [pscustomobject]@{ cycle = $cycle; updatedAt = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); models = @($models) } |
+        ConvertTo-Json -Depth 6 | Set-Content $leaderFile -Encoding utf8 } catch {}
+}
+function Get-Rank($models) {
+    @($models | Sort-Object -Property total -Descending | ForEach-Object {
+        @{ key = $_.key; total = $_.total; score = $_.score; speedPts = $_.speedPts; secs = $_.secs; details = $_.details; file = $_.file; lastCycle = $_.lastCycle } })
+}
+
 # ---- Candidats de depart (GGUF tenant sur RX 7800 XT 16 Go) ----
 $baseCandidates = @(
     @{ key = "qwen3-coder-30b"; file = "Qwen3-Coder-30B-A3B-Instruct-Q3_K_M.gguf"; repo = "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF" }
@@ -193,77 +209,76 @@ function Invoke-Bench([string]$key, [double]$temp = 0.3, [int]$reps = 3) {
 }
 
 function Invoke-ArenaCycle {
-    $script:cycleNo++
-    # 1. Construire la liste des candidats: base + nouveaux crawles (jamais juges).
-    # Get-CrawledCandidates lit lui-meme arena_tried.txt pour ne pas re-juger.
+    # HISTORIQUE PERSISTANT: on charge le classement de TOUS les temps. Le cycle ne
+    # repart pas a 1, le champion = meilleur jamais vu, et on NE re-benche PAS un
+    # modele juge il y a moins de 5 cycles -> fini "il oublie et relance qwen".
+    $lb = Get-Leaderboard
+    $cycle = [int]$lb.cycle + 1
+    $script:cycleNo = $cycle
+    $models = @($lb.models)
+    $bestEver = if ($models.Count) { @($models | Sort-Object total -Descending)[0] } else { $null }
+    Write-ArenaStatus @{ phase = 'crawl'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @() }
+
+    # 1. Candidats: base + nouveaux crawles (Get-CrawledCandidates lit arena_tried).
     $candidates = @($baseCandidates)
-    Write-ArenaStatus @{ phase = 'crawl'; cycle = $script:cycleNo; current = $null; tested = @(); best = $null; queue = @($candidates.key) }
     if (-not $Only) {
-        $crawled = @(Get-CrawledCandidates -Want ($NewPerCycle * 2))   # crawl borne (s'arrete des qu'il a assez)
+        $crawled = @(Get-CrawledCandidates -Want ($NewPerCycle * 2))
         $newOnes = @($crawled | Select-Object -First $NewPerCycle)
-        if ($newOnes.Count) {
-            Write-Host "OCEAN: $($newOnes.Count) nouveau(x) challenger(s): $($newOnes.key -join ', ')" -ForegroundColor Cyan
-            $candidates += $newOnes
-        }
+        if ($newOnes.Count) { Write-Host "OCEAN: $($newOnes.key -join ', ')" -ForegroundColor Cyan; $candidates += $newOnes }
     } else {
         $candidates = @($candidates | Where-Object { $_.key -match $Only })
     }
 
-    # 2. Combats - RECURSIF: apres CHAQUE modele on met a jour le meilleur connu a
-    #    l'instant T (champion promu tout de suite, statut live), sans attendre la
-    #    fin du cycle. C'est ce que le directeur veut: "le meilleur present a T".
-    $results = @()
-    $best = $null
+    # 2. Combats. On SAUTE ce qui a ete juge recemment (historique garde), et on
+    #    promeut le meilleur de TOUS LES TEMPS apres chaque combat.
     foreach ($c in $candidates) {
+        $prev = @($models | Where-Object { $_.key -eq $c.key })[0]
+        if ($prev -and (($cycle - [int]$prev.lastCycle) -lt 5)) {
+            Write-Host "  $($c.key): deja juge (cycle $($prev.lastCycle), $($prev.total) pts) - garde l'historique, skip" -ForegroundColor DarkGray
+            continue
+        }
         $file = $c.file
         $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$file && echo OK"
         if ($have -notmatch "OK") {
-            if (-not $c.repo) { Write-Host "skip $($c.key): pas de fichier local, pas de repo"; continue }
-            Write-ArenaStatus @{ phase = 'download'; cycle = $script:cycleNo; current = @{ key = $c.key; file = $c.file }; tested = @($results); best = $best; queue = @($candidates.key) }
+            if (-not $c.repo) { Write-Host "skip $($c.key): pas de repo"; continue }
+            Write-ArenaStatus @{ phase = 'download'; cycle = $cycle; current = @{ key = $c.key; file = $c.file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
             $file = Get-HfFile $c.repo $c.file
             if (-not $file) { Write-Host "skip $($c.key): telechargement echoue"; continue }
         }
         Write-Host "=== ARENE: $($c.key) ($file) ===" -ForegroundColor Cyan
-        Write-ArenaStatus @{ phase = 'bench'; cycle = $script:cycleNo; current = @{ key = $c.key; file = $file }; tested = @($results); best = $best; queue = @($candidates.key) }
-        if (-not (Start-Model $file)) { Write-Host "  modele n'a pas demarre (trop gros ?)"; continue }
-        $r = Invoke-Bench $c.key   # reps internes = robustesse statistique
-        $r.file = $file
-        $results += [pscustomobject]$r
-        # memoriser qu'on a juge ce fichier (pour ne pas le re-crawler sans fin)
-        if ($file -notmatch '^(Qwen3-Coder-30B|Qwen2.5-Coder-14B|Yi-Coder-9B)') { Add-Content $triedFile $file }
-        # PROMOTION INCREMENTALE: ce modele est-il le meilleur connu ? Il tourne
-        # deja sur 1234 -> il devient le champion immediatement.
-        if (-not $best -or $r.total -gt $best.total) {
-            $best = [pscustomobject]$r
-            Set-Content $championFile $best.file -Encoding ascii
-            Write-Host "  -> champion provisoire: $($best.key) ($($best.total))" -ForegroundColor Green
+        Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = @{ key = $c.key; file = $file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
+        if (-not (Start-Model $file)) { Write-Host "  modele n'a pas demarre"; continue }
+        $r = Invoke-Bench $c.key
+        $r.file = $file; $r.lastCycle = $cycle; $r.repo = $c.repo
+        if ($file -notmatch '^(Qwen3-Coder-30B|Qwen2.5-Coder-14B|Yi-Coder-9B)') {
+            if (@(Get-Content $triedFile -ErrorAction SilentlyContinue) -notcontains $file) { Add-Content $triedFile $file }
         }
-        $rankedNow = @($results | Sort-Object -Property total -Descending)
-        $rankedNow | ConvertTo-Json -Depth 5 | Set-Content $arenaLog -Encoding utf8
-        Write-ArenaStatus @{ phase = 'bench'; cycle = $script:cycleNo; current = $null; tested = @($rankedNow); best = $best; queue = @($candidates.key) }
+        # UPSERT dans l'historique persistant + champion = meilleur de tous les temps
+        $models = @($models | Where-Object { $_.key -ne $r.key }) + ([pscustomobject]$r)
+        $bestEver = @($models | Sort-Object total -Descending)[0]
+        Set-Content $championFile $bestEver.file -Encoding ascii
+        Save-Leaderboard $cycle $models
+        @(Get-Rank $models) | ConvertTo-Json -Depth 5 | Set-Content $arenaLog -Encoding utf8
+        Write-Host "  -> champion all-time: $($bestEver.key) ($($bestEver.total))" -ForegroundColor Green
+        Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
     }
-    if ($results.Count -eq 0) { Write-Host "aucun resultat ce cycle."; Write-ArenaStatus @{ phase = 'idle'; cycle = $script:cycleNo; current = $null; tested = @(); best = $null; queue = @() }; return }
 
-    # 3. Classement final + purge des perdants pour liberer de la place
-    $ranked = @($results | Sort-Object -Property total -Descending)
-    $ranked | ConvertTo-Json -Depth 5 | Set-Content $arenaLog -Encoding utf8
-    $champ = $ranked[0]
-    Set-Content $championFile $champ.file -Encoding ascii
-    Write-Host "CHAMPION: $($champ.key) ($($champ.score)/$(10*$tasks.Count) + $($champ.speedPts) vitesse) -> $championFile" -ForegroundColor Green
+    Save-Leaderboard $cycle $models
+    if (-not $bestEver) { Write-Host "aucun modele juge."; Write-ArenaStatus @{ phase = 'idle'; cycle = $cycle; current = $null; tested = @(); best = $null; queue = @() }; return }
 
-    # ne jamais supprimer les modeles de base (filet de securite)
+    # 3. Purge: garde KeepTop du classement ALL-TIME (jamais les modeles de base).
     $protect = @($baseCandidates.file)
-    foreach ($r in ($ranked | Select-Object -Skip $KeepTop)) {
+    foreach ($r in (Get-Rank $models | Select-Object -Skip $KeepTop)) {
         if ($protect -contains $r.file) { continue }
         Write-Host "  selection naturelle: suppression du perdant $($r.file)" -ForegroundColor DarkYellow
         wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$($r.file)" | Out-Null
     }
 
-    # 4. Relancer le champion en PROD (port 1234) pour la boucle de dev - lancement
-    # PERSISTANT (le nohup& precedent ne survivait pas -> prod morte apres l'arene).
-    Start-LlamaServer -Model $champ.file
-    Write-ArenaStatus @{ phase = 'done'; cycle = $script:cycleNo; current = $null; tested = @($ranked); best = $champ; queue = @() }
-    $ranked | Format-Table key, score, speedPts, secs
+    # 4. Champion (meilleur de tous les temps) en PROD, lancement persistant.
+    Set-Content $championFile $bestEver.file -Encoding ascii
+    Write-Host "CHAMPION ALL-TIME: $($bestEver.key) ($($bestEver.total)) -> $championFile" -ForegroundColor Green
+    Start-LlamaServer -Model $bestEver.file
+    Write-ArenaStatus @{ phase = 'done'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @() }
 }
 
 Write-Host "=== ARENE DE SELECTION NATURELLE DES LLM ===" -ForegroundColor Magenta

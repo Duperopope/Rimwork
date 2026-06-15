@@ -389,7 +389,7 @@ function viewArena(){
         <div class="mut" style="margin-top:6px;font-size:12px">${(t.details||[]).map(esc).join(' · ')}${t.secs?(' · '+t.secs+'s'):''}</div></div>`;
     }).join('');
   }
-  document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card('📊 Classement du cycle (score = taux de réussite sur de vraies tâches du jeu)',board,true);
+  document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card('📊 Classement persistant — tous les modèles jugés (mémoire conservée entre cycles)',board,true);
 }
 function renderView(){ ({overview:viewOverview,activity:viewActivity,arena:viewArena,tasks:viewTasks,feedback:viewFeedback}[TAB]||viewOverview)(); }
 function render(){ if(!DATA){return;} renderPills();renderBanner();renderCtrl();renderKpis();renderTabs();renderView(); }
