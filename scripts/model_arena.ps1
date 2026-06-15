@@ -49,6 +49,16 @@ function Write-ArenaStatus($o) {
     try { $o['updatedAt'] = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); ($o | ConvertTo-Json -Depth 6) | Set-Content $arenaStatus -Encoding utf8 } catch {}
 }
 
+# Evenements HAUT NIVEAU cote modeles (telecharge/benche/champion/echec), affiches
+# dans l'onglet Activite du dashboard (l'utilisateur voit ce qui se passe).
+$arenaEvents = Join-Path $cfg.Paths.Logs 'arena_events.jsonl'
+function Write-ArenaEvent($kind, $text) {
+    try {
+        @{ ts = (Get-Date -Format 'dd/MM HH:mm'); kind = $kind; text = $text } | ConvertTo-Json -Compress | Add-Content $arenaEvents
+        $l = @(Get-Content $arenaEvents -ErrorAction SilentlyContinue); if ($l.Count -gt 200) { Set-Content $arenaEvents ($l | Select-Object -Last 150) }
+    } catch {}
+}
+
 # HISTORIQUE PERSISTANT : classement de TOUS les modeles jamais juges (le systeme
 # n'oublie plus a chaque redemarrage). Le cycle est persistant aussi.
 $leaderFile = Join-Path $cfg.Paths.Logs 'arena_leaderboard.json'
@@ -217,6 +227,20 @@ function Get-HfFile([string]$repo, [string]$file) {
     return $null
 }
 
+# PREFETCH: lance le telechargement d'un candidat en ARRIERE-PLAN (nohup, ne
+# bloque pas). Appele en debut de cycle pour tous les nouveaux candidats -> ils
+# se telechargent pendant qu'on benche les modeles de base (plus de cycle bloque
+# 3 min sur un download). Best-effort: si le path n'est pas a la racine, le vrai
+# Get-HfFile (synchrone, avec resolution d'arbre) prendra le relais plus tard.
+function Start-Prefetch($cand) {
+    if (-not $cand -or -not $cand.repo -or -not $cand.file) { return }
+    $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$($cand.file) && echo OK"
+    if ($have -match 'OK') { return }
+    $u = "https://huggingface.co/$($cand.repo)/resolve/main/$($cand.file)"
+    wsl -d Ubuntu -u root -- bash -c "cd /root/models && nohup timeout 1800 wget -q -c --timeout=30 '$u' -O '$($cand.file)' >/dev/null 2>&1 &" | Out-Null
+    Write-ArenaEvent 'download' "prefetch (arriere-plan) : $($cand.key)"
+}
+
 # Execute le code Python du modele contre le test OFFICIEL du benchmark (HumanEval)
 # dans WSL python3, avec timeout. Retourne $true si tous les asserts passent.
 function Test-PyCode([string]$code, [string]$test, [string]$entry) {
@@ -315,7 +339,11 @@ function Invoke-ArenaCycle {
     if (-not $Only) {
         $crawled = @(Get-CrawledCandidates -Want ($NewPerCycle * 2))
         $newOnes = @($crawled | Select-Object -First $NewPerCycle)
-        if ($newOnes.Count) { Write-Host "OCEAN: $($newOnes.key -join ', ')" -ForegroundColor Cyan; $candidates += $newOnes }
+        if ($newOnes.Count) {
+            Write-Host "OCEAN: $($newOnes.key -join ', ')" -ForegroundColor Cyan
+            $candidates += $newOnes
+            foreach ($pc in $newOnes) { Start-Prefetch $pc }   # telecharge en arriere-plan pendant le bench des base
+        }
     } else {
         $candidates = @($candidates | Where-Object { $_.key -match $Only })
     }
@@ -347,9 +375,11 @@ function Invoke-ArenaCycle {
             $file = Get-HfFile $c.repo $c.file
             if (-not $file) {
                 Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "telechargement echoue ($($c.file))"
+                Write-ArenaEvent 'fail' "$($c.key) - telechargement echoue"
                 $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle 'telechargement echoue'); Save-Leaderboard $cycle $models
                 Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }; continue
             }
+            Write-ArenaEvent 'download' "telecharge $($c.key)"
         }
         Write-Host "=== ARENE: $($c.key) ($file) ===" -ForegroundColor Cyan
         Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = @{ key = $c.key; file = $file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
@@ -359,14 +389,18 @@ function Invoke-ArenaCycle {
             if (-not $errlog) { $errlog = (wsl -d Ubuntu -u root -- bash -lc 'tail -2 /tmp/llama-server.log 2>/dev/null' 2>$null | Out-String).Trim() }
             Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "serveur KO ($file) -> $errlog"
             $note = if ($errlog) { (($errlog -split "`n")[-1]).Trim() } else { "n'a pas charge/servi" }
+            Write-ArenaEvent 'fail' "$($c.key) - $note"
             $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle $note); Save-Leaderboard $cycle $models
             Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }; continue
         }
         $r = Invoke-Bench $c.key
         $r.file = $file; $r.lastCycle = $cycle; $r.repo = $c.repo
         # UPSERT dans l'historique persistant + champion = meilleur de tous les temps
+        $prevBest = if ($bestEver) { $bestEver.key } else { '' }
         $models = @($models | Where-Object { $_.key -ne $r.key }) + ([pscustomobject]$r)
         $bestEver = @($models | Sort-Object total -Descending)[0]
+        Write-ArenaEvent 'bench' "$($c.key) -> $($r.total) pts"
+        if ($bestEver.key -ne $prevBest) { Write-ArenaEvent 'champion' "nouveau champion : $($bestEver.key) ($($bestEver.total) pts)" }
         if (-not (Test-Path $pinFile)) { Set-Content $championFile $bestEver.file -Encoding ascii }  # respecte le choix manuel
         Save-Leaderboard $cycle $models
         @(Get-Rank $models) | ConvertTo-Json -Depth 5 | Set-Content $arenaLog -Encoding utf8

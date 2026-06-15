@@ -95,6 +95,13 @@ function Get-DashboardData {
             try { $console += ($l | ConvertFrom-Json) } catch {}
         }
     } catch {}
+    # Evenements arene (cote modeles) : telecharge / benche / champion / echec.
+    $arenaEvents = @()
+    try {
+        foreach ($l in (Get-Content (Join-Path $Config.Paths.Logs 'arena_events.jsonl') -ErrorAction Stop | Select-Object -Last 30)) {
+            try { $arenaEvents += ($l | ConvertFrom-Json) } catch {}
+        }
+    } catch {}
 
     # Serie temporelle (graphes temps reel) : derniers snapshots d'etat.
     $history = @()
@@ -122,6 +129,7 @@ function Get-DashboardData {
         history     = $history
         llm         = @{ pinned = $llmPin; useMsg = $llmUseMsg }
         console     = $console
+        arenaEvents = $arenaEvents
     }
 }
 
@@ -389,10 +397,17 @@ function viewOverview(){
   document.getElementById('view').innerHTML=flowView(s)+'<div style="height:18px"></div>'+`<div class="grid">${health}${trendsCard()}${brainC}${lessonsC}</div>`;
 }
 function viewActivity(){
+  // Cote MODELES : evenements arene (telecharge / benche / champion / echec).
+  const ev=arr(DATA&&DATA.arenaEvents).slice().reverse();
+  const ick={download:'download',bench:'flask',champion:'trophy',fail:'alert',cycle:'repeat'};
+  const colk={download:'#4aa6ff',bench:'#49e29f',champion:'var(--cyan)',fail:'#ff6b6b'};
+  const evRows=ev.length?ev.map(e=>'<div class="row"><span class="time">'+esc(e.ts)+'</span><span class="badge" style="color:'+(colk[e.kind]||'var(--mut)')+'">'+ic(ick[e.kind]||'zap',13)+'</span><span class="txt">'+esc(e.text)+'</span></div>').join(''):'<div class="empty">aucun événement arène pour l\'instant (passe en mode ARENA)</div>';
+  const evCard=card(ic('flask')+' Modèles &amp; arène — téléchargements, benchs, champions, échecs',evRows,true);
+  // Cote CODE : commits du jeu et du systeme (hors bruit auto).
   const a=arr(DATA&&DATA.activity);
-  if(!a.length){ document.getElementById('view').innerHTML=card(ic('zap')+' Activité',`<div class="empty">aucune activité</div>`,true); return; }
-  const rows=a.map(e=>`<div class="row"><span class="time">${esc(e.date)}</span><span class="badge ${esc(e.type)}">${esc(e.who==='IA locale'?'IA':e.type)}</span><span class="txt">${esc(e.text)}</span></div>`).join('');
-  document.getElementById('view').innerHTML=card(ic('zap')+' Activité réelle (commits, hors bruit auto)',rows,true);
+  const cRows=a.length?a.map(e=>`<div class="row"><span class="time">${esc(e.date)}</span><span class="badge ${esc(e.type)}">${esc(e.who==='IA locale'?'IA':e.type)}</span><span class="txt">${esc(e.text)}</span></div>`).join(''):'<div class="empty">aucun commit</div>';
+  const cCard=card(ic('zap')+' Activité code — commits (hors bruit auto)',cRows,true);
+  document.getElementById('view').innerHTML=evCard+'<div style="height:16px"></div>'+cCard;
 }
 function viewTasks(){
   const t=arr(DATA&&DATA.tracker);
