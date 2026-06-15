@@ -477,21 +477,45 @@ function viewArena(){
      <div class="mut" style="margin-top:6px">mise à jour ${esc(a.updatedAt||'')}</div>`,true);
   let board='<div class="empty">aucun combat encore</div>';
   const tested=arr(a.tested).slice().sort((x,y)=>(y.total||0)-(x.total||0));
+  window._aOpen=window._aOpen||new Set();   // lignes depliees (persiste a travers le refresh 4s)
   if(tested.length){
     const max=Math.max.apply(null,tested.map(t=>t.total||0).concat([1]));
-    board=tested.map((t,i)=>{
+    const rows=tested.map((t,i)=>{
       const failed=t.status==='echec';
       const stale=!failed&&t.benchVer&&a.benchVer&&t.benchVer!==a.benchVer;
       const w=Math.round((t.total||0)/max*100), name=t.file||t.key, isBest=!failed&&!stale&&a.best&&t.key===a.best.key, isPin=pin&&t.file===pin;
+      const open=window._aOpen.has(t.key);
       const right=failed?'<span class="badge" style="background:rgba(255,107,107,.16);color:var(--red)">échec</span>':('<span class="hl" style="font-variant-numeric:tabular-nums">'+t.total+' pts</span>'+(stale?'<span class="badge" style="background:rgba(255,200,97,.16);color:var(--amb)" title="noté sur un ancien barème, re-test auto en cours">ancien barème</span>':''));
       const cats=arr(t.cats).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return '<span class="catbadge"><b>'+esc(c.cat)+'</b> <span style="color:'+cc+'">'+c.pct+'%</span></span>';}).join('')||esc(arr(t.details).join(' · '));
-      const detail=failed
+      // Replie par defaut : le detail (barre + categories) n'apparait qu'a l'ouverture.
+      const detail=!open?'':(failed
         ?'<div class="mut" style="margin-top:6px;font-size:12px">'+esc(t.note||'n\'a pas chargé')+'</div>'
-        :'<div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:'+w+'%;background:var(--grad)"></i></div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+cats+(t.secs?('<span class="catbadge">'+t.secs+'s</span>'):'')+(t.gb?('<span class="catbadge" title="taille ~ VRAM occupee">'+t.gb+' Go</span>'):'')+'</div>';
-      return '<div class="task" style="'+(isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':'')+(failed?';opacity:.62':'')+'"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="cat">#'+(i+1)+'</span><b style="flex:1;min-width:200px;word-break:break-all">'+esc(name)+' '+(isBest?ic('trophy',15):'')+(isPin?ic('pin',15):'')+'</b>'+right+'<button class="btn ghost sm" title="Copier le benchmark" onclick="copyBench(\''+esc(t.key)+'\')">'+ic('copy')+'</button><button class="btn ghost sm" title="Renvoyer au bench" onclick="act(\'/arena/rebench?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('repeat')+' Re-bench</button>'+(failed?'':'<button class="btn ghost sm" onclick="act(\'/llm/use?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('play')+' Utiliser</button>')+'</div>'+detail+'</div>';
+        :'<div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:'+w+'%;background:var(--grad)"></i></div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+cats+(t.secs?('<span class="catbadge">'+t.secs+'s</span>'):'')+(t.gb?('<span class="catbadge" title="taille ~ VRAM occupee">'+t.gb+' Go</span>'):'')+'</div>');
+      const compact=(!open&&!failed&&t.gb)?'<span class="mut" style="font-size:11.5px">'+t.gb+' Go</span>':'';
+      const chev='<button class="btn ghost sm" title="'+(open?'Replier':'Déplier')+'" onclick="togArena(\''+esc(t.key)+'\')"><span style="display:inline-flex;transition:transform .2s;transform:rotate('+(open?90:0)+'deg)">'+ic('chevron',15)+'</span></button>';
+      return '<div class="task" style="'+(isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':'')+(failed?';opacity:.62':'')+'"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+chev+'<span class="cat">#'+(i+1)+'</span><b style="flex:1;min-width:160px;word-break:break-all;cursor:pointer" onclick="togArena(\''+esc(t.key)+'\')">'+esc(name)+' '+(isBest?ic('trophy',15):'')+(isPin?ic('pin',15):'')+'</b>'+compact+right+'<button class="btn ghost sm" title="Copier le benchmark" onclick="copyBench(\''+esc(t.key)+'\')">'+ic('copy')+'</button><button class="btn ghost sm" title="Renvoyer au bench" onclick="act(\'/arena/rebench?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('repeat')+' Re-bench</button>'+(failed?'':'<button class="btn ghost sm" onclick="act(\'/llm/use?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('play')+' Utiliser</button>')+'</div>'+detail+'</div>';
     }).join('');
+    const allOpen=tested.every(t=>window._aOpen.has(t.key));
+    const toolbar='<div class="toolbar"><button class="btn ghost sm" onclick="copyBenchAll()">'+ic('copy')+' Copier tout le tableau</button><button class="btn ghost sm" onclick="arenaToggleAll('+(allOpen?'false':'true')+')">'+ic('chevron')+' '+(allOpen?'Tout replier':'Tout déplier')+'</button><span class="mut" style="font-size:11.5px;align-self:center">'+tested.length+' modèles · clique une ligne pour le détail</span></div>';
+    board=toolbar+rows;
   }
   document.getElementById('view').innerHTML=progBar(DATA&&DATA.arenaProgress)+head+'<div style="height:14px"></div>'+card(ic('chart')+' Classement persistant — vrais noms · « Utiliser » pour activer, copier pour exporter le benchmark',board,true);
+}
+function togArena(key){ window._aOpen=window._aOpen||new Set(); if(window._aOpen.has(key))window._aOpen.delete(key); else window._aOpen.add(key); renderView(); }
+function arenaToggleAll(open){ window._aOpen=window._aOpen||new Set(); const t=arr(DATA&&DATA.arena&&DATA.arena.tested); if(open)t.forEach(x=>window._aOpen.add(x.key)); else window._aOpen.clear(); renderView(); }
+function copyBenchAll(){
+  const t=arr(DATA&&DATA.arena&&DATA.arena.tested).slice().sort((x,y)=>(y.total||0)-(x.total||0));
+  if(!t.length){ toast('aucun benchmark'); return; }
+  const cols=[]; t.forEach(m=>arr(m.cats).forEach(c=>{if(cols.indexOf(c.cat)<0)cols.push(c.cat);}));
+  const ver=(DATA.arena&&DATA.arena.benchVer)||'?';
+  const head=['#','Modele','Score','Vitesse(s)','Go'].concat(cols).join('\t');
+  const lines=t.map((m,i)=>{
+    if(m.status==='echec') return [i+1,(m.file||m.key),'ECHEC',(m.secs||''),(m.gb||'')].concat(cols.map(()=>'')).join('\t')+'\t'+(m.note||'');
+    const byc={}; arr(m.cats).forEach(c=>byc[c.cat]=c.pct+'%');
+    return [i+1,(m.file||m.key),m.total,(m.secs||''),(m.gb||'')].concat(cols.map(c=>byc[c]||'')).join('\t');
+  });
+  const txt='Benchmark Arene — bareme v'+ver+' — '+t.length+' modeles\n'+head+'\n'+lines.join('\n');
+  navigator.clipboard.writeText(txt).then(()=>toast('Tableau copié ('+t.length+' modèles)'),()=>toast('copie refusée'));
 }
 function viewConsole(){
   const all=arr(DATA&&DATA.console);
