@@ -110,43 +110,66 @@ $baseCandidates = @(
     @{ key = "yi-coder-9b";     file = "Yi-Coder-9B-Chat-Q4_K_M.gguf";             repo = "" }
 )
 
-# ---- CRAWLER: decouvre des coders recents dans l'ocean HF ----
-# Plus de requetes = on ratisse plus large. On ne garde que les GGUF Q4_K_M /
-# Q3_K_M tenant en VRAM (4-15.5 Go), tries par popularite.
+# Identite "modele" normalisee = nom sans quant/taille/extension/casse. Sert a
+# DEDUPLIQUER les variantes (Yi-Coder-9B-Chat.Q4_K_M == Yi-Coder-9B-Chat-Q4_K_M,
+# Qwen2.5-Coder-14B Q4_K_S == Q4_K_M) -> on ne crawle pas 2x le meme modele.
+function Get-ModelNorm([string]$name) {
+    $n = $name.ToLower() -replace '\.gguf$', ''
+    $n = $n -replace '[._-]?i?q\d(_k)?(_[a-z0-9]+)*', ''      # tags de quant (q4_k_m, iq4_xs, q3_k_l...)
+    $n = $n -replace '[._-]?(f16|bf16|fp16|8bit|4bit|gguf)', ''
+    return ($n -replace '[^a-z0-9]', '')
+}
+
+# ---- CRAWLER: decouvre des coders dans l'ocean HF ----
+# Deux passes: POPULARITE (valeurs sures) ET RECENCE (modeles fraichement sortis,
+# qui n'ont pas encore de telechargements -> invisibles si on triait que par downloads).
+# On garde les GGUF Q4_K_M/Q3_K_M tenant en VRAM (4-15.5 Go).
 function Get-CrawledCandidates([int]$Want = 4) {
-    # ROBUSTE + RAPIDE + OBSERVABLE. Avant: jusqu'a 120 lookups d'arbre a 60s ->
-    # le crawl ne finissait JAMAIS (bloque en phase "crawl", 0 challenger telecharge).
-    # Maintenant: timeouts courts, on SAUTE les modeles deja connus AVANT le lookup,
-    # on s'ARRETE des qu'on a assez de challengers frais, et on publie la decouverte.
+    # ROBUSTE + RAPIDE + OBSERVABLE. Timeouts courts, on SAUTE les modeles deja connus
+    # AVANT le lookup, on s'ARRETE des qu'on a assez de challengers frais.
     $found = @{}
     $tried = if (Test-Path $triedFile) { @(Get-Content $triedFile) } else { @() }
     $known = @($baseCandidates.file) + $tried
-    $queries = @("coder gguf", "code instruct gguf", "qwen coder gguf",
-                 "deepseek coder gguf", "codestral gguf", "granite code gguf",
-                 "starcoder gguf", "code llama gguf")
-    foreach ($q in $queries) {
+    # set des identites normalisees deja connues (base + tries) pour la dedup
+    $knownNorm = New-Object 'System.Collections.Generic.HashSet[string]'
+    foreach ($k in $known) { [void]$knownNorm.Add((Get-ModelNorm $k)) }
+    $terms = @("coder gguf", "code instruct gguf", "qwen coder gguf",
+               "deepseek coder gguf", "codestral gguf", "granite code gguf",
+               "starcoder gguf", "code llama gguf")
+    # (terme, tri) : popularite d'abord (fiable), puis recence (nouveautes).
+    $queries = @(); foreach ($t in $terms) { $queries += , @($t, 'downloads') }
+    foreach ($t in @("coder gguf", "code instruct gguf", "qwen3 coder gguf", "deepseek coder gguf")) { $queries += , @($t, 'lastModified') }
+    foreach ($qq in $queries) {
         if ($found.Count -ge $Want) { break }
+        $q = $qq[0]; $sort = $qq[1]
         try {
-            $hits = Invoke-RestMethod "https://huggingface.co/api/models?search=$([uri]::EscapeDataString($q))&sort=downloads&direction=-1&limit=12" -TimeoutSec 20
+            $hits = Invoke-RestMethod "https://huggingface.co/api/models?search=$([uri]::EscapeDataString($q))&sort=$sort&direction=-1&limit=12" -TimeoutSec 20
         } catch { continue }
         foreach ($m in $hits) {
             if ($found.Count -ge $Want) { break }
-            # On ne filtre QUE ce qui ne peut PAS coder du tout (embeddings,
-            # rerankers, modeles vision). On NE se prive PAS des archis exotiques
-            # (MTP, merges, abliterated...) : on les TESTE. Si ca ne charge pas,
-            # l'erreur llama.cpp est visible dans la Console et on passe au suivant.
-            # (Le filtre de TAILLE 4-15.5 Go reste : c'est la VRAM 16 Go, pas un choix.)
-            if ($m.id -match "embed|rerank|vision|VL") { continue }
+            # On ne filtre QUE: (a) ce qui ne peut PAS coder (embed/rerank/vision),
+            # (b) les architectures que llama.cpp ROCm ne charge pas de maniere fiable
+            # (Mamba/RWKV/Jamba = state-space, support partiel/absent -> echecs garantis,
+            # ex. le "unsloth.gguf" Mamba). On garde les merges/MTP/abliterated: on les TESTE.
+            if ($m.id -match "(?i)embed|rerank|vision|VL|mamba|rwkv|jamba|ssm|bert|whisper|diffus|t5|clip") { continue }
             if ($found.ContainsKey($m.id)) { continue }
+            $norm = Get-ModelNorm ($m.id -replace '.*/', '')
+            if ($knownNorm.Contains($norm)) { continue }   # variante d'un modele deja connu -> skip
             try { $tree = Invoke-RestMethod "https://huggingface.co/api/models/$($m.id)/tree/main" -TimeoutSec 15 } catch { continue }
             $gg = $tree | Where-Object { $_.path -match "Q4_K_M\.gguf$|Q3_K_M\.gguf$" -and $_.path -notmatch "of-000|00001-of" } |
                   Where-Object { ($_.lfs.size ?? $_.size) -gt 4e9 -and ($_.lfs.size ?? $_.size) -lt 15.5e9 } |
                   Sort-Object { $_.lfs.size ?? $_.size } -Descending | Select-Object -First 1
             if (-not $gg) { continue }
             $fname = [System.IO.Path]::GetFileName($gg.path)
-            if ($known -contains $fname) { continue }   # base ou deja juge -> on n'y revient pas
+            # GARDE-FOU NOM POUBELLE: certains repos exportent un fichier generique
+            # ("unsloth.Q4_K_M.gguf", "model.gguf", "ggml-model-...") qui ne porte pas
+            # l'identite du modele -> souvent un export casse. On saute.
+            if ($fname -match '(?i)^(unsloth|model|ggml-model|output|merged|final|result|pytorch)[._-]') { continue }
+            $fnorm = Get-ModelNorm $fname
+            if ($known -contains $fname -or $knownNorm.Contains($fnorm)) { continue }   # deja connu (nom OU identite)
+            [void]$knownNorm.Add($norm); [void]$knownNorm.Add($fnorm)
             $found[$m.id] = @{ key = ($m.id -replace '.*/', ''); file = $fname; repo = $m.id }
-            Write-Host "  ocean: $($m.id) -> $fname ($([math]::Round((($gg.lfs.size ?? $gg.size))/1e9,1)) Go)" -ForegroundColor DarkCyan
+            Write-Host "  ocean[$sort]: $($m.id) -> $fname ($([math]::Round((($gg.lfs.size ?? $gg.size))/1e9,1)) Go)" -ForegroundColor DarkCyan
             Write-ArenaStatus @{ phase = 'crawl'; cycle = $script:cycleNo; current = @{ key = ($m.id -replace '.*/', '') }; tested = @(); best = $null; queue = @($found.Values.key) }
         }
     }
@@ -176,10 +199,17 @@ $tasks = @(
     @{ cat = 'Code edit'; kind = 'codeinline'; lines = 0
        snippet = "public int Energy()`n{`n    int baseValue = 10;`n    return baseValue * 2;`n}"
        ask = 'In this C# snippet, change baseValue from 10 to 25. Keep everything else identical.'; expect = '25' }
+    @{ cat = 'Code edit'; kind = 'codeinline'; lines = 0
+       snippet = "public float Speed(float dist, float time)`n{`n    return dist / time;`n}"
+       ask = 'In this C# snippet, rename the parameter time to seconds (update both the signature and its use). Keep everything else identical.'; expect = 'seconds' }
     @{ cat = 'Instruction'; kind = 'exact'
        ask = 'Reply with ONLY the single word READY in uppercase. No punctuation, no quotes, no other text.'; expect = '^\s*READY\s*$' }
-    @{ cat = 'Logic'; kind = 'exact'
-       ask = 'Given C#: int x = 7; x += 5; x *= 2; What is the final value of x? Reply with ONLY the number.'; expect = '\b24\b' }
+    @{ cat = 'Instruction'; kind = 'exact'
+       ask = 'Output exactly three dashes and nothing else.'; expect = '^\s*---\s*$' }
+    @{ cat = 'Logic'; kind = 'num'
+       ask = 'Given C#: int x = 7; x += 5; x *= 2; What is the final value of x? Reply with ONLY the number.'; answer = 24 }
+    @{ cat = 'Logic'; kind = 'num'
+       ask = 'Given C#: int[] a = {4, 9, 2, 7}; what is the sum of its elements? Reply with ONLY the number.'; answer = 22 }
 
     # --- VRAI benchmark coder public: problemes HumanEval, code EXECUTE dans WSL ---
     @{ cat = 'HumanEval'; kind = 'humaneval'; entry = 'truncate_number'
@@ -192,13 +222,15 @@ $tasks = @(
        ask = 'Write a complete Python function below_zero(operations: list) that returns True if the running balance (starting from 0) ever falls below zero, otherwise returns False.'
        test = "def check(c):`n    assert c([1,2,3])==False`n    assert c([1,2,-4,5])==True`n    assert c([1,-1])==False" }
 
-    # --- VRAI benchmark raisonnement public: problemes GSM8K, nombre final exact ---
-    @{ cat = 'GSM8K'; kind = 'exact'
-       ask = 'Natalia sold clips to 48 of her friends in April, and then she sold half as many clips in May. How many clips did Natalia sell altogether in April and May? Reply with ONLY the final number.'; expect = '\b72\b' }
-    @{ cat = 'GSM8K'; kind = 'exact'
-       ask = 'Weng earns $12 an hour for babysitting. Yesterday she did 50 minutes of babysitting. How many dollars did she earn? Reply with ONLY the final number.'; expect = '\b10\b' }
-    @{ cat = 'GSM8K'; kind = 'exact'
-       ask = 'Betty needs $100 for a wallet and currently has only half of that. Her parents give her $15, and her grandparents give twice as much as her parents. How many more dollars does Betty need? Reply with ONLY the final number.'; expect = '\b5\b' }
+    # --- VRAI benchmark raisonnement public: problemes GSM8K, DERNIER nombre exact ---
+    @{ cat = 'GSM8K'; kind = 'num'
+       ask = 'Natalia sold clips to 48 of her friends in April, and then she sold half as many clips in May. How many clips did Natalia sell altogether in April and May? Reply with ONLY the final number.'; answer = 72 }
+    @{ cat = 'GSM8K'; kind = 'num'
+       ask = 'Weng earns $12 an hour for babysitting. Yesterday she did 50 minutes of babysitting. How many dollars did she earn? Reply with ONLY the final number.'; answer = 10 }
+    @{ cat = 'GSM8K'; kind = 'num'
+       ask = 'Betty needs $100 for a wallet and currently has only half of that. Her parents give her $15, and her grandparents give twice as much as her parents. How many more dollars does Betty need? Reply with ONLY the final number.'; answer = 5 }
+    @{ cat = 'GSM8K'; kind = 'num'
+       ask = 'A robe takes 2 bolts of blue fiber and half that much white fiber. How many bolts in total does it take? Reply with ONLY the final number.'; answer = 3 }
 
     # --- Knowledge & raisonnement (esprit MMLU-Pro: QCM dur, reponse = lettre) ---
     @{ cat = 'Knowledge'; kind = 'exact'
@@ -209,8 +241,8 @@ $tasks = @(
     # --- Science niveau expert (esprit GPQA: Google-proof, reponse exacte) ---
     @{ cat = 'Science'; kind = 'exact'
        ask = 'For an ideal gas undergoing a reversible adiabatic process, which quantity stays constant? A) temperature B) pressure C) entropy D) volume. Reply with ONLY the letter.'; expect = '(?i)\bC\b' }
-    @{ cat = 'Science'; kind = 'exact'
-       ask = 'What is the oxidation state of chromium in the dichromate ion Cr2O7^2-? Reply with ONLY the number (e.g. 6).'; expect = '\+?\s*6\b' }
+    @{ cat = 'Science'; kind = 'num'
+       ask = 'What is the oxidation state of chromium in the dichromate ion Cr2O7^2-? Reply with ONLY the number.'; answer = 6 }
 
     # --- IFEval (suivi d'instruction VERIFIABLE programmatiquement, sans juge) ---
     @{ cat = 'IFEval'; kind = 'exact'
@@ -262,7 +294,35 @@ function Start-Model([string]$file, [int]$port = 1234) {
     if ($have -notmatch 'OK') { Write-Host "  modele absent sur disque: $file -> skip" -ForegroundColor DarkYellow; return $false }
     Start-LlamaServer -Model $file
     Start-Sleep -Seconds 8   # laisse le pkill tuer l'ancien serveur + le nouveau commencer a charger
-    return (Wait-Llm)        # ne rend la main que si une VRAIE completion passe
+    # TIMEOUT proportionnel a la taille: un gros modele (ou offload CPU partiel)
+    # charge plus lentement. 240s mini, +22s/Go -> un 22B (~12 Go) a ~500s avant
+    # d'etre declare en echec (avant: 240s fixes -> faux echecs sur les gros).
+    $gb = [math]::Round([long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$file 2>/dev/null || echo 0") / 1GB, 1)
+    $timeout = [int][Math]::Max(240, 200 + $gb * 22)
+    return (Wait-Llm $timeout)  # ne rend la main que si une VRAIE completion passe
+}
+
+# Lit le log de llama-server apres un echec de chargement et en deduit une RAISON
+# exploitable (au lieu de "n'a pas charge"). Sauvegarde aussi le log complet pour
+# analyse. Rend la verite a l'utilisateur: VRAM, archi non supportee, gguf casse...
+function Get-LlamaFailReason([string]$key) {
+    $raw = (wsl -d Ubuntu -u root -- bash -c "cat /tmp/llama-server.log 2>/dev/null" | Out-String)
+    try {
+        $safe = ($key -replace '[^A-Za-z0-9._-]', '_')
+        Set-Content (Join-Path $cfg.Paths.Logs "arena_fail_$safe.log") -Value $raw -Encoding utf8
+    } catch {}
+    if ($raw -match '(?im)out of memory|oom|failed to allocate|cudaMalloc|hipMalloc|ggml_backend_.*alloc|insufficient|not enough|VRAM') {
+        return 'VRAM insuffisante au chargement (essayer un quant plus petit)'
+    }
+    if ($raw -match '(?im)unknown (model )?architecture|unsupported|not supported|unknown model|mamba|rwkv|jamba|ssm|arch ') {
+        return 'architecture non prise en charge par ce build de llama.cpp'
+    }
+    if ($raw -match '(?im)invalid magic|wrong|corrupt|failed to load model|tensor.*missing|gguf') {
+        return 'fichier GGUF invalide / incomplet'
+    }
+    $lines = @($raw -split "`r?`n" | Where-Object { $_ -match '(?i)error|fail|abort|terminate|panic' })
+    if ($lines.Count) { return ($lines[-1].Trim().Substring(0, [Math]::Min(180, $lines[-1].Trim().Length))) }
+    return "n'a pas charge dans le temps imparti (timeout)"
 }
 
 function Get-HfFile([string]$repo, [string]$file, [string]$key) {
@@ -332,6 +392,16 @@ function Test-PyCode([string]$code, [string]$test, [string]$entry) {
     } catch { return $false }
 }
 
+# Extrait le DERNIER nombre d'une reponse (convention GSM8K). Gere "$10", "10 dollars",
+# "1,000", "the answer is 72.", les decimales et le signe. Retourne $null si aucun.
+function Get-LastNumber([string]$text) {
+    if (-not $text) { return $null }
+    $t = $text -replace '(?<=\d),(?=\d)', ''   # 1,000 -> 1000 (separateur de milliers anglais)
+    $ms = [regex]::Matches($t, '-?\d+(?:\.\d+)?')
+    if ($ms.Count -eq 0) { return $null }
+    return [double]$ms[$ms.Count - 1].Value
+}
+
 function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
     # BENCHMARK MULTI-CATEGORIES (esprit evals frontiere). Chaque epreuve x$reps;
     # score final = MOYENNE des taux PAR CATEGORIE (chaque categorie pese pareil) x10
@@ -349,7 +419,7 @@ function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
         if ($catOrder -notcontains $t.cat) { $catOrder += $t.cat; $catPass[$t.cat] = 0; $catTot[$t.cat] = 0 }
         # Prepare system prompt + user message + verification context per kind.
         $full = ''
-        if ($t.kind -eq 'exact') {
+        if ($t.kind -eq 'exact' -or $t.kind -eq 'num') {
             $sys = $qaSys; $user = $t.ask
         } elseif ($t.kind -eq 'humaneval') {
             $sys = $codeSys; $user = $t.ask
@@ -382,6 +452,12 @@ function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
                     $code = $out
                     if ($out -match '(?s)```(?:python)?\s*(.*?)```') { $code = $Matches[1] }
                     if (Test-PyCode $code $t.test $t.entry) { $ok = $true }
+                } elseif ($t.kind -eq 'num') {
+                    # GSM8K/numerique: on prend le DERNIER nombre de la reponse (methode
+                    # standard) au lieu de "le bon nombre apparait quelque part" -> pas
+                    # de faux PASS quand le modele raisonne juste mais conclut faux.
+                    $got = Get-LastNumber $out
+                    if ($null -ne $got -and [math]::Abs($got - [double]$t.answer) -lt 1e-6) { $ok = $true }
                 } elseif ($t.kind -eq 'exact') {
                     if ($out.Trim() -match $t.expect) { $ok = $true }
                 } elseif ($out -match '(?s)<<<<<<< SEARCH\r?\n(.*?)\r?\n=======\r?\n(.*?)\r?\n>>>>>>> REPLACE') {
@@ -525,11 +601,9 @@ function Invoke-ArenaCycle {
         Write-Host "=== ARENE: $($c.key) ($file) ===" -ForegroundColor Cyan
         Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = @{ key = $c.key; file = $file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
         if (-not (Start-Model $file)) {
-            # Capture la VRAIE erreur de llama.cpp (archi non supportee, OOM, gguf casse...)
-            $errlog = (wsl -d Ubuntu -u root -- bash -lc "grep -iE 'error|unsupported|unknown|not supported|failed|out of memory|cannot' /tmp/llama-server.log 2>/dev/null | tail -2" 2>$null | Out-String).Trim()
-            if (-not $errlog) { $errlog = (wsl -d Ubuntu -u root -- bash -lc 'tail -2 /tmp/llama-server.log 2>/dev/null' 2>$null | Out-String).Trim() }
-            Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "serveur KO ($file) -> $errlog"
-            $note = if ($errlog) { (($errlog -split "`n")[-1]).Trim() } else { "n'a pas charge/servi" }
+            # RAISON exploitable (VRAM / archi / gguf) + log complet sauvegarde pour analyse.
+            $note = Get-LlamaFailReason $c.key
+            Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "serveur KO ($file) -> $note"
             Write-ArenaEvent 'fail' "$($c.key) - $note"
             $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle $note); Save-Leaderboard $cycle $models
             Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }; continue

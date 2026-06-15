@@ -451,7 +451,13 @@ entier. Pour du JSON, garde un JSON VALIDE.
     foreach ($edit in $edits) {
         $applied = Try-ApplyEdit -Content $newContent -Search $edit.Search -Replace $edit.Replace
         if ($null -ne $applied) { $newContent = $applied; $appliedCount++ }
-        else { Add-Content -Path "$logDir\failed_searches.log" -Value "=== [iter $i] $($target.Rel) ===`n$($edit.Search)`n" }
+        else {
+            Add-Content -Path "$logDir\failed_searches.log" -Value "=== [iter $i] $($target.Rel) ===`n$($edit.Search)`n"
+            # WORLD MODEL : un SEARCH qui ne matche pas = patch rate -> exemple NEGATIF.
+            # (Avant, le predicteur n'apprenait QUE des builds casses ; il ratait les
+            # patchs qui ne s'appliquent meme pas, le 1er mode d'echec a anticiper.)
+            try { Add-PatchExperience -Search $edit.Search -Replace $edit.Replace -Ext $target.Ext -Label 0 } catch {}
+        }
     }
     if ($appliedCount -eq 0) {
         Write-Host "Aucun bloc SEARCH ne matche le fichier." -ForegroundColor DarkYellow
@@ -469,6 +475,9 @@ entier. Pour du JSON, garde un JSON VALIDE.
         Write-Host "Patch rejete: le JSON resultant est invalide." -ForegroundColor Red
         Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $i] REJETE (JSON invalide): $changeDesc ($($target.Rel))"
         $lastFailNote = "Ton patch rendait le JSON invalide (il n'a pas ete ecrit). Garde une syntaxe JSON correcte (virgules, accolades)."; $lastFailItem = $itemKey
+        # WORLD MODEL : patch qui casse le JSON = exemple NEGATIF (il s'appliquait mais
+        # produisait un fichier invalide) -> le predicteur apprend a l'eviter.
+        try { foreach ($edit in $edits) { Add-PatchExperience -Search $edit.Search -Replace $edit.Replace -Ext $target.Ext -Label 0 } } catch {}
         Start-Sleep -Seconds $DelaySeconds; continue
     }
 

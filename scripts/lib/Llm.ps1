@@ -30,7 +30,12 @@ sleep 1
 } > "$LOG" 2>&1
 # AUTO-FIT: pas de -ngl force; llama.cpp place autant de couches que la VRAM libre
 # le permet (le JEU partage les 16 Go), le reste sur CPU.
-exec "$BIN" --model "/root/models/$MODEL" --ctx-size 8192 --host 0.0.0.0 --port 1234 >> "$LOG" 2>&1
+# --parallel 1 = UN SEUL slot. Sans ca, ce build cree 4 slots, CHACUN avec un cache
+# KV de 8192 tokens (=32k de KV en VRAM) -> un 22B dense deborde les 16 Go et NE
+# CHARGE PAS (echecs Codestral). On ne sert qu'une requete a la fois (boucle de dev
+# + arene sequentielles) -> 1 slot suffit, divise le KV par 4 et laisse de la VRAM
+# au jeu. --no-context-shift: pas de glissement de contexte (inutile ici).
+exec "$BIN" --model "/root/models/$MODEL" --ctx-size 8192 --parallel 1 --host 0.0.0.0 --port 1234 >> "$LOG" 2>&1
 '@
     # CR-strip cote WSL avec tr -d '\r' : INDISPENSABLE. Un '#!/bin/bash\r' (CRLF)
     # casse l'interpreteur et colle un \r a chaque valeur (MODEL="...gguf\r" ->
