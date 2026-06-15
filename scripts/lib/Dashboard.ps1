@@ -255,6 +255,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--line)}
 __BOOT__
 const $=(h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
 const esc=(s)=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+// PowerShell ConvertTo-Json deballe un tableau d'1 element en OBJET -> on reforce
+// en tableau partout (sinon .map/.slice plante des qu'une liste a 1 element).
+const arr=(x)=>Array.isArray(x)?x:(x==null?[]:[x]);
 let DATA=window.__DATA__||null, TAB=sessionStorage.getItem('tab')||'overview', BUSY=false;
 const TABS=[['overview','Vue d\'ensemble'],['activity','Activité'],['arena','Arène'],['console','Console'],['tasks','Tâches'],['feedback','Feedback']];
 
@@ -336,24 +339,24 @@ function viewOverview(){
   if(b){ brain=`<div class="txt">Champion <span class="hl">${esc(b.model)}</span> · ${b.features} features · utilité <span class="hl">${b.utility}</span></div>
     <div class="mut" style="margin-top:8px">gain +${b.gain} sur ${b.gens} générations (champion-challenger)</div>`; }
   const brainC=card('🧠 Cerveau auto-conçu (successeur)',brain);
-  const lessons=(DATA.lessons&&DATA.lessons.length)?DATA.lessons.map(l=>`<div class="row"><div class="txt">${esc(l)}</div></div>`).join(''):'<div class="empty">—</div>';
+  const lessons=arr(DATA.lessons).length?arr(DATA.lessons).map(l=>`<div class="row"><div class="txt">${esc(l)}</div></div>`).join(''):'<div class="empty">—</div>';
   const lessonsC=card('🎓 Leçons récentes de l\'IA',lessons);
   document.getElementById('view').innerHTML=flowView(s)+`<div class="grid">${health}${trendsCard()}${brainC}${lessonsC}</div>`;
 }
 function viewActivity(){
-  const a=DATA?DATA.activity:[];
-  if(!a||!a.length){ document.getElementById('view').innerHTML=card('⚡ Activité',`<div class="empty">aucune activité</div>`,true); return; }
+  const a=arr(DATA&&DATA.activity);
+  if(!a.length){ document.getElementById('view').innerHTML=card('⚡ Activité',`<div class="empty">aucune activité</div>`,true); return; }
   const rows=a.map(e=>`<div class="row"><span class="time">${esc(e.date)}</span><span class="badge ${esc(e.type)}">${esc(e.who==='IA locale'?'IA':e.type)}</span><span class="txt">${esc(e.text)}</span></div>`).join('');
   document.getElementById('view').innerHTML=card('⚡ Activité réelle (commits, hors bruit auto)',rows,true);
 }
 function viewTasks(){
-  const t=DATA?DATA.tracker:[];
-  if(!t||!t.length){ document.getElementById('view').innerHTML=card('🗂️ Tâches en file',`<div class="empty">aucune tâche en file</div>`,true); return; }
+  const t=arr(DATA&&DATA.tracker);
+  if(!t.length){ document.getElementById('view').innerHTML=card('🗂️ Tâches en file',`<div class="empty">aucune tâche en file</div>`,true); return; }
   const rows=t.map(x=>`<div class="task"><span class="cat">${esc(x.cat)}</span>${esc(x.text)}</div>`).join('');
   document.getElementById('view').innerHTML=card('🗂️ Tâches en file (roadmap)',rows,true);
 }
 function viewFeedback(){
-  const f=DATA?DATA.feedback:[];
+  const f=arr(DATA&&DATA.feedback);
   const form=`<form onsubmit="sendFb(event)" style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px">
     <select id="fbtype"><option value="feature">✨ Feature</option><option value="bug">🐛 Bug</option></select>
     <input id="fbtext" placeholder="Décris ta demande ou un bug…" style="flex:1;min-width:240px">
@@ -379,7 +382,7 @@ function spark(vals,color,h){
     <circle cx="${xy[xy.length-1][0].toFixed(1)}" cy="${xy[xy.length-1][1].toFixed(1)}" r="3" fill="${color}"/></svg>`;
 }
 function trendsCard(){
-  const h=DATA&&DATA.history?DATA.history:[];
+  const h=arr(DATA&&DATA.history);
   if(h.length<2) return '';
   const last=h[h.length-1];
   return card('📈 Tendances (temps réel)',
@@ -403,7 +406,7 @@ function viewArena(){
      <div class="txt" style="margin-top:10px">${best}</div>${pinBox}${msgBox}
      <div class="mut" style="margin-top:6px">mise à jour ${esc(a.updatedAt||'')}</div>`,true);
   let board='<div class="empty">aucun combat encore</div>';
-  const tested=(a.tested||[]).slice().sort((x,y)=>(y.total||0)-(x.total||0));
+  const tested=arr(a.tested).slice().sort((x,y)=>(y.total||0)-(x.total||0));
   if(tested.length){
     const max=Math.max.apply(null,tested.map(t=>t.total||0).concat([1]));
     board=tested.map((t,i)=>{
@@ -415,13 +418,13 @@ function viewArena(){
           <span class="hl" style="font-variant-numeric:tabular-nums">${t.total} pts</span>
           <button class="btn ghost" style="padding:5px 12px" onclick="act('/llm/use?key='+encodeURIComponent('${esc(t.key)}'))">▶ Utiliser</button></div>
         <div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:${w}%;background:var(--grad)"></i></div>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${(t.cats||[]).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return `<span class="catbadge"><b>${esc(c.cat)}</b> <span style="color:${cc}">${c.pct}%</span></span>`;}).join('')||esc((t.details||[]).join(' · '))}${t.secs?`<span class="catbadge">⏱ ${t.secs}s</span>`:''}</div></div>`;
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${arr(t.cats).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return `<span class="catbadge"><b>${esc(c.cat)}</b> <span style="color:${cc}">${c.pct}%</span></span>`;}).join('')||esc(arr(t.details).join(' · '))}${t.secs?`<span class="catbadge">⏱ ${t.secs}s</span>`:''}</div></div>`;
     }).join('');
   }
   document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card('📊 Classement persistant — vrais noms de modèles · 📌 épinglé · « Utiliser » pour activer',board,true);
 }
 function viewConsole(){
-  const c=(DATA&&DATA.console)?DATA.console:[];
+  const c=arr(DATA&&DATA.console);
   const col={test:'#4aa6ff',pass:'#49e29f',fail:'#ff6b6b',output:'#8ba2b6'};
   let body;
   if(!c.length){ body=`<div class="empty">aucune sortie LLM pour l'instant — lance l'<b>Arène</b> (ou le <b>DEV</b>) et les tests/réponses des modèles s'afficheront ici en direct.</div>`; }
