@@ -58,25 +58,36 @@ $baseCandidates = @(
 # ---- CRAWLER: decouvre des coders recents dans l'ocean HF ----
 # Plus de requetes = on ratisse plus large. On ne garde que les GGUF Q4_K_M /
 # Q3_K_M tenant en VRAM (4-15.5 Go), tries par popularite.
-function Get-CrawledCandidates {
+function Get-CrawledCandidates([int]$Want = 4) {
+    # ROBUSTE + RAPIDE + OBSERVABLE. Avant: jusqu'a 120 lookups d'arbre a 60s ->
+    # le crawl ne finissait JAMAIS (bloque en phase "crawl", 0 challenger telecharge).
+    # Maintenant: timeouts courts, on SAUTE les modeles deja connus AVANT le lookup,
+    # on s'ARRETE des qu'on a assez de challengers frais, et on publie la decouverte.
     $found = @{}
+    $tried = if (Test-Path $triedFile) { @(Get-Content $triedFile) } else { @() }
+    $known = @($baseCandidates.file) + $tried
     $queries = @("coder gguf", "code instruct gguf", "qwen coder gguf",
-                 "deepseek coder gguf", "codestral gguf", "starcoder gguf",
-                 "code llama gguf", "granite code gguf")
+                 "deepseek coder gguf", "codestral gguf", "granite code gguf",
+                 "starcoder gguf", "code llama gguf")
     foreach ($q in $queries) {
+        if ($found.Count -ge $Want) { break }
         try {
-            $hits = Invoke-RestMethod "https://huggingface.co/api/models?search=$([uri]::EscapeDataString($q))&sort=downloads&direction=-1&limit=15" -TimeoutSec 60
+            $hits = Invoke-RestMethod "https://huggingface.co/api/models?search=$([uri]::EscapeDataString($q))&sort=downloads&direction=-1&limit=12" -TimeoutSec 20
         } catch { continue }
         foreach ($m in $hits) {
-            if ($m.id -match "embed|rerank|vision|VL|abliterat|base-gguf") { continue }
+            if ($found.Count -ge $Want) { break }
+            if ($m.id -match "embed|rerank|vision|VL|abliterat|base-gguf|-1\.5B|-3B") { continue }
             if ($found.ContainsKey($m.id)) { continue }
-            try { $tree = Invoke-RestMethod "https://huggingface.co/api/models/$($m.id)/tree/main" -TimeoutSec 60 } catch { continue }
+            try { $tree = Invoke-RestMethod "https://huggingface.co/api/models/$($m.id)/tree/main" -TimeoutSec 15 } catch { continue }
             $gg = $tree | Where-Object { $_.path -match "Q4_K_M\.gguf$|Q3_K_M\.gguf$" -and $_.path -notmatch "of-000|00001-of" } |
                   Where-Object { ($_.lfs.size ?? $_.size) -gt 4e9 -and ($_.lfs.size ?? $_.size) -lt 15.5e9 } |
                   Sort-Object { $_.lfs.size ?? $_.size } -Descending | Select-Object -First 1
-            if ($gg) {
-                $found[$m.id] = @{ key = ($m.id -replace '.*/', ''); file = [System.IO.Path]::GetFileName($gg.path); repo = $m.id }
-            }
+            if (-not $gg) { continue }
+            $fname = [System.IO.Path]::GetFileName($gg.path)
+            if ($known -contains $fname) { continue }   # base ou deja juge -> on n'y revient pas
+            $found[$m.id] = @{ key = ($m.id -replace '.*/', ''); file = $fname; repo = $m.id }
+            Write-Host "  ocean: $($m.id) -> $fname ($([math]::Round((($gg.lfs.size ?? $gg.size))/1e9,1)) Go)" -ForegroundColor DarkCyan
+            Write-ArenaStatus @{ phase = 'crawl'; cycle = $script:cycleNo; current = @{ key = ($m.id -replace '.*/', '') }; tested = @(); best = $null; queue = @($found.Values.key) }
         }
     }
     return @($found.Values)
@@ -183,12 +194,12 @@ function Invoke-Bench([string]$key, [double]$temp = 0.3, [int]$reps = 3) {
 
 function Invoke-ArenaCycle {
     $script:cycleNo++
-    # 1. Construire la liste des candidats: base + nouveaux crawles (jamais juges)
-    $tried = if (Test-Path $triedFile) { @(Get-Content $triedFile) } else { @() }
+    # 1. Construire la liste des candidats: base + nouveaux crawles (jamais juges).
+    # Get-CrawledCandidates lit lui-meme arena_tried.txt pour ne pas re-juger.
     $candidates = @($baseCandidates)
     Write-ArenaStatus @{ phase = 'crawl'; cycle = $script:cycleNo; current = $null; tested = @(); best = $null; queue = @($candidates.key) }
     if (-not $Only) {
-        $crawled = @(Get-CrawledCandidates | Where-Object { $tried -notcontains $_.file -and ($baseCandidates.file -notcontains $_.file) })
+        $crawled = @(Get-CrawledCandidates -Want ($NewPerCycle * 2))   # crawl borne (s'arrete des qu'il a assez)
         $newOnes = @($crawled | Select-Object -First $NewPerCycle)
         if ($newOnes.Count) {
             Write-Host "OCEAN: $($newOnes.Count) nouveau(x) challenger(s): $($newOnes.key -join ', ')" -ForegroundColor Cyan
