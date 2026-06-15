@@ -49,6 +49,14 @@ function Write-ArenaStatus($o) {
     try { $o['updatedAt'] = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); ($o | ConvertTo-Json -Depth 6) | Set-Content $arenaStatus -Encoding utf8 } catch {}
 }
 
+# PROGRESSION LIVE (barre dynamique du dashboard) : telechargement (% octets) ou
+# benchmark (% epreuves). Un seul etat courant, ecrase a chaque maj.
+$arenaProgress = Join-Path $cfg.Paths.Logs 'arena_progress.json'
+function Write-ArenaProgress($kind, $key, $pct, $label) {
+    try { @{ kind = $kind; key = $key; pct = [int]$pct; label = $label; ts = (Get-Date -Format 'HH:mm:ss') } | ConvertTo-Json -Compress | Set-Content $arenaProgress -Encoding utf8 } catch {}
+}
+function Clear-ArenaProgress { try { Remove-Item $arenaProgress -Force -ErrorAction SilentlyContinue } catch {} }
+
 # Evenements HAUT NIVEAU cote modeles (telecharge/benche/champion/echec), affiches
 # dans l'onglet Activite du dashboard (l'utilisateur voit ce qui se passe).
 $arenaEvents = Join-Path $cfg.Paths.Logs 'arena_events.jsonl'
@@ -240,14 +248,27 @@ function Get-HfFile([string]$repo, [string]$file) {
     # Deja present ET COMPLET (taille exacte) ? -> on ne retelecharge pas.
     $cur = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name 2>/dev/null || echo 0")
     if ($cur -eq $want -and $want -gt 3e9) { return $name }
-    Write-Host "  telechargement $repo / $($entry.path) ($([math]::Round($want/1GB,1)) Go)..."
-    # On ecrase un eventuel PARTIEL pris pour complet, on telecharge vers .dl, puis
-    # RENAME ATOMIQUE -> le nom final n'existe QUE s'il est complet (jamais de partiel
-    # charge par erreur). Verification de taille obligatoire avant de valider.
-    wsl -d Ubuntu -u root -- bash -c "cd /root/models && rm -f '$name' && timeout 1800 wget -q -c --tries=2 --timeout=30 'https://huggingface.co/$repo/resolve/main/$($entry.path)' -O '$name.dl' && mv -f '$name.dl' '$name'" | Out-Null
-    $size = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name 2>/dev/null || echo 0")
-    if ($size -eq $want -and $want -gt 3e9) { return $name }
-    wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$name /root/models/$name.dl" | Out-Null
+    if (-not $key) { $key = $name }
+    $gb = [math]::Round($want / 1GB, 2)
+    Write-Host "  telechargement $repo / $($entry.path) ($gb Go)..."
+    # Download en ARRIERE-PLAN vers .dl; on POLL la taille -> BARRE DE PROGRESSION.
+    # Un seul download a la fois (l'arene attend dans cette boucle) = pas de
+    # concurrence; RENAME ATOMIQUE a la fin -> jamais de partiel pris pour complet.
+    $url = "https://huggingface.co/$repo/resolve/main/$($entry.path)"
+    wsl -d Ubuntu -u root -- bash -c "cd /root/models && rm -f '$name' '$name.dl'; nohup timeout 1800 wget -q -c --timeout=30 '$url' -O '$name.dl' >/dev/null 2>&1 & echo go" | Out-Null
+    $t0 = Get-Date
+    while (((Get-Date) - $t0).TotalSeconds -lt 1850) {
+        Start-Sleep -Seconds 3
+        $got = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name.dl 2>/dev/null || echo 0")
+        $pct = if ($want -gt 0) { [math]::Min(100, [math]::Round($got * 100 / $want)) } else { 0 }
+        Write-ArenaProgress 'download' $key $pct "$([math]::Round($got/1GB,2)) / $gb Go"
+        if ($got -ge $want) { break }
+        if ((wsl -d Ubuntu -u root -- bash -c "pgrep -f 'wget.*$name' >/dev/null && echo Y") -notmatch 'Y') { break }
+    }
+    Clear-ArenaProgress
+    $got = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name.dl 2>/dev/null || echo 0")
+    if ($got -eq $want -and $want -gt 3e9) { wsl -d Ubuntu -u root -- bash -c "mv -f /root/models/$name.dl /root/models/$name" | Out-Null; return $name }
+    wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$name.dl /root/models/$name" | Out-Null
     return $null
 }
 
@@ -284,7 +305,10 @@ function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
     $qaSys = "You are a precise assistant. Follow the instruction exactly and answer as briefly as possible, with no explanation."
     $codeSys = "You are an expert Python programmer. Write the COMPLETE function. Return ONLY Python code (a single code block is fine), no explanation."
     $catPass = @{}; $catTot = @{}; $catOrder = @()
+    $ti = 0; $ntasks = @($tasks).Count
     foreach ($t in $tasks) {
+        $ti++
+        Write-ArenaProgress 'bench' $key ([math]::Round(($ti - 1) * 100 / [Math]::Max(1, $ntasks))) "epreuve $ti/$ntasks : $($t.cat)"
         if ($catOrder -notcontains $t.cat) { $catOrder += $t.cat; $catPass[$t.cat] = 0; $catTot[$t.cat] = 0 }
         # Prepare system prompt + user message + verification context per kind.
         $full = ''
@@ -341,6 +365,7 @@ function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
         $details += "$c $([int]($pct*100))%"
         Write-Host "  [$key] $c $([int]($pct*100))%"
     }
+    Clear-ArenaProgress
     $score = [math]::Round(10 * $sum / [Math]::Max(1, $catOrder.Count), 1)
     $secs = [math]::Round(((Get-Date) - $t0).TotalSeconds, 1)
     $speedPts = [Math]::Max(0, 5 - [int]($secs / 60))
@@ -422,7 +447,7 @@ function Invoke-ArenaCycle {
             # rename atomique) -> jamais charger un fichier partiel/incomplet.
             Write-ArenaStatus @{ phase = 'download'; cycle = $cycle; current = @{ key = $c.key; file = $c.file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
             Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'test' -Text "verif/telechargement (taille exacte) de $($c.file)..."
-            $file = Get-HfFile $c.repo $c.file
+            $file = Get-HfFile $c.repo $c.file $c.key
             if (-not $file) {
                 Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "telechargement echoue/incomplet ($($c.file))"
                 Write-ArenaEvent 'fail' "$($c.key) - telechargement echoue/incomplet"

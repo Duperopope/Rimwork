@@ -95,6 +95,10 @@ function Get-DashboardData {
             try { $console += ($l | ConvertFrom-Json) } catch {}
         }
     } catch {}
+    # Progression LIVE (barre dynamique) : telechargement (% octets) ou benchmark.
+    $arenaProgress = $null
+    try { $arenaProgress = (Get-Content (Join-Path $Config.Paths.Logs 'arena_progress.json') -Raw -ErrorAction Stop | ConvertFrom-Json) } catch {}
+
     # Evenements arene (cote modeles) : telecharge / benche / champion / echec.
     $arenaEvents = @()
     try {
@@ -130,6 +134,7 @@ function Get-DashboardData {
         llm         = @{ pinned = $llmPin; useMsg = $llmUseMsg }
         console     = $console
         arenaEvents = $arenaEvents
+        arenaProgress = $arenaProgress
     }
 }
 
@@ -365,6 +370,11 @@ function renderTabs(){
 function go(t){ TAB=t; sessionStorage.setItem('tab',t); renderTabs(); renderView(); }
 
 function card(title,body,wide){ return `<div class="card${wide?' wide':''}"><h3>${title}</h3>${body}</div>`; }
+// Barre de progression LIVE (telechargement % octets, ou benchmark % epreuves).
+function progBar(p){
+  if(!p||p.pct==null) return '';
+  const isDl=p.kind==='download';
+  return '<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">'+ic(isDl?'download':'flask',16)+'<b>'+(isDl?'Téléchargement':'Benchmark en cours')+' — '+esc(p.key||'')+'</b><span class="hl" style="margin-left:auto;font-variant-numeric:tabular-nums">'+p.pct+'%</span></div><div class="bar" style="height:10px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden"><i style="display:block;height:100%;width:'+p.pct+'%;background:var(--grad);box-shadow:0 0 14px rgba(46,230,200,.5);transition:width .5s"></i></div><div class="mut" style="margin-top:7px;font-size:12px">'+esc(p.label||'')+'</div></div>';}
 function flowView(s){
   // Pipeline recursif REEL : roadmap -> patch LLM -> build/test -> garde/annule -> world model (qui re-trie).
   const mode=s?s.mode:'';
@@ -407,7 +417,7 @@ function viewActivity(){
   const a=arr(DATA&&DATA.activity);
   const cRows=a.length?a.map(e=>`<div class="row"><span class="time">${esc(e.date)}</span><span class="badge ${esc(e.type)}">${esc(e.who==='IA locale'?'IA':e.type)}</span><span class="txt">${esc(e.text)}</span></div>`).join(''):'<div class="empty">aucun commit</div>';
   const cCard=card(ic('zap')+' Activité code — commits (hors bruit auto)',cRows,true);
-  document.getElementById('view').innerHTML=evCard+'<div style="height:16px"></div>'+cCard;
+  document.getElementById('view').innerHTML=progBar(DATA&&DATA.arenaProgress)+evCard+'<div style="height:16px"></div>'+cCard;
 }
 function viewTasks(){
   const t=arr(DATA&&DATA.tracker);
@@ -480,7 +490,7 @@ function viewArena(){
       return '<div class="task" style="'+(isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':'')+(failed?';opacity:.62':'')+'"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="cat">#'+(i+1)+'</span><b style="flex:1;min-width:200px;word-break:break-all">'+esc(name)+' '+(isBest?ic('trophy',15):'')+(isPin?ic('pin',15):'')+'</b>'+right+'<button class="btn ghost sm" title="Copier le benchmark" onclick="copyBench(\''+esc(t.key)+'\')">'+ic('copy')+'</button><button class="btn ghost sm" title="Renvoyer au bench" onclick="act(\'/arena/rebench?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('repeat')+' Re-bench</button>'+(failed?'':'<button class="btn ghost sm" onclick="act(\'/llm/use?key=\'+encodeURIComponent(\''+esc(t.key)+'\'))">'+ic('play')+' Utiliser</button>')+'</div>'+detail+'</div>';
     }).join('');
   }
-  document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card(ic('chart')+' Classement persistant — vrais noms · « Utiliser » pour activer, copier pour exporter le benchmark',board,true);
+  document.getElementById('view').innerHTML=progBar(DATA&&DATA.arenaProgress)+head+'<div style="height:14px"></div>'+card(ic('chart')+' Classement persistant — vrais noms · « Utiliser » pour activer, copier pour exporter le benchmark',board,true);
 }
 function viewConsole(){
   const all=arr(DATA&&DATA.console);
