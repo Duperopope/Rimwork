@@ -74,3 +74,4 @@ scripts/wm/game_wm.pkl
 scripts/logs/game_wm.json
 scripts/logs/play_findings.md
 scripts/logs/play_sessions.jsonl
+scripts/logs/strategy_evidence.json
