@@ -62,7 +62,7 @@ function Save-Leaderboard($cycle, $models) {
 }
 function Get-Rank($models) {
     @($models | Sort-Object -Property total -Descending | ForEach-Object {
-        @{ key = $_.key; total = $_.total; score = $_.score; speedPts = $_.speedPts; secs = $_.secs; details = $_.details; file = $_.file; lastCycle = $_.lastCycle } })
+        @{ key = $_.key; total = $_.total; score = $_.score; speedPts = $_.speedPts; secs = $_.secs; details = $_.details; cats = $_.cats; file = $_.file; lastCycle = $_.lastCycle } })
 }
 
 # ---- Candidats de depart (GGUF tenant sur RX 7800 XT 16 Go) ----
@@ -110,24 +110,33 @@ function Get-CrawledCandidates([int]$Want = 4) {
     return @($found.Values)
 }
 
-# ---- BENCHMARK de combat: fichiers Thrive REELS + difficulte GRADUEE, scoring
-# deterministe et instantane. On teste la competence cle du dev: produire un
-# SEARCH/REPLACE qui (a) matche le fichier VERBATIM, (b) donne un JSON VALIDE,
-# (c) fait EXACTEMENT le changement demande. Les epreuves vont du facile (ajouter
-# un champ au 1er objet) au plus dur (champ string, 2 champs, cibler le 2e objet)
-# -> un vrai gradient qui separe les bons des chanceux. Pas de build lent: l'arene
-# juge vite; le champion est ensuite confirme en prod par la vraie boucle de dev.
+# ---- BENCHMARK multi-categories (esprit des evals de modeles frontiere). Chaque
+# CATEGORIE teste une competence reelle du dev, en ANGLAIS (meilleur pour les LLM),
+# scoring deterministe et instantane. Categories:
+#   JSON patch  : SEARCH/REPLACE verbatim + JSON valide (coeur du dev)
+#   Precision   : cibler le bon objet / multi-champs (plus dur)
+#   Code edit   : SEARCH/REPLACE sur un snippet C#
+#   Instruction : suivre une consigne a la lettre (sortie exacte)
+#   Reasoning   : raisonnement deterministe (sortie exacte)
+# Le score final = MOYENNE des taux par categorie (chaque categorie compte autant)
+# x3 essais -> un classement fiable, pas un coup de chance. Le champion est ensuite
+# confirme en prod par la vraie boucle de dev.
 $tasks = @(
-    @{ file = "simulation_parameters/microbe_stage/compounds.json"; lines = 60; kind = "json"
+    @{ cat = 'JSON patch'; kind = 'json'; file = 'simulation_parameters/microbe_stage/compounds.json'; lines = 60
        ask = 'Add a new field "ArenaTag": 1 to the VERY FIRST compound object. Keep the JSON valid.'; expect = 'ArenaTag' }
-    @{ file = "simulation_parameters/microbe_stage/membranes.json"; lines = 60; kind = "json"
+    @{ cat = 'JSON patch'; kind = 'json'; file = 'simulation_parameters/microbe_stage/membranes.json'; lines = 60
        ask = 'Add a new STRING field "ArenaNote": "ok" to the VERY FIRST membrane object. Keep the JSON valid.'; expect = 'ArenaNote' }
-    @{ file = "simulation_parameters/microbe_stage/biomes.json"; lines = 80; kind = "json"
-       ask = 'Add a new field "ArenaTag": 2 to the VERY FIRST top-level object. Keep the JSON valid.'; expect = 'ArenaTag' }
-    @{ file = "simulation_parameters/microbe_stage/organelles.json"; lines = 80; kind = "json"
-       ask = 'Add TWO new fields "ArenaA": 1 and "ArenaB": 2 to the VERY FIRST organelle object. Keep the JSON valid.'; expect = 'ArenaB' }
-    @{ file = "simulation_parameters/microbe_stage/compounds.json"; lines = 120; kind = "json"
+    @{ cat = 'Precision'; kind = 'json'; file = 'simulation_parameters/microbe_stage/compounds.json'; lines = 120
        ask = 'Add a new field "ArenaDeep": 9 to the SECOND compound object (NOT the first one). Keep the JSON valid.'; expect = 'ArenaDeep' }
+    @{ cat = 'Precision'; kind = 'json'; file = 'simulation_parameters/microbe_stage/organelles.json'; lines = 80
+       ask = 'Add TWO new fields "ArenaA": 1 and "ArenaB": 2 to the VERY FIRST organelle object. Keep the JSON valid.'; expect = 'ArenaB' }
+    @{ cat = 'Code edit'; kind = 'codeinline'; lines = 0
+       snippet = "public int Energy()`n{`n    int baseValue = 10;`n    return baseValue * 2;`n}"
+       ask = 'In this C# snippet, change baseValue from 10 to 25. Keep everything else identical.'; expect = '25' }
+    @{ cat = 'Instruction'; kind = 'exact'
+       ask = 'Reply with ONLY the single word READY in uppercase. No punctuation, no quotes, no other text.'; expect = '^\s*READY\s*$' }
+    @{ cat = 'Reasoning'; kind = 'exact'
+       ask = 'Given C#: int x = 7; x += 5; x *= 2; What is the final value of x? Reply with ONLY the number.'; expect = '\b24\b' }
 )
 
 function Wait-Llm([int]$timeoutSec = 240) {
@@ -167,52 +176,69 @@ function Get-HfFile([string]$repo, [string]$file) {
     return $null
 }
 
-function Invoke-Bench([string]$key, [double]$temp = 0.3, [int]$reps = 3) {
-    # ROBUSTESSE STATISTIQUE: chaque epreuve est tentee $reps fois; le score =
-    # TAUX de reussite x10 (pas un coup de chance unique). Un modele qui ne
-    # passe que 1 fois sur 3 marque 3.3/10, pas 10. La selection devient
-    # statistique - un gagnant doit etre REGULIEREMENT bon, pas chanceux.
-    $score = 0.0; $details = @(); $t0 = Get-Date
-    $sys = "You write minimal SEARCH/REPLACE patches. Format STRICTLY:`nFILE: <path>`n<<<<<<< SEARCH`n(exact verbatim lines from the file)`n=======`n(replacement)`n>>>>>>> REPLACE`nNEVER write '...' or 'omitted' inside SEARCH. SEARCH must be copied character-for-character from the provided file."
+function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
+    # BENCHMARK MULTI-CATEGORIES (esprit evals frontiere). Chaque epreuve x$reps;
+    # score final = MOYENNE des taux PAR CATEGORIE (chaque categorie pese pareil) x10
+    # -> un gagnant doit etre bon PARTOUT, pas chanceux sur une seule competence.
+    $t0 = Get-Date
+    $patchSys = "You write minimal SEARCH/REPLACE patches. Format STRICTLY:`nFILE: <path>`n<<<<<<< SEARCH`n(exact verbatim lines)`n=======`n(replacement)`n>>>>>>> REPLACE`nNEVER write '...' or 'omitted'. SEARCH must be copied character-for-character."
+    $qaSys = "You are a precise assistant. Follow the instruction exactly and answer as briefly as possible, with no explanation."
+    $catPass = @{}; $catTot = @{}; $catOrder = @()
     foreach ($t in $tasks) {
-        $abs = Join-Path $thrive ($t.file -replace '/', '\')
-        if (-not (Test-Path $abs)) { continue }
-        $src = (Get-Content $abs -TotalCount $t.lines) -join "`n"
-        $full = (Get-Content $abs -Raw) -replace "`r", ""
-        $passes = 0
+        if ($catOrder -notcontains $t.cat) { $catOrder += $t.cat; $catPass[$t.cat] = 0; $catTot[$t.cat] = 0 }
+        # Prepare system prompt + user message + verification context per kind.
+        $full = ''
+        if ($t.kind -eq 'exact') {
+            $sys = $qaSys; $user = $t.ask
+        } elseif ($t.kind -eq 'codeinline') {
+            $sys = $patchSys; $full = $t.snippet
+            $user = "FILE snippet.cs:`n$($t.snippet)`n`nTASK: $($t.ask)`nProduce ONE patch."
+        } else {
+            $abs = Join-Path $thrive ($t.file -replace '/', '\')
+            if (-not (Test-Path $abs)) { continue }
+            $src = (Get-Content $abs -TotalCount $t.lines) -join "`n"
+            $full = (Get-Content $abs -Raw) -replace "`r", ""
+            $sys = $patchSys
+            $user = "FILE $($t.file) (first $($t.lines) lines):`n$src`n`nTASK: $($t.ask)`nProduce ONE patch."
+        }
+        Write-LlmConsole -Src 'arene' -Model $key -Kind 'test' -Text "[$($t.cat)] $($t.ask)"
         for ($rep = 1; $rep -le $reps; $rep++) {
-            $body = @{ model = "arena"; max_tokens = 600; temperature = $temp; messages = @(
-                @{ role = "system"; content = $sys },
-                @{ role = "user"; content = "FILE $($t.file) (first $($t.lines) lines):`n$src`n`nTASK: $($t.ask)`nProduce ONE patch." }
-            ) } | ConvertTo-Json -Depth 6
-            $ok = $false
+            $catTot[$t.cat]++
+            $ok = $false; $out = ''
             try {
+                $body = @{ model = 'arena'; max_tokens = 600; temperature = $temp; messages = @(
+                        @{ role = 'system'; content = $sys }, @{ role = 'user'; content = $user }) } | ConvertTo-Json -Depth 6
                 $r = Invoke-RestMethod "$llm/v1/chat/completions" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 180
                 $out = $r.choices[0].message.content
-                if ($out -match '(?s)<<<<<<< SEARCH\r?\n(.*?)\r?\n=======\r?\n(.*?)\r?\n>>>>>>> REPLACE') {
-                    $search = $Matches[1] -replace "`r", ""; $replace = $Matches[2] -replace "`r", ""
-                    # (a) SEARCH verbatim, (b) pas de '...', (c) vrai changement,
-                    # (d) resultat valide + contient le changement attendu
-                    if ($full.Contains($search) -and $search.Trim().Length -gt 10 -and $search -notmatch '\.\.\.|omitted' -and $replace -ne $search) {
+                if ($t.kind -eq 'exact') {
+                    if ($out.Trim() -match $t.expect) { $ok = $true }
+                } elseif ($out -match '(?s)<<<<<<< SEARCH\r?\n(.*?)\r?\n=======\r?\n(.*?)\r?\n>>>>>>> REPLACE') {
+                    $search = $Matches[1] -replace "`r", ''; $replace = $Matches[2] -replace "`r", ''
+                    if ($full.Contains($search) -and $search.Trim().Length -gt 3 -and $search -notmatch '\.\.\.|omitted' -and $replace -ne $search) {
                         $patched = $full.Replace($search, $replace)
-                        if ($t.kind -eq "json") {
+                        if ($t.kind -eq 'json') {
                             try { $null = $patched | ConvertFrom-Json; if ($patched -match [regex]::Escape($t.expect)) { $ok = $true } } catch {}
-                        } else {
-                            if ($patched -match [regex]::Escape($t.expect)) { $ok = $true }
-                        }
+                        } elseif ($patched -match [regex]::Escape($t.expect)) { $ok = $true }
                     }
                 }
             } catch {}
-            if ($ok) { $passes++ }
+            if ($ok) { $catPass[$t.cat]++ }
+            Write-LlmConsole -Src 'arene' -Model $key -Kind $(if ($ok) { 'pass' } else { 'fail' }) -Text $out
         }
-        $frac = $passes / $reps
-        $score += 10 * $frac
-        $details += "$([int]($frac*100))% ($passes/$reps) $($t.file)"
-        Write-Host "  [$key] $($details[-1])"
     }
+    # Score = moyenne des taux par categorie x10 (0-10) + bonus vitesse (0-5).
+    $details = @(); $cats = @(); $sum = 0.0
+    foreach ($c in $catOrder) {
+        $pct = if ($catTot[$c]) { $catPass[$c] / $catTot[$c] } else { 0 }
+        $sum += $pct
+        $cats += @{ cat = $c; pct = [int]($pct * 100) }
+        $details += "$c $([int]($pct*100))%"
+        Write-Host "  [$key] $c $([int]($pct*100))%"
+    }
+    $score = [math]::Round(10 * $sum / [Math]::Max(1, $catOrder.Count), 1)
     $secs = [math]::Round(((Get-Date) - $t0).TotalSeconds, 1)
-    $speedPts = [Math]::Max(0, 5 - [int]($secs / 60))   # tiebreaker vitesse
-    return @{ key = $key; score = [math]::Round($score, 1); speedPts = $speedPts; total = [math]::Round($score + $speedPts, 1); secs = $secs; details = $details }
+    $speedPts = [Math]::Max(0, 5 - [int]($secs / 60))
+    return @{ key = $key; score = $score; speedPts = $speedPts; total = [math]::Round($score + $speedPts, 1); secs = $secs; details = $details; cats = $cats }
 }
 
 function Invoke-ArenaCycle {

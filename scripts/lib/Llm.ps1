@@ -47,6 +47,21 @@ function Start-LlamaServer {
     Start-Process wsl -ArgumentList "-d", "Ubuntu", "-u", "root", "--", "bash", "/root/start-llm.sh", $Model -WindowStyle Hidden
 }
 
+# Console LLM : journal des tests envoyes aux modeles et de leurs sorties, lu en
+# direct par le dashboard (onglet Console). Rolling pour ne pas grossir sans fin.
+function Write-LlmConsole {
+    param([string]$Src = '', [string]$Model = '', [string]$Kind = '', [string]$Text = '')
+    try {
+        $f = Join-Path (Join-Path (Split-Path $PSScriptRoot -Parent) 'logs') 'llm_console.jsonl'
+        $t = ($Text -replace "`r", '' -replace "`n", ' ')
+        if ($t.Length -gt 600) { $t = $t.Substring(0, 600) + '…' }
+        $entry = @{ ts = (Get-Date -Format 'HH:mm:ss'); src = $Src; model = $Model; kind = $Kind; text = $t } | ConvertTo-Json -Compress
+        Add-Content -Path $f -Value $entry
+        $lines = @(Get-Content $f -ErrorAction SilentlyContinue)
+        if ($lines.Count -gt 600) { Set-Content $f -Value ($lines | Select-Object -Last 400) }
+    } catch {}
+}
+
 # Telecharge un GGUF depuis HuggingFace s'il manque (re-DL d'un modele supprime).
 # Retourne le nom de fichier local, ou $null. Partage par l'arene et la selection
 # manuelle. Verifie la taille pour ne pas servir un telechargement tronque.

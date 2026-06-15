@@ -88,6 +88,14 @@ function Get-DashboardData {
     $llmPin = $null; try { $llmPin = (Get-Content (Join-Path $Config.Paths.Logs 'llm_pinned.txt') -Raw -ErrorAction Stop).Trim() } catch {}
     $llmUseMsg = $null; try { $llmUseMsg = (Get-Content (Join-Path $Config.Paths.Logs 'llm_use_status.txt') -Raw -ErrorAction Stop).Trim() } catch {}
 
+    # Console LLM : derniers tests + sorties des modeles (onglet Console).
+    $console = @()
+    try {
+        foreach ($l in (Get-Content (Join-Path $Config.Paths.Logs 'llm_console.jsonl') -ErrorAction Stop | Select-Object -Last 200)) {
+            try { $console += ($l | ConvertFrom-Json) } catch {}
+        }
+    } catch {}
+
     # Serie temporelle (graphes temps reel) : derniers snapshots d'etat.
     $history = @()
     try {
@@ -113,6 +121,7 @@ function Get-DashboardData {
         arena       = $arena
         history     = $history
         llm         = @{ pinned = $llmPin; useMsg = $llmUseMsg }
+        console     = $console
     }
 }
 
@@ -213,6 +222,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--line)}
 .arrow{color:var(--dim);font-size:18px;flex:none}
 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--glass2);border:1px solid var(--line2);border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700;margin:3px 5px 3px 0}
 .chip.on{border-color:var(--line);color:var(--cyan)}
+/* console LLM (terminal) */
+.termhead{font-size:12px;color:var(--mut);margin-bottom:10px}
+.term{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-size:12.5px;max-height:68vh;overflow:auto;background:rgba(0,0,0,.28);border:1px solid var(--line2);border-radius:12px;padding:12px}
+.cline{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}.cline:last-child{border:0}
+.ct{color:var(--dim)}.cs{color:var(--violet);margin-left:8px;font-weight:700}.ck{margin-left:8px;font-weight:800}
+.cx{color:var(--ink);margin-top:4px;white-space:pre-wrap;word-break:break-word;opacity:.92}
+.catbadge{display:inline-flex;align-items:center;gap:5px;background:var(--glass2);border:1px solid var(--line2);border-radius:8px;padding:3px 9px;font-size:11.5px;color:var(--mut)}
+.catbadge b{color:var(--ink);font-weight:600}
 @keyframes beat{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:1}50%{transform:translate(-50%,-50%) scale(1.5);opacity:.55}}
 @keyframes ring{0%{transform:scale(.6);opacity:.7}100%{transform:scale(1.7);opacity:0}}
 </style></head><body>
@@ -239,7 +256,7 @@ __BOOT__
 const $=(h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
 const esc=(s)=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 let DATA=window.__DATA__||null, TAB=sessionStorage.getItem('tab')||'overview', BUSY=false;
-const TABS=[['overview','Vue d\'ensemble'],['activity','Activité'],['arena','Arène'],['tasks','Tâches'],['feedback','Feedback']];
+const TABS=[['overview','Vue d\'ensemble'],['activity','Activité'],['arena','Arène'],['console','Console'],['tasks','Tâches'],['feedback','Feedback']];
 
 async function api(path,opts){ try{return await fetch(path,opts);}catch(e){return null;} }
 async function load(){ if(!window.__DATA__){ const r=await api('/api.json'); if(r){try{DATA=await r.json();}catch(e){}} } render(); }
@@ -398,12 +415,27 @@ function viewArena(){
           <span class="hl" style="font-variant-numeric:tabular-nums">${t.total} pts</span>
           <button class="btn ghost" style="padding:5px 12px" onclick="act('/llm/use?key='+encodeURIComponent('${esc(t.key)}'))">▶ Utiliser</button></div>
         <div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:${w}%;background:var(--grad)"></i></div>
-        <div class="mut" style="margin-top:6px;font-size:12px">${(t.details||[]).map(esc).join(' · ')}${t.secs?(' · '+t.secs+'s'):''}</div></div>`;
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${(t.cats||[]).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return `<span class="catbadge"><b>${esc(c.cat)}</b> <span style="color:${cc}">${c.pct}%</span></span>`;}).join('')||esc((t.details||[]).join(' · '))}${t.secs?`<span class="catbadge">⏱ ${t.secs}s</span>`:''}</div></div>`;
     }).join('');
   }
   document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card('📊 Classement persistant — vrais noms de modèles · 📌 épinglé · « Utiliser » pour activer',board,true);
 }
-function renderView(){ ({overview:viewOverview,activity:viewActivity,arena:viewArena,tasks:viewTasks,feedback:viewFeedback}[TAB]||viewOverview)(); }
+function viewConsole(){
+  const c=(DATA&&DATA.console)?DATA.console:[];
+  const col={test:'#4aa6ff',pass:'#49e29f',fail:'#ff6b6b',output:'#8ba2b6'};
+  let body;
+  if(!c.length){ body=`<div class="empty">aucune sortie LLM pour l'instant — lance l'<b>Arène</b> (ou le <b>DEV</b>) et les tests/réponses des modèles s'afficheront ici en direct.</div>`; }
+  else {
+    const rows=c.slice().reverse().map(e=>`<div class="cline">
+      <span class="ct">${esc(e.ts)}</span>
+      <span class="cs">${esc(e.src||'')}${e.model?(' · '+esc(e.model)):''}</span>
+      <span class="ck" style="color:${col[e.kind]||'#8ba2b6'}">${esc((e.kind||'').toUpperCase())}</span>
+      <div class="cx">${esc(e.text||'')}</div></div>`).join('');
+    body=`<div class="termhead">▶ ${c.length} lignes · le plus récent en haut · rafraîchi en direct</div><div class="term">${rows}</div>`;
+  }
+  document.getElementById('view').innerHTML=card('🖥️ Console LLM — tests envoyés & réponses des modèles',body,true);
+}
+function renderView(){ ({overview:viewOverview,activity:viewActivity,arena:viewArena,console:viewConsole,tasks:viewTasks,feedback:viewFeedback}[TAB]||viewOverview)(); }
 function render(){ if(!DATA){return;} renderPills();renderBanner();renderCtrl();renderKpis();renderTabs();renderView(); }
 
 /* Fond anime : cellules bioluminescentes a la derive (remontent de l'abysse). */
