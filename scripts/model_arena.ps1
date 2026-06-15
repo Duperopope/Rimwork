@@ -159,9 +159,18 @@ $tasks = @(
 )
 
 function Wait-Llm([int]$timeoutSec = 240) {
+    # /health "ok" NE SUFFIT PAS: un vieux serveur (modele precedent) peut encore
+    # repondre pendant que le nouveau charge -> le bench partirait dans le vide
+    # (FAIL vides). On exige une VRAIE completion: le modele genere = il est pret.
     $t0 = Get-Date
     while (((Get-Date) - $t0).TotalSeconds -lt $timeoutSec) {
-        try { if ((Invoke-RestMethod "$llm/health" -TimeoutSec 5).status -eq "ok") { return $true } } catch {}
+        try {
+            if ((Invoke-RestMethod "$llm/health" -TimeoutSec 5).status -eq "ok") {
+                $b = @{ model = 'arena'; max_tokens = 1; messages = @(@{ role = 'user'; content = 'hi' }) } | ConvertTo-Json
+                $r = Invoke-RestMethod "$llm/v1/chat/completions" -Method Post -Body $b -ContentType 'application/json' -TimeoutSec 30
+                if ($r.choices) { return $true }
+            }
+        } catch {}
         Start-Sleep 5
     }
     return $false
@@ -173,8 +182,11 @@ function Start-Model([string]$file, [int]$port = 1234) {
     # session wsl: le serveur mourait aussitot -> Wait-Llm timeout -> 0 resultat
     # pour TOUS les modeles (cause du "arene sans gagnant + LLM down" en ARENA).
     # L'arene benche sur le port prod (1234), comme Start-LlamaServer.
+    $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$file && echo OK"
+    if ($have -notmatch 'OK') { Write-Host "  modele absent sur disque: $file -> skip" -ForegroundColor DarkYellow; return $false }
     Start-LlamaServer -Model $file
-    return (Wait-Llm)
+    Start-Sleep -Seconds 8   # laisse le pkill tuer l'ancien serveur + le nouveau commencer a charger
+    return (Wait-Llm)        # ne rend la main que si une VRAIE completion passe
 }
 
 function Get-HfFile([string]$repo, [string]$file) {
