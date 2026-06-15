@@ -237,11 +237,17 @@ function Get-HfFile([string]$repo, [string]$file) {
     if (-not $entry) { return $null }
     $name = [System.IO.Path]::GetFileName($entry.path)
     $want = [long]($entry.lfs.size ?? $entry.size)
+    # Deja present ET COMPLET (taille exacte) ? -> on ne retelecharge pas.
+    $cur = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name 2>/dev/null || echo 0")
+    if ($cur -eq $want -and $want -gt 3e9) { return $name }
     Write-Host "  telechargement $repo / $($entry.path) ($([math]::Round($want/1GB,1)) Go)..."
-    wsl -d Ubuntu -u root -- bash -c "cd /root/models && timeout 1200 wget -q -c --tries=2 --timeout=30 'https://huggingface.co/$repo/resolve/main/$($entry.path)' -O '$name'" | Out-Null
+    # On ecrase un eventuel PARTIEL pris pour complet, on telecharge vers .dl, puis
+    # RENAME ATOMIQUE -> le nom final n'existe QUE s'il est complet (jamais de partiel
+    # charge par erreur). Verification de taille obligatoire avant de valider.
+    wsl -d Ubuntu -u root -- bash -c "cd /root/models && rm -f '$name' && timeout 1800 wget -q -c --tries=2 --timeout=30 'https://huggingface.co/$repo/resolve/main/$($entry.path)' -O '$name.dl' && mv -f '$name.dl' '$name'" | Out-Null
     $size = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name 2>/dev/null || echo 0")
     if ($size -eq $want -and $want -gt 3e9) { return $name }
-    wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$name" | Out-Null
+    wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$name /root/models/$name.dl" | Out-Null
     return $null
 }
 
@@ -360,7 +366,9 @@ function Invoke-ArenaCycle {
         if ($newOnes.Count) {
             Write-Host "OCEAN: $($newOnes.key -join ', ')" -ForegroundColor Cyan
             $candidates += $newOnes
-            foreach ($pc in $newOnes) { Start-Prefetch $pc }   # telecharge en arriere-plan pendant le bench des base
+            # NOTE: prefetch concurrent retire - il laissait des fichiers PARTIELS pris
+            # pour complets (test -s) -> chargement de GGUF incomplets -> echecs en masse.
+            # Telechargement desormais synchrone + verifie (taille exacte) dans Get-HfFile.
         }
     } else {
         $candidates = @($candidates | Where-Object { $_.key -match $Only })
@@ -396,23 +404,32 @@ function Invoke-ArenaCycle {
         $isBase = $baseCandidates.file -contains $c.file
         if (-not $isBase -and (@(Get-Content $triedFile -ErrorAction SilentlyContinue) -notcontains $c.file)) { Add-Content $triedFile $c.file }
         $file = $c.file
-        $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$file && echo OK"
-        if ($have -notmatch "OK") {
+        if ($isBase) {
+            $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$file && echo OK"
+            if ($have -notmatch "OK") {
+                Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "fichier de base absent: $file"
+                Write-ArenaEvent 'fail' "$($c.key) - fichier absent"
+                $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle 'fichier de base absent'); Save-Leaderboard $cycle $models
+                Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }; continue
+            }
+        } else {
             if (-not $c.repo) {
                 Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text 'pas de repo / fichier introuvable'
                 $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle 'pas de repo / introuvable'); Save-Leaderboard $cycle $models
                 Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }; continue
             }
+            # CRAWLE: TOUJOURS passer par Get-HfFile (verifie la taille exacte +
+            # rename atomique) -> jamais charger un fichier partiel/incomplet.
             Write-ArenaStatus @{ phase = 'download'; cycle = $cycle; current = @{ key = $c.key; file = $c.file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
-            Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'test' -Text "telechargement de $($c.file) depuis $($c.repo)..."
+            Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'test' -Text "verif/telechargement (taille exacte) de $($c.file)..."
             $file = Get-HfFile $c.repo $c.file
             if (-not $file) {
-                Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "telechargement echoue ($($c.file))"
-                Write-ArenaEvent 'fail' "$($c.key) - telechargement echoue"
-                $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle 'telechargement echoue'); Save-Leaderboard $cycle $models
+                Write-LlmConsole -Src 'arene' -Model $c.key -Kind 'fail' -Text "telechargement echoue/incomplet ($($c.file))"
+                Write-ArenaEvent 'fail' "$($c.key) - telechargement echoue/incomplet"
+                $models = @($models | Where-Object { $_.key -ne $c.key }) + (New-FailEntry $c $cycle 'telechargement echoue/incomplet'); Save-Leaderboard $cycle $models
                 Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }; continue
             }
-            Write-ArenaEvent 'download' "telecharge $($c.key)"
+            Write-ArenaEvent 'download' "pret: $($c.key)"
         }
         Write-Host "=== ARENE: $($c.key) ($file) ===" -ForegroundColor Cyan
         Write-ArenaStatus @{ phase = 'bench'; cycle = $cycle; current = @{ key = $c.key; file = $file }; tested = (Get-Rank $models); best = $bestEver; queue = @($candidates.key) }
