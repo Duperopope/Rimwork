@@ -105,6 +105,11 @@ function Get-Move([string]$state, [string]$hint) {
 Write-Host "=== DOWN HERE - agent joueur (cycle complet) ===" -ForegroundColor Cyan
 $staleSince = $null
 $gameOverSince = $null
+# Adaptation du CORPS : on memorise si la session a croise du H2S et si la cellule
+# sait deja le metaboliser -> dans l'editeur on AJOUTE la chimiosynthese si besoin.
+$sessionSawH2S = $false
+$lastCanChemo = $false
+$addedOrganelleThisEditor = $false
 
 while ($true) {
     # 1) Y a-t-il une partie active ? (etat frais < 5s)
@@ -136,6 +141,7 @@ while ($true) {
             Write-Action @{ command = "newgame" }
             Log "NEWGAME (extinction)"
             Write-Host "extinction -> nouvelle partie" -ForegroundColor Red
+            $sessionSawH2S = $false   # nouvelle lignee -> on re-apprend l'environnement
         }
         Start-Sleep -Milliseconds 1500
         continue
@@ -150,8 +156,21 @@ while ($true) {
         continue
     }
 
-    # 3) Dans l'editeur -> confirmer (evoluer)
+    # 3) Dans l'editeur -> ADAPTER LE CORPS puis confirmer.
+    #    Si la session a croise du H2S et que la cellule ne sait PAS le metaboliser,
+    #    on ajoute la chimiosynthese (le poison devient une source d'energie) AVANT de
+    #    confirmer. Sinon on confirme directement. (Strategie pilotee par le besoin.)
     if ($sObj.inEditor -eq $true) {
+        $canChemo = $lastCanChemo
+        try { if ($sObj.PSObject.Properties.Name -contains 'canChemo') { $canChemo = [bool]$sObj.canChemo } } catch {}
+        if ($sessionSawH2S -and -not $canChemo -and -not $addedOrganelleThisEditor) {
+            Write-Action @{ command = "addOrganelle"; organelle = "chemoSynthesizingProteins" }
+            $addedOrganelleThisEditor = $true
+            Log "EDITEUR: ajoute chemoSynthesizingProteins (H2S rencontre, pas de chimiosynthese)"
+            Write-Host "editeur -> EVOLUE: chimiosynthese (le H2S devient de l'energie)" -ForegroundColor Cyan
+            Start-Sleep -Milliseconds 2000
+            continue
+        }
         Write-Action @{ command = "evolve" }
         Log "EVOLVE (confirme l'editeur)"
         Write-Host "dans l'editeur -> confirme l'evolution" -ForegroundColor Yellow
@@ -174,6 +193,12 @@ while ($true) {
     #                 de donnees -> ca marche tout de suite et s'ameliore en jouant.
     #    Brain=reflex -> ancien reflexe deterministe (fonce vers la nourriture).
     $wmState = Get-WmState $sObj
+
+    # Suivi pour l'adaptation du CORPS : a-t-on croise du H2S (toxine proche) ? la
+    # cellule sait-elle deja le metaboliser ? On rejoue -> editeur a nouveau permis.
+    if ($wmState[6] -lt 0.3) { $sessionSawH2S = $true }
+    try { if ($sObj.PSObject.Properties.Name -contains 'canChemo') { $lastCanChemo = [bool]$sObj.canChemo } } catch {}
+    $addedOrganelleThisEditor = $false
 
     # JOURNALISE la transition reelle (etat precedent + action precedente -> etat actuel).
     # C'est ce que le world model APPREND : la vraie dynamique du jeu, pas une maquette.
