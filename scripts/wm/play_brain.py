@@ -35,15 +35,31 @@ MIN_TRANS = 120          # en-dessous : reflexe (pas assez vu le vrai jeu)
 ENGULF_DIST = 0.15       # distance normalisee sous laquelle on engloutit
 
 
+# Contrat d'indices de l'etat RICHE 14D (partage avec play_agent.ps1 Get-WmState) :
+#  0 sante  1 ATP  2 glucose  3 H2S  4 ammoniac  5 phosphate  6 fer  7 canChemo
+#  8 foodDx 9 foodDz 10 foodDist  11 toxinDx 12 toxinDz 13 toxinDist
+IDX_HEALTH, IDX_ATP = 0, 1
+IDX_FOODDX, IDX_FOODDZ, IDX_FOODDIST = 8, 9, 10
+
+
 def _onehot(a):
     v = [0.0] * N_ACTIONS
     v[a] = 1.0
     return v
 
 
+def _food(state):
+    """(fdx, fdz, fdist) selon la longueur d'etat (14D riche, ou 4D legacy en repli)."""
+    n = len(state)
+    if n > IDX_FOODDIST:
+        return state[IDX_FOODDX], state[IDX_FOODDZ], state[IDX_FOODDIST]
+    return (state[1] if n > 1 else 0.0), (state[2] if n > 2 else 0.0), (state[3] if n > 3 else 1.0)
+
+
 def reflex(state):
-    """Aller vers la nourriture (repli sur). state = [energy, fdx, fdz, fdistN]."""
-    _, fdx, fdz, fdist = (list(state) + [0, 0, 0, 1])[:4]
+    """Repli sur : aller vers la nourriture (utilise tant que le world model n'a pas
+    encore assez de donnees du VRAI jeu)."""
+    fdx, fdz, fdist = _food(state)
     n = (fdx * fdx + fdz * fdz) ** 0.5
     if n < 1e-6:
         return {"moveX": 0.0, "moveZ": 0.0, "engulf": False, "src": "reflex(idle)"}
@@ -97,14 +113,16 @@ def train():
 
 
 def plan(state, horizon=6):
-    """MPC : simule chaque action sur `horizon` pas avec le world model appris,
-    choisit celle qui maximise l'energie predite. Aucune regle de survie codee."""
+    """MPC : simule chaque action sur `horizon` pas avec le world model appris et
+    choisit celle qui maximise la SURVIE predite (sante d'abord, ATP ensuite, aversion
+    au risque pres de la mort). AUCUNE regle 'evite le H2S' : le modele decide selon
+    l'etat complet (dont canChemo) -> le H2S devient poison OU nourriture, appris."""
     import numpy as np
     if not os.path.exists(MODEL):
         return None
     wm = pickle.load(open(MODEL, "rb"))
     # Securite transition de version : si le modele a ete entraine sur une autre
-    # dimension d'etat que celle recue (4D<->7D), on repli sur le reflexe (pas de crash).
+    # dimension d'etat que celle recue, on repli sur le reflexe (pas de crash).
     try:
         if wm.n_features_in_ != len(state) + N_ACTIONS:
             return None
@@ -117,7 +135,10 @@ def plan(state, horizon=6):
         total = 0.0
         for _ in range(horizon):
             s = wm.predict(np.concatenate([s, oh]).reshape(1, -1))[0]
-            total += s[0]   # energie predite
+            health = s[IDX_HEALTH]
+            total += 3.0 * health + s[IDX_ATP]      # survie d'abord, energie ensuite
+            if health < 0.3:
+                total -= 2.0 * (0.3 - health)        # aversion au risque (zone mortelle)
         if total > best_val:
             best_val, best_a = total, a
     return best_a
@@ -131,7 +152,7 @@ def decide(state):
     if a is None:
         return reflex(state)
     mx, mz = MOVES[a]
-    fdist = (list(state) + [1])[3]
+    _, _, fdist = _food(state)
     return {"moveX": round(mx, 3), "moveZ": round(mz, 3),
             "engulf": bool(fdist < ENGULF_DIST), "src": "worldmodel(MPC)"}
 

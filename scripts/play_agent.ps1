@@ -38,13 +38,22 @@ $brainPy = Join-Path $cfg.Paths.Scripts 'wm\play_brain.py'
 $FOODSCALE = 50.0          # echelle de normalisation de la distance a la nourriture/toxine
 $prevState = $null; $prevAction = $null; $lastTrain = Get-Date; $lastReport = Get-Date
 
-# Etat normalise (7D, FIXE) depuis l'etat brut du jeu :
-#   [energie, foodDx_unit, foodDz_unit, foodDistNorm, toxinDx_unit, toxinDz_unit, toxinDistNorm]
-# La toxine (sulfure d'hydrogene) est le sens qui MANQUAIT -> sans lui l'agent fonce
-# dans le poison et meurt. Defaut "pas de toxine percue" = [0,0,1] (loin).
+# Etat RICHE (14D, FIXE) - tout ce qui pese sur la survie, pour que le world model
+# apprenne les VRAIS compromis (pas du cas-par-cas). Contrat d'indices partage avec
+# scripts/wm/play_brain.py :
+#   0 sante  1 ATP  2 glucose  3 H2S(stock)  4 ammoniac  5 phosphate  6 fer
+#   7 canChemo  8 foodDx 9 foodDz 10 foodDist  11 toxinDx 12 toxinDz 13 toxinDist
 function Get-WmState($s) {
-    $e = 0.5
-    try { if ($s.PSObject.Properties.Name -contains 'health' -and [double]$s.maxHealth -gt 0) { $e = [double]$s.health / [double]$s.maxHealth } } catch {}
+    $health = 0.5
+    try { if ($s.PSObject.Properties.Name -contains 'health' -and [double]$s.maxHealth -gt 0) { $health = [double]$s.health / [double]$s.maxHealth } } catch {}
+    # composes stockes (cle = nom de l'enum Compound: ATP/Glucose/Hydrogensulfide/...)
+    function CompVal($name) {
+        try { if ($s.compounds -and ($s.compounds.PSObject.Properties.Name -contains $name)) { return [math]::Min(1.0, [double]$s.compounds.$name) } } catch {}
+        return 0.0
+    }
+    $atp = CompVal 'ATP'; $glu = CompVal 'Glucose'; $h2s = CompVal 'Hydrogensulfide'
+    $amm = CompVal 'Ammonia'; $pho = CompVal 'Phosphates'; $iron = CompVal 'Iron'
+    $canChemo = 0.0; try { if ($s.PSObject.Properties.Name -contains 'canChemo' -and [bool]$s.canChemo) { $canChemo = 1.0 } } catch {}
     $fx = 0.0; $fz = 0.0; $fd = 1.0
     try {
         if ($s.PSObject.Properties.Name -contains 'foodDx') {
@@ -61,7 +70,9 @@ function Get-WmState($s) {
             $td = [math]::Min(1.0, [double]$s.toxinDist / $FOODSCALE)
         }
     } catch {}
-    return @([math]::Round($e, 4), [math]::Round($fx, 4), [math]::Round($fz, 4), [math]::Round($fd, 4),
+    return @([math]::Round($health, 4), [math]::Round($atp, 4), [math]::Round($glu, 4), [math]::Round($h2s, 4),
+        [math]::Round($amm, 4), [math]::Round($pho, 4), [math]::Round($iron, 4), $canChemo,
+        [math]::Round($fx, 4), [math]::Round($fz, 4), [math]::Round($fd, 4),
         [math]::Round($tx, 4), [math]::Round($tz, 4), [math]::Round($td, 4))
 }
 # (moveX,moveZ) -> indice d'action discret le plus proche (pour journaliser la transition).
@@ -194,9 +205,9 @@ while ($true) {
     #    Brain=reflex -> ancien reflexe deterministe (fonce vers la nourriture).
     $wmState = Get-WmState $sObj
 
-    # Suivi pour l'adaptation du CORPS : a-t-on croise du H2S (toxine proche) ? la
-    # cellule sait-elle deja le metaboliser ? On rejoue -> editeur a nouveau permis.
-    if ($wmState[6] -lt 0.3) { $sessionSawH2S = $true }
+    # Suivi pour l'adaptation du CORPS : a-t-on croise du H2S (toxine proche, index 13) ?
+    # la cellule sait-elle deja le metaboliser ? On rejoue -> editeur a nouveau permis.
+    if ($wmState[13] -lt 0.3) { $sessionSawH2S = $true }
     try { if ($sObj.PSObject.Properties.Name -contains 'canChemo') { $lastCanChemo = [bool]$sObj.canChemo } } catch {}
     $addedOrganelleThisEditor = $false
 
