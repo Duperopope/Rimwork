@@ -93,9 +93,12 @@ function Get-CrawledCandidates([int]$Want = 4) {
         } catch { continue }
         foreach ($m in $hits) {
             if ($found.Count -ge $Want) { break }
-            # exclut les archis exotiques / non chargeables par ce llama.cpp:
-            # MTP (multi-token-prediction), vision, abliterated, tout petits, etc.
-            if ($m.id -match "embed|rerank|vision|VL|abliterat|base-gguf|MTP|draft|bnb|awq|gptq|-1\.5B|-0\.5B|-3B") { continue }
+            # On ne filtre QUE ce qui ne peut PAS coder du tout (embeddings,
+            # rerankers, modeles vision). On NE se prive PAS des archis exotiques
+            # (MTP, merges, abliterated...) : on les TESTE. Si ca ne charge pas,
+            # l'erreur llama.cpp est visible dans la Console et on passe au suivant.
+            # (Le filtre de TAILLE 4-15.5 Go reste : c'est la VRAM 16 Go, pas un choix.)
+            if ($m.id -match "embed|rerank|vision|VL") { continue }
             if ($found.ContainsKey($m.id)) { continue }
             try { $tree = Invoke-RestMethod "https://huggingface.co/api/models/$($m.id)/tree/main" -TimeoutSec 15 } catch { continue }
             $gg = $tree | Where-Object { $_.path -match "Q4_K_M\.gguf$|Q3_K_M\.gguf$" -and $_.path -notmatch "of-000|00001-of" } |
