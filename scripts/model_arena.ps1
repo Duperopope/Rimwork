@@ -23,7 +23,7 @@ param(
     [int]$KeepTop = 2,            # combien de modeles on garde sur le disque
     [int]$NewPerCycle = 2,        # nouveaux challengers crawles par cycle
     [switch]$Forever,             # selection naturelle continue
-    [int]$CycleRestSec = 1800     # repos entre cycles (mode Forever)
+    [int]$CycleRestSec = 10       # micro-pause entre cycles (continu: ne s'arrete jamais)
 )
 
 $ErrorActionPreference = "Continue"
@@ -37,6 +37,7 @@ $cfg = Get-DownHereConfig
 $llm = $cfg.Llm.BaseUrl
 $arenaLog = Join-Path $cfg.Paths.Logs 'model_arena.json'
 $championFile = $cfg.Llm.ChampionFile
+$pinFile = Join-Path $cfg.Paths.Logs 'llm_pinned.txt'      # choix MANUEL (interface): l'arene ne le remplace pas
 $triedFile = Join-Path $cfg.Paths.Logs 'arena_tried.txt'   # memoire des modeles deja juges
 $arenaStatus = Join-Path $cfg.Paths.Logs 'arena_status.json' # statut LIVE pour le dashboard
 $thrive = $cfg.Paths.ActiveGame
@@ -109,18 +110,24 @@ function Get-CrawledCandidates([int]$Want = 4) {
     return @($found.Values)
 }
 
-# ---- Taches de combat: fichiers Thrive REELS, scoring deterministe INSTANTANE.
-# On teste la competence cle du dev: produire un SEARCH/REPLACE qui (a) matche
-# le fichier VERBATIM, (b) donne un resultat VALIDE (JSON qui parse), (c) fait
-# le changement demande. Pas de build lent: l'arene doit juger vite des dizaines
-# de modeles. Le champion est ensuite confirme en prod par la vraie boucle.
+# ---- BENCHMARK de combat: fichiers Thrive REELS + difficulte GRADUEE, scoring
+# deterministe et instantane. On teste la competence cle du dev: produire un
+# SEARCH/REPLACE qui (a) matche le fichier VERBATIM, (b) donne un JSON VALIDE,
+# (c) fait EXACTEMENT le changement demande. Les epreuves vont du facile (ajouter
+# un champ au 1er objet) au plus dur (champ string, 2 champs, cibler le 2e objet)
+# -> un vrai gradient qui separe les bons des chanceux. Pas de build lent: l'arene
+# juge vite; le champion est ensuite confirme en prod par la vraie boucle de dev.
 $tasks = @(
     @{ file = "simulation_parameters/microbe_stage/compounds.json"; lines = 60; kind = "json"
-       ask = 'Add a new field `"ArenaTag": 1` to the VERY FIRST compound object in this JSON, keeping the JSON valid.'; expect = 'ArenaTag' }
+       ask = 'Add a new field "ArenaTag": 1 to the VERY FIRST compound object. Keep the JSON valid.'; expect = 'ArenaTag' }
     @{ file = "simulation_parameters/microbe_stage/membranes.json"; lines = 60; kind = "json"
-       ask = 'Add a new field `"ArenaTag": 1` to the VERY FIRST membrane object in this JSON, keeping the JSON valid.'; expect = 'ArenaTag' }
-    @{ file = "simulation_parameters/microbe_stage/biomes.json"; lines = 70; kind = "json"
-       ask = 'Add a new field `"ArenaTag": 1` to the VERY FIRST top-level object in this JSON, keeping the JSON valid.'; expect = 'ArenaTag' }
+       ask = 'Add a new STRING field "ArenaNote": "ok" to the VERY FIRST membrane object. Keep the JSON valid.'; expect = 'ArenaNote' }
+    @{ file = "simulation_parameters/microbe_stage/biomes.json"; lines = 80; kind = "json"
+       ask = 'Add a new field "ArenaTag": 2 to the VERY FIRST top-level object. Keep the JSON valid.'; expect = 'ArenaTag' }
+    @{ file = "simulation_parameters/microbe_stage/organelles.json"; lines = 80; kind = "json"
+       ask = 'Add TWO new fields "ArenaA": 1 and "ArenaB": 2 to the VERY FIRST organelle object. Keep the JSON valid.'; expect = 'ArenaB' }
+    @{ file = "simulation_parameters/microbe_stage/compounds.json"; lines = 120; kind = "json"
+       ask = 'Add a new field "ArenaDeep": 9 to the SECOND compound object (NOT the first one). Keep the JSON valid.'; expect = 'ArenaDeep' }
 )
 
 function Wait-Llm([int]$timeoutSec = 240) {
@@ -256,7 +263,7 @@ function Invoke-ArenaCycle {
         # UPSERT dans l'historique persistant + champion = meilleur de tous les temps
         $models = @($models | Where-Object { $_.key -ne $r.key }) + ([pscustomobject]$r)
         $bestEver = @($models | Sort-Object total -Descending)[0]
-        Set-Content $championFile $bestEver.file -Encoding ascii
+        if (-not (Test-Path $pinFile)) { Set-Content $championFile $bestEver.file -Encoding ascii }  # respecte le choix manuel
         Save-Leaderboard $cycle $models
         @(Get-Rank $models) | ConvertTo-Json -Depth 5 | Set-Content $arenaLog -Encoding utf8
         Write-Host "  -> champion all-time: $($bestEver.key) ($($bestEver.total))" -ForegroundColor Green
@@ -274,10 +281,17 @@ function Invoke-ArenaCycle {
         wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$($r.file)" | Out-Null
     }
 
-    # 4. Champion (meilleur de tous les temps) en PROD, lancement persistant.
-    Set-Content $championFile $bestEver.file -Encoding ascii
-    Write-Host "CHAMPION ALL-TIME: $($bestEver.key) ($($bestEver.total)) -> $championFile" -ForegroundColor Green
-    Start-LlamaServer -Model $bestEver.file
+    # 4. En PROD: le choix MANUEL (pin via l'interface) a la PRIORITE; sinon le
+    # champion all-time (le plus fort jamais vu). Lancement persistant.
+    if (Test-Path $pinFile) {
+        $pinned = (Get-Content $pinFile -Raw).Trim()
+        Write-Host "Champion EPINGLE manuellement: $pinned (l'arene continue de bencher mais ne le remplace pas)" -ForegroundColor Yellow
+        Start-LlamaServer -Model $pinned
+    } else {
+        Set-Content $championFile $bestEver.file -Encoding ascii
+        Write-Host "CHAMPION ALL-TIME: $($bestEver.key) ($($bestEver.total)) -> $championFile" -ForegroundColor Green
+        Start-LlamaServer -Model $bestEver.file
+    }
     Write-ArenaStatus @{ phase = 'done'; cycle = $cycle; current = $null; tested = (Get-Rank $models); best = $bestEver; queue = @() }
 }
 

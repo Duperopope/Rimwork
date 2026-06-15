@@ -84,6 +84,10 @@ function Get-DashboardData {
     $arena = $null
     try { $arena = (Get-Content (Join-Path $Config.Paths.Logs 'arena_status.json') -Raw -ErrorAction Stop | ConvertFrom-Json) } catch {}
 
+    # Selection MANUELLE: modele epingle + dernier message de la selection.
+    $llmPin = $null; try { $llmPin = (Get-Content (Join-Path $Config.Paths.Logs 'llm_pinned.txt') -Raw -ErrorAction Stop).Trim() } catch {}
+    $llmUseMsg = $null; try { $llmUseMsg = (Get-Content (Join-Path $Config.Paths.Logs 'llm_use_status.txt') -Raw -ErrorAction Stop).Trim() } catch {}
+
     # Serie temporelle (graphes temps reel) : derniers snapshots d'etat.
     $history = @()
     try {
@@ -108,6 +112,7 @@ function Get-DashboardData {
         feedback    = $fb
         arena       = $arena
         history     = $history
+        llm         = @{ pinned = $llmPin; useMsg = $llmUseMsg }
     }
 }
 
@@ -367,29 +372,36 @@ function trendsCard(){
 }
 function viewArena(){
   const a=DATA?DATA.arena:null;
-  if(!a){ document.getElementById('view').innerHTML=card('🔬 Arène — sélection naturelle des LLM',`<div class="empty">L'arène n'a pas encore tourné.<br>Passe en mode <b>ARENA</b> (en haut) pour lancer la sélection : elle explore HuggingFace, fait combattre les modèles sur de vraies tâches, et couronne le meilleur — en direct ici.</div>`,true); return; }
-  const phaseL={crawl:'🌊 exploration de l\'océan HuggingFace',download:'⬇️ téléchargement d\'un challenger',bench:'⚔️ combat en cours',done:'✅ cycle terminé',idle:'💤 au repos'}[a.phase]||esc(a.phase);
-  const cur=a.current?`<div class="txt" style="margin-top:8px">⚔️ Teste maintenant : <span class="hl">${esc(a.current.key)}</span></div>`:'';
-  const best=a.best?`🏆 Meilleur à l'instant T : <span class="hl">${esc(a.best.key)}</span> — <b>${a.best.total} pts</b>`:'<span class="mut">pas encore de gagnant ce cycle</span>';
-  const head=card('🔬 Arène — sélection naturelle des LLM',
+  const pin=(DATA&&DATA.llm)?DATA.llm.pinned:null, useMsg=(DATA&&DATA.llm)?DATA.llm.useMsg:null;
+  if(!a){ document.getElementById('view').innerHTML=card('🔬 Arène — sélection naturelle des LLM',`<div class="empty">L'arène n'a pas encore tourné.<br>Passe en mode <b>ARENA</b> (en haut) : elle explore HuggingFace en continu, télécharge et benchmarke les modèles, et garde le plus fort — en direct ici.</div>`,true); return; }
+  const phaseL={crawl:'🌊 exploration de HuggingFace',download:'⬇️ téléchargement',bench:'⚔️ combat en cours',done:'✅ cycle terminé',idle:'💤 repos',rest:'⏳ prochain cycle imminent'}[a.phase]||esc(a.phase);
+  const curName=a.current?(a.current.file||a.current.key):null;
+  const cur=curName?`<div class="txt" style="margin-top:8px">⚔️ Teste : <span class="hl">${esc(curName)}</span></div>`:'';
+  const bestName=a.best?(a.best.file||a.best.key):null;
+  const best=a.best?`🏆 Plus fort connu : <span class="hl">${esc(bestName)}</span> — <b>${a.best.total} pts</b>`:'<span class="mut">pas encore de gagnant</span>';
+  const pinBox=pin?`<div class="warnbox ok" style="margin-top:10px">📌 Épinglé manuellement : <b>${esc(pin)}</b> — l'arène ne le remplacera pas. <button class="btn ghost" style="padding:5px 12px;margin-left:8px" onclick="act('/llm/auto')">↺ Revenir à l'auto</button></div>`:'';
+  const msgBox=useMsg?`<div class="mut" style="margin-top:8px">ℹ️ ${esc(useMsg)}</div>`:'';
+  const head=card('🔬 Arène — sélection naturelle des LLM (continue)',
     `<div class="txt"><b>Cycle ${a.cycle||1}</b> · ${phaseL}</div>${cur}
-     <div class="txt" style="margin-top:10px">${best}</div>
+     <div class="txt" style="margin-top:10px">${best}</div>${pinBox}${msgBox}
      <div class="mut" style="margin-top:6px">mise à jour ${esc(a.updatedAt||'')}</div>`,true);
-  let board='<div class="empty">aucun combat encore ce cycle</div>';
+  let board='<div class="empty">aucun combat encore</div>';
   const tested=(a.tested||[]).slice().sort((x,y)=>(y.total||0)-(x.total||0));
   if(tested.length){
     const max=Math.max.apply(null,tested.map(t=>t.total||0).concat([1]));
     board=tested.map((t,i)=>{
-      const w=Math.round((t.total||0)/max*100), isBest=a.best&&t.key===a.best.key;
+      const w=Math.round((t.total||0)/max*100), name=t.file||t.key, isBest=a.best&&t.key===a.best.key, isPin=pin&&t.file===pin;
       return `<div class="task" style="${isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':''}">
-        <div style="display:flex;gap:10px;align-items:center">
-          <span class="cat">#${i+1}</span><b style="flex:1">${esc(t.key)} ${isBest?'🏆':''}</b>
-          <span class="hl" style="font-variant-numeric:tabular-nums">${t.total} pts</span></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span class="cat">#${i+1}</span>
+          <b style="flex:1;min-width:200px;word-break:break-all">${esc(name)} ${isBest?'🏆':''}${isPin?'📌':''}</b>
+          <span class="hl" style="font-variant-numeric:tabular-nums">${t.total} pts</span>
+          <button class="btn ghost" style="padding:5px 12px" onclick="act('/llm/use?key='+encodeURIComponent('${esc(t.key)}'))">▶ Utiliser</button></div>
         <div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:${w}%;background:var(--grad)"></i></div>
         <div class="mut" style="margin-top:6px;font-size:12px">${(t.details||[]).map(esc).join(' · ')}${t.secs?(' · '+t.secs+'s'):''}</div></div>`;
     }).join('');
   }
-  document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card('📊 Classement persistant — tous les modèles jugés (mémoire conservée entre cycles)',board,true);
+  document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card('📊 Classement persistant — vrais noms de modèles · 📌 épinglé · « Utiliser » pour activer',board,true);
 }
 function renderView(){ ({overview:viewOverview,activity:viewActivity,arena:viewArena,tasks:viewTasks,feedback:viewFeedback}[TAB]||viewOverview)(); }
 function render(){ if(!DATA){return;} renderPills();renderBanner();renderCtrl();renderKpis();renderTabs();renderView(); }

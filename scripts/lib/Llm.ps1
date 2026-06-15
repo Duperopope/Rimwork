@@ -46,3 +46,26 @@ function Start-LlamaServer {
     Write-LlmLauncher
     Start-Process wsl -ArgumentList "-d", "Ubuntu", "-u", "root", "--", "bash", "/root/start-llm.sh", $Model -WindowStyle Hidden
 }
+
+# Telecharge un GGUF depuis HuggingFace s'il manque (re-DL d'un modele supprime).
+# Retourne le nom de fichier local, ou $null. Partage par l'arene et la selection
+# manuelle. Verifie la taille pour ne pas servir un telechargement tronque.
+function Get-ModelFile {
+    param([Parameter(Mandatory)][string]$Repo, [Parameter(Mandatory)][string]$File)
+    $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$File && echo OK"
+    if ($have -match 'OK') { return $File }
+    if (-not $Repo) { return $null }
+    try { $tree = Invoke-RestMethod "https://huggingface.co/api/models/$Repo/tree/main" -TimeoutSec 30 } catch { return $null }
+    $entry = $tree | Where-Object { $_.path -ieq $File } | Select-Object -First 1
+    if (-not $entry) {
+        $pat = ($File -replace '.*(Q\d_K_[MS]).*', '$1')
+        $entry = $tree | Where-Object { $_.path -match "$pat.*\.gguf$" -and $_.path -notmatch "0000\d-of" } | Select-Object -First 1
+    }
+    if (-not $entry) { return $null }
+    $name = [System.IO.Path]::GetFileName($entry.path)
+    $want = [long]($entry.lfs.size ?? $entry.size)
+    wsl -d Ubuntu -u root -- bash -c "cd /root/models && wget -q -c --tries=3 'https://huggingface.co/$Repo/resolve/main/$($entry.path)' -O '$name'" | Out-Null
+    $size = [long](wsl -d Ubuntu -u root -- bash -c "stat -c%s /root/models/$name 2>/dev/null || echo 0")
+    if ($size -eq $want -and $want -gt 3e9) { return $name }
+    return $null
+}

@@ -8,6 +8,7 @@
 . "$PSScriptRoot\lib\State.ps1"
 . "$PSScriptRoot\lib\Chat.ps1"
 . "$PSScriptRoot\lib\Dashboard.ps1"
+. "$PSScriptRoot\lib\Llm.ps1"
 $cfg = Get-DownHereConfig
 $port = $cfg.Dashboard.Port
 $logDir = $cfg.Paths.Logs
@@ -101,6 +102,28 @@ while ($true) {
         $ctx.Response.Redirect("/")
         $ctx.Response.Close()
         continue
+    }
+    if ($ctx.Request.Url.AbsolutePath -eq "/llm/use") {
+        # SELECTION MANUELLE: epingle + (re)telecharge + sert un modele choisi dans
+        # l'interface. Le travail (long: DL + chargement) part en arriere-plan.
+        if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
+        $key = $ctx.Request.QueryString["key"]
+        if ($key) {
+            Start-Process pwsh -ArgumentList '-NoProfile', '-File', (Join-Path $cfg.Paths.Scripts 'use-model.ps1'), '-Key', $key -WindowStyle Hidden
+        }
+        $ctx.Response.Redirect("/"); $ctx.Response.Close(); continue
+    }
+    if ($ctx.Request.Url.AbsolutePath -eq "/llm/auto") {
+        # Retour au choix AUTOMATIQUE (meilleur de tous les temps): retire le pin.
+        if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
+        try { Remove-Item (Join-Path $logDir 'llm_pinned.txt') -Force -ErrorAction SilentlyContinue } catch {}
+        try {
+            $lb = Get-Content (Join-Path $logDir 'arena_leaderboard.json') -Raw | ConvertFrom-Json
+            $best = $lb.models | Sort-Object total -Descending | Select-Object -First 1
+            if ($best) { Set-Content $cfg.Llm.ChampionFile $best.file -Encoding ascii; Start-LlamaServer -Model $best.file }
+        } catch {}
+        Set-Content (Join-Path $logDir 'llm_use_status.txt') -Value "Mode AUTO: l'arene choisit le meilleur modele." -ErrorAction SilentlyContinue
+        $ctx.Response.Redirect("/"); $ctx.Response.Close(); continue
     }
     if ($ctx.Request.Url.AbsolutePath -eq "/state.json") {
         # Etat consolide, machine-readable (Phase 3) - voir lib/State.ps1.
