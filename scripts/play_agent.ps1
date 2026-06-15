@@ -35,11 +35,13 @@ New-Item -ItemType Directory -Force -Path (Split-Path $logFile) | Out-Null
 # qu'il manque de donnees, decide() retombe sur le reflexe -> ca marche tout de suite.
 $transFile = Join-Path $cfg.Paths.Logs 'real_transitions.jsonl'
 $brainPy = Join-Path $cfg.Paths.Scripts 'wm\play_brain.py'
-$FOODSCALE = 50.0          # echelle de normalisation de la distance a la nourriture
-$ACT = @{ '0' = @(0.0, 0.0); '1' = @(1.0, 0.0); '2' = @(-1.0, 0.0); '3' = @(0.0, 1.0); '4' = @(0.0, -1.0) }
+$FOODSCALE = 50.0          # echelle de normalisation de la distance a la nourriture/toxine
 $prevState = $null; $prevAction = $null; $lastTrain = Get-Date
 
-# Etat normalise [energie, foodDx_unit, foodDz_unit, foodDistNorm] depuis l'etat brut du jeu.
+# Etat normalise (7D, FIXE) depuis l'etat brut du jeu :
+#   [energie, foodDx_unit, foodDz_unit, foodDistNorm, toxinDx_unit, toxinDz_unit, toxinDistNorm]
+# La toxine (sulfure d'hydrogene) est le sens qui MANQUAIT -> sans lui l'agent fonce
+# dans le poison et meurt. Defaut "pas de toxine percue" = [0,0,1] (loin).
 function Get-WmState($s) {
     $e = 0.5
     try { if ($s.PSObject.Properties.Name -contains 'health' -and [double]$s.maxHealth -gt 0) { $e = [double]$s.health / [double]$s.maxHealth } } catch {}
@@ -51,7 +53,16 @@ function Get-WmState($s) {
             $fd = [math]::Min(1.0, [double]$s.foodDist / $FOODSCALE)
         }
     } catch {}
-    return @([math]::Round($e, 4), [math]::Round($fx, 4), [math]::Round($fz, 4), [math]::Round($fd, 4))
+    $tx = 0.0; $tz = 0.0; $td = 1.0
+    try {
+        if ($s.PSObject.Properties.Name -contains 'toxinDx') {
+            $rx = [double]$s.toxinDx; $rz = [double]$s.toxinDz; $len = [math]::Sqrt($rx * $rx + $rz * $rz)
+            if ($len -gt 1e-6) { $tx = $rx / $len; $tz = $rz / $len }
+            $td = [math]::Min(1.0, [double]$s.toxinDist / $FOODSCALE)
+        }
+    } catch {}
+    return @([math]::Round($e, 4), [math]::Round($fx, 4), [math]::Round($fz, 4), [math]::Round($fd, 4),
+        [math]::Round($tx, 4), [math]::Round($tz, 4), [math]::Round($td, 4))
 }
 # (moveX,moveZ) -> indice d'action discret le plus proche (pour journaliser la transition).
 function Get-ActionIndex($mx, $mz) {

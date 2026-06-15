@@ -55,10 +55,11 @@ def train():
     if not os.path.exists(TRANS):
         print("pas de real_transitions.jsonl"); return 1
     import numpy as np
+    from collections import Counter
     from sklearn.neural_network import MLPRegressor
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import mean_squared_error
-    X, Y = [], []
+    recs = []
     for line in open(TRANS, encoding="utf-8", errors="ignore"):
         line = line.strip()
         if not line:
@@ -66,16 +67,25 @@ def train():
         try:
             o = json.loads(line)
             s, a, ns = o["s"], int(o["a"]), o["ns"]
-            if len(s) == 4 and len(ns) == 4 and 0 <= a < N_ACTIONS:
-                X.append(list(s) + _onehot(a)); Y.append(list(ns))
+            if len(s) >= 4 and len(s) == len(ns) and 0 <= a < N_ACTIONS:
+                recs.append((s, a, ns))
         except Exception:
             continue
-    n = len(X)
+    if not recs:
+        print("aucune transition exploitable"); return 1
+    # ROBUSTE aux changements de version (4D food seul -> 7D food+toxine) et aux
+    # ecritures concurrentes : on entraine sur la dimension d'etat la PLUS FREQUENTE
+    # et on ignore les lignes d'une autre dimension. La dynamique apprise inclut alors
+    # la toxine (l'energie chute pres du poison) -> la planification l'evite.
+    sdim = Counter(len(s) for s, _, _ in recs).most_common(1)[0][0]
+    recs = [r for r in recs if len(r[0]) == sdim]
+    n = len(recs)
     if n < MIN_TRANS:
-        print(f"pas assez de transitions ({n} < {MIN_TRANS}) - le reflexe continue"); return 1
-    X, Y = np.array(X, float), np.array(Y, float)
+        print(f"pas assez de transitions {sdim}D ({n} < {MIN_TRANS}) - le reflexe continue"); return 1
+    X = np.array([list(s) + _onehot(a) for s, a, _ in recs], float)
+    Y = np.array([list(ns) for _, _, ns in recs], float)
     Xtr, Xte, Ytr, Yte = train_test_split(X, Y, test_size=0.25, random_state=0)
-    base = mean_squared_error(Yte, Xte[:, :4])   # baseline "rien ne change"
+    base = mean_squared_error(Yte, Xte[:, :sdim])   # baseline "rien ne change"
     wm = MLPRegressor(hidden_layer_sizes=(64, 32), max_iter=800, random_state=0).fit(Xtr, Ytr)
     mse = mean_squared_error(Yte, wm.predict(Xte))
     pickle.dump(wm, open(MODEL, "wb"))
@@ -93,6 +103,13 @@ def plan(state, horizon=6):
     if not os.path.exists(MODEL):
         return None
     wm = pickle.load(open(MODEL, "rb"))
+    # Securite transition de version : si le modele a ete entraine sur une autre
+    # dimension d'etat que celle recue (4D<->7D), on repli sur le reflexe (pas de crash).
+    try:
+        if wm.n_features_in_ != len(state) + N_ACTIONS:
+            return None
+    except Exception:
+        pass
     best_a, best_val = 0, -1e9
     for a in range(N_ACTIONS):
         s = np.array(state, float)
@@ -132,7 +149,8 @@ def main():
     if not state or len(state) < 4:
         print(json.dumps({"moveX": 0.0, "moveZ": 0.0, "engulf": False, "src": "nostate"}))
         return 0
-    print(json.dumps(decide(list(state)[:4])))
+    # On garde l'etat COMPLET (4D ou 7D) : la planification a besoin de la toxine.
+    print(json.dumps(decide(list(state))))
     return 0
 
 
