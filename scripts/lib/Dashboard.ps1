@@ -256,13 +256,15 @@ h3 .ic{vertical-align:-2px;opacity:.85}
 .cx{color:var(--ink);margin-top:3px;white-space:pre-wrap;word-break:break-word;opacity:.9;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .catbadge{display:inline-flex;align-items:center;gap:5px;background:var(--glass2);border:1px solid var(--line2);border-radius:8px;padding:3px 9px;font-size:11.5px;color:var(--mut)}
 .catbadge b{color:var(--ink);font-weight:600}
-.htip{position:relative;display:inline-flex;cursor:help;color:var(--mut);align-self:center}
-.htip:hover{color:var(--cyan)}
+.htip{position:relative;display:inline-flex;cursor:help;color:var(--mut);align-self:center;padding:2px}
+.htip:hover{color:var(--cyan);z-index:1000}
 .htip .tipbox{position:absolute;z-index:1000;right:0;top:150%;width:312px;background:#0b1722;border:1px solid var(--line);border-radius:13px;padding:13px 15px;box-shadow:0 16px 48px rgba(0,0,0,.6);font-size:12px;line-height:1.5;color:var(--ink);display:none;white-space:normal;text-align:left;font-weight:400}
 .htip:hover .tipbox{display:block}
-/* la carte survolee passe AU-DESSUS des cartes suivantes (sinon le backdrop-filter
-   de la carte du dessous repeint par-dessus le tooltip et le cache). */
+/* Empilement: la CARTE survolee passe au-dessus des cartes suivantes (backdrop-filter),
+   la LIGNE survolee passe au-dessus des lignes suivantes (sinon leurs icones ⓘ, en
+   position:relative, se repeignent par-dessus le tooltip car plus loin dans le DOM). */
 .card:has(.htip:hover){z-index:1000}
+.task:has(.htip:hover){position:relative;z-index:1000}
 /* si la ligne est trop bas, le tooltip s'ouvre VERS LE HAUT (pas hors-ecran). */
 .task:nth-last-child(-n+3) .htip .tipbox{top:auto;bottom:150%}
 .tipbox h5{font-size:12px;color:var(--cyan);margin:0 0 8px;word-break:break-all}
