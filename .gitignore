@@ -44,6 +44,7 @@ scripts/wm/model.pkl
 scripts/wm/__pycache__/
 scripts/logs/experience.jsonl
 scripts/logs/experience_raw.jsonl
+scripts/logs/experience_open.jsonl
 scripts/logs/wm_model.json
 scripts/logs/wm_history.jsonl
 scripts/logs/wm_evidence.json
