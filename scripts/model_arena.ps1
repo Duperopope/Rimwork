@@ -32,8 +32,8 @@ $ErrorActionPreference = "Continue"
 # (1234), puis rend la main au champion. La boucle de dev tolere ces swaps brefs.
 # Source de verite unique (paths/url) - voir scripts/lib/Config.ps1.
 . "$PSScriptRoot\lib\Config.ps1"
+. "$PSScriptRoot\lib\Llm.ps1"   # Start-LlamaServer : lancement PERSISTANT (vs nohup& qui meurt)
 $cfg = Get-DownHereConfig
-$prodPort = 1234
 $llm = $cfg.Llm.BaseUrl
 $arenaLog = Join-Path $cfg.Paths.Logs 'model_arena.json'
 $championFile = $cfg.Llm.ChampionFile
@@ -106,11 +106,12 @@ function Wait-Llm([int]$timeoutSec = 240) {
 }
 
 function Start-Model([string]$file, [int]$port = 1234) {
-    # AUTO-FIT (pas de -ngl force): tient compte de la VRAM libre reelle.
-    # --model/--ctx-size en formes LONGUES: le raccourci -m est casse dans ce build
-    # (model.path reste vide -> router mode, ne sert pas). Voir startup_all.ps1.
-    $cmd = "pkill -f 'llama-server.*$port'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server --model /root/models/$file --ctx-size 8192 --host 0.0.0.0 --port $port > /var/log/llama-arena.log 2>&1 &"
-    wsl -d Ubuntu -u root -- bash -c $cmd | Out-Null
+    # Lancement PERSISTANT (Start-Process wsl + /root/start-llm.sh, voir lib/Llm.ps1).
+    # L'ancien `nohup ... &` via `wsl bash -c` NE survivait PAS a la fin de la
+    # session wsl: le serveur mourait aussitot -> Wait-Llm timeout -> 0 resultat
+    # pour TOUS les modeles (cause du "arene sans gagnant + LLM down" en ARENA).
+    # L'arene benche sur le port prod (1234), comme Start-LlamaServer.
+    Start-LlamaServer -Model $file
     return (Wait-Llm)
 }
 
@@ -247,9 +248,9 @@ function Invoke-ArenaCycle {
         wsl -d Ubuntu -u root -- bash -c "rm -f /root/models/$($r.file)" | Out-Null
     }
 
-    # 4. Relancer le champion en PROD (port 1234, auto-fit) pour la boucle de dev
-    # --model/--ctx-size (formes longues): -m casse dans ce build (router mode).
-    wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*$prodPort'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server --model /root/models/$($champ.file) --ctx-size 8192 --host 0.0.0.0 --port $prodPort > /var/log/llama-server.log 2>&1 &" | Out-Null
+    # 4. Relancer le champion en PROD (port 1234) pour la boucle de dev - lancement
+    # PERSISTANT (le nohup& precedent ne survivait pas -> prod morte apres l'arene).
+    Start-LlamaServer -Model $champ.file
     Write-ArenaStatus @{ phase = 'done'; cycle = $script:cycleNo; current = $null; tested = @($ranked); best = $champ; queue = @() }
     $ranked | Format-Table key, score, speedPts, secs
 }
