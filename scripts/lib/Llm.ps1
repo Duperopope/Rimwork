@@ -18,14 +18,25 @@ function Write-LlmLauncher {
 # DOWN HERE - lance llama-server (ROCm). Genere par lib/Llm.ps1 - ne pas editer ici.
 # --model en forme LONGUE: le raccourci -m est casse dans ce build (-> router mode).
 MODEL="${1:-Qwen2.5-Coder-14B-Instruct-Q4_K_S.gguf}"
+LOG=/tmp/llama-server.log
+BIN=/root/llama.cpp/build/bin/llama-server
 pkill -f llama-server 2>/dev/null
 sleep 1
+# Log de demarrage TOUJOURS ecrit (diagnostic) + verifications avant exec.
+{
+  echo "[start-llm] $(date '+%F %T') model=$MODEL"
+  [ -x "$BIN" ]               || { echo "[start-llm] ERREUR: binaire absent: $BIN"; exit 1; }
+  [ -f "/root/models/$MODEL" ] || { echo "[start-llm] ERREUR: modele absent: /root/models/$MODEL"; ls -la /root/models/; exit 1; }
+} > "$LOG" 2>&1
 # AUTO-FIT: pas de -ngl force; llama.cpp place autant de couches que la VRAM libre
 # le permet (le JEU partage les 16 Go), le reste sur CPU.
-exec /root/llama.cpp/build/bin/llama-server --model "/root/models/${MODEL}" --ctx-size 8192 --host 0.0.0.0 --port 1234 > /tmp/llama-server.log 2>&1
+exec "$BIN" --model "/root/models/$MODEL" --ctx-size 8192 --host 0.0.0.0 --port 1234 >> "$LOG" 2>&1
 '@
-    # CR-strip indispensable: un '#!/bin/bash\r' casse l'interpreteur.
-    ($sh -replace "`r", "") | wsl -d Ubuntu -u root -- bash -c "cat > /root/start-llm.sh && chmod +x /root/start-llm.sh" | Out-Null
+    # CR-strip cote WSL avec tr -d '\r' : INDISPENSABLE. Un '#!/bin/bash\r' (CRLF)
+    # casse l'interpreteur et colle un \r a chaque valeur (MODEL="...gguf\r" ->
+    # chemin invalide). PowerShell REAJOUTE des CRLF en pipant vers le stdin d'une
+    # commande native, donc un -replace cote PS ne suffit pas : seul tr garantit du LF.
+    $sh | wsl -d Ubuntu -u root -- bash -c "tr -d '\r' > /root/start-llm.sh && chmod +x /root/start-llm.sh" | Out-Null
 }
 
 # Lance le serveur (processus wsl.exe PERSISTANT, cache). Les enfants en
