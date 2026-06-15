@@ -218,16 +218,29 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--line)}
 .node.act{border-color:var(--line);box-shadow:0 0 20px rgba(46,230,200,.16)}
 .node .n{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
 .node .d{font-size:13px;font-weight:700;margin-top:3px}
-.node .ic{font-size:16px}
+.node .nic{color:var(--cyan);margin-bottom:3px}
 .arrow{color:var(--dim);font-size:18px;flex:none}
 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--glass2);border:1px solid var(--line2);border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700;margin:3px 5px 3px 0}
 .chip.on{border-color:var(--line);color:var(--cyan)}
-/* console LLM (terminal) */
+/* icones (Lucide inline) */
+.ic{display:inline-block;vertical-align:-3px;flex:none}
+h3 .ic{vertical-align:-2px;opacity:.85}
+/* scrollbars discrets (fini les grosses barres moches) */
+*{scrollbar-width:thin;scrollbar-color:rgba(120,160,200,.2) transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:rgba(120,160,200,.18);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.btn.sm{padding:6px 12px;font-size:12.5px;border-radius:9px}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--glass);border:1px solid var(--line);color:var(--ink);padding:10px 18px;border-radius:12px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:20;backdrop-filter:blur(10px)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* console LLM (terminal) - compacte, sans barre de scroll visible */
 .termhead{font-size:12px;color:var(--mut);margin-bottom:10px}
-.term{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-size:12.5px;max-height:68vh;overflow:auto;background:rgba(0,0,0,.28);border:1px solid var(--line2);border-radius:12px;padding:12px}
-.cline{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}.cline:last-child{border:0}
+.term{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-size:12px;max-height:54vh;overflow:auto;background:rgba(0,0,0,.28);border:1px solid var(--line2);border-radius:12px;padding:10px 14px}
+.term{scrollbar-width:none}.term::-webkit-scrollbar{display:none}
+.cline{padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}.cline:last-child{border:0}
 .ct{color:var(--dim)}.cs{color:var(--violet);margin-left:8px;font-weight:700}.ck{margin-left:8px;font-weight:800}
-.cx{color:var(--ink);margin-top:4px;white-space:pre-wrap;word-break:break-word;opacity:.92}
+.cx{color:var(--ink);margin-top:3px;white-space:pre-wrap;word-break:break-word;opacity:.9;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .catbadge{display:inline-flex;align-items:center;gap:5px;background:var(--glass2);border:1px solid var(--line2);border-radius:8px;padding:3px 9px;font-size:11.5px;color:var(--mut)}
 .catbadge b{color:var(--ink);font-weight:600}
 @keyframes beat{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:1}50%{transform:translate(-50%,-50%) scale(1.5);opacity:.55}}
@@ -258,6 +271,38 @@ const esc=(s)=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt
 // PowerShell ConvertTo-Json deballe un tableau d'1 element en OBJET -> on reforce
 // en tableau partout (sinon .map/.slice plante des qu'une liste a 1 element).
 const arr=(x)=>Array.isArray(x)?x:(x==null?[]:[x]);
+// Vrai set d'icones open-source (Lucide, licence ISC) vendore inline -> hors-ligne,
+// pas d'emoji. ic(name,size) rend un SVG qui herite de la couleur du texte.
+const ICONS={
+ terminal:'<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>',
+ zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+ flask:'<path d="M10 2v7.31"/><path d="M14 9.3V2"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/>',
+ trophy:'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+ activity:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+ cpu:'<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/>',
+ repeat:'<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+ map:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
+ wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+ check:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+ chart:'<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
+ list:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
+ msg:'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+ trend:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+ pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+ play:'<polygon points="5 3 19 12 5 21 5 3"/>',
+ stop:'<rect x="5" y="5" width="14" height="14" rx="2"/>',
+ rotate:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
+ download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+ copy:'<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+ trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+ chevron:'<polyline points="9 18 15 12 9 6"/>',
+ waves:'<path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>',
+ moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+ swords:'<polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/>',
+ robot:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>',
+ alert:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+};
+function ic(n,sz){sz=sz||16;return '<svg class="ic" width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[n]||'')+'</svg>';}
 let DATA=window.__DATA__||null, TAB=sessionStorage.getItem('tab')||'overview', BUSY=false;
 const TABS=[['overview','Vue d\'ensemble'],['activity','Activité'],['arena','Arène'],['console','Console'],['tasks','Tâches'],['feedback','Feedback']];
 
@@ -283,8 +328,8 @@ function renderPills(){
 function renderBanner(){
   const s=DATA?DATA.state:null; let h='';
   if(s&&!s.llmAlive){
-    if(s.mode==='ARENA'){ h='<div class="warnbox ok">🔬 Mode <b>ARENA</b> : l\'arène teste des modèles et occupe le GPU — le serveur de prod est coupé par intermittence. C\'est normal, pas une panne.</div>'; }
-    else { h='<div class="warnbox">⚠ Le LLM local est <b>hors ligne</b> — clique <b>DÉMARRER</b> (lance llama-server + la pile). Sans lui, le dev IA ne progresse pas.</div>'; }
+    if(s.mode==='ARENA'){ h='<div class="warnbox ok">'+ic('flask')+' Mode <b>ARENA</b> : l\'arène teste des modèles et occupe le GPU — le serveur de prod est coupé par intermittence. C\'est normal, pas une panne.</div>'; }
+    else { h='<div class="warnbox">'+ic('alert')+' Le LLM local est <b>hors ligne</b> — clique <b>DÉMARRER</b> (lance llama-server + la pile). Sans lui, le dev IA ne progresse pas.</div>'; }
   }
   document.getElementById('banner').innerHTML=h;
 }
@@ -293,10 +338,10 @@ function renderCtrl(){
   const modes=[['DEV','code le jeu'],['PLAY','joue'],['ARENA','choisit le cerveau'],['EVOLVE','s\'auto-modifie'],['IDLE','repos']];
   const seg=modes.map(m=>`<button class="${s&&s.mode===m[0]?'on':''}" title="${m[1]}" onclick="setMode('${m[0]}')">${m[0]}</button>`).join('');
   document.getElementById('ctrl').innerHTML=
-    (paused?`<button class="btn start" onclick="act('/resume')">▶ DÉMARRER</button>`
-           :`<button class="btn stop" onclick="if(confirm('Arrêter toute la pile ?'))act('/pause')">■ ARRÊTER</button>`)+
+    (paused?`<button class="btn start" onclick="act('/resume')">${ic('play')} DÉMARRER</button>`
+           :`<button class="btn stop" onclick="if(confirm('Arrêter toute la pile ?'))act('/pause')">${ic('stop')} ARRÊTER</button>`)+
     `<div class="seg">${seg}</div>`+
-    `<a class="btn ghost" href="/chat">💬 Parler à l'IA</a>`;
+    `<a class="btn ghost" href="/chat">${ic('msg')} Parler à l'IA</a>`;
 }
 function renderKpis(){
   const p=DATA?DATA.progress:{}, b=DATA&&DATA.state?DATA.state.brain:null;
@@ -315,14 +360,14 @@ function card(title,body,wide){ return `<div class="card${wide?' wide':''}"><h3>
 function flowView(s){
   // Pipeline recursif REEL : roadmap -> patch LLM -> build/test -> garde/annule -> world model (qui re-trie).
   const mode=s?s.mode:'';
-  const steps=[['🗺️','Roadmap','une tâche', mode==='DEV'],
-    ['🧠','LLM local','propose un patch', s&&s.llmAlive],
-    ['🛠️','Build + test','valide', mode==='DEV'],
-    ['✅','Garde / annule','ne garde que ce qui marche', mode==='DEV'],
-    ['🔁','World model','ré-entraîne et re-trie', s&&s.brain]];
-  const n=steps.map((x,i)=>`<div class="node${x[3]?' act':''}"><div class="ic">${x[0]}</div><div class="n">${x[1]}</div><div class="d">${x[2]}</div></div>`+
-    (i<steps.length-1?'<div class="arrow">→</div>':'')).join('');
-  return card('🔁 Boucle d\'auto-amélioration récursive',`<div class="flow">${n}</div>`,true);
+  const steps=[['map','Roadmap','une tâche', mode==='DEV'],
+    ['cpu','LLM local','propose un patch', s&&s.llmAlive],
+    ['wrench','Build + test','valide', mode==='DEV'],
+    ['check','Garde / annule','ne garde que ce qui marche', mode==='DEV'],
+    ['repeat','World model','ré-entraîne et re-trie', s&&s.brain]];
+  const n=steps.map((x,i)=>'<div class="node'+(x[3]?' act':'')+'"><div class="nic">'+ic(x[0],20)+'</div><div class="n">'+x[1]+'</div><div class="d">'+x[2]+'</div></div>'+
+    (i<steps.length-1?'<div class="arrow">'+ic('chevron',16)+'</div>':'')).join('');
+  return card(ic('repeat')+' Boucle d\'auto-amélioration récursive',`<div class="flow">${n}</div>`,true);
 }
 function viewOverview(){
   const s=DATA?DATA.state:{}, b=s.brain, ct=s.currentTask;
@@ -331,38 +376,38 @@ function viewOverview(){
   const game=s.game&&s.game.running?`<span class="hl">lancé</span> (pid ${s.game.pid})`:'<span class="mut">fermé (le jeu ne tourne pas pendant le dev)</span>';
   const agentsList=s.agents?Object.keys(s.agents).filter(a=>s.agents[a]):[];
   const agents=agentsList.length?agentsList.map(a=>`<span class="chip on">⬤ ${esc(a)}</span>`).join(''):'<span class="mut">aucun agent actif</span>';
-  const health=card('🩺 Santé en direct',
+  const health=card(ic('activity')+' Santé en direct',
     `<div class="txt"><b>Tâche :</b> ${task}</div>
      <div class="txt" style="margin-top:10px"><b>Jeu :</b> ${game}</div>
      <div class="txt" style="margin-top:10px"><b>Agents :</b><div style="margin-top:6px">${agents}</div></div>`);
   let brain='<span class="mut">pas encore de cerveau conçu</span>';
   if(b){ brain=`<div class="txt">Champion <span class="hl">${esc(b.model)}</span> · ${b.features} features · utilité <span class="hl">${b.utility}</span></div>
     <div class="mut" style="margin-top:8px">gain +${b.gain} sur ${b.gens} générations (champion-challenger)</div>`; }
-  const brainC=card('🧠 Cerveau auto-conçu (successeur)',brain);
+  const brainC=card(ic('cpu')+' Cerveau auto-conçu (successeur)',brain);
   const lessons=arr(DATA.lessons).length?arr(DATA.lessons).map(l=>`<div class="row"><div class="txt">${esc(l)}</div></div>`).join(''):'<div class="empty">—</div>';
-  const lessonsC=card('🎓 Leçons récentes de l\'IA',lessons);
-  document.getElementById('view').innerHTML=flowView(s)+`<div class="grid">${health}${trendsCard()}${brainC}${lessonsC}</div>`;
+  const lessonsC=card(ic('list')+' Leçons récentes de l\'IA',lessons);
+  document.getElementById('view').innerHTML=flowView(s)+'<div style="height:18px"></div>'+`<div class="grid">${health}${trendsCard()}${brainC}${lessonsC}</div>`;
 }
 function viewActivity(){
   const a=arr(DATA&&DATA.activity);
-  if(!a.length){ document.getElementById('view').innerHTML=card('⚡ Activité',`<div class="empty">aucune activité</div>`,true); return; }
+  if(!a.length){ document.getElementById('view').innerHTML=card(ic('zap')+' Activité',`<div class="empty">aucune activité</div>`,true); return; }
   const rows=a.map(e=>`<div class="row"><span class="time">${esc(e.date)}</span><span class="badge ${esc(e.type)}">${esc(e.who==='IA locale'?'IA':e.type)}</span><span class="txt">${esc(e.text)}</span></div>`).join('');
-  document.getElementById('view').innerHTML=card('⚡ Activité réelle (commits, hors bruit auto)',rows,true);
+  document.getElementById('view').innerHTML=card(ic('zap')+' Activité réelle (commits, hors bruit auto)',rows,true);
 }
 function viewTasks(){
   const t=arr(DATA&&DATA.tracker);
-  if(!t.length){ document.getElementById('view').innerHTML=card('🗂️ Tâches en file',`<div class="empty">aucune tâche en file</div>`,true); return; }
+  if(!t.length){ document.getElementById('view').innerHTML=card(ic('list')+' Tâches en file',`<div class="empty">aucune tâche en file</div>`,true); return; }
   const rows=t.map(x=>`<div class="task"><span class="cat">${esc(x.cat)}</span>${esc(x.text)}</div>`).join('');
-  document.getElementById('view').innerHTML=card('🗂️ Tâches en file (roadmap)',rows,true);
+  document.getElementById('view').innerHTML=card(ic('list')+' Tâches en file (roadmap)',rows,true);
 }
 function viewFeedback(){
   const f=arr(DATA&&DATA.feedback);
   const form=`<form onsubmit="sendFb(event)" style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px">
-    <select id="fbtype"><option value="feature">✨ Feature</option><option value="bug">🐛 Bug</option></select>
+    <select id="fbtype"><option value="feature">Feature</option><option value="bug">Bug</option></select>
     <input id="fbtext" placeholder="Décris ta demande ou un bug…" style="flex:1;min-width:240px">
     <button class="btn start" type="submit">Envoyer</button></form>`;
   const rows=(f&&f.length)?f.map(x=>`<div class="row"><span class="time">${esc(x.date)}</span><span class="badge">${esc(x.type)} · ${esc(x.status)}</span><span class="txt">${esc(x.text)}</span></div>`).join(''):'<div class="empty">aucune demande</div>';
-  document.getElementById('view').innerHTML=card('💬 Feedback',form+rows,true);
+  document.getElementById('view').innerHTML=card(ic('msg')+' Feedback',form+rows,true);
 }
 function sendFb(e){ e.preventDefault(); const t=document.getElementById('fbtext').value.trim(); if(!t)return;
   const ty=document.getElementById('fbtype').value;
@@ -385,7 +430,7 @@ function trendsCard(){
   const h=arr(DATA&&DATA.history);
   if(h.length<2) return '';
   const last=h[h.length-1];
-  return card('📈 Tendances (temps réel)',
+  return card(ic('trend')+' Tendances (temps réel)',
     `<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="mut">patchs gardés</span><b class="hl">${last.kept}</b></div>${spark(h.map(x=>x.kept),'#49e29f')}
      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px"><span class="mut">annulés (garde-fou)</span><b style="color:var(--red)">${last.reverted}</b></div>${spark(h.map(x=>x.reverted),'#ff6b6b')}
      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px"><span class="mut">avancement jeu</span><b style="color:var(--blue)">${last.pct}%</b></div>${spark(h.map(x=>x.pct),'#4aa6ff')}`);
@@ -393,15 +438,15 @@ function trendsCard(){
 function viewArena(){
   const a=DATA?DATA.arena:null;
   const pin=(DATA&&DATA.llm)?DATA.llm.pinned:null, useMsg=(DATA&&DATA.llm)?DATA.llm.useMsg:null;
-  if(!a){ document.getElementById('view').innerHTML=card('🔬 Arène — sélection naturelle des LLM',`<div class="empty">L'arène n'a pas encore tourné.<br>Passe en mode <b>ARENA</b> (en haut) : elle explore HuggingFace en continu, télécharge et benchmarke les modèles, et garde le plus fort — en direct ici.</div>`,true); return; }
-  const phaseL={crawl:'🌊 exploration de HuggingFace',download:'⬇️ téléchargement',bench:'⚔️ combat en cours',done:'✅ cycle terminé',idle:'💤 repos',rest:'⏳ prochain cycle imminent'}[a.phase]||esc(a.phase);
+  if(!a){ document.getElementById('view').innerHTML=card(ic('flask')+' Arène — sélection naturelle des LLM',`<div class="empty">L'arène n'a pas encore tourné.<br>Passe en mode <b>ARENA</b> (en haut) : elle explore HuggingFace en continu, télécharge et benchmarke les modèles, et garde le plus fort — en direct ici.</div>`,true); return; }
+  const phaseL={crawl:'exploration de HuggingFace',download:'téléchargement',bench:'combat en cours',done:'cycle terminé',idle:'repos',rest:'prochain cycle imminent'}[a.phase]||esc(a.phase);
   const curName=a.current?(a.current.file||a.current.key):null;
-  const cur=curName?`<div class="txt" style="margin-top:8px">⚔️ Teste : <span class="hl">${esc(curName)}</span></div>`:'';
+  const cur=curName?`<div class="txt" style="margin-top:8px">${ic('swords',15)} Teste : <span class="hl">${esc(curName)}</span></div>`:'';
   const bestName=a.best?(a.best.file||a.best.key):null;
-  const best=a.best?`🏆 Plus fort connu : <span class="hl">${esc(bestName)}</span> — <b>${a.best.total} pts</b>`:'<span class="mut">pas encore de gagnant</span>';
-  const pinBox=pin?`<div class="warnbox ok" style="margin-top:10px">📌 Épinglé manuellement : <b>${esc(pin)}</b> — l'arène ne le remplacera pas. <button class="btn ghost" style="padding:5px 12px;margin-left:8px" onclick="act('/llm/auto')">↺ Revenir à l'auto</button></div>`:'';
-  const msgBox=useMsg?`<div class="mut" style="margin-top:8px">ℹ️ ${esc(useMsg)}</div>`:'';
-  const head=card('🔬 Arène — sélection naturelle des LLM (continue)',
+  const best=a.best?`${ic('trophy',15)} Plus fort connu : <span class="hl">${esc(bestName)}</span> — <b>${a.best.total} pts</b>`:'<span class="mut">pas encore de gagnant</span>';
+  const pinBox=pin?`<div class="warnbox ok" style="margin-top:10px">${ic('pin',15)} Épinglé manuellement : <b>${esc(pin)}</b> — l'arène ne le remplacera pas. <button class="btn ghost sm" style="margin-left:8px" onclick="act('/llm/auto')">${ic('rotate')} Revenir à l'auto</button></div>`:'';
+  const msgBox=useMsg?`<div class="mut" style="margin-top:8px">${esc(useMsg)}</div>`:'';
+  const head=card(ic('flask')+' Arène — sélection naturelle des LLM (continue)',
     `<div class="txt"><b>Cycle ${a.cycle||1}</b> · ${phaseL}</div>${cur}
      <div class="txt" style="margin-top:10px">${best}</div>${pinBox}${msgBox}
      <div class="mut" style="margin-top:6px">mise à jour ${esc(a.updatedAt||'')}</div>`,true);
@@ -414,30 +459,42 @@ function viewArena(){
       return `<div class="task" style="${isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':''}">
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <span class="cat">#${i+1}</span>
-          <b style="flex:1;min-width:200px;word-break:break-all">${esc(name)} ${isBest?'🏆':''}${isPin?'📌':''}</b>
+          <b style="flex:1;min-width:200px;word-break:break-all">${esc(name)} ${isBest?ic('trophy',15):''}${isPin?ic('pin',15):''}</b>
           <span class="hl" style="font-variant-numeric:tabular-nums">${t.total} pts</span>
-          <button class="btn ghost" style="padding:5px 12px" onclick="act('/llm/use?key='+encodeURIComponent('${esc(t.key)}'))">▶ Utiliser</button></div>
+          <button class="btn ghost sm" title="Copier le benchmark" onclick="copyBench('${esc(t.key)}')">${ic('copy')}</button>
+          <button class="btn ghost sm" onclick="act('/llm/use?key='+encodeURIComponent('${esc(t.key)}'))">${ic('play')} Utiliser</button></div>
         <div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:${w}%;background:var(--grad)"></i></div>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${arr(t.cats).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return `<span class="catbadge"><b>${esc(c.cat)}</b> <span style="color:${cc}">${c.pct}%</span></span>`;}).join('')||esc(arr(t.details).join(' · '))}${t.secs?`<span class="catbadge">⏱ ${t.secs}s</span>`:''}</div></div>`;
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${arr(t.cats).map(c=>{const cc=c.pct>=80?'var(--green)':c.pct>=40?'var(--amb)':'var(--red)';return `<span class="catbadge"><b>${esc(c.cat)}</b> <span style="color:${cc}">${c.pct}%</span></span>`;}).join('')||esc(arr(t.details).join(' · '))}${t.secs?`<span class="catbadge">${t.secs}s</span>`:''}</div></div>`;
     }).join('');
   }
-  document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card('📊 Classement persistant — vrais noms de modèles · 📌 épinglé · « Utiliser » pour activer',board,true);
+  document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card(ic('chart')+' Classement persistant — vrais noms · « Utiliser » pour activer, copier pour exporter le benchmark',board,true);
 }
 function viewConsole(){
-  const c=arr(DATA&&DATA.console);
+  const all=arr(DATA&&DATA.console);
+  const c=all.slice(-60);   // compact: 60 dernieres lignes
   const col={test:'#4aa6ff',pass:'#49e29f',fail:'#ff6b6b',output:'#8ba2b6'};
+  const toolbar='<div class="toolbar"><button class="btn ghost sm" onclick="copyConsole()">'+ic('copy')+' Copier</button><button class="btn ghost sm" onclick="if(confirm(\'Vider la console ?\'))act(\'/console/clear\')">'+ic('trash')+' Vider</button></div>';
   let body;
-  if(!c.length){ body=`<div class="empty">aucune sortie LLM pour l'instant — lance l'<b>Arène</b> (ou le <b>DEV</b>) et les tests/réponses des modèles s'afficheront ici en direct.</div>`; }
+  if(!c.length){ body=toolbar+'<div class="empty">aucune sortie LLM pour l\'instant — lance l\'Arène (ou le DEV) et les tests/réponses des modèles s\'afficheront ici en direct.</div>'; }
   else {
-    const rows=c.slice().reverse().map(e=>`<div class="cline">
-      <span class="ct">${esc(e.ts)}</span>
-      <span class="cs">${esc(e.src||'')}${e.model?(' · '+esc(e.model)):''}</span>
-      <span class="ck" style="color:${col[e.kind]||'#8ba2b6'}">${esc((e.kind||'').toUpperCase())}</span>
-      <div class="cx">${esc(e.text||'')}</div></div>`).join('');
-    body=`<div class="termhead">▶ ${c.length} lignes · le plus récent en haut · rafraîchi en direct</div><div class="term">${rows}</div>`;
+    const rows=c.slice().reverse().map(e=>'<div class="cline"><span class="ct">'+esc(e.ts)+'</span><span class="cs">'+esc(e.src||'')+(e.model?(' · '+esc(e.model)):'')+'</span><span class="ck" style="color:'+(col[e.kind]||'#8ba2b6')+'">'+esc((e.kind||'').toUpperCase())+'</span><div class="cx">'+esc(e.text||'')+'</div></div>').join('');
+    body=toolbar+'<div class="termhead">'+c.length+' lignes (sur '+all.length+') · le plus récent en haut · en direct</div><div class="term">'+rows+'</div>';
   }
-  document.getElementById('view').innerHTML=card('🖥️ Console LLM — tests envoyés & réponses des modèles',body,true);
+  document.getElementById('view').innerHTML=card(ic('terminal')+' Console LLM — tests &amp; réponses des modèles',body,true);
 }
+function copyConsole(){
+  const c=arr(DATA&&DATA.console);
+  const txt=c.map(e=>e.ts+' ['+(e.src||'')+(e.model?(' '+e.model):'')+'] '+(e.kind||'').toUpperCase()+': '+(e.text||'')).join('\n');
+  navigator.clipboard.writeText(txt).then(()=>toast('Console copiée ('+c.length+' lignes)'),()=>toast('copie refusée'));
+}
+function copyBench(key){
+  const m=arr(DATA&&DATA.arena&&DATA.arena.tested).find(x=>x.key===key);
+  if(!m){ toast('benchmark introuvable'); return; }
+  const cats=arr(m.cats).map(c=>'  '+c.cat+': '+c.pct+'%').join('\n');
+  const txt='Benchmark — '+(m.file||m.key)+'\nScore total: '+m.total+' pts (vitesse '+(m.speedPts||0)+' · '+(m.secs||0)+'s)\n'+cats;
+  navigator.clipboard.writeText(txt).then(()=>toast('Benchmark copié: '+key),()=>toast('copie refusée'));
+}
+function toast(msg){ let t=document.getElementById('toast'); if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);} t.textContent=msg; t.className='show'; clearTimeout(window._tt); window._tt=setTimeout(()=>{t.className='';},2200); }
 function renderView(){ ({overview:viewOverview,activity:viewActivity,arena:viewArena,console:viewConsole,tasks:viewTasks,feedback:viewFeedback}[TAB]||viewOverview)(); }
 function render(){ if(!DATA){return;} renderPills();renderBanner();renderCtrl();renderKpis();renderTabs();renderView(); }
 

@@ -125,6 +125,12 @@ while ($true) {
         Set-Content (Join-Path $logDir 'llm_use_status.txt') -Value "Mode AUTO: l'arene choisit le meilleur modele." -ErrorAction SilentlyContinue
         $ctx.Response.Redirect("/"); $ctx.Response.Close(); continue
     }
+    if ($ctx.Request.Url.AbsolutePath -eq "/console/clear") {
+        # Vider la console LLM (journal des tests/sorties) depuis l'interface.
+        if ($ctx.Request.HttpMethod -ne "POST") { $ctx.Response.StatusCode = 405; $ctx.Response.Close(); continue }
+        try { Remove-Item (Join-Path $logDir 'llm_console.jsonl') -Force -ErrorAction SilentlyContinue } catch {}
+        $ctx.Response.Redirect("/"); $ctx.Response.Close(); continue
+    }
     if ($ctx.Request.Url.AbsolutePath -eq "/state.json") {
         # Etat consolide, machine-readable (Phase 3) - voir lib/State.ps1.
         try {
