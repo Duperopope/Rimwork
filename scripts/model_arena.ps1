@@ -33,6 +33,7 @@ $ErrorActionPreference = "Continue"
 # Source de verite unique (paths/url) - voir scripts/lib/Config.ps1.
 . "$PSScriptRoot\lib\Config.ps1"
 . "$PSScriptRoot\lib\Llm.ps1"   # Start-LlamaServer : lancement PERSISTANT (vs nohup& qui meurt)
+. "$PSScriptRoot\lib\Patch.ps1" # Try-ApplyEdit : meme tolerance que la vraie boucle de dev
 $cfg = Get-DownHereConfig
 $llm = $cfg.Llm.BaseUrl
 $arenaLog = Join-Path $cfg.Paths.Logs 'model_arena.json'
@@ -358,11 +359,16 @@ function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
                     if ($out.Trim() -match $t.expect) { $ok = $true }
                 } elseif ($out -match '(?s)<<<<<<< SEARCH\r?\n(.*?)\r?\n=======\r?\n(.*?)\r?\n>>>>>>> REPLACE') {
                     $search = $Matches[1] -replace "`r", ''; $replace = $Matches[2] -replace "`r", ''
-                    if ($full.Contains($search) -and $search.Trim().Length -gt 3 -and $search -notmatch '\.\.\.|omitted' -and $replace -ne $search) {
-                        $patched = $full.Replace($search, $replace)
-                        if ($t.kind -eq 'json') {
-                            try { $null = $patched | ConvertFrom-Json; if ($patched -match [regex]::Escape($t.expect)) { $ok = $true } } catch {}
-                        } elseif ($patched -match [regex]::Escape($t.expect)) { $ok = $true }
+                    # MEME tolerance que la vraie boucle de dev (Try-ApplyEdit: lignes
+                    # normalisees, insensible aux espaces, blank-tolerant) -> le bench
+                    # mesure ce que le dev ACCEPTE, pas un match byte-exact trop severe.
+                    if ($search.Trim().Length -gt 3 -and $search -notmatch '\.\.\.|omitted' -and $replace -ne $search) {
+                        $patched = Try-ApplyEdit -Content $full -Search $search -Replace $replace
+                        if ($patched) {
+                            if ($t.kind -eq 'json') {
+                                try { $null = $patched | ConvertFrom-Json; if ($patched -match [regex]::Escape($t.expect)) { $ok = $true } } catch {}
+                            } elseif ($patched -match [regex]::Escape($t.expect)) { $ok = $true }
+                        }
                     }
                 }
             } catch {}
