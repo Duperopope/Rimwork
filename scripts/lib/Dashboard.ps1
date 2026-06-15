@@ -522,7 +522,13 @@ function copyBench(key){
 }
 function toast(msg){ let t=document.getElementById('toast'); if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);} t.textContent=msg; t.className='show'; clearTimeout(window._tt); window._tt=setTimeout(()=>{t.className='';},2200); }
 function renderView(){ ({overview:viewOverview,activity:viewActivity,arena:viewArena,console:viewConsole,tasks:viewTasks,feedback:viewFeedback}[TAB]||viewOverview)(); }
-function render(){ if(!DATA){return;} renderPills();renderBanner();renderCtrl();renderKpis();renderTabs();renderView(); }
+function render(){ if(!DATA){return;}
+  // Preserve le defilement de la console (et autres zones .term) a travers le
+  // re-render auto (4s) -> ne remonte plus en haut quand une entree arrive.
+  const term=document.querySelector('#view .term'); const sc=term?term.scrollTop:null;
+  renderPills();renderBanner();renderCtrl();renderKpis();renderTabs();renderView();
+  if(sc!=null){ const t2=document.querySelector('#view .term'); if(t2)t2.scrollTop=sc; }
+}
 
 /* Fond anime : cellules bioluminescentes a la derive (remontent de l'abysse). */
 (function(){
