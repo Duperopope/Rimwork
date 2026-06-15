@@ -38,7 +38,15 @@ $llm = $cfg.Llm.BaseUrl
 $arenaLog = Join-Path $cfg.Paths.Logs 'model_arena.json'
 $championFile = $cfg.Llm.ChampionFile
 $triedFile = Join-Path $cfg.Paths.Logs 'arena_tried.txt'   # memoire des modeles deja juges
+$arenaStatus = Join-Path $cfg.Paths.Logs 'arena_status.json' # statut LIVE pour le dashboard
 $thrive = $cfg.Paths.ActiveGame
+$script:cycleNo = 0
+
+# Publie l'etat LIVE de l'arene (lu par le dashboard) : phase, modele en cours,
+# classement courant, meilleur connu a l'instant T.
+function Write-ArenaStatus($o) {
+    try { $o['updatedAt'] = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); ($o | ConvertTo-Json -Depth 6) | Set-Content $arenaStatus -Encoding utf8 } catch {}
+}
 
 # ---- Candidats de depart (GGUF tenant sur RX 7800 XT 16 Go) ----
 $baseCandidates = @(
@@ -173,9 +181,11 @@ function Invoke-Bench([string]$key, [double]$temp = 0.3, [int]$reps = 3) {
 }
 
 function Invoke-ArenaCycle {
+    $script:cycleNo++
     # 1. Construire la liste des candidats: base + nouveaux crawles (jamais juges)
     $tried = if (Test-Path $triedFile) { @(Get-Content $triedFile) } else { @() }
     $candidates = @($baseCandidates)
+    Write-ArenaStatus @{ phase = 'crawl'; cycle = $script:cycleNo; current = $null; tested = @(); best = $null; queue = @($candidates.key) }
     if (-not $Only) {
         $crawled = @(Get-CrawledCandidates | Where-Object { $tried -notcontains $_.file -and ($baseCandidates.file -notcontains $_.file) })
         $newOnes = @($crawled | Select-Object -First $NewPerCycle)
@@ -187,28 +197,43 @@ function Invoke-ArenaCycle {
         $candidates = @($candidates | Where-Object { $_.key -match $Only })
     }
 
-    # 2. Combats
+    # 2. Combats - RECURSIF: apres CHAQUE modele on met a jour le meilleur connu a
+    #    l'instant T (champion promu tout de suite, statut live), sans attendre la
+    #    fin du cycle. C'est ce que le directeur veut: "le meilleur present a T".
     $results = @()
+    $best = $null
     foreach ($c in $candidates) {
         $file = $c.file
         $have = wsl -d Ubuntu -u root -- bash -c "test -s /root/models/$file && echo OK"
         if ($have -notmatch "OK") {
             if (-not $c.repo) { Write-Host "skip $($c.key): pas de fichier local, pas de repo"; continue }
+            Write-ArenaStatus @{ phase = 'download'; cycle = $script:cycleNo; current = @{ key = $c.key; file = $c.file }; tested = @($results); best = $best; queue = @($candidates.key) }
             $file = Get-HfFile $c.repo $c.file
             if (-not $file) { Write-Host "skip $($c.key): telechargement echoue"; continue }
         }
         Write-Host "=== ARENE: $($c.key) ($file) ===" -ForegroundColor Cyan
+        Write-ArenaStatus @{ phase = 'bench'; cycle = $script:cycleNo; current = @{ key = $c.key; file = $file }; tested = @($results); best = $best; queue = @($candidates.key) }
         if (-not (Start-Model $file)) { Write-Host "  modele n'a pas demarre (trop gros ?)"; continue }
-        $best = Invoke-Bench $c.key   # reps internes = robustesse statistique
-        $best.file = $file
-        $results += [pscustomobject]$best
+        $r = Invoke-Bench $c.key   # reps internes = robustesse statistique
+        $r.file = $file
+        $results += [pscustomobject]$r
         # memoriser qu'on a juge ce fichier (pour ne pas le re-crawler sans fin)
         if ($file -notmatch '^(Qwen3-Coder-30B|Qwen2.5-Coder-14B|Yi-Coder-9B)') { Add-Content $triedFile $file }
+        # PROMOTION INCREMENTALE: ce modele est-il le meilleur connu ? Il tourne
+        # deja sur 1234 -> il devient le champion immediatement.
+        if (-not $best -or $r.total -gt $best.total) {
+            $best = [pscustomobject]$r
+            Set-Content $championFile $best.file -Encoding ascii
+            Write-Host "  -> champion provisoire: $($best.key) ($($best.total))" -ForegroundColor Green
+        }
+        $rankedNow = @($results | Sort-Object -Property total -Descending)
+        $rankedNow | ConvertTo-Json -Depth 5 | Set-Content $arenaLog -Encoding utf8
+        Write-ArenaStatus @{ phase = 'bench'; cycle = $script:cycleNo; current = $null; tested = @($rankedNow); best = $best; queue = @($candidates.key) }
     }
-    if ($results.Count -eq 0) { Write-Host "aucun resultat ce cycle."; return }
+    if ($results.Count -eq 0) { Write-Host "aucun resultat ce cycle."; Write-ArenaStatus @{ phase = 'idle'; cycle = $script:cycleNo; current = $null; tested = @(); best = $null; queue = @() }; return }
 
-    # 3. Couronner + purger les perdants pour liberer de la place
-    $ranked = $results | Sort-Object -Property total -Descending
+    # 3. Classement final + purge des perdants pour liberer de la place
+    $ranked = @($results | Sort-Object -Property total -Descending)
     $ranked | ConvertTo-Json -Depth 5 | Set-Content $arenaLog -Encoding utf8
     $champ = $ranked[0]
     Set-Content $championFile $champ.file -Encoding ascii
@@ -225,6 +250,7 @@ function Invoke-ArenaCycle {
     # 4. Relancer le champion en PROD (port 1234, auto-fit) pour la boucle de dev
     # --model/--ctx-size (formes longues): -m casse dans ce build (router mode).
     wsl -d Ubuntu -u root -- bash -c "pkill -f 'llama-server.*$prodPort'; sleep 2; nohup /root/llama.cpp/build/bin/llama-server --model /root/models/$($champ.file) --ctx-size 8192 --host 0.0.0.0 --port $prodPort > /var/log/llama-server.log 2>&1 &" | Out-Null
+    Write-ArenaStatus @{ phase = 'done'; cycle = $script:cycleNo; current = $null; tested = @($ranked); best = $champ; queue = @() }
     $ranked | Format-Table key, score, speedPts, secs
 }
 

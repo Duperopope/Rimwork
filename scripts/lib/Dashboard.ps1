@@ -80,6 +80,20 @@ function Get-DashboardData {
     $devAgeMin = $null
     try { $devAgeMin = [int]((Get-Date) - [datetime]::ParseExact($st.health.timestamp, "yyyy-MM-dd HH:mm:ss", $null)).TotalMinutes } catch {}
 
+    # Statut LIVE de l'arene (ecrit par model_arena.ps1 a chaque etape).
+    $arena = $null
+    try { $arena = (Get-Content (Join-Path $Config.Paths.Logs 'arena_status.json') -Raw -ErrorAction Stop | ConvertFrom-Json) } catch {}
+
+    # Serie temporelle (graphes temps reel) : derniers snapshots d'etat.
+    $history = @()
+    try {
+        $snaps = Get-Content (Join-Path $Config.Paths.Logs 'state_history.jsonl') -ErrorAction Stop | Select-Object -Last 48
+        foreach ($s in $snaps) {
+            try { $j = $s | ConvertFrom-Json } catch { continue }
+            $history += @{ t = ($j.timestamp -replace '^\d{4}-\d\d-\d\d ', ''); kept = [int]$j.devlog.kept; reverted = [int]$j.devlog.reverted; pct = [double]$j.roadmap.pct; llm = [bool]$j.llmAlive }
+        }
+    } catch {}
+
     return @{
         generatedAt = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
         state       = $st
@@ -92,6 +106,8 @@ function Get-DashboardData {
         tracker     = (Get-DashboardTracker -Config $Config)
         lessons     = $lessons
         feedback    = $fb
+        arena       = $arena
+        history     = $history
     }
 }
 
@@ -218,7 +234,7 @@ __BOOT__
 const $=(h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
 const esc=(s)=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 let DATA=window.__DATA__||null, TAB=sessionStorage.getItem('tab')||'overview', BUSY=false;
-const TABS=[['overview','Vue d\'ensemble'],['activity','Activité'],['tasks','Tâches'],['feedback','Feedback']];
+const TABS=[['overview','Vue d\'ensemble'],['activity','Activité'],['arena','Arène'],['tasks','Tâches'],['feedback','Feedback']];
 
 async function api(path,opts){ try{return await fetch(path,opts);}catch(e){return null;} }
 async function load(){ if(!window.__DATA__){ const r=await api('/api.json'); if(r){try{DATA=await r.json();}catch(e){}} } render(); }
@@ -300,7 +316,7 @@ function viewOverview(){
   const brainC=card('🧠 Cerveau auto-conçu (successeur)',brain);
   const lessons=(DATA.lessons&&DATA.lessons.length)?DATA.lessons.map(l=>`<div class="row"><div class="txt">${esc(l)}</div></div>`).join(''):'<div class="empty">—</div>';
   const lessonsC=card('🎓 Leçons récentes de l\'IA',lessons);
-  document.getElementById('view').innerHTML=flowView(s)+`<div class="grid">${health}${brainC}${lessonsC}</div>`;
+  document.getElementById('view').innerHTML=flowView(s)+`<div class="grid">${health}${trendsCard()}${brainC}${lessonsC}</div>`;
 }
 function viewActivity(){
   const a=DATA?DATA.activity:[];
@@ -326,7 +342,56 @@ function viewFeedback(){
 function sendFb(e){ e.preventDefault(); const t=document.getElementById('fbtext').value.trim(); if(!t)return;
   const ty=document.getElementById('fbtype').value;
   api('/feedback?type='+ty+'&text='+encodeURIComponent(t),{method:'GET'}).then(()=>{document.getElementById('fbtext').value='';setTimeout(load,400);}); }
-function renderView(){ ({overview:viewOverview,activity:viewActivity,tasks:viewTasks,feedback:viewFeedback}[TAB]||viewOverview)(); }
+// graphe SVG sans dependance (sparkline)
+function spark(vals,color,h){
+  h=h||42; const w=260; vals=(vals||[]).filter(v=>v!=null&&!isNaN(v)); if(vals.length<2) return '<div class="mut" style="font-size:12px">pas assez de données</div>';
+  const mn=Math.min(...vals),mx=Math.max(...vals),rng=(mx-mn)||1;
+  const xy=vals.map((v,i)=>[(i/(vals.length-1)*w),(h-((v-mn)/rng)*(h-8)-4)]);
+  const line=xy.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area=`0,${h} `+line+` ${w},${h}`;
+  const id='g'+Math.random().toString(36).slice(2,7);
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:${h}px;display:block">
+    <defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <polygon points="${area}" fill="url(#${id})"/>
+    <polyline points="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${xy[xy.length-1][0].toFixed(1)}" cy="${xy[xy.length-1][1].toFixed(1)}" r="3" fill="${color}"/></svg>`;
+}
+function trendsCard(){
+  const h=DATA&&DATA.history?DATA.history:[];
+  if(h.length<2) return '';
+  const last=h[h.length-1];
+  return card('📈 Tendances (temps réel)',
+    `<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="mut">patchs gardés</span><b class="hl">${last.kept}</b></div>${spark(h.map(x=>x.kept),'#49e29f')}
+     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px"><span class="mut">annulés (garde-fou)</span><b style="color:var(--red)">${last.reverted}</b></div>${spark(h.map(x=>x.reverted),'#ff6b6b')}
+     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px"><span class="mut">avancement jeu</span><b style="color:var(--blue)">${last.pct}%</b></div>${spark(h.map(x=>x.pct),'#4aa6ff')}`);
+}
+function viewArena(){
+  const a=DATA?DATA.arena:null;
+  if(!a){ document.getElementById('view').innerHTML=card('🔬 Arène — sélection naturelle des LLM',`<div class="empty">L'arène n'a pas encore tourné.<br>Passe en mode <b>ARENA</b> (en haut) pour lancer la sélection : elle explore HuggingFace, fait combattre les modèles sur de vraies tâches, et couronne le meilleur — en direct ici.</div>`,true); return; }
+  const phaseL={crawl:'🌊 exploration de l\'océan HuggingFace',download:'⬇️ téléchargement d\'un challenger',bench:'⚔️ combat en cours',done:'✅ cycle terminé',idle:'💤 au repos'}[a.phase]||esc(a.phase);
+  const cur=a.current?`<div class="txt" style="margin-top:8px">⚔️ Teste maintenant : <span class="hl">${esc(a.current.key)}</span></div>`:'';
+  const best=a.best?`🏆 Meilleur à l'instant T : <span class="hl">${esc(a.best.key)}</span> — <b>${a.best.total} pts</b>`:'<span class="mut">pas encore de gagnant ce cycle</span>';
+  const head=card('🔬 Arène — sélection naturelle des LLM',
+    `<div class="txt"><b>Cycle ${a.cycle||1}</b> · ${phaseL}</div>${cur}
+     <div class="txt" style="margin-top:10px">${best}</div>
+     <div class="mut" style="margin-top:6px">mise à jour ${esc(a.updatedAt||'')}</div>`,true);
+  let board='<div class="empty">aucun combat encore ce cycle</div>';
+  const tested=(a.tested||[]).slice().sort((x,y)=>(y.total||0)-(x.total||0));
+  if(tested.length){
+    const max=Math.max.apply(null,tested.map(t=>t.total||0).concat([1]));
+    board=tested.map((t,i)=>{
+      const w=Math.round((t.total||0)/max*100), isBest=a.best&&t.key===a.best.key;
+      return `<div class="task" style="${isBest?'border-color:var(--line);box-shadow:0 0 16px rgba(46,230,200,.14)':''}">
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="cat">#${i+1}</span><b style="flex:1">${esc(t.key)} ${isBest?'🏆':''}</b>
+          <span class="hl" style="font-variant-numeric:tabular-nums">${t.total} pts</span></div>
+        <div class="bar" style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:${w}%;background:var(--grad)"></i></div>
+        <div class="mut" style="margin-top:6px;font-size:12px">${(t.details||[]).map(esc).join(' · ')}${t.secs?(' · '+t.secs+'s'):''}</div></div>`;
+    }).join('');
+  }
+  document.getElementById('view').innerHTML=head+'<div style="height:14px"></div>'+card('📊 Classement du cycle (score = taux de réussite sur de vraies tâches du jeu)',board,true);
+}
+function renderView(){ ({overview:viewOverview,activity:viewActivity,arena:viewArena,tasks:viewTasks,feedback:viewFeedback}[TAB]||viewOverview)(); }
 function render(){ if(!DATA){return;} renderPills();renderBanner();renderCtrl();renderKpis();renderTabs();renderView(); }
 
 /* Fond anime : cellules bioluminescentes a la derive (remontent de l'abysse). */
