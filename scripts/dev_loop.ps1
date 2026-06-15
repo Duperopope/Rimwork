@@ -109,7 +109,21 @@ function Invoke-Improve {
         "simulation_parameters/microbe_stage/biomes.json",
         "simulation_parameters/microbe_stage/membranes.json"
     )
-    $rel = $dataFiles[(Get-Random -Maximum $dataFiles.Count)]
+    # ANTI-CHURN: les 15 dernieres modifs DEJA faites (commits du jeu). Sert a la
+    # fois a DIVERSIFIER (eviter les fichiers tout juste touches) et a interdire au
+    # LLM de re-tweaker une valeur deja changee (le bug "courants 3->5->7->10").
+    $recent = @()
+    try {
+        $prevEnc = [Console]::OutputEncoding; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        $recent = @(git -C $ProjectDir log -15 --format="%s" 2>$null)
+        [Console]::OutputEncoding = $prevEnc
+    } catch {}
+    $recentTxt = if ($recent) { ($recent | ForEach-Object { "- $_" }) -join "`n" } else { "(aucune modif recente)" }
+    # Diversifier: ecarter les fichiers cites dans les 6 derniers commits.
+    $recent6 = ($recent | Select-Object -First 6) -join "`n"
+    $pool = @($dataFiles | Where-Object { $recent6 -notmatch [regex]::Escape((Split-Path $_ -Leaf)) })
+    if (-not $pool) { $pool = $dataFiles }
+    $rel = $pool[(Get-Random -Maximum $pool.Count)]
     $abs = Join-Path $ProjectDir ($rel -replace '/', '\')
     if (-not (Test-Path $abs)) { return }
     $content = (Get-Content $abs -TotalCount 120) -join "`n"
@@ -140,6 +154,17 @@ Tu examines un fichier de DONNEES reel du jeu. Propose UNE seule petite
 amelioration CONCRETE et equilibree de CE fichier (une valeur, un champ, une
 entree) qui rend le jeu plus riche ou mieux equilibre. Reste minuscule et sur
 (donnee uniquement, JSON qui reste valide).
+
+MODIFICATIONS DEJA FAITES RECEMMENT (ne PAS les refaire) :
+$recentTxt
+
+REGLES ABSOLUES :
+1. Ne propose JAMAIS de re-toucher une valeur/un champ deja modifie ci-dessus
+   (pas de re-tweak, pas d'escalade du meme nombre type "vitesse 5 -> 7 -> 10").
+2. Vise un AUTRE systeme/champ, ou une amelioration QUALITATIVEMENT nouvelle
+   (nouvelle entree, equilibrage d'un parametre jamais touche, lisibilite).
+3. L'amelioration doit aller dans le sens de la vision : un stade cellulaire
+   riche, lisible et juste equilibre - pas un nombre pousse au hasard.
 $playBlock
 FICHIER $rel (extrait):
 ``````json
@@ -154,6 +179,16 @@ Reponds par EXACTEMENT une ligne, rien d'autre, au format:
     if (-not $line) { return }
     $desc = ($line -split ',', 2)[0]
     if ($existing -match [regex]::Escape($desc.Trim())) { Write-Host "Proposition deja en file - ignoree." -ForegroundColor DarkYellow; return }
+    # Dedup SEMANTIQUE: si la proposition partage >=2 mots-cles significatifs avec
+    # une modif recente sur le MEME fichier, c'est un re-tweak deguise -> refuse.
+    $leaf = Split-Path $rel -Leaf
+    $kw = @(($desc -replace '[^\p{L}\p{N} ]', ' ') -split '\s+' | Where-Object { $_.Length -ge 5 } | ForEach-Object { $_.ToLower() } | Select-Object -Unique)
+    foreach ($rc in $recent) {
+        if ($rc -match [regex]::Escape($leaf) -or $rc -notmatch '\.json') {
+            $hit = @($kw | Where-Object { $rc.ToLower() -match [regex]::Escape($_) })
+            if ($hit.Count -ge 2) { Write-Host "Re-tweak deguise d'une modif recente - ignore: $($desc.Trim())" -ForegroundColor DarkYellow; return }
+        }
+    }
     Add-Content -Path "$Root\ROADMAP.md" -Value $line.Trim()
     Add-Content -Path "$Root\DEV_LOG.md" -Value "- [iter $Iter] AMELIORATION PROPOSEE PAR LE DEV: $($line.Trim())"
     Write-Host "Le dev propose: $($line.Trim())" -ForegroundColor Magenta
