@@ -22,6 +22,7 @@ function New-PsShortcut($name, $script, $icon, $iconIdx) {
 }
 
 # Icones systeme (shell32.dll) lisibles et toujours presentes.
+New-PsShortcut 'DOWN HERE - BOUCLE COMPLETE' 'loop-all.ps1'  "$env:SystemRoot\System32\shell32.dll" 144  # etoiles/auto
 New-PsShortcut 'DOWN HERE - Demarrer'        'start-all.ps1' "$env:SystemRoot\System32\shell32.dll" 137  # fleches/marche
 New-PsShortcut "DOWN HERE - Voir l'IA jouer" 'play-now.ps1'  "$env:SystemRoot\System32\shell32.dll" 137
 New-PsShortcut 'DOWN HERE - Arreter'         'stop-all.ps1'  "$env:SystemRoot\System32\shell32.dll" 27   # croix/stop

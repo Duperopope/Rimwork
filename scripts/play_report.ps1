@@ -22,7 +22,8 @@ deja remontes (pas de spam).
 param(
     [int]$MinTransitions = 200,   # seuil "sessions convaincantes"
     [int]$Top = 6,                # nb de bugs distincts remontes
-    [switch]$Emit                 # ecrire aussi dans feedback.jsonl (sinon: rapport seul)
+    [switch]$Emit,                # ecrire aussi dans feedback.jsonl (sinon: rapport seul)
+    [switch]$ToRoadmap            # transformer les trouvailles ACTIONNABLES en taches ROADMAP (le dev loop les execute)
 )
 . "$PSScriptRoot\lib\Config.ps1"
 $cfg = Get-DownHereConfig
@@ -30,6 +31,7 @@ $logs = $cfg.Paths.Logs
 $transFile = Join-Path $logs 'real_transitions.jsonl'
 $findFile = Join-Path $logs 'play_findings.md'
 $fbFile = Join-Path $logs 'feedback.jsonl'
+$roadmap = $cfg.Paths.Roadmap
 $gameLog = Join-Path $env:APPDATA 'DownHereOrigins\logs\log.txt'
 
 # ---- 1) Metriques de friction depuis le flux d'etat vecu ----
@@ -114,3 +116,37 @@ if ($Emit -and $n -ge $MinTransitions) {
     Write-Host "`n$added finding(s) remonte(s) au dev (feedback.jsonl)."
 }
 elseif ($Emit) { Write-Host "`npas d'emission: $n < $MinTransitions (sessions pas encore convaincantes)." }
+
+# ---- 5) FERMETURE DU CYCLE : trouvailles ACTIONNABLES -> taches ROADMAP ----
+# La boucle de dev n'execute QUE la ROADMAP. On y ajoute donc des taches PRECISES,
+# derivees des vrais bugs/friction du jeu. Conservateur : on n'ajoute que ce qui est
+# clairement actionnable (liste blanche de signatures), dedupe, plafonne -> pas de churn.
+if ($ToRoadmap -and $n -ge $MinTransitions -and (Test-Path $roadmap)) {
+    # signature de bug REELLE -> instruction de correction ciblee (ce que le LLM peut faire)
+    $fixable = @(
+        @{ rx = 'Playback can only happen when a node is inside the scene tree'
+            task = 'Corriger l''erreur Godot « Playback can only happen when a node is inside the scene tree » : dans le script qui declenche un son (AudioStreamPlayer/AudioStreamPlayer3D), protege l''appel Play() par une verification que le noeud IsInsideTree() (sinon differer). Ne modifie que ce garde.' }
+        @{ rx = 'Parse JSON failed'
+            task = 'Corriger l''erreur « Parse JSON failed » au chargement : trouve et repare le fichier JSON fautif sous simulation_parameters/. Garde un JSON valide (virgules, accolades).' }
+        @{ rx = 'FormatException|Index \(zero based\)'
+            task = 'Corriger la System.FormatException (« Index ... must be ... ») : un appel string.Format/FormatSafe a moins d''arguments que de placeholders {0}{1}. Aligne le nombre d''arguments sur les accolades.' }
+    )
+    $rmText = (Get-Content $roadmap -Raw -ErrorAction SilentlyContinue)
+    $tasks = @()
+    foreach ($b in ($topBugs | Select-Object -First 3)) {
+        if ($b.Value -lt 5) { continue }   # bug recurrent uniquement
+        foreach ($f in $fixable) { if ($b.Key -match $f.rx) { $tasks += $f.task; break } }
+    }
+    if ($play['pct_detresse_pres_toxine'] -ge 15) {
+        $tasks += 'Dans simulation_parameters/microbe_stage/organelles.json, s''assurer qu''une organelle de chimiosynthese consommant le sulfure d''hydrogene (hydrogensulfide) existe, est disponible tot et peu couteuse (MPCost bas), pour survivre en milieu riche en H2S. Garde le JSON valide.'
+    }
+    $tasks = $tasks | Select-Object -Unique | Select-Object -First 2   # plafond anti-churn
+    $rmAdded = 0
+    foreach ($t in $tasks) {
+        $key = ($t.Substring(0, [Math]::Min(40, $t.Length)))
+        if ($rmText -and $rmText.Contains($key)) { continue }   # deja dans la ROADMAP
+        Add-Content -Path $roadmap -Value "- [ ] $t" -Encoding utf8
+        $rmAdded++
+    }
+    if ($rmAdded) { Write-Host "$rmAdded tache(s) de jeu ajoutee(s) a la ROADMAP -> le dev loop va les traiter." }
+}

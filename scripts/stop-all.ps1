@@ -8,7 +8,7 @@ try { Disable-ScheduledTask -TaskName RimworkAIDev -ErrorAction SilentlyContinue
 
 # Tue les processus pwsh de la pile (en s'excluant soi-meme). Le nom de fichier de
 # ce script ne contient AUCUN des motifs ci-dessous -> pas d'auto-kill.
-$pat = 'dashboard_server|orchestrator|dev_loop|game_watchdog|model_arena|play_agent|playtest|self_evolve|recurse|startup_all|publish_site'
+$pat = 'dashboard_server|orchestrator|dev_loop|game_watchdog|model_arena|play_agent|playtest|self_evolve|recurse|startup_all|publish_site|auto_cycle|play_report'
 Get-CimInstance Win32_Process -Filter "Name='pwsh.exe'" -ErrorAction SilentlyContinue |
     Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -match $pat } |
     ForEach-Object { try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop } catch {} }
