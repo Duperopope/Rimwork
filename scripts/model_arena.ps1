@@ -135,8 +135,27 @@ $tasks = @(
        ask = 'In this C# snippet, change baseValue from 10 to 25. Keep everything else identical.'; expect = '25' }
     @{ cat = 'Instruction'; kind = 'exact'
        ask = 'Reply with ONLY the single word READY in uppercase. No punctuation, no quotes, no other text.'; expect = '^\s*READY\s*$' }
-    @{ cat = 'Reasoning'; kind = 'exact'
+    @{ cat = 'Logic'; kind = 'exact'
        ask = 'Given C#: int x = 7; x += 5; x *= 2; What is the final value of x? Reply with ONLY the number.'; expect = '\b24\b' }
+
+    # --- VRAI benchmark coder public: problemes HumanEval, code EXECUTE dans WSL ---
+    @{ cat = 'HumanEval'; kind = 'humaneval'; entry = 'truncate_number'
+       ask = 'Write a complete Python function truncate_number(number: float) -> float that returns the decimal part (the part after the decimal point) of a positive float. Example: truncate_number(3.5) returns 0.5.'
+       test = "def check(c):`n    assert c(3.5)==0.5`n    assert abs(c(1.33)-0.33)<1e-6`n    assert abs(c(123.456)-0.456)<1e-6" }
+    @{ cat = 'HumanEval'; kind = 'humaneval'; entry = 'sum_product'
+       ask = 'Write a complete Python function sum_product(numbers: list) that returns a tuple (sum_of_all_numbers, product_of_all_numbers). For an empty list, the sum is 0 and the product is 1.'
+       test = "def check(c):`n    assert c([])==(0,1)`n    assert c([1,2,3,4])==(10,24)`n    assert c([1,1,1])==(3,1)" }
+    @{ cat = 'HumanEval'; kind = 'humaneval'; entry = 'below_zero'
+       ask = 'Write a complete Python function below_zero(operations: list) that returns True if the running balance (starting from 0) ever falls below zero, otherwise returns False.'
+       test = "def check(c):`n    assert c([1,2,3])==False`n    assert c([1,2,-4,5])==True`n    assert c([1,-1])==False" }
+
+    # --- VRAI benchmark raisonnement public: problemes GSM8K, nombre final exact ---
+    @{ cat = 'GSM8K'; kind = 'exact'
+       ask = 'Natalia sold clips to 48 of her friends in April, and then she sold half as many clips in May. How many clips did Natalia sell altogether in April and May? Reply with ONLY the final number.'; expect = '\b72\b' }
+    @{ cat = 'GSM8K'; kind = 'exact'
+       ask = 'Weng earns $12 an hour for babysitting. Yesterday she did 50 minutes of babysitting. How many dollars did she earn? Reply with ONLY the final number.'; expect = '\b10\b' }
+    @{ cat = 'GSM8K'; kind = 'exact'
+       ask = 'Betty needs $100 for a wallet and currently has only half of that. Her parents give her $15, and her grandparents give twice as much as her parents. How many more dollars does Betty need? Reply with ONLY the final number.'; expect = '\b5\b' }
 )
 
 function Wait-Llm([int]$timeoutSec = 240) {
@@ -176,6 +195,16 @@ function Get-HfFile([string]$repo, [string]$file) {
     return $null
 }
 
+# Execute le code Python du modele contre le test OFFICIEL du benchmark (HumanEval)
+# dans WSL python3, avec timeout. Retourne $true si tous les asserts passent.
+function Test-PyCode([string]$code, [string]$test, [string]$entry) {
+    $prog = "$code`n`n$test`n`ntry:`n    check($entry)`n    print('PASS_OK')`nexcept Exception as _e:`n    print('FAIL', _e)"
+    try {
+        $res = ($prog -replace "`r", '') | wsl -d Ubuntu -u root -- bash -c "cat > /tmp/arena_he.py && timeout 12 python3 /tmp/arena_he.py 2>&1" | Out-String
+        return ($res -match 'PASS_OK')
+    } catch { return $false }
+}
+
 function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
     # BENCHMARK MULTI-CATEGORIES (esprit evals frontiere). Chaque epreuve x$reps;
     # score final = MOYENNE des taux PAR CATEGORIE (chaque categorie pese pareil) x10
@@ -183,6 +212,7 @@ function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
     $t0 = Get-Date
     $patchSys = "You write minimal SEARCH/REPLACE patches. Format STRICTLY:`nFILE: <path>`n<<<<<<< SEARCH`n(exact verbatim lines)`n=======`n(replacement)`n>>>>>>> REPLACE`nNEVER write '...' or 'omitted'. SEARCH must be copied character-for-character."
     $qaSys = "You are a precise assistant. Follow the instruction exactly and answer as briefly as possible, with no explanation."
+    $codeSys = "You are an expert Python programmer. Write the COMPLETE function. Return ONLY Python code (a single code block is fine), no explanation."
     $catPass = @{}; $catTot = @{}; $catOrder = @()
     foreach ($t in $tasks) {
         if ($catOrder -notcontains $t.cat) { $catOrder += $t.cat; $catPass[$t.cat] = 0; $catTot[$t.cat] = 0 }
@@ -190,6 +220,8 @@ function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
         $full = ''
         if ($t.kind -eq 'exact') {
             $sys = $qaSys; $user = $t.ask
+        } elseif ($t.kind -eq 'humaneval') {
+            $sys = $codeSys; $user = $t.ask
         } elseif ($t.kind -eq 'codeinline') {
             $sys = $patchSys; $full = $t.snippet
             $user = "FILE snippet.cs:`n$($t.snippet)`n`nTASK: $($t.ask)`nProduce ONE patch."
@@ -210,7 +242,11 @@ function Invoke-Bench([string]$key, [double]$temp = 0.2, [int]$reps = 3) {
                         @{ role = 'system'; content = $sys }, @{ role = 'user'; content = $user }) } | ConvertTo-Json -Depth 6
                 $r = Invoke-RestMethod "$llm/v1/chat/completions" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 180
                 $out = $r.choices[0].message.content
-                if ($t.kind -eq 'exact') {
+                if ($t.kind -eq 'humaneval') {
+                    $code = $out
+                    if ($out -match '(?s)```(?:python)?\s*(.*?)```') { $code = $Matches[1] }
+                    if (Test-PyCode $code $t.test $t.entry) { $ok = $true }
+                } elseif ($t.kind -eq 'exact') {
                     if ($out.Trim() -match $t.expect) { $ok = $true }
                 } elseif ($out -match '(?s)<<<<<<< SEARCH\r?\n(.*?)\r?\n=======\r?\n(.*?)\r?\n>>>>>>> REPLACE') {
                     $search = $Matches[1] -replace "`r", ''; $replace = $Matches[2] -replace "`r", ''
