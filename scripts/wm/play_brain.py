@@ -29,6 +29,7 @@ LOGS = os.path.join(ROOT, "scripts", "logs")
 TRANS = os.path.join(LOGS, "real_transitions.jsonl")
 PRETRAIN = os.path.join(LOGS, "pretrain_transitions.jsonl")  # sandbox (anti spirale de la mort)
 MODEL = os.path.join(HERE, "game_wm.pkl")
+RL_POLICY = os.path.join(HERE, "rl_policy.json")  # politique RL apprise (rl_train.py)
 
 N_ACTIONS = 5
 MOVES = {0: (0.0, 0.0), 1: (1.0, 0.0), 2: (-1.0, 0.0), 3: (0.0, 1.0), 4: (0.0, -1.0)}
@@ -39,7 +40,8 @@ ENGULF_DIST = 0.15       # distance normalisee sous laquelle on engloutit
 # Contrat d'indices de l'etat RICHE 14D (partage avec play_agent.ps1 Get-WmState) :
 #  0 sante  1 ATP  2 glucose  3 H2S  4 ammoniac  5 phosphate  6 fer  7 canChemo
 #  8 foodDx 9 foodDz 10 foodDist  11 toxinDx 12 toxinDz 13 toxinDist
-IDX_HEALTH, IDX_ATP = 0, 1
+IDX_HEALTH, IDX_ATP, IDX_GLU = 0, 1, 2
+IDX_AMM, IDX_PHO = 4, 5
 IDX_FOODDX, IDX_FOODDZ, IDX_FOODDIST = 8, 9, 10
 
 
@@ -145,25 +147,53 @@ def plan(state, horizon=6):
         for _ in range(horizon):
             s = wm.predict(np.concatenate([s, oh]).reshape(1, -1))[0]
             health = s[IDX_HEALTH]
-            total += 3.0 * health + s[IDX_ATP]      # survie d'abord, energie ensuite
+            # DRIVE = survivre + maintenir ses RESERVES (le glucose alimente l'ATP, les
+            # nutriments permettent de se reproduire). Comme les reserves SATURENT, ce
+            # terme pousse a FORAGER quand on est bas et a PARTIR quand on est plein -
+            # sans regle "va/evite" codee. La sante domine (on ne meurt pas pour du stock).
+            total += 4.0 * health + s[IDX_ATP] + 1.5 * s[IDX_GLU] + 0.5 * (s[IDX_AMM] + s[IDX_PHO])
             if health < 0.3:
-                total -= 2.0 * (0.3 - health)        # aversion au risque (zone mortelle)
+                total -= 3.0 * (0.3 - health)        # aversion au risque (zone mortelle)
         if total > best_val:
             best_val, best_a = total, a
     return best_a
 
 
-def decide(state):
+def rl_action(state):
+    """Politique RL APPRISE (rl_train.py) : action = argmax(W.obs + b). C'est ELLE qui
+    decide (apprise par recompense, pas codee). None si pas de politique ou dim != obs."""
+    if not os.path.exists(RL_POLICY):
+        return None
     try:
-        a = plan(state)
+        import numpy as np
+        p = json.load(open(RL_POLICY, encoding="utf-8"))
+        od, na = int(p["obs_dim"]), int(p["n_actions"])
+        if len(state) != od:
+            return None
+        theta = np.array(p["theta"], float)
+        W = theta[: na * od].reshape(na, od)
+        b = theta[na * od:]
+        return int(np.argmax(W @ np.asarray(state, float) + b))
     except Exception:
-        a = None
+        return None
+
+
+def decide(state):
+    # 1) POLITIQUE RL apprise (primaire). 2) repli world-model MPC. 3) repli reflexe.
+    a = rl_action(state)
+    src = "rl_policy"
+    if a is None:
+        try:
+            a = plan(state)
+        except Exception:
+            a = None
+        src = "worldmodel(MPC)"
     if a is None:
         return reflex(state)
     mx, mz = MOVES[a]
     _, _, fdist = _food(state)
     return {"moveX": round(mx, 3), "moveZ": round(mz, 3),
-            "engulf": bool(fdist < ENGULF_DIST), "src": "worldmodel(MPC)"}
+            "engulf": bool(fdist < ENGULF_DIST), "src": src}
 
 
 def main():

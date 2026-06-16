@@ -38,42 +38,45 @@ $brainPy = Join-Path $cfg.Paths.Scripts 'wm\play_brain.py'
 $FOODSCALE = 50.0          # echelle de normalisation de la distance a la nourriture/toxine
 $prevState = $null; $prevAction = $null; $lastTrain = Get-Date; $lastReport = Get-Date
 
-# Etat RICHE (14D, FIXE) - tout ce qui pese sur la survie, pour que le world model
-# apprenne les VRAIS compromis (pas du cas-par-cas). Contrat d'indices partage avec
-# scripts/wm/play_brain.py :
-#   0 sante  1 ATP  2 glucose  3 H2S(stock)  4 ammoniac  5 phosphate  6 fer
-#   7 canChemo  8 foodDx 9 foodDz 10 foodDist  11 toxinDx 12 toxinDz 13 toxinDist
+# Observation BRUTE 16D pour la POLITIQUE RL apprise. MEME ordre que CellEnv.obs de
+# scripts/wm/rl_train.py (sinon la politique lit des features decalees) :
+#   0 sante 1 ATP 2 glucose 3 ammoniac 4 phosphate 5 H2S 6 canChemo
+#   7 cloudDx 8 cloudDz 9 cloudDist 10 densite_locale
+#   11 entiteDx 12 entiteDz 13 entiteDist 14 entiteTaille 15 entiteApparence
 function Get-WmState($s) {
     $health = 0.5
     try { if ($s.PSObject.Properties.Name -contains 'health' -and [double]$s.maxHealth -gt 0) { $health = [double]$s.health / [double]$s.maxHealth } } catch {}
-    # composes stockes (cle = nom de l'enum Compound: ATP/Glucose/Hydrogensulfide/...)
     function CompVal($name) {
         try { if ($s.compounds -and ($s.compounds.PSObject.Properties.Name -contains $name)) { return [math]::Min(1.0, [double]$s.compounds.$name) } } catch {}
         return 0.0
     }
-    $atp = CompVal 'ATP'; $glu = CompVal 'Glucose'; $h2s = CompVal 'Hydrogensulfide'
-    $amm = CompVal 'Ammonia'; $pho = CompVal 'Phosphates'; $iron = CompVal 'Iron'
+    $atp = CompVal 'ATP'; $glu = CompVal 'Glucose'; $amm = CompVal 'Ammonia'; $pho = CompVal 'Phosphates'; $h2s = CompVal 'Hydrogensulfide'
     $canChemo = 0.0; try { if ($s.PSObject.Properties.Name -contains 'canChemo' -and [bool]$s.canChemo) { $canChemo = 1.0 } } catch {}
-    $fx = 0.0; $fz = 0.0; $fd = 1.0
+    # nuage le plus proche (glucose) -> direction unite + distance + densite locale
+    $cx = 0.0; $cz = 0.0; $cd = 1.0
     try {
         if ($s.PSObject.Properties.Name -contains 'foodDx') {
             $rx = [double]$s.foodDx; $rz = [double]$s.foodDz; $len = [math]::Sqrt($rx * $rx + $rz * $rz)
-            if ($len -gt 1e-6) { $fx = $rx / $len; $fz = $rz / $len }
-            $fd = [math]::Min(1.0, [double]$s.foodDist / $FOODSCALE)
+            if ($len -gt 1e-6) { $cx = $rx / $len; $cz = $rz / $len }
+            $cd = [math]::Min(1.0, [double]$s.foodDist / $FOODSCALE)
         }
     } catch {}
-    $tx = 0.0; $tz = 0.0; $td = 1.0
+    $dens = [math]::Max(0.0, 1.0 - $cd)
+    # microbe le plus proche (BRUT : direction, distance, taille, apparence) - pas d'etiquette
+    $ex = 0.0; $ez = 0.0; $ed = 1.0; $esz = 0.0; $eap = 0.0
     try {
-        if ($s.PSObject.Properties.Name -contains 'toxinDx') {
-            $rx = [double]$s.toxinDx; $rz = [double]$s.toxinDz; $len = [math]::Sqrt($rx * $rx + $rz * $rz)
-            if ($len -gt 1e-6) { $tx = $rx / $len; $tz = $rz / $len }
-            $td = [math]::Min(1.0, [double]$s.toxinDist / $FOODSCALE)
+        if ($s.PSObject.Properties.Name -contains 'entityDx') {
+            $rx = [double]$s.entityDx; $rz = [double]$s.entityDz; $len = [math]::Sqrt($rx * $rx + $rz * $rz)
+            if ($len -gt 1e-6) { $ex = $rx / $len; $ez = $rz / $len }
+            $ed = [math]::Min(1.0, [double]$s.entityDist / $FOODSCALE)
+            $esz = [math]::Min(1.0, [double]$s.entitySize)
+            $eap = [double]$s.entityAppearance
         }
     } catch {}
-    return @([math]::Round($health, 4), [math]::Round($atp, 4), [math]::Round($glu, 4), [math]::Round($h2s, 4),
-        [math]::Round($amm, 4), [math]::Round($pho, 4), [math]::Round($iron, 4), $canChemo,
-        [math]::Round($fx, 4), [math]::Round($fz, 4), [math]::Round($fd, 4),
-        [math]::Round($tx, 4), [math]::Round($tz, 4), [math]::Round($td, 4))
+    return @([math]::Round($health, 4), [math]::Round($atp, 4), [math]::Round($glu, 4), [math]::Round($amm, 4),
+        [math]::Round($pho, 4), [math]::Round($h2s, 4), $canChemo,
+        [math]::Round($cx, 4), [math]::Round($cz, 4), [math]::Round($cd, 4), [math]::Round($dens, 4),
+        [math]::Round($ex, 4), [math]::Round($ez, 4), [math]::Round($ed, 4), [math]::Round($esz, 4), [math]::Round($eap, 4))
 }
 # (moveX,moveZ) -> indice d'action discret le plus proche (pour journaliser la transition).
 function Get-ActionIndex($mx, $mz) {
@@ -205,9 +208,9 @@ while ($true) {
     #    Brain=reflex -> ancien reflexe deterministe (fonce vers la nourriture).
     $wmState = Get-WmState $sObj
 
-    # Suivi pour l'adaptation du CORPS : a-t-on croise du H2S (toxine proche, index 13) ?
+    # Suivi pour l'adaptation du CORPS : a-t-on croise du H2S ? (lu direct de l'etat brut)
     # la cellule sait-elle deja le metaboliser ? On rejoue -> editeur a nouveau permis.
-    if ($wmState[13] -lt 0.3) { $sessionSawH2S = $true }
+    try { if (($sObj.PSObject.Properties.Name -contains 'toxinDist') -and ([double]$sObj.toxinDist -lt 15)) { $sessionSawH2S = $true } } catch {}
     try { if ($sObj.PSObject.Properties.Name -contains 'canChemo') { $lastCanChemo = [bool]$sObj.canChemo } } catch {}
     $addedOrganelleThisEditor = $false
 
