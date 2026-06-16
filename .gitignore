@@ -80,3 +80,5 @@ scripts/logs/strategy_evidence.json
 scripts/logs/emergence_evidence.json
 scripts/wm/rl_policy.json
 scripts/logs/rl_evidence.json
+scripts/logs/rl_episodes.jsonl
+scripts/logs/rl_online.jsonl

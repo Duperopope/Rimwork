@@ -160,8 +160,10 @@ def plan(state, horizon=6):
 
 
 def rl_action(state):
-    """Politique RL APPRISE (rl_train.py) : action = argmax(W.obs + b). C'est ELLE qui
-    decide (apprise par recompense, pas codee). None si pas de politique ou dim != obs."""
+    """Politique RL APPRISE (rl_train.py) : on ECHANTILLONNE softmax(W.obs + b) au lieu
+    d'un argmax -> EXPLORATION (indispensable pour l'apprentissage en ligne REINFORCE,
+    voir rl_online.py). C'est la politique apprise qui decide ; rien n'est code.
+    None si pas de politique ou dimension != obs."""
     if not os.path.exists(RL_POLICY):
         return None
     try:
@@ -173,7 +175,11 @@ def rl_action(state):
         theta = np.array(p["theta"], float)
         W = theta[: na * od].reshape(na, od)
         b = theta[na * od:]
-        return int(np.argmax(W @ np.asarray(state, float) + b))
+        temp = float(p.get("temp", 0.6))
+        logits = W @ np.asarray(state, float) + b
+        z = (logits - logits.max()) / max(temp, 1e-3)
+        probs = np.exp(z); probs /= probs.sum()
+        return int(np.random.default_rng().choice(na, p=probs))
     except Exception:
         return None
 

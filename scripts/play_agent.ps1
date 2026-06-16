@@ -34,9 +34,11 @@ New-Item -ItemType Directory -Force -Path (Split-Path $logFile) | Out-Null
 # (scripts/wm/play_brain.py) apprend la dynamique du jeu puis PLANIFIE (MPC). Tant
 # qu'il manque de donnees, decide() retombe sur le reflexe -> ca marche tout de suite.
 $transFile = Join-Path $cfg.Paths.Logs 'real_transitions.jsonl'
+$rlEpisFile = Join-Path $cfg.Paths.Logs 'rl_episodes.jsonl'   # (obs, action, recompense, done) pour REINFORCE
 $brainPy = Join-Path $cfg.Paths.Scripts 'wm\play_brain.py'
+$rlOnlinePy = Join-Path $cfg.Paths.Scripts 'wm\rl_online.py'  # apprentissage en ligne sur la recompense reelle
 $FOODSCALE = 50.0          # echelle de normalisation de la distance a la nourriture/toxine
-$prevState = $null; $prevAction = $null; $lastTrain = Get-Date; $lastReport = Get-Date
+$prevState = $null; $prevAction = $null; $lastTrain = Get-Date; $lastReport = Get-Date; $lastRl = Get-Date
 
 # Observation BRUTE 16D pour la POLITIQUE RL apprise. MEME ordre que CellEnv.obs de
 # scripts/wm/rl_train.py (sinon la politique lit des features decalees) :
@@ -165,6 +167,11 @@ while ($true) {
     # 2b) Cellule morte mais PAS extinction: Thrive fait un respawn automatique.
     #     On NE reboot PAS le jeu - on attend juste de revivre.
     if ($sObj.dead -eq $true) {
+        # FIN D'EPISODE (mort) : recompense terminale negative + cloture (une seule fois).
+        if ($null -ne $prevState -and $null -ne $prevAction) {
+            try { (@{ s = $prevState; a = $prevAction; r = -0.5; done = $true } | ConvertTo-Json -Compress) | Add-Content -Path $rlEpisFile -Encoding utf8 } catch {}
+            $prevState = $null; $prevAction = $null
+        }
         Log "mort - attente du respawn automatique"
         Start-Sleep -Milliseconds 800
         continue
@@ -218,6 +225,11 @@ while ($true) {
     # C'est ce que le world model APPREND : la vraie dynamique du jeu, pas une maquette.
     if ($null -ne $prevState -and $null -ne $prevAction) {
         try { (@{ s = $prevState; a = $prevAction; ns = $wmState } | ConvertTo-Json -Compress) | Add-Content -Path $transFile -Encoding utf8 } catch {}
+        # APPRENTISSAGE EN LIGNE (REINFORCE) : (obs, action) -> RECOMPENSE reelle.
+        # Recompense = rester en vie + sante (la vraie mesure de survie du jeu).
+        $healthNorm = 0.5; try { if ([double]$sObj.maxHealth -gt 0) { $healthNorm = [double]$sObj.health / [double]$sObj.maxHealth } } catch {}
+        $reward = 0.02 + 0.05 * $healthNorm
+        try { (@{ s = $prevState; a = $prevAction; r = [math]::Round($reward, 4); done = $false } | ConvertTo-Json -Compress) | Add-Content -Path $rlEpisFile -Encoding utf8 } catch {}
     }
 
     $mx = 0.0; $mz = 0.0; $engulf = $false; $why = "explore"; $src = "reflex"
@@ -263,6 +275,12 @@ while ($true) {
     if ($Brain -eq "wm" -and ((Get-Date) - $lastTrain).TotalSeconds -ge 45) {
         $lastTrain = Get-Date
         try { Start-Process python -ArgumentList $brainPy, '--train' -WindowStyle Hidden } catch {}
+    }
+    # APPRENTISSAGE EN LIGNE : toutes les ~2 min, la politique RL apprend de la
+    # recompense REELLE accumulee (REINFORCE) -> ferme l'ecart sim->reel. Non bloquant.
+    if (((Get-Date) - $lastRl).TotalSeconds -ge 120) {
+        $lastRl = Get-Date
+        try { Start-Process python -ArgumentList $rlOnlinePy -WindowStyle Hidden } catch {}
     }
     # FERME LA BOUCLE jeu -> dev : toutes les 5 min, agrege friction + bugs reels du
     # log et les remonte au dev (feedback.jsonl). Voir scripts/play_report.ps1.
