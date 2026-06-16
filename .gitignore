@@ -78,3 +78,5 @@ scripts/logs/strategy_evidence.json
 scripts/logs/pretrain_transitions.jsonl
 scripts/logs/strategy_evidence.json
 scripts/logs/emergence_evidence.json
+scripts/wm/rl_policy.json
+scripts/logs/rl_evidence.json
