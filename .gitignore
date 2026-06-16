@@ -75,3 +75,6 @@ scripts/logs/game_wm.json
 scripts/logs/play_findings.md
 scripts/logs/play_sessions.jsonl
 scripts/logs/strategy_evidence.json
+scripts/logs/pretrain_transitions.jsonl
+scripts/logs/strategy_evidence.json
+scripts/logs/emergence_evidence.json

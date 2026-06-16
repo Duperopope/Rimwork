@@ -27,6 +27,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 LOGS = os.path.join(ROOT, "scripts", "logs")
 TRANS = os.path.join(LOGS, "real_transitions.jsonl")
+PRETRAIN = os.path.join(LOGS, "pretrain_transitions.jsonl")  # sandbox (anti spirale de la mort)
 MODEL = os.path.join(HERE, "game_wm.pkl")
 
 N_ACTIONS = 5
@@ -68,27 +69,34 @@ def reflex(state):
 
 
 def train():
-    if not os.path.exists(TRANS):
-        print("pas de real_transitions.jsonl"); return 1
     import numpy as np
     from collections import Counter
     from sklearn.neural_network import MLPRegressor
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import mean_squared_error
+    # On apprend sur le PRE-ENTRAINEMENT (sandbox, comprend deja le compromis H2S) ET
+    # l'experience REELLE. Resultat: la cellule NAIT en comprenant le risque (plus de
+    # reflexe suicidaire au demarrage), puis affine sur le vrai jeu. Rien n'est code.
     recs = []
-    for line in open(TRANS, encoding="utf-8", errors="ignore"):
-        line = line.strip()
-        if not line:
+    nreal = 0
+    for path in (PRETRAIN, TRANS):
+        if not os.path.exists(path):
             continue
-        try:
-            o = json.loads(line)
-            s, a, ns = o["s"], int(o["a"]), o["ns"]
-            if len(s) >= 4 and len(s) == len(ns) and 0 <= a < N_ACTIONS:
-                recs.append((s, a, ns))
-        except Exception:
-            continue
+        for line in open(path, encoding="utf-8", errors="ignore"):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                o = json.loads(line)
+                s, a, ns = o["s"], int(o["a"]), o["ns"]
+                if len(s) >= 4 and len(s) == len(ns) and 0 <= a < N_ACTIONS:
+                    recs.append((s, a, ns))
+                    if path == TRANS:
+                        nreal += 1
+            except Exception:
+                continue
     if not recs:
-        print("aucune transition exploitable"); return 1
+        print("aucune transition exploitable (ni pretrain ni reel)"); return 1
     # ROBUSTE aux changements de version (4D food seul -> 7D food+toxine) et aux
     # ecritures concurrentes : on entraine sur la dimension d'etat la PLUS FREQUENTE
     # et on ignore les lignes d'une autre dimension. La dynamique apprise inclut alors
@@ -105,10 +113,11 @@ def train():
     wm = MLPRegressor(hidden_layer_sizes=(64, 32), max_iter=800, random_state=0).fit(Xtr, Ytr)
     mse = mean_squared_error(Yte, wm.predict(Xte))
     pickle.dump(wm, open(MODEL, "wb"))
-    json.dump({"n": n, "mse": round(float(mse), 5), "baseline_mse": round(float(base), 5),
-               "learns": bool(mse < base * 0.9)},
+    json.dump({"n": n, "n_real": nreal, "n_pretrain": n - nreal, "mse": round(float(mse), 5),
+               "baseline_mse": round(float(base), 5), "learns": bool(mse < base * 0.9)},
               open(os.path.join(LOGS, "game_wm.json"), "w"))
-    print(f"game_wm: {n} transitions reelles, MSE={mse:.5f} (baseline {base:.5f}) -> {MODEL}")
+    print(f"game_wm: {n} transitions ({nreal} reelles + {n - nreal} pre-entrainement), "
+          f"MSE={mse:.5f} (baseline {base:.5f}) -> {MODEL}")
     return 0
 
 
